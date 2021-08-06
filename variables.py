@@ -1,4 +1,5 @@
 import os
+import functions
 
 shardCount = 2
 botOwner = 531392146767347712
@@ -42,39 +43,6 @@ publicFlags = {
 	"32768": "Pending deletion for being underage",
 	"65536": "Verified Bot",
 	"131072": "Verified Bot Developer",
-	"262144": "Discord Certified Moderator"
-}
-commands = {
-	"ping": "Display the bot's current latency",
-	"status": "Show the bot's current statistics",
-	"tests": "Run a series of tests to diagnose Doge",
-	"vote": "Display a link to upvote Doge Utilities",
-	"version": "Display the bot's current version",
-	"prefix": "Change the bot's prefix on this server",
-	"invite": "Invite this bot to another server",
-	"shards <page>": "View information about Doge Utilities' shards", 
-	"setup-muted": "Generate a role that mutes members", 
-	"setup-banned": "Generate a role that disables access to channels", 
-	"random <low> <high>": "Generate a random number within the range", 
-	"disconnect-members": "Disconnect all the members in voice channels", 
-	"suggest <suggestion>": "Send a suggestion to the bot creators", 
-	"autorole <role>": "Change the role that is automatically given to users", 
-	"lookup <user>": "Display profile information for the specified user",
-	"clear <messages>": "Delete the specified amount of messages",
-	"raid-protection <on/off>": "Toggle server's raid protection",
-	"wide <text>": "Add spaces to every character in the text",
-	"cringe <text>": "Randomly change the cases of the text",
-	"spoiler <text>": "Add spoilers to every character in the text",
-	"reverse <text>": "Reverse the specified text (last character first)",
-	"corrupt <text>": "Make the specified text appear to be corrupted",
-	"epoch-date <epoch>": "Convert an epoch timestamp into a date",
-	"base64 <encode/decode> <text>": "Convert the text to/from base64",
-	"date-epoch <date>": "Covert a date into an epoch timestamp",
-	"hash <type> <text>": "Hash the text object with the specified type",
-	"calculate <expression>": "Calculate the specified math expression",
-	"color <color code>": "Display information about the color code",
-	"permissions <user>": "Display the permissions for the specified user",
-	"time <timezone>": "Display the current time for the specified timezone",
-	"binary <encode/decode> <text>": "Convert the text to/from binary"
+	"262144": "Discord Certified Moderator",
 }
 
