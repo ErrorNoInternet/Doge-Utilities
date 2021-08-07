@@ -1062,8 +1062,8 @@ async def timeCommand(message, prefix):
 					title=f"Timezone List", entries=segments
 				)
 				await pager.start(ContextObject(client, message))
-			elif text.lower() == "epoch":
-				embed = discord.Embed(title="Time", description=f"Current epoch time: {time.time()}", color=variables.embedColor)
+			elif text.lower() == "epoch" or text.lower() == "unix":
+				embed = discord.Embed(title="Time", description=f"Current epoch time: **{round(time.time())}**", color=variables.embedColor)
 				await message.channel.send(embed=embed)
 			else:
 				userTimezone = pytz.timezone(text)
