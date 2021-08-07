@@ -1095,7 +1095,7 @@ async def helpCommand(message, prefix):
 		pageArguments = True
 	except:
 		try:
-			currentPage = message.content.split(prefix + " ")[1]
+			currentPage = message.content.split(" ")[1]
 		except:
 			pageArguments = True
 			pass
@@ -1246,7 +1246,6 @@ async def sendUserMessage(userID, message):
 				await member.send(message)
 				return
 
-
 async def on_message(message):
 	try:
 		if message.author.bot:
@@ -1271,15 +1270,20 @@ async def on_message(message):
 			lastCommand.write(str(round(time.time()))); lastCommand.close()
 			return
 
+		if not message.content.startswith(prefix):
+			return
+
 		for command in commandList:
 			callCommand = False
+			if len(command.aliases) > 0:
+				for alias in command.aliases:
+					if " " not in message.content:
+						if message.content == f"{prefix}{alias}":
+							message.content = f"{prefix}{command.name}"
+					else:
+						message.content = message.content.replace(f"{prefix}{alias} ", f"{prefix}{command.name} ")
 			if message.content.startswith(prefix + command.name):
 				callCommand = True
-			else:
-				if len(command.aliases) > 0:
-					for alias in command.aliases:
-						if message.content.startswith(prefix + alias):
-							callCommand = True
 
 			if callCommand:
 				if getCooldown(message.author.id, command.name) > 0:
@@ -1315,7 +1319,7 @@ commandList = [
 	Command("reload", [], reloadCommand, "reload", "System Command"),
 	Command("execute;", [], executeCommand, "execute;<code>", "System Command"),
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
-	Command("ping", [], pingCommand, "ping", "Display the bot's current latency"),
+	Command("ping", ["pong", "poing"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", [], statusCommand, "status", "Show the bot's current statistics"),
 	Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
 	Command("vote", [], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
@@ -1325,7 +1329,7 @@ commandList = [
 	Command("shards", [], shardsCommand, "shards <page>", "View information about Doge Utilities' shards"),
 	Command("setup-muted", [], setupMutedCommand, "setup-muted", "Generate a role that mutes members"),
 	Command("setup-banned", [], setupBannedCommand, "setup-banned", "Generate a role that disables access to channels"),
-	Command("random", [], randomCommand, "random <low> <high>", "Generate a random number within the range"),
+	Command("random", ["rand"], randomCommand, "random <low> <high>", "Generate a random number within the range"),
 	Command("disconnect-members", [], disconnectMembersCommand, "disconnect-members", "Disconnect all the members in voice channels"),
 	Command("suggest", [], suggestCommand, "suggest <suggestion>", "Send a suggestion to the bot creators"),
 	Command("autorole", [], autoroleCommand, "autorole <role>", "Change the role that is automatically given to users"),
