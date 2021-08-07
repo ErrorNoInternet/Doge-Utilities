@@ -1,6 +1,7 @@
 # Doge-Utilities
 [![Discord Bots](https://top.gg/api/widget/status/854965721805226005.svg)](https://top.gg/bot/854965721805226005)
-[![Discord Bots](https://top.gg/api/widget/upvotes/854965721805226005.svg)](https://top.gg/bot/854965721805226005)
+[![Discord Bots](https://top.gg/api/widget/upvotes/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
+[![Discord Bots](https://top.gg/api/widget/owner/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 
 A simple Discord utility bot written in Python
 
