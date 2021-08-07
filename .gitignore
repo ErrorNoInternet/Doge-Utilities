@@ -1,4 +1,4 @@
 .env
 last-command
-/databases/*
-/images/*
+databases/*
+images/*
