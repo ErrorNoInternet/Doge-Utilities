@@ -5,7 +5,7 @@
 [![Discord Bots](https://top.gg/api/widget/upvotes/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 
 A simple Discord utility bot written in Python (by **Zenderking#7479**)\
-Feel free to donate some Dogecoin at `DEerNph3oTdXDC8AjVzQSaWiLPAxenQW7t`!
+Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
 ## Usage
 - Environment variables:
