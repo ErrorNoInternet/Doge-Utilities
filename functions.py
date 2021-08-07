@@ -215,7 +215,7 @@ async def currencyCommand(message, prefix):
 			output += f"{key}: {response[key]}\n"
 		segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
 		pager = CustomPager(
-			timeout=120, length=1, prefix=f"```\n", suffix="```", color=variables.embedColor, title="Currency List", entries=segments
+			timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embedColor, title="Currency List", entries=segments
 		)
 		await pager.start(ContextObject(client, message))
 		addCooldown(message.author.id, "currency", 10)
