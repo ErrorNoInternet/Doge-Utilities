@@ -1326,7 +1326,7 @@ commandList = [
 	Command("version", [], versionCommand, "version", "Display the bot's current version"),
 	Command("prefix", [], prefixCommand, "prefix", "Change the bot's prefix on this server"),
 	Command("invite", [], inviteCommand, "invite", "Invite this bot to another server"),
-	Command("shards", [], shardsCommand, "shards <page>", "View information about Doge Utilities' shards"),
+	Command("shards", [], shardsCommand, "shards <page>", "View information about Doge's shards"),
 	Command("setup-muted", [], setupMutedCommand, "setup-muted", "Generate a role that mutes members"),
 	Command("setup-banned", [], setupBannedCommand, "setup-banned", "Generate a role that disables access to channels"),
 	Command("random", ["rand"], randomCommand, "random <low> <high>", "Generate a random number within the range"),
@@ -1335,7 +1335,7 @@ commandList = [
 	Command("autorole", [], autoroleCommand, "autorole <role>", "Change the role that is automatically given to users"),
 	Command("lookup", [], lookupCommand, "lookup <user>", "Display profile information for the specified user"),
 	Command("clear", ["purge"], clearCommand, "clear <messages>", "Delete the specified amount of messages"),
-	Command("raid-protection", [], raidProtectionCommand, "raid-protection <on/off>", "Toggle server's raid protection"),
+	Command("raid-protection", ["raidp"], raidProtectionCommand, "raid-protection <on/off>", "Toggle server's raid protection"),
 	Command("wide", [], wideCommand, "wide <text>", "Add spaces to every character in the text"),
 	Command("cringe", [], cringeCommand, "cringe <text>", "Randomly change the cases of the text"),
 	Command("spoiler", [], spoilerCommand, "spoiler <text>", "Add spoilers to every character in the text"),
@@ -1349,6 +1349,6 @@ commandList = [
 	Command("color", ["colour"], colorCommand, "color <color code>", "Display information about the color code"),
 	Command("permissions", ["perms"], permissionsCommand, "permissions <user>", "Display the permissions for the specified user"),
 	Command("time", [], timeCommand, "time <timezone>", "Display the current time for the specified timezone"),
-	Command("binary", [], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
+	Command("binary", ["bin"], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
 ]
 
