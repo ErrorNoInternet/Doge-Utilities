@@ -1,0 +1,9 @@
+pytz
+flask
+psutil
+pillow
+discord
+requests
+simpleeval
+sqlitedict
+discord-components
