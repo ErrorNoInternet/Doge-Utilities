@@ -208,6 +208,17 @@ async def currencyCommand(message, prefix):
 			addCooldown(message.author.id, "currency", 10)
 		except:
 			await message.channel.send("Unable to convert currency"); return
+	elif len(parts) == 2 and parts[1].lower() == "list":
+		response = requests.get("https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json").json()
+		output = ""
+		for key in response.keys():
+			output += f"{key}: {response[key]}\n"
+		segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
+		pager = CustomPager(
+			timeout=120, length=1, prefix=f"```\n", suffix="```", color=variables.embedColor, title="Currency List", entries=segments
+		)
+		await pager.start(ContextObject(client, message))
+		addCooldown(message.author.id, "currency", 10)
 	else:
 		await message.channel.send(f"The syntax is `{prefix}currency <input> <amount> <output>`"); return
 
