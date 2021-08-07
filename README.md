@@ -11,3 +11,4 @@ git clone https://github.com/ErrorNoInternet/Doge-Utilities
 cd Doge-Utilities && pip install -r requirements.txt
 python3 main.py
 ```
+The default prefix is `=`, type `=help` to see a list of commands
