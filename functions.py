@@ -106,6 +106,8 @@ def parseVariables(text):
 	text = text.replace("<type>", "sha256")
 	text = text.replace("<page>", "2")
 	text = text.replace("<timezone>", "America/Denver")
+	text = text.replace("<currency>", "usd")
+	text = text.replace("<amount>", "8")
 	return text
 
 def reloadData():
@@ -193,6 +195,21 @@ def generateCooldown(command, cooldownTime):
 		cooldownTime = "for an"
 		cooldownUnit = "eternity"
 	return f"Please wait **{cooldownTime} {cooldownUnit}** before using the `{command}` command again"
+
+async def currencyCommand(message, prefix):
+	parts = message.content.split(" ")
+	if len(parts) == 4:
+		try:
+			inputCurrency = parts[1].lower(); amount = float(parts[2].replace(",", "").replace(" ", "")); outputCurrency = parts[3].lower()
+			url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{inputCurrency}/{outputCurrency}.json"
+			response = requests.get(url).json(); value = response[outputCurrency] * amount
+			embed = discord.Embed(title="Currency Convert", description=f"**{round(amount, 6)} {inputCurrency.upper()}** = **{round(value, 6)} {outputCurrency.upper()}**", color=variables.embedColor)
+			await message.channel.send(embed=embed)
+			addCooldown(message.author.id, "currency", 10)
+		except:
+			await message.channel.send("Unable to convert currency"); return
+	else:
+		await message.channel.send(f"The syntax is `{prefix}currency <input> <amount> <output>`"); return
 
 async def pingCommand(message, prefix):
 	embed = discord.Embed(title="Pong :ping_pong:", description=f"Latency: **{round(client.latency * 1000, 1)} ms**", color=variables.embedColor)
@@ -1350,5 +1367,5 @@ commandList = [
 	Command("permissions", ["perms"], permissionsCommand, "permissions <user>", "Display the permissions for the specified user"),
 	Command("time", [], timeCommand, "time <timezone>", "Display the current time for the specified timezone"),
 	Command("binary", ["bin"], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
+	Command("currency", ["cur"], currencyCommand, "currency <currency> <amount> <currency>", "Convert currencies"),
 ]
-
