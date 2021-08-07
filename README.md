@@ -1,9 +1,9 @@
 # Doge-Utilities
 [![Discord Bots](https://top.gg/api/widget/status/854965721805226005.svg)](https://top.gg/bot/854965721805226005)
 [![Discord Bots](https://top.gg/api/widget/upvotes/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
-[![Discord Bots](https://top.gg/api/widget/owner/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 
-A simple Discord utility bot written in Python
+A simple Discord utility bot written in Python (by **Zenderking#7479**)  
+Feel free to donate some Dogecoin at `DEerNph3oTdXDC8AjVzQSaWiLPAxenQW7t`!
 
 ## Usage
 - Environment variables:
