@@ -1160,7 +1160,8 @@ async def stackoverflowCommand(message, prefix):
 			    "sort": "activity",
 			    "site": "stackoverflow"
 			}
-			arguments.pop(0); text = ' '.join(arguments); parameters = stackoverflowParameters | {"q": text}
+			arguments.pop(0); text = ' '.join(arguments)
+			stackoverflowParameters["q"] = text; parameters = stackoverflowParameters
 			response = requests.get(url="https://api.stackexchange.com/2.2/search/advanced", params=parameters).json()
 			if not response["items"]:
 				embed = discord.Embed(title="StackOverflow", description=f"No search results found for **{text}**", color=discord.Color.red())
