@@ -491,7 +491,7 @@ async def setupBannedCommand(message, prefix):
 				retryCount += 1
 		for channel in message.guild.channels:
 			try:
-				await channel.set_permissions(bannedRole, view_channel=False)
+				await channel.set_permissions(bannedRole, view_channel=False, connect=False, change_nickname=False, add_reactions=False)
 			except:
 				pass
 	except:
@@ -1406,7 +1406,7 @@ async def on_message(message):
 					cooldownString = generateCooldown(command.name, getCooldown(message.author.id, command.name))
 					embed = discord.Embed(title="Command Cooldown", description=cooldownString, color=variables.embedColor)
 					await message.channel.send(embed=embed); return
-				await command.function(message, prefix)
+				await command.function(message, prefix); return
 
 	except Exception as error:
 		if "50035" in str(error):
