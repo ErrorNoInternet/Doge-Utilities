@@ -384,7 +384,7 @@ async def statusCommand(message, prefix):
 	embed = discord.Embed(color=variables.embedColor)
 	embed.add_field(name="Latency", value="```" + f"{round(client.get_shard(message.guild.shard_id).latency * 1000, 1)} ms" + "```")
 	embed.add_field(name="CPU Usage", value="```" + f"{psutil.cpu_percent()}%" + "```")
-	embed.add_field(name="RAM Usage", value="```" + f"{round(memoryUsage, 1)} MB{' (nice)' if round(memoryUsage) == 69 else ''}" + "```")
+	embed.add_field(name="RAM Usage", value="```" + f"{round(memoryUsage, 1)} MB{' (nice)' if round(memoryUsage, 1) == 69.0 else ''}" + "```")
 	embed.add_field(name="Thread Count", value="```" + str(threading.active_count()) + "```")
 	embed.add_field(name="Joined Guilds", value="```" + str(len(client.guilds)) + "```")
 	embed.add_field(name="Active Shards", value="```" + str(client.shards[0].shard_count) + "```")
