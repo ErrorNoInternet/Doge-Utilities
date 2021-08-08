@@ -7,10 +7,12 @@ except:
 
 import io
 import sys
+import html
 import pytz
 import time
 import math
 import extra
+import urllib
 import base64
 import string
 import psutil
@@ -116,10 +118,12 @@ def reloadData():
 		os,
 		io,
 		sys,
+		html,
 		pytz,
 		time,
 		math,
 		extra,
+		urllib,
 		base64,
 		string,
 		psutil,
@@ -1147,6 +1151,46 @@ async def nicknameCommand(message, prefix):
 	else:
 		await message.channel.send("You do not have permission to use this command!")
 
+async def stackoverflowCommand(message, prefix):
+	arguments = message.content.split(" ")
+	if len(arguments) > 1:
+		try:
+			stackoverflowParameters = {
+			    "order": "desc",
+			    "sort": "activity",
+			    "site": "stackoverflow"
+			}
+			arguments.pop(0); text = ' '.join(arguments); parameters = stackoverflowParameters | {"q": text}
+			response = requests.get(url="https://api.stackexchange.com/2.2/search/advanced", params=parameters).json()
+			if not response["items"]:
+				embed = discord.Embed(title="StackOverflow", description=f"No search results found for **{text}**", color=discord.Color.red())
+				await message.channel.send(embed=embed); return
+			finalResults = response["items"][:5]
+			embed = discord.Embed(title="StackOverflow", description=f"Here are the top **{len(finalResults)}** results for **{text}**", color=variables.embedColor)
+			for result in finalResults:
+				tags = ""
+				for tag in result['tags'][:4]:
+					tags += f"**{tag}**, "
+				embed.add_field(
+					name = html.unescape(result["title"]),
+					value = (
+						f"Views: **{result['view_count']}**, "
+						f"Score: **{result['score']}**, "
+						f"Answers: **{result['answer_count']}** "
+						f"([link to post]({result['link']}))\n"
+						f"Tags: {tags[:-2]}"
+					),
+					inline = False
+				)
+			await message.channel.send(embed=embed)
+		except HTTPException:
+			await message.channel.send("The search result is too long!"); return
+		except:
+			await message.channel.send("Unable to search for item"); return
+		addCooldown(message.author.id, "stackoverflow", 10)
+	else:
+		await message.channel.send(f"The syntax is `{prefix}nickname <user> <nickname>`")
+
 async def sourceCommand(message, prefix):
 	embed = discord.Embed(title="Source Code", description="You can find my source code [here](https://github.com/ErrorNoInternet/Doge-Utilities)", color=variables.embedColor)
 	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
@@ -1416,4 +1460,5 @@ commandList = [
 	Command("binary", ["bin"], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
 	Command("currency", ["cur"], currencyCommand, "currency <currency> <amount> <currency>", "Convert currencies"),
 	Command("nickname", ["nick"], nicknameCommand, "nickname <user> <nickname>", "Change or update a user's nickname"),
+	Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
 ]
