@@ -1,5 +1,6 @@
 import os
 import time
+import topgg
 import random
 import discord
 import asyncio
@@ -18,6 +19,8 @@ if os.getenv("TOKEN") == None:
 	print("Unable to load TOKEN variable"); exit()
 if os.getenv("SECRET") == None:
 	print("Unable to load SECRET variable"); exit()
+if os.getenv("TOPGG_TOKEN") == None:
+	print("Unable to load TOPGG_TOKEN variable"); exit()
 
 def updateObjects():
 	time.sleep(2)
@@ -103,6 +106,6 @@ async def on_member_join(member):
 async def on_message(message):
 	await functions.on_message(message)
 
+functions.client.topggpy = topgg.DBLClient(functions.client, os.getenv("TOPGG_TOKEN"), autopost=True, post_shard_count=True)
 webServer.start("Doge Utilities")
 functions.client.run(os.getenv("TOKEN"))
-
