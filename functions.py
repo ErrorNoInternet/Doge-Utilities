@@ -1183,7 +1183,7 @@ async def stackoverflowCommand(message, prefix):
 					inline = False
 				)
 			await message.channel.send(embed=embed)
-		except HTTPException:
+		except discord.HTTPException:
 			await message.channel.send("The search result is too long!"); return
 		except:
 			await message.channel.send("Unable to search for item"); return
