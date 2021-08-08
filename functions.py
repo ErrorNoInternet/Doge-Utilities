@@ -108,6 +108,7 @@ def parseVariables(text):
 	text = text.replace("<timezone>", "America/Denver")
 	text = text.replace("<currency>", "usd")
 	text = text.replace("<amount>", "8")
+	text = text.replace("<nickname>", "Wumpus")
 	return text
 
 def reloadData():
@@ -205,7 +206,7 @@ async def currencyCommand(message, prefix):
 			response = requests.get(url).json(); value = response[outputCurrency] * amount
 			embed = discord.Embed(title="Currency Convert", description=f"**{round(amount, 6)} {inputCurrency.upper()}** = **{round(value, 6)} {outputCurrency.upper()}**", color=variables.embedColor)
 			await message.channel.send(embed=embed)
-			addCooldown(message.author.id, "currency", 10)
+			addCooldown(message.author.id, "currency", 5)
 		except:
 			await message.channel.send("Unable to convert currency"); return
 	elif len(parts) == 2 and parts[1].lower() == "list":
@@ -218,7 +219,7 @@ async def currencyCommand(message, prefix):
 			timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embedColor, title="Currency List", entries=segments
 		)
 		await pager.start(ContextObject(client, message))
-		addCooldown(message.author.id, "currency", 10)
+		addCooldown(message.author.id, "currency", 5)
 	else:
 		await message.channel.send(f"The syntax is `{prefix}currency <input> <amount> <output>`"); return
 
@@ -788,7 +789,7 @@ async def lookupCommand(message, prefix):
 	else:
 		embed = discord.Embed(title="Unknown User", description="Unable to find the specified user", color=variables.embedColor)
 	await message.channel.send(embed=embed)
-	addCooldown(message.author.id, "lookup", 8)
+	addCooldown(message.author.id, "lookup", 6)
 
 async def permissionsCommand(message, prefix):
 	userID = message.content.split(" ")
@@ -813,7 +814,7 @@ async def permissionsCommand(message, prefix):
 			permissionList += f":x: `{permission[0]}`\n"
 	embed = discord.Embed(title="User Permissions", description=f"Permissions for **{targetUser.name}#{targetUser.discriminator}**\n\n" + permissionList, color=variables.embedColor)
 	await message.channel.send(embed=embed)
-	addCooldown(message.author.id, "permissions", 8)
+	addCooldown(message.author.id, "permissions", 3)
 
 async def raidProtectionCommand(message, prefix):
 	if message.author.guild_permissions.administrator or message.author.id in variables.permissionOverride:
@@ -1106,7 +1107,7 @@ async def timeCommand(message, prefix):
 					if text.lower() == city.lower():
 						userTimezone = pytz.timezone(timezone)
 						now = datetime.datetime.now(userTimezone)
-						embed = discord.Embed(title="Time", description=f"Information for **{text}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**", color=variables.embedColor)
+						embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**", color=variables.embedColor)
 						await message.channel.send(embed=embed); return
 				except:
 					pass
@@ -1115,6 +1116,28 @@ async def timeCommand(message, prefix):
 	else:
 		await message.channel.send(f"The syntax is `{prefix}time <timezone>`")
 	addCooldown(message.author.id, "time", 3)
+
+async def nicknameCommand(message, prefix):
+	if message.author.guild_permissions.manage_nicknames:
+		arguments = message.content.split(" ")
+		if len(arguments) >= 3:
+			arguments.pop(0); userID = arguments[0]; arguments.pop(0); nickname = ' '.join(arguments)
+			try:
+				userID = int(userID.replace("<", "").replace(">", "").replace("@", "").replace("!", ""))
+			except:
+				await message.channel.send("Please mention a valid user!"); return
+			for member in message.author.guild.members:
+				if member.id == userID:
+					try:
+						await member.edit(nick=nickname); addCooldown(message.author.id, "nickname", 5)
+						await message.channel.send(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**"); return
+					except:
+						await message.channel.send("Unable to change user nickname"); return
+			await message.channel.send("Unable to find user"); return
+		else:
+			await message.channel.send(f"The syntax is `{prefix}nickname <user> <nickname>`")
+	else:
+		await message.channel.send("You do not have permission to use this command!")
 
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
@@ -1348,20 +1371,20 @@ commandList = [
 	Command("execute;", [], executeCommand, "execute;<code>", "System Command"),
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
 	Command("ping", ["pong", "poing"], pingCommand, "ping", "Display the bot's current latency"),
-	Command("status", [], statusCommand, "status", "Show the bot's current statistics"),
+	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
 	Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
 	Command("vote", [], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
-	Command("version", [], versionCommand, "version", "Display the bot's current version"),
+	Command("version", ["ver"], versionCommand, "version", "Display the bot's current version"),
 	Command("prefix", [], prefixCommand, "prefix", "Change the bot's prefix on this server"),
-	Command("invite", [], inviteCommand, "invite", "Invite this bot to another server"),
+	Command("invite", ["inv"], inviteCommand, "invite", "Invite this bot to another server"),
 	Command("shards", [], shardsCommand, "shards <page>", "View information about Doge's shards"),
 	Command("setup-muted", [], setupMutedCommand, "setup-muted", "Generate a role that mutes members"),
 	Command("setup-banned", [], setupBannedCommand, "setup-banned", "Generate a role that disables access to channels"),
 	Command("random", ["rand"], randomCommand, "random <low> <high>", "Generate a random number within the range"),
-	Command("disconnect-members", [], disconnectMembersCommand, "disconnect-members", "Disconnect all the members in voice channels"),
+	Command("disconnect-members", ["disc-members", "disconnect-users"], disconnectMembersCommand, "disconnect-members", "Disconnect all the members in voice channels"),
 	Command("suggest", [], suggestCommand, "suggest <suggestion>", "Send a suggestion to the bot creators"),
 	Command("autorole", [], autoroleCommand, "autorole <role>", "Change the role that is automatically given to users"),
-	Command("lookup", [], lookupCommand, "lookup <user>", "Display profile information for the specified user"),
+	Command("lookup", ["ui", "userinfo"], lookupCommand, "lookup <user>", "Display profile information for the specified user"),
 	Command("clear", ["purge"], clearCommand, "clear <messages>", "Delete the specified amount of messages"),
 	Command("raid-protection", ["raidp"], raidProtectionCommand, "raid-protection <on/off>", "Toggle server's raid protection"),
 	Command("wide", [], wideCommand, "wide <text>", "Add spaces to every character in the text"),
@@ -1379,4 +1402,5 @@ commandList = [
 	Command("time", [], timeCommand, "time <timezone>", "Display the current time for the specified timezone"),
 	Command("binary", ["bin"], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
 	Command("currency", ["cur"], currencyCommand, "currency <currency> <amount> <currency>", "Convert currencies"),
+	Command("nickname", ["nick"], nicknameCommand, "nickname <user> <nickname>", "Change or update a user's nickname"),
 ]
