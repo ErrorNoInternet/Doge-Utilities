@@ -1196,6 +1196,10 @@ async def sourceCommand(message, prefix):
 	embed = discord.Embed(title="Source Code", description="You can find my source code [here](https://github.com/ErrorNoInternet/Doge-Utilities)", color=variables.embedColor)
 	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
 
+async def dogeCommand(message, prefix):
+	embed = discord.Embed(color=variables.embedColor)
+	embed.set_image(url=client.user.avatar_url); await message.channel.send(embed=embed)
+
 async def guildsCommand(message, prefix):
 	if message.author.id == variables.botOwner:
 		await message.channel.send(str(len(client.guilds)))
@@ -1440,6 +1444,7 @@ commandList = [
 	Command("version", ["ver"], versionCommand, "version", "Display the bot's current version"),
 	Command("prefix", ["setprefix", "changeprefix"], prefixCommand, "prefix", "Change the bot's prefix on this server"),
 	Command("invite", ["inv"], inviteCommand, "invite", "Invite this bot to another server"),
+	Command("doge", ["dog"], dogeCommand, "doge", "**D O G E**"),
 	Command("shards", [], shardsCommand, "shards <page>", "View information about Doge's shards"),
 	Command("setup-muted", [], setupMutedCommand, "setup-muted", "Generate a role that mutes members"),
 	Command("setup-banned", [], setupBannedCommand, "setup-banned", "Generate a role that disables access to channels"),
