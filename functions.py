@@ -523,7 +523,10 @@ async def setupMutedCommand(message, prefix):
 			try:
 				await channel.set_permissions(mutedRole, send_messages=False)
 			except:
-				pass
+				try:
+					await channel.set_permissions(mutedRole, connect=False)
+				except:
+					pass
 	except:
 		await oldMessage.edit(f"Unable to generate **Muted** role for current guild")
 		return
