@@ -182,7 +182,7 @@ def generateCooldown(command, cooldownTime):
 				cooldownTime = cooldownTime / 24
 				if cooldownTime >= 30.4:
 					cooldownUnit = "months"
-					cooldownTime = cooldownTime / 30
+					cooldownTime = cooldownTime / 30.4
 					if cooldownTime >= 12:
 						cooldownUnit = "years"
 						cooldownTime = cooldownTime / 12
@@ -815,6 +815,11 @@ async def permissionsCommand(message, prefix):
 			permissionList += f":white_check_mark: `{permission[0]}`\n"
 		else:
 			permissionList += f":x: `{permission[0]}`\n"
+	if targetUser == message.author.guild.owner:
+		permissionList += f":white_check_mark: `owner`\n"
+	else:
+		permissionList += f":x: `owner`\n"
+
 	embed = discord.Embed(title="User Permissions", description=f"Permissions for **{targetUser.name}#{targetUser.discriminator}**\n\n" + permissionList, color=variables.embedColor)
 	await message.channel.send(embed=embed)
 	addCooldown(message.author.id, "permissions", 3)
@@ -1142,6 +1147,10 @@ async def nicknameCommand(message, prefix):
 	else:
 		await message.channel.send("You do not have permission to use this command!")
 
+async def sourceCommand(message, prefix):
+	embed = discord.Embed(title="Source Code", description="You can find my source code [here](https://github.com/ErrorNoInternet/Doge-Utilities)", color=variables.embedColor)
+	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
+
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
 	try:
@@ -1376,6 +1385,7 @@ commandList = [
 	Command("ping", ["pong", "poing"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
 	Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
+	Command("source", ["src"], sourceCommand, "source", "Display a link to Doge Utilities' code"),
 	Command("vote", [], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
 	Command("version", ["ver"], versionCommand, "version", "Display the bot's current version"),
 	Command("prefix", [], prefixCommand, "prefix", "Change the bot's prefix on this server"),

@@ -14,6 +14,11 @@ if not os.path.exists("last-command"):
 	file = open("last-command", "w+")
 	file.write("0"); file.close()
 
+if os.getenv("TOKEN") == None:
+	print("Unable to load TOKEN variable"); exit()
+if os.getenv("SECRET") == None:
+	print("Unable to load SECRET variable"); exit()
+
 def updateObjects():
 	time.sleep(2)
 	while True:
