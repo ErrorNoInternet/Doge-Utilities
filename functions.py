@@ -1197,7 +1197,8 @@ async def sourceCommand(message, prefix):
 	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
 
 async def guildsCommand(message, prefix):
-	await message.channel.send(str(len(client.guilds)))
+	if message.author.id == variables.botOwner:
+		await message.channel.send(str(len(client.guilds)))
 
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
