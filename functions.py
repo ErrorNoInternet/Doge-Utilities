@@ -1190,7 +1190,7 @@ async def stackoverflowCommand(message, prefix):
 			await message.channel.send("Unable to search for item"); return
 		addCooldown(message.author.id, "stackoverflow", 10)
 	else:
-		await message.channel.send(f"The syntax is `{prefix}nickname <user> <nickname>`")
+		await message.channel.send(f"The syntax is `{prefix}stackoverflow <text>`")
 
 async def sourceCommand(message, prefix):
 	embed = discord.Embed(title="Source Code", description="You can find my source code [here](https://github.com/ErrorNoInternet/Doge-Utilities)", color=variables.embedColor)
