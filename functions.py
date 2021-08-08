@@ -1196,6 +1196,9 @@ async def sourceCommand(message, prefix):
 	embed = discord.Embed(title="Source Code", description="You can find my source code [here](https://github.com/ErrorNoInternet/Doge-Utilities)", color=variables.embedColor)
 	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
 
+async def guildsCommand(message, prefix):
+	await message.channel.send(str(len(client.guilds)))
+
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
 	try:
@@ -1223,7 +1226,7 @@ async def helpCommand(message, prefix):
 		try:
 			helpPage = pages[currentPage - 1]
 		except:
-			helpPage = "That page doesn't exist"
+			helpPage = "That page doesn't exist or wasn't found"
 			currentPage = 0
 		embed = discord.Embed(title="Doge Commands", description=helpPage, color=variables.embedColor, timestamp=datetime.datetime.utcnow())
 		embed.set_footer(text=f"Viewing help page {currentPage} of {len(pages)}")
@@ -1242,7 +1245,7 @@ async def helpCommand(message, prefix):
 				embed = discord.Embed(title="Doge Commands", description=command, color=variables.embedColor, timestamp=datetime.datetime.utcnow())
 				embed.set_footer(text=f"Viewing command help page")
 				await message.channel.send(embed=embed); return
-		embed = discord.Embed(title="Doge Commands", description="That command doesn't exist", color=variables.embedColor, timestamp=datetime.datetime.utcnow())
+		embed = discord.Embed(title="Doge Commands", description="That command doesn't exist or wasn't found", color=variables.embedColor, timestamp=datetime.datetime.utcnow())
 		embed.set_footer(text=f"Viewing command help page")
 		await message.channel.send(embed=embed); addCooldown(message.author.id, "help", 1.5)
 
@@ -1422,10 +1425,11 @@ async def on_message(message):
 		embed = discord.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=discord.Color.red(), timestamp=datetime.datetime.utcnow())
 		embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
 
-hiddenCommands = ["reload", "execute;"]
+hiddenCommands = ["execute;", "reload", "guilds"]
 commandList = [
-	Command("reload", [], reloadCommand, "reload", "System Command"),
 	Command("execute;", [], executeCommand, "execute;<code>", "System Command"),
+	Command("reload", [], reloadCommand, "reload", "System Command"),
+	Command("guilds", [], guildsCommand, "guilds", "System Command"),
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
 	Command("ping", ["pong", "poing"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
