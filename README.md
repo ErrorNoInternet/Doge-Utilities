@@ -6,7 +6,7 @@
 A simple Discord utility bot written in Python (by **Zenderking#7479**)\
 Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
-## Usage
+## Installation
 - Environment variables:
   - `TOKEN` - Discord bot token
   - `SECRET` - Vote webhook secret
