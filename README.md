@@ -1,13 +1,12 @@
 # Doge-Utilities
-![Doge](https://images-ext-1.discordapp.net/external/rarDliGfkaTHLvL8XKYESCSj4Tw8-h55fOz9dO24nYs/%3Fsize%3D512/https/cdn.discordapp.com/avatars/854965721805226005/a8c3e7d9ae4dd3b69524e2476f8c7032.webp?width=250&height=250)
-
+![Doge](https://media.discordapp.net/attachments/843240892147826689/873809662506573884/Doge.png?width=250&height=250)\
 [![Discord Bots](https://top.gg/api/widget/status/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 [![Discord Bots](https://top.gg/api/widget/upvotes/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 
-A simple Discord utility bot written in Python (by **Zenderking#7479**)\
+A simple Discord utility bot written in Python (by [**Zenderking#7479**](https://discord.com/users/531392146767347712))\
 Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
-## Usage
+## Installation
 - Environment variables:
   - `TOKEN` - Discord bot token
   - `SECRET` - Vote webhook secret
