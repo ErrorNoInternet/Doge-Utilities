@@ -13,25 +13,36 @@ def index():
 	response = flask.make_response(f"Hello World! I am {botName}!", 200)
 	response.mimetype = "text/plain"; return response
 
-@app.route("/vote", methods=["GET", "POST"])
+@app.route("/vote", methods=["POST", "OPTIONS"])
 def handleVote():
-	if flask.request.method == "POST":
-		try:
+	try:
+		topgg = False; discordBotList = False
+		if "Top.gg" in flask.request.headers["User-Agent"]:
+			topgg = True
+		if flask.request.headers["Origin"] == "https://discordbotlist.com":
+			discordBotList = True
+		
+		if topgg == False and discordBotList == False:
+			response = flask.make_response("Forbidden", 403)
+			response.mimetype = "text/plain"; return response
+
+		if topgg:
 			if flask.request.headers["Authorization"] == os.getenv("SECRET"):
 				voteUserID = flask.request.json["user"]
 				message = "Thank you for voting for Doge Utilities on Top.GG!"
 				asyncio.run_coroutine_threadsafe(functions.sendUserMessage(voteUserID, message), functions.client.loop)
 
-				response = flask.make_response("200", 200)
+				response = flask.make_response("OK", 200)
 				response.mimetype = "text/plain"; return response
 			else:
 				response = flask.make_response("Forbidden", 403)
 				response.mimetype = "text/plain"; return response
-		except:
-			response = flask.make_response("Error", 200)
+
+		if discordBotList:
+			response = flask.make_response("Not implemented", 200)
 			response.mimetype = "text/plain"; return response
-	else:
-		response = flask.make_response("Invalid method", 200)
+	except:
+		response = flask.make_response("Error", 500)
 		response.mimetype = "text/plain"; return response
 
 def run():
