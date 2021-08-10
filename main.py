@@ -1,12 +1,10 @@
 import os
 import time
 import topgg
-import random
 import discord
 import asyncio
 import webServer
 import functions
-import variables
 import threading
 
 initializeTime = time.time()
@@ -106,6 +104,11 @@ async def on_member_join(member):
 async def on_message(message):
 	await functions.on_message(message)
 
-functions.client.topggpy = topgg.DBLClient(functions.client, os.getenv("TOPGG_TOKEN"), autopost=True, post_shard_count=True)
+functions.client.topggpy = topgg.DBLClient(
+	functions.client,
+	os.getenv("TOPGG_TOKEN"),
+	autopost=True,
+	post_shard_count=True
+)
 webServer.start("Doge Utilities")
 functions.client.run(os.getenv("TOKEN"))
