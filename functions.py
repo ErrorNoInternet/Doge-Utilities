@@ -1246,7 +1246,10 @@ async def helpCommand(message, prefix):
 				if commandArguments == "":
 					commandArguments = "None"
 				commandExample = prefix + parseVariables(command.usage)
-				command = f"Command: `{prefix}{command.name}`\nAdditional arguments: `{commandArguments}`\nUsage example: `{commandExample}`\n\n**{command.description}**"
+				additionalArguments = ""
+				if commandArguments != "None":
+					additionalArguments = f"\nAdditional arguments: `{commandArguments}`"
+				command = f"Command: `{prefix}{command.name}`{additionalArguments}\nUsage example: `{commandExample}`\n\n**{command.description}**"
 				embed = discord.Embed(title="Doge Commands", description=command, color=variables.embedColor, timestamp=datetime.datetime.utcnow())
 				embed.set_footer(text=f"Viewing command help page")
 				await message.channel.send(embed=embed); return
@@ -1469,7 +1472,7 @@ commandList = [
 	Command("permissions", ["perms"], permissionsCommand, "permissions <user>", "Display the permissions for the specified user"),
 	Command("time", [], timeCommand, "time <timezone>", "Display the current time for the specified timezone"),
 	Command("binary", ["bin"], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
-	Command("currency", ["cur"], currencyCommand, "currency <currency> <amount> <currency>", "Convert currencies"),
 	Command("nickname", ["nick"], nicknameCommand, "nickname <user> <nickname>", "Change or update a user's nickname"),
+	Command("currency", ["cur"], currencyCommand, "currency <currency> <amount> <currency>", "Convert currencies"),
 	Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
 ]
