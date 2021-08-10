@@ -17,10 +17,16 @@ def index():
 def handleVote():
 	try:
 		topgg = False; discordBotList = False
-		if "Top.gg" in flask.request.headers["User-Agent"]:
-			topgg = True
-		if flask.request.headers["Origin"] == "https://discordbotlist.com":
-			discordBotList = True
+		try:
+			if "Top.gg" in flask.request.headers["User-Agent"]:
+				topgg = True
+		except:
+			pass
+		try:
+			if flask.request.headers["Origin"] == "https://discordbotlist.com":
+				discordBotList = True
+		except:
+			pass
 		
 		if topgg == False and discordBotList == False:
 			response = flask.make_response("Forbidden", 403)
