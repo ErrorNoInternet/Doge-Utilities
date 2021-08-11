@@ -1171,13 +1171,13 @@ async def stackoverflowCommand(message, prefix):
 			for result in finalResults:
 				tags = ""
 				for tag in result['tags'][:4]:
-					tags += f"**{tag}**, "
+					tags += f"`{tag}`, "
 				embed.add_field(
 					name = html.unescape(result["title"]),
 					value = (
-						f"Views: **{result['view_count']}**, "
-						f"Score: **{result['score']}**, "
-						f"Answers: **{result['answer_count']}** "
+						f"Views: `{result['view_count']}`, "
+						f"Score: `{result['score']}`, "
+						f"Answers: `{result['answer_count']}` "
 						f"([link to post]({result['link']}))\n"
 						f"Tags: {tags[:-2]}"
 					),
