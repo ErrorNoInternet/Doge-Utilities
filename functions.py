@@ -1198,6 +1198,7 @@ async def sourceCommand(message, prefix):
 	description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['watchers_count']}**"
 	embed = discord.Embed(title="Source Code", description=description, color=variables.embedColor)
 	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
+	addCooldown(message.author.id, "source", 20)
 
 async def dogeCommand(message, prefix):
 	embed = discord.Embed(color=variables.embedColor)
