@@ -1193,7 +1193,10 @@ async def stackoverflowCommand(message, prefix):
 		await message.channel.send(f"The syntax is `{prefix}stackoverflow <text>`")
 
 async def sourceCommand(message, prefix):
-	embed = discord.Embed(title="Source Code", description="You can find my source code [here](https://github.com/ErrorNoInternet/Doge-Utilities)", color=variables.embedColor)
+	description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)\n"
+	response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
+	description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['watchers_count']}**"
+	embed = discord.Embed(title="Source Code", description=description, color=variables.embedColor)
 	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
 
 async def dogeCommand(message, prefix):
