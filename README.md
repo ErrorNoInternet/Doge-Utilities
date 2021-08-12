@@ -1,7 +1,7 @@
 # Doge-Utilities
 ![Doge](https://media.discordapp.net/attachments/843240892147826689/873809662506573884/Doge.png?width=250&height=250)\
-[![Discord Bots](https://top.gg/api/widget/status/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
-[![Discord Bots](https://top.gg/api/widget/servers/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
+[![Bot Status](https://top.gg/api/widget/status/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
+[![Server Count](https://top.gg/api/widget/servers/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 
 A simple Discord utility bot written in Python (by [Zenderking#7479](https://discord.com/users/531392146767347712))\
 Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
