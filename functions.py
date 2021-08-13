@@ -1109,7 +1109,7 @@ async def timeCommand(message, prefix):
 			else:
 				userTimezone = pytz.timezone(text)
 				now = datetime.datetime.now(userTimezone)
-				embed = discord.Embed(title="Time", description=f"Information for **{text}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**", color=variables.embedColor)
+				embed = discord.Embed(title="Time", description=f"Information for **{text}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday()}**", color=variables.embedColor)
 				await message.channel.send(embed=embed)
 		except KeyError:
 			text = " ".join(arguments)
@@ -1117,9 +1117,8 @@ async def timeCommand(message, prefix):
 				try:
 					city = timezone.split("/")[1]
 					if text.lower() == city.lower():
-						userTimezone = pytz.timezone(timezone)
-						now = datetime.datetime.now(userTimezone)
-						embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**", color=variables.embedColor)
+						userTimezone = pytz.timezone(timezone); now = datetime.datetime.now(userTimezone)
+						embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday()}**", color=variables.embedColor)
 						await message.channel.send(embed=embed); return
 				except:
 					pass
@@ -1199,6 +1198,10 @@ async def sourceCommand(message, prefix):
 	embed = discord.Embed(title="Source Code", description=description, color=variables.embedColor)
 	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
 	addCooldown(message.author.id, "source", 20)
+
+async def donateCommand(message, prefix):
+	embed = discord.Embed(title="Donate", description=":moneybag: Bitcoin: `bc1qer5es59d62pvwdhaplgyltzd63kyyd0je2fhjm`\n:dog: Dogecoin: `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`", color=variables.embedColor)
+	await message.channel.send(embed=embed)
 
 async def dogeCommand(message, prefix):
 	embed = discord.Embed(color=variables.embedColor)
@@ -1448,6 +1451,7 @@ commandList = [
 	Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
 	Command("source", ["src"], sourceCommand, "source", "Display a link to Doge Utilities' code"),
 	Command("vote", [], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
+	Command("donate", [], donateCommand, "donate", "Donate to the creators of Doge Utilities"),
 	Command("version", ["ver"], versionCommand, "version", "Display the bot's current version"),
 	Command("prefix", ["setprefix", "changeprefix"], prefixCommand, "prefix", "Change the bot's prefix on this server"),
 	Command("invite", ["inv"], inviteCommand, "invite", "Invite this bot to another server"),
