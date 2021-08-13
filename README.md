@@ -8,7 +8,7 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
 ## Installation
 - Requirements:
-  - Python 3.7+
+  - Python 3.8+
   - pip 20.x
   - git (optional)
   - port 8080
