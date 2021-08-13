@@ -7,6 +7,12 @@ A simple Discord utility bot written in Python (by [Zenderking#7479](https://dis
 Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
 ## Installation
+- Requirements:
+  - Python 3.7+
+  - pip 20.x
+  - git (optional)
+  - port 8080
+
 - Environment variables:
   - `TOKEN` - Discord bot token
   - `SECRET` - Vote webhook secret
