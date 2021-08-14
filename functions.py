@@ -1109,7 +1109,7 @@ async def timeCommand(message, prefix):
 			else:
 				userTimezone = pytz.timezone(text)
 				now = datetime.datetime.now(userTimezone)
-				embed = discord.Embed(title="Time", description=f"Information for **{text}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday()}**", color=variables.embedColor)
+				embed = discord.Embed(title="Time", description=f"Information for **{text}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday() + 1}**", color=variables.embedColor)
 				await message.channel.send(embed=embed)
 		except KeyError:
 			text = " ".join(arguments)
@@ -1118,7 +1118,7 @@ async def timeCommand(message, prefix):
 					city = timezone.split("/")[1]
 					if text.lower() == city.lower():
 						userTimezone = pytz.timezone(timezone); now = datetime.datetime.now(userTimezone)
-						embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday()}**", color=variables.embedColor)
+						embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday() + 1}**", color=variables.embedColor)
 						await message.channel.send(embed=embed); return
 				except:
 					pass
@@ -1385,10 +1385,6 @@ async def on_message(message):
 				prefixDatabase[message.guild.id] = "="
 		else:
 			return
-		
-		if message.content.startswith(prefix) and len(message.content) > 1:
-			lastCommand = open("last-command", "w")
-			lastCommand.write(str(round(time.time()))); lastCommand.close()
 
 		if "<@" in message.content and str(client.user.id) in message.content:
 			await message.channel.send(f"My prefix here is `{prefix}`")
@@ -1396,7 +1392,10 @@ async def on_message(message):
 			lastCommand.write(str(round(time.time()))); lastCommand.close()
 			return
 
-		if not message.content.startswith(prefix):
+		if message.content.startswith(prefix) and len(message.content) > 1:
+			lastCommand = open("last-command", "w")
+			lastCommand.write(str(round(time.time()))); lastCommand.close()
+		else:
 			return
 
 		for command in commandList:
