@@ -1084,7 +1084,7 @@ async def colorCommand(message, prefix):
 	addCooldown(message.author.id, "color", 3)
 
 async def voteCommand(message, prefix):
-	embed = discord.Embed(title="Vote Link", description="You can upvote Doge Utilities using [this link](https://top.gg/bot/854965721805226005)", color=variables.embedColor)
+	embed = discord.Embed(title="Vote Link", description="You can upvote Doge Utilities on [top.gg](https://top.gg/bot/854965721805226005/vote) or on [discordbotlist](https://discordbotlist.com/bots/doge-utilities/upvote)", color=variables.embedColor)
 	await message.channel.send(embed=embed)
 
 async def timeCommand(message, prefix):
