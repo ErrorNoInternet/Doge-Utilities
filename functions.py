@@ -1449,7 +1449,7 @@ commandList = [
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
 	Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
 	Command("source", ["src"], sourceCommand, "source", "Display a link to Doge Utilities' code"),
-	Command("vote", [], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
+	Command("vote", ["upvote"], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
 	Command("donate", [], donateCommand, "donate", "Donate to the creators of Doge Utilities"),
 	Command("version", ["ver"], versionCommand, "version", "Display the bot's current version"),
 	Command("prefix", ["setprefix", "changeprefix"], prefixCommand, "prefix", "Change the bot's prefix on this server"),
