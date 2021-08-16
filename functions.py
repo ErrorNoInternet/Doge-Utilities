@@ -1,10 +1,4 @@
 import os
-try:
-	import discord_components
-except:
-	os.system("pip install discord-components")
-	import discord_components
-
 import io
 import sys
 import html
@@ -31,6 +25,7 @@ import contextlib
 import simpleeval
 import sqlitedict
 from PIL import Image
+import discord_components
 from discord.ext import buttons
 
 try:
@@ -208,7 +203,7 @@ async def currencyCommand(message, prefix):
 			inputCurrency = parts[1].lower(); amount = float(parts[2].replace(",", "").replace(" ", "")); outputCurrency = parts[3].lower()
 			url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{inputCurrency}/{outputCurrency}.json"
 			response = requests.get(url).json(); value = response[outputCurrency] * amount
-			embed = discord.Embed(title="Currency Convert", description=f"**{round(amount, 6)} {inputCurrency.upper()}** = **{round(value, 6)} {outputCurrency.upper()}**", color=variables.embedColor)
+			embed = discord.Embed(title="Currency Convert", description=f"**{round(amount, 6):,} {inputCurrency.upper()}** = **{round(value, 6):,} {outputCurrency.upper()}**", color=variables.embedColor)
 			await message.channel.send(embed=embed)
 			addCooldown(message.author.id, "currency", 5)
 		except:
@@ -386,7 +381,7 @@ async def statusCommand(message, prefix):
 		uptime = "Unknown"
 	
 	embed = discord.Embed(color=variables.embedColor)
-	embed.add_field(name="Latency", value="```" + f"{round(client.get_shard(message.guild.shard_id).latency * 1000, 1)} ms" + "```")
+	embed.add_field(name="Bot Latency", value="```" + f"{round(client.get_shard(message.guild.shard_id).latency * 1000, 1)} ms" + "```")
 	embed.add_field(name="CPU Usage", value="```" + f"{psutil.cpu_percent()}%" + "```")
 	embed.add_field(name="RAM Usage", value="```" + f"{round(memoryUsage, 1)} MB{' (nice)' if round(memoryUsage, 1) == 69.0 else ''}" + "```")
 	embed.add_field(name="Thread Count", value="```" + str(threading.active_count()) + "```")
@@ -967,7 +962,7 @@ async def clearCommand(message, prefix):
 			return
 		if count > 500:
 			await message.channel.send(
-				f"Are you sure you want to clear more than 500 messages in this channel?",
+				f"Are you sure you want to clear more than **500 messages** in this channel?",
 				components=[[
 					discord_components.Button(style=discord_components.ButtonStyle.green, label="Yes"),
 					discord_components.Button(style=discord_components.ButtonStyle.green, label="No")
@@ -1477,7 +1472,7 @@ commandList = [
 	Command("calculate", ["calc"], calculateCommand, "calculate <expression>", "Calculate the specified math expression"),
 	Command("color", ["colour"], colorCommand, "color <color code>", "Display information about the color code"),
 	Command("permissions", ["perms"], permissionsCommand, "permissions <user>", "Display the permissions for the specified user"),
-	Command("time", [], timeCommand, "time <timezone>", "Display the current time for the specified timezone"),
+	Command("time", ["date"], timeCommand, "time <timezone>", "Display the current time for the specified timezone"),
 	Command("binary", ["bin"], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
 	Command("nickname", ["nick"], nicknameCommand, "nickname <user> <nickname>", "Change or update a user's nickname"),
 	Command("currency", ["cur"], currencyCommand, "currency <currency> <amount> <currency>", "Convert currencies"),
