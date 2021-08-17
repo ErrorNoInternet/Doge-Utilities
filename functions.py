@@ -200,7 +200,7 @@ async def currencyCommand(message, prefix):
 	parts = message.content.split(" ")
 	if len(parts) == 4:
 		try:
-			inputCurrency = parts[1].lower(); amount = float(parts[2].replace(",", "").replace(" ", "")); outputCurrency = parts[3].lower()
+			amount = float(parts[1].replace(",", "").replace(" ", "")); inputCurrency = parts[2].lower(); outputCurrency = parts[3].lower()
 			url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{inputCurrency}/{outputCurrency}.json"
 			response = requests.get(url).json(); value = response[outputCurrency] * amount
 			embed = discord.Embed(title="Currency Convert", description=f"**{round(amount, 6):,} {inputCurrency.upper()}** = **{round(value, 6):,} {outputCurrency.upper()}**", color=variables.embedColor)
@@ -1475,6 +1475,6 @@ commandList = [
 	Command("time", ["date"], timeCommand, "time <timezone>", "Display the current time for the specified timezone"),
 	Command("binary", ["bin"], binaryCommand, "binary <encode/decode> <text>", "Convert the text to/from binary"),
 	Command("nickname", ["nick"], nicknameCommand, "nickname <user> <nickname>", "Change or update a user's nickname"),
-	Command("currency", ["cur"], currencyCommand, "currency <currency> <amount> <currency>", "Convert currencies"),
+	Command("currency", ["cur"], currencyCommand, "currency <amount> <currency> <currency>", "Convert currencies"),
 	Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
 ]
