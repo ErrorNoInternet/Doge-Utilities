@@ -7,7 +7,7 @@ A simple lightweight Discord utility bot written in Python with [discord.py](htt
 Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
 ## Installation
-⚠️ **Doge Utilities is currently using discord.py 2.0.0a**
+⚠️ **Doge Utilities is currently using discord.py 2.0.0a. Please install the latest development version of discord.py in order to ensure that Doge Utilities fully works.**
 
 ---
 
