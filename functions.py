@@ -232,7 +232,6 @@ async def testsCommand(message, prefix):
 :grey_question: `Code Integrity`
 :grey_question: `Bot Status`
 :grey_question: `Task Threads`
-:grey_question: `Web Server`
 :grey_question: `Bot Version`
 :grey_question: `Raid Protection`
 :grey_question: `User Lookup`
@@ -281,20 +280,6 @@ async def testsCommand(message, prefix):
 					description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
 				else:
 					description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-			except:
-				description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-		elif name == "Web Server":
-			try:
-				safe = True
-				for i in range(5):
-					pingStart = time.time()
-					requests.get("https://DogeUtilities-Discord.errornointernet.repl.co")
-					pingEnd = time.time()
-					if pingEnd - pingStart > 1.5:
-						description = description.replace(test, test.replace(":grey_question:", ":yellow_square:"))
-						safe = False
-				if safe:
-					description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
 			except:
 				description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
 		elif name == "Bot Version":
@@ -1191,7 +1176,7 @@ async def sourceCommand(message, prefix):
 	response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
 	description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['watchers_count']}**"
 	embed = discord.Embed(title="Source Code", description=description, color=variables.embedColor)
-	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
+	embed.set_thumbnail(url=client.user.avatar); await message.channel.send(embed=embed)
 	addCooldown(message.author.id, "source", 20)
 
 async def donateCommand(message, prefix):
@@ -1200,7 +1185,7 @@ async def donateCommand(message, prefix):
 
 async def dogeCommand(message, prefix):
 	embed = discord.Embed(color=variables.embedColor)
-	embed.set_image(url=client.user.avatar_url); await message.channel.send(embed=embed)
+	embed.set_image(url=client.user.avatar); await message.channel.send(embed=embed)
 
 async def guildsCommand(message, prefix):
 	if message.author.id == variables.botOwner:
