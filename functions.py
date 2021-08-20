@@ -1176,7 +1176,7 @@ async def sourceCommand(message, prefix):
 	response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
 	description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['watchers_count']}**"
 	embed = discord.Embed(title="Source Code", description=description, color=variables.embedColor)
-	embed.set_thumbnail(url=client.user.avatar); await message.channel.send(embed=embed)
+	embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
 	addCooldown(message.author.id, "source", 20)
 
 async def donateCommand(message, prefix):
@@ -1185,7 +1185,7 @@ async def donateCommand(message, prefix):
 
 async def dogeCommand(message, prefix):
 	embed = discord.Embed(color=variables.embedColor)
-	embed.set_image(url=client.user.avatar); await message.channel.send(embed=embed)
+	embed.set_image(url=client.user.avatar_url); await message.channel.send(embed=embed)
 
 async def guildsCommand(message, prefix):
 	if message.author.id == variables.botOwner:
