@@ -40,10 +40,10 @@ except:
 
 if not os.path.exists("databases"):
 	os.mkdir("databases")
+userCooldowns = {}
 prefixDatabase = sqlitedict.SqliteDict("databases/prefixDatabase.sql", autocommit=True)
 autoroleDatabase = sqlitedict.SqliteDict("databases/autoroleDatabase.sql", autocommit=True)
 settingsDatabase = sqlitedict.SqliteDict("databases/settingsDatabase.sql", autocommit=True)
-userCooldowns = sqlitedict.SqliteDict("databases/userCooldowns.sql", autocommit=True)
 
 class Command(object):
 	def __init__(self, name, aliases, function, usage, description):
@@ -1425,7 +1425,7 @@ commandList = [
 	Command("reload", [], reloadCommand, "reload", "System Command"),
 	Command("guilds", ["servers"], guildsCommand, "guilds", "System Command"),
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
-	Command("ping", ["pong", "poing"], pingCommand, "ping", "Display the bot's current latency"),
+	Command("ping", ["pong"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
 	Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
 	Command("source", ["src"], sourceCommand, "source", "Display a link to Doge Utilities' code"),
@@ -1439,7 +1439,7 @@ commandList = [
 	Command("setup-muted", [], setupMutedCommand, "setup-muted", "Generate a role that mutes members"),
 	Command("setup-banned", [], setupBannedCommand, "setup-banned", "Generate a role that disables access to channels"),
 	Command("random", ["rand"], randomCommand, "random <low> <high>", "Generate a random number within the range"),
-	Command("disconnect-members", ["disc-members", "disconnect-users"], disconnectMembersCommand, "disconnect-members", "Disconnect all the members in voice channels"),
+	Command("disconnect-members", ["disconnect-users"], disconnectMembersCommand, "disconnect-members", "Disconnect all the members in voice channels"),
 	Command("suggest", [], suggestCommand, "suggest <suggestion>", "Send a suggestion to the bot creators"),
 	Command("autorole", [], autoroleCommand, "autorole <role>", "Change the role that is automatically given to users"),
 	Command("lookup", ["ui", "userinfo"], lookupCommand, "lookup <user>", "Display profile information for the specified user"),

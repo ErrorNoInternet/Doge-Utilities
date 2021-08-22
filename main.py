@@ -112,3 +112,4 @@ functions.client.topggpy = topgg.DBLClient(
 )
 webServer.start("Doge Utilities")
 functions.client.run(os.getenv("TOKEN"))
+
