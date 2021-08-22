@@ -982,6 +982,23 @@ async def wideCommand(message, prefix):
 		await message.channel.send(f"The syntax is `{prefix}wide <text>`")
 	addCooldown(message.author.id, "wide", 5)
 
+async def unwideCommand(message, prefix):
+	arguments = message.content.split(" ")
+	if len(arguments) > 1:
+		arguments.pop(0); newText = ""; text = " ".join(arguments); spaceCharacter = False
+		for letter in text.replace("   ", "  "):
+			if letter == " ":
+				if spaceCharacter:
+					newText += " "
+				spaceCharacter = True
+			else:
+				spaceCharacter = False
+				newText += letter
+		await message.channel.send(newText)
+	else:
+		await message.channel.send(f"The syntax is `{prefix}unwide <text>`")
+	addCooldown(message.author.id, "unwide", 5)
+
 async def spoilerCommand(message, prefix):
 	arguments = message.content.split(" ")
 	if len(arguments) > 1:
@@ -1446,6 +1463,7 @@ commandList = [
 	Command("clear", ["purge"], clearCommand, "clear <messages>", "Delete the specified amount of messages"),
 	Command("raid-protection", ["raidp"], raidProtectionCommand, "raid-protection <on/off>", "Toggle server's raid protection"),
 	Command("wide", [], wideCommand, "wide <text>", "Add spaces to every character in the text"),
+	Command("unwide", [], unwideCommand, "unwide <text>", "Removes spaces from every character in the text"),
 	Command("cringe", [], cringeCommand, "cringe <text>", "Randomly change the cases of the text"),
 	Command("spoiler", [], spoilerCommand, "spoiler <text>", "Add spoilers to every character in the text"),
 	Command("reverse", [], reverseCommand, "reverse <text>", "Reverse the specified text (last character first)"),
