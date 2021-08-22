@@ -769,9 +769,9 @@ async def lookupCommand(message, prefix):
 
 		if response['banner'] != None:
 			if response['banner'].startswith("a_"):
-				bannerURL = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.gif?size=2048"
+				bannerURL = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.gif?size=1024"
 			else:
-				bannerURL = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.webp?size=2048"
+				bannerURL = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.webp?size=1024"
 			embed.set_image(url=bannerURL)
 	else:
 		embed = discord.Embed(title="Unknown User", description="Unable to find the specified user", color=variables.embedColor)
