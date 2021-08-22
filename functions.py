@@ -1463,7 +1463,7 @@ commandList = [
 	Command("clear", ["purge"], clearCommand, "clear <messages>", "Delete the specified amount of messages"),
 	Command("raid-protection", ["raidp"], raidProtectionCommand, "raid-protection <on/off>", "Toggle server's raid protection"),
 	Command("wide", [], wideCommand, "wide <text>", "Add spaces to every character in the text"),
-	Command("unwide", [], unwideCommand, "unwide <text>", "Removes spaces from every character in the text"),
+	Command("unwide", [], unwideCommand, "unwide <text>", "Remove spaces from every character in the text"),
 	Command("cringe", [], cringeCommand, "cringe <text>", "Randomly change the cases of the text"),
 	Command("spoiler", [], spoilerCommand, "spoiler <text>", "Add spoilers to every character in the text"),
 	Command("reverse", [], reverseCommand, "reverse <text>", "Reverse the specified text (last character first)"),
