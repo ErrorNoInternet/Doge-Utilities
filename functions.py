@@ -34,8 +34,7 @@ except:
 	startTime = time.time(); lastCommand = time.time()
 	ownerObject = None; mathVariables = {}
 	client = discord.AutoShardedClient(
-		intents=discord.Intents.all(),
-		shard_count=variables.shardCount
+		shard_count=variables.shardCount,
 	)
 
 if not os.path.exists("databases"):
@@ -343,7 +342,7 @@ async def testsCommand(message, prefix):
 async def statusCommand(message, prefix):
 	memberCount = 0; channelCount = 0; uptime = ""
 	for guild in client.guilds:
-		memberCount += len(guild.members)
+		memberCount += guild.member_count
 		channelCount += len(guild.channels)
 	process = psutil.Process(os.getpid())
 	memoryUsage = process.memory_info().rss / 1000000
@@ -638,19 +637,21 @@ async def suggestCommand(message, prefix):
 	arguments = message.content.split(" ")
 	if len(arguments) > 1:
 		addCooldown(message.author.id, "suggest", variables.largeNumber)
-		arguments.pop(0); text = " ".join(arguments); sentUsers = []
+		arguments.pop(0); text = " ".join(arguments)
 		oldMessage = await message.channel.send("Sending your suggestion...")
-		for guild in client.guilds:
-			for member in guild.members:
-				if member.id in variables.messageManagers:
-					if member.id in sentUsers:
-						continue
-					else:
-						sentUsers.append(member.id)
-					try:
-						await member.send(f"**{message.author.name}#{message.author.discriminator}** **(**`{member.id}`**)** **has sent a suggestion:**\n{text}")
-					except:
-						pass
+		for userID in variables.messageManagers:
+			member = None
+			for guild in client.guilds:
+				try:
+					member = await guild.fetch_member(userID)
+					break
+				except:
+					continue
+			if member:
+				try:
+					await member.send(f"**{message.author.name}#{message.author.discriminator}** **(**`{member.id}`**)** **has sent a suggestion:**\n{text}")
+				except:
+					pass
 		await oldMessage.edit("Your suggestion has been successfully sent")
 	else:
 		await message.channel.send(f"The syntax is `{prefix}suggest <text>`")
@@ -787,7 +788,10 @@ async def permissionsCommand(message, prefix):
 	userID = userID.replace("!", ""); userID = userID.replace(">", "")
 	
 	targetUser = None
-	for user in message.author.guild.members:
+	try:
+		targetUser = await message.guild.fetch_member(int(userID))
+	except:
+		pass
 		if str(user.id) == userID:
 			targetUser = user
 	if targetUser == None:
@@ -1132,15 +1136,14 @@ async def nicknameCommand(message, prefix):
 			arguments.pop(0); userID = arguments[0]; arguments.pop(0); nickname = ' '.join(arguments)
 			try:
 				userID = int(userID.replace("<", "").replace(">", "").replace("@", "").replace("!", ""))
+				member = await message.guild.fetch_member(userID)
 			except:
 				await message.channel.send("Please mention a valid user!"); return
-			for member in message.author.guild.members:
-				if member.id == userID:
-					try:
-						await member.edit(nick=nickname); addCooldown(message.author.id, "nickname", 5)
-						await message.channel.send(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**"); return
-					except:
-						await message.channel.send("Unable to change user nickname"); return
+			try:
+				await member.edit(nick=nickname); addCooldown(message.author.id, "nickname", 5)
+				await message.channel.send(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**"); return
+			except:
+				await message.channel.send("Unable to change user nickname"); return
 			await message.channel.send("Unable to find user"); return
 		else:
 			await message.channel.send(f"The syntax is `{prefix}nickname <user> <nickname>`")
@@ -1364,10 +1367,11 @@ def generateColor(colorCode):
 
 async def sendUserMessage(userID, message):
 	for guild in client.guilds:
-		for member in guild.members:
-			if str(member.id) == userID:
-				await member.send(message)
-				return
+		try:
+			member = await guild.fetch_member(int(userID))
+			await member.send(message); return
+		except:
+			continue
 
 async def on_message(message):
 	try:
@@ -1420,18 +1424,20 @@ async def on_message(message):
 		elif "Interaction is unknown" in str(error):
 			await message.channel.send("That interaction is already used!"); return
 
-		sentUsers = []; escapedCharacter = '\`'
-		for guild in client.guilds:
-			for member in guild.members:
-				if member.id in variables.messageManagers:
-					if member.id in sentUsers:
-						continue
-					else:
-						sentUsers.append(member.id)
-					try:
-						await member.send(f"**{message.author.name}#{message.author.discriminator}** (**`{message.author.id}`**) has ran into an error in **{message.author.guild.name}** (**`{message.author.guild.id}`**):\n\n**Message:**\n```\n{message.content}\n```**Error:**\n```\n{str(''.join(traceback.format_exception(error, error, error.__traceback__))).replace('`', escapedCharacter)}\n```")
-					except:
-						pass
+		escapedCharacter = '\`'
+		for userID in variables.messageManagers:
+			member = None
+			for guild in client.guilds:
+				try:
+					member = await guild.fetch_member(userID)
+					break
+				except:
+					continue
+			if member:
+				try:
+					await member.send(f"**{message.author.name}#{message.author.discriminator}** (**`{message.author.id}`**) has ran into an error in **{message.author.guild.name}** (**`{message.author.guild.id}`**):\n\n**Message:**\n```\n{message.content}\n```**Error:**\n```\n{str(''.join(traceback.format_exception(error, error, error.__traceback__))).replace('`', escapedCharacter)}\n```")
+				except:
+					pass
 
 		embed = discord.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=discord.Color.red(), timestamp=datetime.datetime.utcnow())
 		embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
