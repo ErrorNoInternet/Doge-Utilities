@@ -33,8 +33,11 @@ try:
 except:
 	startTime = time.time(); lastCommand = time.time()
 	ownerObject = None; mathVariables = {}
+	requiredIntents = discord.Intents.default()
+	requiredIntents.members = True
 	client = discord.AutoShardedClient(
 		shard_count=variables.shardCount,
+		intents=requiredIntents,
 	)
 
 if not os.path.exists("databases"):
@@ -1398,6 +1401,9 @@ async def on_message(message):
 			lastCommand.write(str(round(time.time()))); lastCommand.close()
 		else:
 			return
+		
+		if message.author not in message.guild.members:
+			message.guild.members.append(message.author)
 
 		for command in commandList:
 			callCommand = False
