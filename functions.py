@@ -678,13 +678,13 @@ async def autoroleCommand(message, prefix):
 			autoroleDatabase[message.guild.id] = roleList; roleString = ""
 			for role in roleList:
 				roleString += "<@&" + role + "> "
-			await message.channel.send(f"This server's autorole has been changed to {roleString}")
+			await message.channel.send(embed=discord.Embed(title="Autorole", description=f"This server's autorole has been changed to {roleString}", color=variables.embedColor))
 		else:
 			try:
 				roleList = autoroleDatabase[message.guild.id]; roleString = ""
 				for role in roleList:
 					roleString += "<@&" + role + "> "
-				await message.channel.send(f"This server's autorole is {roleString}")
+				await message.channel.send(embed=discord.Embed(title="Autorole", description=f"This server's autorole is {roleString}", color=variables.embedColor))
 			except:
 				await message.channel.send(f"This server does not have autorole setup")
 	else:
@@ -977,7 +977,7 @@ async def wideCommand(message, prefix):
 		arguments.pop(0); newText = ""; text = " ".join(arguments)
 		for letter in text:
 			newText += letter + " "
-		await message.channel.send(newText)
+		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}wide <text>`")
 	addCooldown(message.author.id, "wide", 5)
@@ -994,7 +994,7 @@ async def unwideCommand(message, prefix):
 			else:
 				spaceCharacter = False
 				newText += letter
-		await message.channel.send(newText)
+		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}unwide <text>`")
 	addCooldown(message.author.id, "unwide", 5)
@@ -1005,7 +1005,7 @@ async def spoilerCommand(message, prefix):
 		arguments.pop(0); newText = ""; text = " ".join(arguments)
 		for letter in text:
 			newText += "||" + letter + "||"
-		await message.channel.send(newText)
+		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}spoiler <text>`")
 	addCooldown(message.author.id, "spoiler", 5)
@@ -1026,7 +1026,7 @@ async def cringeCommand(message, prefix):
 					newText += letter.upper()
 				else:
 					newText += letter.lower()
-		await message.channel.send(newText)
+		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}cringe <text>`")
 	addCooldown(message.author.id, "cringe", 5)
@@ -1035,7 +1035,7 @@ async def reverseCommand(message, prefix):
 	arguments = message.content.split(" ")
 	if len(arguments) > 1:
 		arguments.pop(0); newText = ""; text = " ".join(arguments)
-		newText = text[::-1]; await message.channel.send(newText)
+		newText = text[::-1]; await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}reverse <text>`")
 	addCooldown(message.author.id, "reverse", 5)
@@ -1057,7 +1057,7 @@ async def corruptCommand(message, prefix):
 					punctuation = random.choice([True, False, False, False, False])
 					if punctuation:
 						newText += string.punctuation[random.randint(0, len(string.punctuation) - 1)]
-		await message.channel.send(newText)
+		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}reverse <text>`")
 	addCooldown(message.author.id, "corrupt", 5)
