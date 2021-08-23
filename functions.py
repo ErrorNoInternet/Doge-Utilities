@@ -32,7 +32,7 @@ try:
 	startTime
 except:
 	startTime = time.time(); lastCommand = time.time()
-	ownerObject = None; mathVariables = {}
+	mathVariables = {}
 	requiredIntents = discord.Intents.default()
 	requiredIntents.members = True
 	client = discord.AutoShardedClient(
