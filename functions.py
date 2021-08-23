@@ -275,7 +275,7 @@ async def testsCommand(message, prefix):
 				description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
 		elif name == "Task Threads":
 			try:
-				if threading.active_count() >= 5:
+				if threading.active_count() >= 4:
 					description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
 				else:
 					description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
