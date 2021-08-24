@@ -590,7 +590,7 @@ async def executeCommand(message, prefix):
 
 					output = stdout.getvalue()
 			except Exception as error:
-				output = str(error)
+				output = "`" + str(error) + "`"
 			
 			output = output.replace(os.getenv("TOKEN"), "<token>")
 			segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
