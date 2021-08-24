@@ -1,4 +1,5 @@
 import discord
+import variables
 import functions
 
 async def autoCount(channelID):
