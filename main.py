@@ -12,6 +12,9 @@ serverChannels = {}; serverRoles = {}
 if not os.path.exists("last-command"):
 	file = open("last-command", "w+")
 	file.write("0"); file.close()
+if not os.path.exists("blacklist.json"):
+	file = open("blacklist.json", "w+")
+	file.write("[]"); file.close()
 
 if os.getenv("TOKEN") == None:
 	print("Unable to load TOKEN variable"); exit()

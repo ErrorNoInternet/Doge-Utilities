@@ -1,6 +1,7 @@
 import os
 import io
 import sys
+import json
 import html
 import pytz
 import time
@@ -115,6 +116,7 @@ def reloadData():
 		os,
 		io,
 		sys,
+		json,
 		html,
 		pytz,
 		time,
@@ -1235,6 +1237,56 @@ async def smileyCommand(message, prefix):
 	if prefix == "=" or prefix == ";":
 		await message.channel.send(f"**{prefix}D**")
 
+async def blacklistCommand(message, prefix):
+	if message.author.id == variables.botOwner:
+		arguments = message.content.split(" ")
+		if len(arguments) >= 2:
+			if arguments[1] == "list":
+				blacklistedUsers = []
+				blacklistFile = open("blacklist.json", "r"); rawArray = json.load(blacklistFile); blacklistFile.close()
+				for user in rawArray:
+					blacklistedUsers.append(str(user))
+				embed = discord.Embed(title="Blacklisted Users", description="\n".join(blacklistedUsers) if "\n".join(blacklistedUsers) != "" else "There are no blacklisted users", color=variables.embedColor)
+				await message.channel.send(embed=embed)
+			if arguments[1] == "add":
+				if len(arguments) == 3:
+					try:
+						userID = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
+					except:
+						await message.channel.send("Please enter a valid user"); return
+					blacklistFile = open("blacklist.json", "r")
+					blacklistedUsers = json.load(blacklistFile); blacklistFile.close()
+					blacklistedUsers.append(userID)
+					blacklistFile = open("blacklist.json", "w")
+					json.dump(blacklistedUsers, blacklistFile)
+					blacklistFile.close()
+					await message.channel.send("Successfully added user to blacklist")
+				else:
+					await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+			if arguments[1] == "remove":
+				if len(arguments) == 3:
+					try:
+						userID = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
+					except:
+						await message.channel.send("Please enter a valid user"); return
+					blacklistFile = open("blacklist.json", "r")
+					blacklistedUsers = json.load(blacklistFile)
+					blacklistFile.close()
+					try:
+						blacklistedUsers.remove(userID)
+					except:
+						pass
+					blacklistFile = open("blacklist.json", "w")
+					json.dump(blacklistedUsers, blacklistFile)
+					blacklistFile.close()
+					await message.channel.send("Successfully removed user from blacklist")
+				else:
+					await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+		else:
+			await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+	else:
+		await message.add_reaction("🚫")
+
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
 	try:
@@ -1426,6 +1478,12 @@ async def on_message(message):
 		if message.author not in message.guild.members:
 			message.guild.members.append(message.author)
 
+		blacklistFile = open("blacklist.json", "r")
+		blacklistedUsers = json.load(blacklistFile)
+		blacklistFile.close()
+		if message.author.id in blacklistedUsers:
+			await message.reply("You're banned from using Doge Utilities"); return
+
 		for command in commandList:
 			callCommand = False
 			if len(command.aliases) > 0:
@@ -1469,12 +1527,13 @@ async def on_message(message):
 		embed = discord.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=discord.Color.red(), timestamp=datetime.datetime.utcnow())
 		embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
 
-hiddenCommands = ["execute;", "reload", "guilds", "D"]
+hiddenCommands = ["execute;", "reload", "guilds", "D", "blacklist"]
 commandList = [
+	Command("D", [], smileyCommand, "D", "=D"),
 	Command("execute;", [], executeCommand, "execute;<code>", "System Command"),
 	Command("reload", [], reloadCommand, "reload", "System Command"),
 	Command("guilds", ["servers"], guildsCommand, "guilds", "System Command"),
-	Command("D", [], smileyCommand, "D", "=D"),
+	Command("blacklist", [], blacklistCommand, "blacklist <add/remove/list>", "System Command"),
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
 	Command("ping", ["pong"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
