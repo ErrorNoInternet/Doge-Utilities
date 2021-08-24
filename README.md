@@ -25,6 +25,7 @@ cd Doge-Utilities && pip install -r requirements.txt && python3 main.py
 
 ## Links
 [Invite Link](https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&&scope=bot)\
+[Discord Server](https://discord.gg/3Tp7R8FUsC)\
 [Description](https://github.com/ErrorNoInternet/Doge-Utilities/blob/main/DESCRIPTION.md)\
 [Upvote Bot](https://top.gg/bot/854965721805226005/vote)\
 [Bot Creator](https://discord.com/users/531392146767347712)
