@@ -1229,6 +1229,9 @@ async def guildsCommand(message, prefix):
 	if message.author.id == variables.botOwner:
 		await message.channel.send(str(len(client.guilds)))
 
+async def smileyCommand(message, prefix):
+	await message.channel.send("=D")
+
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
 	try:
@@ -1463,11 +1466,12 @@ async def on_message(message):
 		embed = discord.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=discord.Color.red(), timestamp=datetime.datetime.utcnow())
 		embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
 
-hiddenCommands = ["execute;", "reload", "guilds"]
+hiddenCommands = ["execute;", "reload", "guilds", "D"]
 commandList = [
 	Command("execute;", [], executeCommand, "execute;<code>", "System Command"),
 	Command("reload", [], reloadCommand, "reload", "System Command"),
 	Command("guilds", ["servers"], guildsCommand, "guilds", "System Command"),
+	Command("D", [], smileyCommand, "D", "=D")
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
 	Command("ping", ["pong"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
