@@ -752,15 +752,23 @@ async def lookupCommand(message, prefix):
 				await message.channel.send("Please provide a valid user ID")
 				return
 		badges = badges[:-2]; badges = badges.replace("None, ", "")
-		botProfile = ""
+		botValue = False
 		try:
-			botValue = response['bot']
-			if botValue == True:
-				botProfile = "(**Bot**)"
+			botValue = response["bot"]
 		except:
 			pass
-		outputText = f"**User ID:** `{response['id']}`\n**Discord:** `{response['username']}#{response['discriminator']}` {botProfile}\n**Creation Time:** <t:{round(((int(response['id']) >> 22) + 1420070400000) / 1000)}:R>\n**Public Flags:** `{response['public_flags']}` ({badges})"
-		embed = discord.Embed(title="User Profile", description=outputText, color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
+		systemValue = False
+		try:
+			systemValue = response["system"]
+		except:
+			pass
+		embed = discord.Embed(color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
+		embed.add_field(name="User ID", value=f"`{response['id']}`")
+		embed.add_field(name="Discord", value=f"`{response['username']}#{response['discriminator']}`")
+		embed.add_field(name="Creation Time", value=f"<t:{round(((int(response['id']) >> 22) + 1420070400000) / 1000)}:R>")
+		embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` ({badges})")
+		embed.add_field(name="Bot User", value=f"`{botValue}`")
+		embed.add_field(name="System User", value=f"`{systemValue}`")
 
 		if response['avatar'] == None:
 			avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png"
@@ -987,7 +995,7 @@ async def wideCommand(message, prefix):
 		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}wide <text>`")
-	addCooldown(message.author.id, "wide", 5)
+	addCooldown(message.author.id, "wide", 3)
 
 async def unwideCommand(message, prefix):
 	arguments = message.content.split(" ")
@@ -1004,7 +1012,7 @@ async def unwideCommand(message, prefix):
 		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}unwide <text>`")
-	addCooldown(message.author.id, "unwide", 5)
+	addCooldown(message.author.id, "unwide", 3)
 
 async def spoilerCommand(message, prefix):
 	arguments = message.content.split(" ")
@@ -1015,7 +1023,7 @@ async def spoilerCommand(message, prefix):
 		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}spoiler <text>`")
-	addCooldown(message.author.id, "spoiler", 5)
+	addCooldown(message.author.id, "spoiler", 3)
 
 async def cringeCommand(message, prefix):
 	arguments = message.content.split(" ")
@@ -1036,7 +1044,7 @@ async def cringeCommand(message, prefix):
 		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}cringe <text>`")
-	addCooldown(message.author.id, "cringe", 5)
+	addCooldown(message.author.id, "cringe", 3)
 
 async def reverseCommand(message, prefix):
 	arguments = message.content.split(" ")
@@ -1045,7 +1053,7 @@ async def reverseCommand(message, prefix):
 		newText = text[::-1]; await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}reverse <text>`")
-	addCooldown(message.author.id, "reverse", 5)
+	addCooldown(message.author.id, "reverse", 3)
 
 async def corruptCommand(message, prefix):
 	arguments = message.content.split(" ")
@@ -1067,7 +1075,7 @@ async def corruptCommand(message, prefix):
 		await message.channel.send(newText.replace("@everyone", "everyone"))
 	else:
 		await message.channel.send(f"The syntax is `{prefix}reverse <text>`")
-	addCooldown(message.author.id, "corrupt", 5)
+	addCooldown(message.author.id, "corrupt", 3)
 
 async def colorCommand(message, prefix):
 	arguments = message.content.split(" ")
