@@ -1228,9 +1228,12 @@ async def dogeCommand(message, prefix):
 async def guildsCommand(message, prefix):
 	if message.author.id == variables.botOwner:
 		await message.channel.send(str(len(client.guilds)))
+	else:
+		await message.add_reaction("🚫")
 
 async def smileyCommand(message, prefix):
-	await message.channel.send("=D")
+	if prefix == "=" or prefix == ";":
+		await message.channel.send(f"**{prefix}D**")
 
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
