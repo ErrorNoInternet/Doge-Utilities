@@ -384,6 +384,10 @@ async def statusCommand(message, prefix):
 	await message.channel.send(embed=embed)
 	addCooldown(message.author.id, "status", 5)
 
+async def supportCommand(message, prefix):
+	embed = discord.Embed(title="Support Server", description=f"You can join Doge Utilities's official server [here](https://discord.gg/3Tp7R8FUsC)", color=variables.embedColor)
+	await message.channel.send(embed=embed)
+
 async def versionCommand(message, prefix):
 	fileSize = 0
 	for object in os.listdir():
@@ -1467,6 +1471,7 @@ commandList = [
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
 	Command("ping", ["pong"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
+	Command("support", [], supportCommand, "support", "Display the official Discord server for Doge"),
 	Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
 	Command("source", ["src"], sourceCommand, "source", "Display a link to Doge Utilities' code"),
 	Command("vote", ["upvote"], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
