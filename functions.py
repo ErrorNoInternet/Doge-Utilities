@@ -408,15 +408,15 @@ async def inviteCommand(message, prefix):
 	result = await client.wait_for("button_click", check = lambda item: item.component.label == "Leave Server")
 	if result.channel == message.channel:
 		if result.author == message.author:
-			await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="Are you sure you want me to leave this server? Please press the button again to confirm.")
+			await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="Are you sure you want me to leave this server? Please press the button again to confirm.")
 			result = await client.wait_for("button_click", check = lambda item: item.component.label == "Leave Server")
 			if result.channel == message.channel:
 				if result.author == message.author:
 					if result.author == message.guild.owner:
-						await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="Leaving server...")
+						await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="Leaving server...")
 						await message.guild.leave()
 		else:
-			await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="You are not the sender of the command!")
+			await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="You are not the sender of the command!")
 
 async def prefixCommand(message, prefix):
 	newPrefix = message.content.split(" ")
@@ -436,13 +436,13 @@ async def prefixCommand(message, prefix):
 			result = await client.wait_for("button_click")
 			if result.message.id == oldMessage.id:
 				if result.component.label == "No":
-					await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="Operation cancelled")
+					await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="Operation cancelled")
 				else:
 					prefixDatabase[message.guild.id] = newPrefix
 					await oldMessage.edit(content=f"This server's prefix has been set to `{newPrefix}`", components=[])
-					await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content=f"Successfully changed server prefix")
+					await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content=f"Successfully changed server prefix")
 			else:
-				await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="You are not the sender of the command!")
+				await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="You are not the sender of the command!")
 		else:
 			await message.channel.send(f"The syntax is `{prefix}prefix <new prefix>`")
 	else:
@@ -555,7 +555,7 @@ async def randomCommand(message, prefix):
 				await oldMessage.edit(content=f"Your random number is **{randomNumber}**")
 				await result.respond(content=f"Successfully generated a new number ({5 - uses} {displayText} left)")
 			else:
-				await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="You are not the sender of this command!")
+				await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="You are not the sender of this command!")
 	await oldMessage.edit(components=[[discord_components.Button(style=discord_components.ButtonStyle.gray, label=buttonText, disabled=True)]])
 
 async def executeCommand(message, prefix):
@@ -972,12 +972,12 @@ async def clearCommand(message, prefix):
 			if result.channel == message.channel:
 				if result.author == message.author:
 					if result.component.label == "No":
-						await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="Operation cancelled")
+						await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="Operation cancelled")
 						return
 					else:
-						await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content=f"Deleting more than 500 messages in this channel...")
+						await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content=f"Deleting more than 500 messages in this channel...")
 				else:
-					await result.respond(type=discord_components.InteractionType.ChannelMessageWithSource, content="You are not the sender of the command!")
+					await result.respond(type=discord_components.Interaction.ChannelMessageWithSource, content="You are not the sender of the command!")
 		try:	
 			await message.channel.purge(limit=count + 1)
 		except:
