@@ -1482,7 +1482,7 @@ async def on_message(message):
 		blacklistedUsers = json.load(blacklistFile)
 		blacklistFile.close()
 		if message.author.id in blacklistedUsers:
-			await message.reply("You're banned from using Doge Utilities"); return
+			await message.reply("You are banned from using Doge Utilities"); return
 
 		for command in commandList:
 			callCommand = False
