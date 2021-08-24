@@ -743,15 +743,18 @@ async def lookupCommand(message, prefix):
 	url = "https://discord.com/api/users/" + userID
 	response = requests.get(url, headers=headers).json()
 	if "10013" not in str(response):
+		try:
+			response["public_flags"]
+		except:
+			await message.channel.send("Please enter a valid user ID"); return
 		badges = ""
 		for flag in variables.publicFlags:
-			try:
-				if response['public_flags'] & int(flag) == int(flag):
-					badges += variables.publicFlags[flag] + ", "
-			except:
-				await message.channel.send("Please provide a valid user ID")
-				return
-		badges = badges[:-2]; badges = badges.replace("None, ", "")
+			if response['public_flags'] & int(flag) == int(flag):
+				if variables.publicFlags[flag] != "None":
+					try:
+						badges += variables.badgeList[variables.publicFlags[flag]]
+					except:
+						raise Exception(f"unable to find badge: {variables.publicFlags[flag]}")
 		botValue = False
 		try:
 			botValue = response["bot"]
@@ -766,7 +769,7 @@ async def lookupCommand(message, prefix):
 		embed.add_field(name="User ID", value=f"`{response['id']}`")
 		embed.add_field(name="Discord", value=f"`{response['username']}#{response['discriminator']}`")
 		embed.add_field(name="Creation Time", value=f"<t:{round(((int(response['id']) >> 22) + 1420070400000) / 1000)}:R>")
-		embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` ({badges})")
+		embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` {badges}")
 		embed.add_field(name="Bot User", value=f"`{botValue}`")
 		embed.add_field(name="System User", value=f"`{systemValue}`")
 

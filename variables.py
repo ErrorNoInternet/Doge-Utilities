@@ -45,4 +45,17 @@ publicFlags = {
 	"131072": "Verified Bot Developer",
 	"262144": "Discord Certified Moderator",
 }
-
+badgeList = {
+	"Discord Employee": "<:DiscordStaff:879666899980546068>",
+	"Discord Partner": "<:DiscordPartner:879668340434534400>",
+	"Bug Hunter Level 1": "<:BugHunter1:879666851448234014>",
+	"Bug Hunter Level 2": "<:BugHunter2:879666866971357224>",
+	"HypeSquad Bravery": "<:HypeSquadBravery:879666945153175612>",
+	"HypeSquad Brilliance": "<:HypeSquadBrilliance:879666956884643861>",
+	"HypeSquad Balance": "<:HypeSquadBalance:879666934717771786>",
+	"HypeSquad Events": "<:HypeSquadEvents:879666970310606848>",
+	"Early Supporter": "<:EarlySupporter:879666916493496400>",
+	"Verified Bot Developer": "<:VerifiedBotDeveloper:879669786550890507>",
+	"Discord Certified Moderator": "<:DiscordModerator:879666882976837654>",
+	"Verified Bot": "<:VerifiedBot:879670687554498591>",
+}
