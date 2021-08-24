@@ -1,3 +1,4 @@
+import discord
 import functions
 
 async def autoCount(channelID):
@@ -17,3 +18,10 @@ async def autoCount(channelID):
 					number = 0
 				await channel.send(number)
 
+async def postAnnouncement(title, text):
+  for guild in functions.client.guilds:
+    if guild.id == 879662689708806154:
+      for channel in guild.channels:
+        if channel.id == 879665441545519134:
+          embed = discord.Embed(title=title, description=text, color=variables.embedColor)
+          await channel.send(embed=embed)
