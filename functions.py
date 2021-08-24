@@ -1471,7 +1471,7 @@ commandList = [
 	Command("execute;", [], executeCommand, "execute;<code>", "System Command"),
 	Command("reload", [], reloadCommand, "reload", "System Command"),
 	Command("guilds", ["servers"], guildsCommand, "guilds", "System Command"),
-	Command("D", [], smileyCommand, "D", "=D")
+	Command("D", [], smileyCommand, "D", "=D"),
 	Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
 	Command("ping", ["pong"], pingCommand, "ping", "Display the bot's current latency"),
 	Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
