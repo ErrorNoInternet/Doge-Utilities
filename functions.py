@@ -1483,6 +1483,9 @@ async def insultsCommand(message, prefix):
 		await message.channel.send(f"The syntax is `{prefix}insults <add/remove/enable/disable/list>`"); return
 
 async def linksCommand(message, prefix):
+	if not message.author.guild_permissions.administrator:
+		await message.channel.send("You do not have permission to use this command"); return
+		
 	arguments = message.content.split(" ")
 	if len(arguments) > 1:
 		if arguments[1] == "enable":
