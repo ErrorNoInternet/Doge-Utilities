@@ -24,7 +24,7 @@ status2 = ["over Discord", "YouTube videos", "over servers", "Dogecoin stocks", 
 status3 = ["music", "jokes", "requests", "port 80", "announcements", "suggestions", "port 443"]
 status4 = ["the Olympics", "NBA", "some servers", "Discord", "a competition"]
 publicFlags = {
-	"1": "Discord Employee"
+	"1": "Discord Employee",
 	"2": "Discord Partner",
 	"4": "HypeSquad Events",
 	"8": "Bug Hunter Level 1",
