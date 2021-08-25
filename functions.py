@@ -803,7 +803,7 @@ async def lookupCommand(message, prefix):
 			if response['public_flags'] & int(flag) == int(flag):
 				if variables.publicFlags[flag] != "None":
 					try:
-						badges += variables.badgeList[variables.publicFlags[flag]]
+						badges += variables.badgeList[variables.publicFlags[flag]] + " "
 					except:
 						raise Exception(f"unable to find badge: {variables.publicFlags[flag]}")
 		botValue = False
