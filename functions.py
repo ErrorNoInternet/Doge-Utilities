@@ -833,7 +833,7 @@ async def lookupCommand(message, prefix):
 		embed.add_field(name="System User", value=f"`{systemValue}`")
 
 		if response['avatar'] == None:
-			avatarURL = "https://cdn.discordapp.com/embed/avatars/0.png"
+			avatarURL = f"https://cdn.discordapp.com/embed/avatars/{int(response['discriminator']) % 5}.png"
 		else:
 			if response['avatar'].startswith("a_"):
 				avatarURL = f"https://cdn.discordapp.com/avatars/{response['id']}/{response['avatar']}.gif?size=512"
