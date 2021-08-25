@@ -78,7 +78,9 @@ async def manageMutedMembers():
 							muteStart = float(value[1])
 							duration = float(value[2])
 						except:
-							del moderationDatabase[key]
+							moderationData = moderationDatabase[key]
+							moderationData.remove(value)
+							moderationDatabase[key] = moderationData
 						if (time.time() / 60) > ((muteStart / 60) + duration):
 							try:
 								muteRole = None; targetGuild = None
@@ -94,13 +96,19 @@ async def manageMutedMembers():
 										await member.remove_roles(muteRole)
 									except:
 										pass
-									del moderationDatabase[key]
+									moderationData = moderationDatabase[key]
+									moderationData.remove(value)
+									moderationDatabase[key] = moderationData
 							except:
-								del moderationDatabase[key]
+								moderationData = moderationDatabase[key]
+								moderationData.remove(value)
+								moderationDatabase[key] = moderationData
 		except Exception as error:
 			print(f"Fatal error in manageMutedMembers: {error}")
 			try:
-				del moderationDatabase[key]
+				moderationData = moderationDatabase[key]
+				moderationData.remove(value)
+				moderationDatabase[key] = moderationData
 			except:
 				pass
 		await asyncio.sleep(10)
