@@ -1704,6 +1704,9 @@ async def sendUserMessage(userID, message):
 			continue
 
 async def on_message_delete(message):
+	if not message.guild:
+		return
+
 	value = True
 	try:
 		value = settingsDatabase[f"snipe|{message.guild.id}"]
