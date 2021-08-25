@@ -124,6 +124,7 @@ except:
 		shard_count=variables.shardCount,
 		intents=requiredIntents,
 	)
+	client.max_messages = 512; snipeList = {}
 	threading.Thread(target=asyncio.run_coroutine_threadsafe, args=(manageMutedMembers(), client.loop, )).start()
 
 async def selectStatus():
@@ -161,6 +162,7 @@ def parseVariables(text):
 	text = text.replace("<amount>", "8")
 	text = text.replace("<nickname>", "Wumpus")
 	text = text.replace("<minutes>", "2")
+	text = text.replace("<enable/disable>", "enable")
 	return text
 
 def reloadData():
@@ -1480,6 +1482,66 @@ async def insultsCommand(message, prefix):
 	else:
 		await message.channel.send(f"The syntax is `{prefix}insults <add/remove/enable/disable/list>`"); return
 
+async def linksCommand(message, prefix):
+	arguments = message.content.split(" ")
+	if len(arguments) > 1:
+		if arguments[1] == "enable":
+			moderationDatabase[f"links.toggle.{message.guild.id}"] = True
+			await message.channel.send("The links filter has been successfully **enabled**")
+		elif arguments[1] == "disable":
+			moderationDatabase[f"links.toggle.{message.guild.id}"] = False
+			await message.channel.send("The links filter has been successfully **disabled**")
+		elif arguments[1] == "status":
+			value = False
+			try:
+				value = moderationDatabase[f"links.toggle.{message.guild.id}"]
+			except:
+				pass
+			await message.channel.send(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
+	else:
+		await message.channel.send(f"The syntax is `{prefix}links <enable/disable>`"); return
+
+async def snipeCommand(message, prefix):
+	arguments = message.content.split(" ")
+	if len(arguments) == 1:
+		try:
+			randomMessage = random.choice(snipeList[message.guild.id])
+			messageAuthor = f"{randomMessage[0]}#{randomMessage[1]}"
+			messageAuthorAvatar = randomMessage[2]; channelName = randomMessage[3]
+			messageSentTime = randomMessage[4]; messageData = randomMessage[5]
+			embed = discord.Embed(description=messageData, color=variables.embedColor, timestamp=messageSentTime)
+			embed.set_author(name=messageAuthor, icon_url=messageAuthorAvatar); embed.set_footer(text=f"Sent in {channelName}")
+			await message.channel.send(embed=embed)
+		except:
+			await message.channel.send("There is nothing to snipe!")
+	elif len(arguments) > 1:
+		command = arguments[1]
+		if command == "enable":
+			if not message.author.guild_permissions.administrator:
+				await message.channel.send("You do not have permission to use this command"); return
+
+			settingsDatabase[f"snipe|{message.guild.id}"] = True
+			await message.channel.send("Snipe has been **enabled** for this server")
+		elif command == "disable":
+			if not message.author.guild_permissions.administrator:
+				await message.channel.send("You do not have permission to use this command"); return
+
+			settingsDatabase[f"snipe|{message.guild.id}"] = False
+			await message.channel.send("Snipe has been **disabled** for this server")
+		elif command == "clear":
+			if not message.author.guild_permissions.administrator:
+				await message.channel.send("You do not have permission to use this command"); return
+
+			snipeList[message.guild.id] = []
+			await message.channel.send("The snipe list for this server has been successfully cleared")
+		elif command == "status":
+			value = False
+			try:
+				value = settingsDatabase[f"snipe|{message.guild.id}"]
+			except:
+				pass
+			await message.channel.send(f"Snipe is currently **{'enabled' if value else 'disabled'}** for this server")
+
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
 	try:
@@ -1642,6 +1704,39 @@ async def sendUserMessage(userID, message):
 		except:
 			continue
 
+async def on_message_delete(message):
+	value = False
+	try:
+		value = settingsDatabase[f"snipe|{message.guild.id}"]
+	except:
+		pass
+	if not value:
+		return
+
+	try:
+		snipes = snipeList[message.guild.id]
+	except:
+		snipes = []
+		snipeList[message.guild.id] = []
+	while len(snipes) >= 10:
+		randomSnipe = random.choice(snipes)
+		snipes.remove(randomSnipe)
+
+	messageData = message.content
+	if messageData == "":
+		if len(message.embeds) > 0:
+			messageData = message.embeds[0].description
+	if messageData != "":
+		snipes.append([
+			message.author.name,
+			message.author.discriminator,
+			message.author.avatar_url,
+			message.channel.name,
+			datetime.datetime.utcnow(),
+			messageData,
+		])
+		snipeList[message.guild.id] = snipes
+
 async def on_message(message):
 	try:
 		if message.author.bot:
@@ -1664,6 +1759,16 @@ async def on_message(message):
 						if word.lower() in message.content.lower():
 							await message.delete()
 							await message.author.send("Please do not use that word!")
+							return
+			except:
+				pass
+			try:
+				if moderationDatabase[f"links.toggle.{message.guild.id}"]:
+					linkRegexes = ["http://", "https://", "www.", "discord.gg/"]
+					for regex in linkRegexes:
+						if regex in message.content.lower():
+							await message.delete()
+							await message.author.send("Please do not put links in your message!")
 							return
 			except:
 				pass
@@ -1768,6 +1873,7 @@ commandList = [
 	Command("date-epoch", [], dateEpochCommand, "date-epoch <date>", "Covert a date into an epoch timestamp"),
 	Command("hash", [], hashCommand, "hash <type> <text>", "Hash the text object with the specified type"),
 	Command("meme", [], memeCommand, "meme", "Search for a meme on Reddit and display it as an embed"),
+	Command("snipe", [], snipeCommand, "snipe <enable/disable>", "Restore and bring deleted messages back to life"),
 	Command("calculate", ["calc"], calculateCommand, "calculate <expression>", "Calculate the specified math expression"),
 	Command("color", ["colour"], colorCommand, "color <color code>", "Display information about the color code"),
 	Command("permissions", ["perms"], permissionsCommand, "permissions <user>", "Display the permissions for the specified user"),
@@ -1777,6 +1883,7 @@ commandList = [
 	Command("currency", ["cur"], currencyCommand, "currency <amount> <currency> <currency>", "Convert currencies"),
 	Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
 	Command("mute", [], muteCommand, "mute <user> <minutes>", "Mute the specified member for the specified duration"),
-	Command("unmute", [], unmuteCommand, "unmute <user>", "Unmute the specified member on the current guild"),
 	Command("insults", [], insultsCommand, "insults <add/remove/enable/disable/list>", "Modify the insults filter"),
+	Command("unmute", [], unmuteCommand, "unmute <user>", "Unmute the specified member on the current guild"),
+	Command("links", [], linksCommand, "links <enable/disable>", "Enable or disable the link/advertisement filter"),
 ]

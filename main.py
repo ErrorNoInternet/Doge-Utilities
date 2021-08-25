@@ -107,6 +107,14 @@ async def on_member_join(member):
 async def on_message(message):
 	await functions.on_message(message)
 
+@functions.client.event
+async def on_message_delete(message):
+	await functions.on_message_delete(message)
+
+@functions.client.event
+async def on_message_edit(message, newMessage):
+	await functions.on_message_delete(message)
+
 functions.client.topggpy = topgg.DBLClient(
 	functions.client,
 	os.getenv("TOPGG_TOKEN"),
@@ -115,4 +123,3 @@ functions.client.topggpy = topgg.DBLClient(
 )
 webServer.start("Doge Utilities")
 functions.client.run(os.getenv("TOKEN"))
-
