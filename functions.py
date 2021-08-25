@@ -1440,6 +1440,12 @@ async def insultsCommand(message, prefix):
 				moderationDatabase[f"insults.list.{message.guild.id}"] = []
 			embed = discord.Embed(title="Insults List", description="There are no swear words configured for your server" if insultsData == [] else '\n'.join(insultsData), color=variables.embedColor)
 			await message.channel.send(embed=embed)
+		elif arguments[1] == "filter" or arguments[1] == "status":
+			try:
+				currentStatus = moderationDatabase[f"insults.toggle.{message.guild.id}"]
+			except:
+				currentStatus = False
+			await message.channel.send(f"The insults filter is current **{'enabled' if currentStatus else 'disabled'}**")
 		elif arguments[1] == "enable":
 			moderationDatabase[f"insults.toggle.{message.guild.id}"] = True
 			await message.channel.send("The insults filter has been successfully **enabled**")
