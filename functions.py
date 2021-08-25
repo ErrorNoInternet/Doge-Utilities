@@ -1656,16 +1656,17 @@ async def on_message(message):
 		else:
 			return
 
-		try:
-			if moderationDatabase[f"insults.toggle.{message.guild.id}"]:
-				insults = moderationDatabase[f"insults.list.{message.guild.id}"]
-				for word in insults:
-					if word.lower() in message.content.lower():
-						await message.delete()
-						await message.author.send("Please do not use that word!")
-						return
-		except:
-			pass
+		if not message.author.guild_permissions.administrator:
+			try:
+				if moderationDatabase[f"insults.toggle.{message.guild.id}"]:
+					insults = moderationDatabase[f"insults.list.{message.guild.id}"]
+					for word in insults:
+						if word.lower() in message.content.lower():
+							await message.delete()
+							await message.author.send("Please do not use that word!")
+							return
+			except:
+				pass
 
 		if "<@" in message.content and str(client.user.id) in message.content:
 			await message.channel.send(f"My prefix here is `{prefix}`")
