@@ -1660,7 +1660,7 @@ async def on_message(message):
 			if moderationDatabase[f"insults.toggle.{message.guild.id}"]:
 				insults = moderationDatabase[f"insults.list.{message.guild.id}"]
 				for word in insults:
-					if word.lower() in message.content:
+					if word.lower() in message.content.lower():
 						await message.delete()
 						await message.author.send("Please do not use that word!")
 						return
