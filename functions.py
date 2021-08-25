@@ -1397,7 +1397,6 @@ async def muteCommand(message, prefix):
 			member = await message.guild.fetch_member(userID)
 		except:
 			await message.channel.send("Please enter a valid user ID"); return
-
 	if len(arguments) == 2:
 		try:
 			await member.add_roles(muteRole)
@@ -1414,10 +1413,9 @@ async def muteCommand(message, prefix):
 		except:
 			moderationDatabase["mute." + str(message.guild.id)] = []
 			moderationData = moderationDatabase["mute." + str(message.guild.id)]
-		moderationData.append([userID, time.time(), duration])
-		moderationDatabase["mute." + str(message.guild.id)] = moderationData
 		try:
-			await member.add_roles(muteRole)
+			await member.add_roles(muteRole); moderationData.append([userID, time.time(), duration])
+			moderationDatabase["mute." + str(message.guild.id)] = moderationData
 		except:
 			await message.channel.send(f"Unable to mute **{member}**"); return
 		await message.channel.send(f"Successfully muted **{member}** for **{duration} {'minute' if round(duration) == 1 else 'minutes'}**")
