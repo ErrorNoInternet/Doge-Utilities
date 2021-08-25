@@ -803,7 +803,7 @@ async def lookupCommand(message, prefix):
 			if response['public_flags'] & int(flag) == int(flag):
 				if variables.publicFlags[flag] != "None":
 					try:
-						badges += variables.badgeList[variables.publicFlags[flag]] + " "
+						badges += variables.badgeList[variables.publicFlags[flag]]
 					except:
 						raise Exception(f"unable to find badge: {variables.publicFlags[flag]}")
 		botValue = False
@@ -818,7 +818,7 @@ async def lookupCommand(message, prefix):
 			pass
 		embed = discord.Embed(color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
 		embed.add_field(name="User ID", value=f"`{response['id']}`")
-		embed.add_field(name="Discord Tag", value=f"`{response['username']}#{response['discriminator']}`")
+		embed.add_field(name="Tag", value=f"`{response['username']}#{response['discriminator']}`")
 		embed.add_field(name="Creation Time", value=f"<t:{round(((int(response['id']) >> 22) + 1420070400000) / 1000)}:R>")
 		embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` {badges}")
 		embed.add_field(name="Bot User", value=f"`{botValue}`")
@@ -1631,7 +1631,6 @@ async def on_message(message):
 					embed = discord.Embed(title="Command Cooldown", description=cooldownString, color=variables.embedColor)
 					await message.channel.send(embed=embed); return
 				await command.function(message, prefix); return
-
 	except Exception as error:
 		if "50035" in str(error):
 			await message.channel.send("Message too long to be sent!"); return
