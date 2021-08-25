@@ -12,6 +12,7 @@ import base64
 import string
 import psutil
 import random
+import asyncio
 import discord
 import hashlib
 import textwrap
@@ -29,24 +30,13 @@ from PIL import Image
 import discord_components
 from discord.ext import buttons
 
-try:
-	startTime
-except:
-	startTime = time.time(); lastCommand = time.time()
-	mathVariables = {}
-	requiredIntents = discord.Intents.default()
-	requiredIntents.members = True
-	client = discord.AutoShardedClient(
-		shard_count=variables.shardCount,
-		intents=requiredIntents,
-	)
-
 if not os.path.exists("databases"):
 	os.mkdir("databases")
 userCooldowns = {}
 prefixDatabase = sqlitedict.SqliteDict("databases/prefixDatabase.sql", autocommit=True)
 autoroleDatabase = sqlitedict.SqliteDict("databases/autoroleDatabase.sql", autocommit=True)
 settingsDatabase = sqlitedict.SqliteDict("databases/settingsDatabase.sql", autocommit=True)
+moderationDatabase = sqlitedict.SqliteDict("databases/moderationDatabase.sql", autocommit=True)
 
 class Command(object):
 	def __init__(self, name, aliases, function, usage, description):
@@ -74,6 +64,59 @@ class CustomPager(buttons.Paginator):
 			await self.page.clear_reactions()
 		except discord.HTTPException:
 			pass
+
+async def manageMutedMembers():
+	await asyncio.sleep(10)
+	while True:
+		try:
+			for key in moderationDatabase.keys():
+				if key.startswith("mute."):
+					for value in moderationDatabase[key]:
+						try:
+							guildID = int(key.split(".")[1])
+							userID = int(value[0])
+							muteStart = float(value[1])
+							duration = float(value[2])
+						except:
+							del moderationDatabase[key]
+						if (time.time() / 60) > ((muteStart / 60) + duration):
+							try:
+								muteRole = None; targetGuild = None
+								for guild in client.guilds:
+									if guild.id == guildID:
+										targetGuild = guild
+								member = await targetGuild.fetch_member(userID)
+								for role in targetGuild.roles:
+									if "mute" in role.name.lower():
+										muteRole = role
+								if muteRole:
+									try:
+										await member.remove_roles(muteRole)
+									except:
+										pass
+									del moderationDatabase[key]
+							except:
+								del moderationDatabase[key]
+		except Exception as error:
+			print(f"Fatal error in manageMutedMembers: {error}")
+			try:
+				del moderationDatabase[key]
+			except:
+				pass
+		await asyncio.sleep(10)
+
+try:
+	startTime
+except:
+	startTime = time.time()
+	lastCommand = time.time(); mathVariables = {}
+	requiredIntents = discord.Intents.default()
+	requiredIntents.members = True
+	client = discord.AutoShardedClient(
+		shard_count=variables.shardCount,
+		intents=requiredIntents,
+	)
+	threading.Thread(target=asyncio.run_coroutine_threadsafe, args=(manageMutedMembers(), client.loop, )).start()
 
 async def selectStatus():
 	clientStatus = discord.Status.online; statusType = random.choice(variables.statusTypes)
@@ -109,6 +152,7 @@ def parseVariables(text):
 	text = text.replace("<currency>", "usd")
 	text = text.replace("<amount>", "8")
 	text = text.replace("<nickname>", "Wumpus")
+	text = text.replace("<minutes>", "2")
 	return text
 
 def reloadData():
@@ -127,6 +171,7 @@ def reloadData():
 		string,
 		psutil,
 		random,
+		asyncio,
 		discord,
 		hashlib,
 		textwrap,
@@ -1253,7 +1298,7 @@ async def blacklistCommand(message, prefix):
 					try:
 						userID = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
 					except:
-						await message.channel.send("Please enter a valid user"); return
+						await message.channel.send("Please enter a valid user ID"); return
 					blacklistFile = open("blacklist.json", "r")
 					blacklistedUsers = json.load(blacklistFile); blacklistFile.close()
 					blacklistedUsers.append(userID)
@@ -1268,7 +1313,7 @@ async def blacklistCommand(message, prefix):
 					try:
 						userID = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
 					except:
-						await message.channel.send("Please enter a valid user"); return
+						await message.channel.send("Please enter a valid user ID"); return
 					blacklistFile = open("blacklist.json", "r")
 					blacklistedUsers = json.load(blacklistFile)
 					blacklistFile.close()
@@ -1286,6 +1331,90 @@ async def blacklistCommand(message, prefix):
 			await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
 	else:
 		await message.add_reaction("🚫")
+
+async def memeCommand(message, prefix):
+	response = requests.get("https://meme-api.herokuapp.com/gimme").json()
+	description = f"Posted by **{response['author']}** in **{response['subreddit']}** (**{response['ups']}** upvotes)"
+	embed = discord.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embedColor)
+	embed.set_image(url=response["url"]); addCooldown(message.author.id, "meme", 5); await message.channel.send(embed=embed)
+
+async def unmuteCommand(message, prefix):
+	if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator:
+		pass
+	else:
+		await message.channel.send("You do not have permission to use this command"); return
+
+	arguments = message.content.split(" ")
+	if len(arguments) == 2:
+		try:
+			userID = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
+			member = await message.guild.fetch_member(userID)
+		except:
+			await message.channel.send("Please enter a valid user ID"); return
+		muteRole = None; exists = False
+		for role in message.guild.roles:
+			if "mute" in role.name.lower():
+				muteRole = role; exists = True
+		if exists:
+			try:
+				await member.remove_roles(muteRole)
+			except:
+				pass
+		await message.channel.send(f"Successfully unmuted **{member}**")
+	else:
+		await message.channel.send(f"The syntax is `{prefix}unmute <user>`"); return
+
+async def muteCommand(message, prefix):
+	if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator:
+		pass
+	else:
+		await message.channel.send("You do not have permission to use this command"); return
+
+	arguments = message.content.split(" ")
+	if len(arguments) >= 2:
+		muteRole = None; exists = False
+		for role in message.guild.roles:
+			if "mute" in role.name.lower():
+				muteRole = role; exists = True
+		if not exists:
+			await setupMutedCommand(message, prefix)
+		muteRole = None; exists = False
+		for role in message.guild.roles:
+			if "mute" in role.name.lower():
+				muteRole = role; exists = True
+		if not exists:
+			await message.channel.send("Unable to find mute role"); return
+		try:
+			userID = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
+			member = await message.guild.fetch_member(userID)
+		except:
+			await message.channel.send("Please enter a valid user ID"); return
+
+	if len(arguments) == 2:
+		try:
+			await member.add_roles(muteRole)
+		except:
+			await message.channel.send(f"Unable to mute **{member}**"); return
+		await message.channel.send(f"Successfully muted **{member}** permanently")
+	elif len(arguments) == 3:
+		try:
+			duration = float(arguments[2])
+		except:
+			await message.channel.send("Please enter a valid duration (in minutes)"); return
+		try:
+			moderationData = moderationDatabase["mute." + str(message.guild.id)]
+		except:
+			moderationDatabase["mute." + str(message.guild.id)] = []
+			moderationData = moderationDatabase["mute." + str(message.guild.id)]
+		moderationData.append([userID, time.time(), duration])
+		moderationDatabase["mute." + str(message.guild.id)] = moderationData
+		try:
+			await member.add_roles(muteRole)
+		except:
+			await message.channel.send(f"Unable to mute **{member}**"); return
+		await message.channel.send(f"Successfully muted **{member}** for **{duration} {'minute' if round(duration) == 1 else 'minutes'}**")
+	else:
+		await message.channel.send(f"The syntax is `{prefix}mute <user> <duration>`"); return
 
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
@@ -1544,8 +1673,8 @@ commandList = [
 	Command("donate", [], donateCommand, "donate", "Donate to the creators of Doge Utilities"),
 	Command("version", ["ver"], versionCommand, "version", "Display the bot's current version"),
 	Command("prefix", ["setprefix", "changeprefix"], prefixCommand, "prefix", "Change the bot's prefix on this server"),
+	Command("doge", ["dog"], dogeCommand, "doge", "D O G E"),
 	Command("invite", ["inv"], inviteCommand, "invite", "Invite this bot to another server"),
-	Command("doge", ["dog"], dogeCommand, "doge", "**D O G E**"),
 	Command("shards", [], shardsCommand, "shards <page>", "View information about Doge's shards"),
 	Command("setup-muted", [], setupMutedCommand, "setup-muted", "Generate a role that mutes members"),
 	Command("setup-banned", [], setupBannedCommand, "setup-banned", "Generate a role that disables access to channels"),
@@ -1566,6 +1695,7 @@ commandList = [
 	Command("base64", ["b64"], base64Command, "base64 <encode/decode> <text>", "Convert the text to/from base64"),
 	Command("date-epoch", [], dateEpochCommand, "date-epoch <date>", "Covert a date into an epoch timestamp"),
 	Command("hash", [], hashCommand, "hash <type> <text>", "Hash the text object with the specified type"),
+	Command("meme", [], memeCommand, "meme", "Search for a meme on Reddit and display it as an embed"),
 	Command("calculate", ["calc"], calculateCommand, "calculate <expression>", "Calculate the specified math expression"),
 	Command("color", ["colour"], colorCommand, "color <color code>", "Display information about the color code"),
 	Command("permissions", ["perms"], permissionsCommand, "permissions <user>", "Display the permissions for the specified user"),
@@ -1574,4 +1704,6 @@ commandList = [
 	Command("nickname", ["nick"], nicknameCommand, "nickname <user> <nickname>", "Change or update a user's nickname"),
 	Command("currency", ["cur"], currencyCommand, "currency <amount> <currency> <currency>", "Convert currencies"),
 	Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
+	Command("mute", [], muteCommand, "mute <user> <minutes>", "Mute the specified member for the specified duration"),
+	Command("unmute", [], unmuteCommand, "unmute <user>", "Unmute the specified member on the current guild"),
 ]
