@@ -1424,6 +1424,58 @@ async def muteCommand(message, prefix):
 	else:
 		await message.channel.send(f"The syntax is `{prefix}mute <user> <duration>`"); return
 
+async def insultsCommand(message, prefix):
+	if message.author.guild_permissions.manage_messages:
+		pass
+	else:
+		await message.channel.send("You do not have permission to use this command"); return
+
+	arguments = message.content.split(" ")
+	if len(arguments) >= 2:
+		if arguments[1] == "list":
+			try:
+				insultsData = moderationDatabase[f"insults.list.{message.guild.id}"]
+			except:
+				insultsData = []
+				moderationDatabase[f"insults.list.{message.guild.id}"] = []
+			embed = discord.Embed(title="Insults List", description="There are no swear words configured for your server" if insultsData == [] else '\n'.join(insultsData), color=variables.embedColor)
+			await message.channel.send(embed=embed)
+		elif arguments[1] == "enable":
+			moderationDatabase[f"insults.toggle.{message.guild.id}"] = True
+			await message.channel.send("The insults filter has been successfully **enabled**")
+		elif arguments[1] == "disable":
+			moderationDatabase[f"insults.toggle.{message.guild.id}"] = False
+			await message.channel.send("The insults filter has been successfully **disabled**")
+		elif arguments[1] == "add":
+			if len(arguments) != 3:
+				await message.channel.send(f"The syntax is `{prefix}insults add <word>`"); return
+			try:
+				insultsData = moderationDatabase[f"insults.list.{message.guild.id}"]
+			except:
+				insultsData = []
+				moderationDatabase[f"insults.list.{message.guild.id}"] = []
+			if len(insultsData) >= 50:
+				await message.channel.send("You have reached the limit of **50 words**"); return
+			insultsData.append(arguments[2])
+			moderationDatabase[f"insults.list.{message.guild.id}"] = insultsData
+			await message.channel.send("Successfully updated the insults filter")
+		elif arguments[1] == "remove" or arguments[1] == "delete":
+			if len(arguments) != 3:
+				await message.channel.send(f"The syntax is `{prefix}insults remove <word>`"); return
+			try:
+				insultsData = moderationDatabase[f"insults.list.{message.guild.id}"]
+			except:
+				insultsData = []
+				moderationDatabase[f"insults.list.{message.guild.id}"] = []
+			try:
+				insultsData.remove(arguments[2])
+			except:
+				await message.channel.send("That word does not exist in the insults filter"); return
+			moderationDatabase[f"insults.list.{message.guild.id}"] = insultsData
+			await message.channel.send("Successfully updated the insults filter")
+	else:
+		await message.channel.send(f"The syntax is `{prefix}insults <add/remove/enable/disable/list>`"); return
+
 async def helpCommand(message, prefix):
 	pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
 	try:
@@ -1600,6 +1652,17 @@ async def on_message(message):
 		else:
 			return
 
+		try:
+			if moderationDatabase[f"insults.toggle.{message.guild.id}"]:
+				insults = moderationDatabase[f"insults.list.{message.guild.id}"]
+				for word in insults:
+					if word.lower() in message.content:
+						await message.delete()
+						await message.author.send("Please do not use that word!")
+						return
+		except:
+			pass
+
 		if "<@" in message.content and str(client.user.id) in message.content:
 			await message.channel.send(f"My prefix here is `{prefix}`")
 			lastCommand = open("last-command", "w")
@@ -1611,9 +1674,6 @@ async def on_message(message):
 			lastCommand.write(str(round(time.time()))); lastCommand.close()
 		else:
 			return
-		
-		if message.author not in message.guild.members:
-			message.guild.members.append(message.author)
 
 		blacklistFile = open("blacklist.json", "r")
 		blacklistedUsers = json.load(blacklistFile)
@@ -1713,4 +1773,5 @@ commandList = [
 	Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
 	Command("mute", [], muteCommand, "mute <user> <minutes>", "Mute the specified member for the specified duration"),
 	Command("unmute", [], unmuteCommand, "unmute <user>", "Unmute the specified member on the current guild"),
+	Command("insults", [], insultsCommand, "insults <add/remove/enable/disable/list>", "Modify the insults filter"),
 ]
