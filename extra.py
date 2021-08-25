@@ -25,4 +25,5 @@ async def postAnnouncement(title, text, mention=False):
       for channel in guild.channels:
         if channel.id == 879665441545519134:
           embed = discord.Embed(title=title, description=text, color=variables.embedColor)
-          await channel.send("<@&879665075642835006>" if mention else "", embed=embed)
+          message = await channel.send("<@&879665075642835006>" if mention else "", embed=embed)
+          await message.publish()
