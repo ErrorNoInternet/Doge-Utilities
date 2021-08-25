@@ -818,7 +818,7 @@ async def lookupCommand(message, prefix):
 			pass
 		embed = discord.Embed(color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
 		embed.add_field(name="User ID", value=f"`{response['id']}`")
-		embed.add_field(name="Discord", value=f"`{response['username']}#{response['discriminator']}`")
+		embed.add_field(name="Discord Tag", value=f"`{response['username']}#{response['discriminator']}`")
 		embed.add_field(name="Creation Time", value=f"<t:{round(((int(response['id']) >> 22) + 1420070400000) / 1000)}:R>")
 		embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` {badges}")
 		embed.add_field(name="Bot User", value=f"`{botValue}`")
