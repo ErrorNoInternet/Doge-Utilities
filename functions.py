@@ -1515,26 +1515,25 @@ async def snipeCommand(message, prefix):
 		except:
 			await message.channel.send("There is nothing to snipe!")
 	elif len(arguments) > 1:
-		command = arguments[1]
-		if command == "enable":
+		if arguments[1] == "enable":
 			if not message.author.guild_permissions.administrator:
 				await message.channel.send("You do not have permission to use this command"); return
 
 			settingsDatabase[f"snipe|{message.guild.id}"] = True
 			await message.channel.send("Snipe has been **enabled** for this server")
-		elif command == "disable":
+		elif arguments[1] == "disable":
 			if not message.author.guild_permissions.administrator:
 				await message.channel.send("You do not have permission to use this command"); return
 
 			settingsDatabase[f"snipe|{message.guild.id}"] = False
 			await message.channel.send("Snipe has been **disabled** for this server")
-		elif command == "clear":
+		elif arguments[1] == "clear":
 			if not message.author.guild_permissions.administrator:
 				await message.channel.send("You do not have permission to use this command"); return
 
 			snipeList[message.guild.id] = []
 			await message.channel.send("The snipe list for this server has been successfully cleared")
-		elif command == "status":
+		elif arguments[1] == "status" or arguments[1] == "filter":
 			value = False
 			try:
 				value = settingsDatabase[f"snipe|{message.guild.id}"]
