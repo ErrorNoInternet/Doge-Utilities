@@ -1491,7 +1491,7 @@ async def linksCommand(message, prefix):
 		elif arguments[1] == "disable":
 			moderationDatabase[f"links.toggle.{message.guild.id}"] = False
 			await message.channel.send("The links filter has been successfully **disabled**")
-		elif arguments[1] == "status":
+		elif arguments[1] == "status" or arguments[1] == "filter":
 			value = False
 			try:
 				value = moderationDatabase[f"links.toggle.{message.guild.id}"]
@@ -1533,7 +1533,7 @@ async def snipeCommand(message, prefix):
 
 			snipeList[message.guild.id] = []
 			await message.channel.send("The snipe list for this server has been successfully cleared")
-		elif arguments[1] == "status" or arguments[1] == "filter":
+		elif arguments[1] == "status":
 			value = False
 			try:
 				value = settingsDatabase[f"snipe|{message.guild.id}"]
