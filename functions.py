@@ -751,7 +751,7 @@ async def autoroleCommand(message, prefix):
 					roleString += "<@&" + role + "> "
 				await message.channel.send(embed=discord.Embed(title="Autorole", description=f"This server's autorole is {roleString}", color=variables.embedColor))
 			except:
-				await message.channel.send(f"This server does not have autorole setup")
+				await message.channel.send(f"This server does not have autorole configured")
 	else:
 		await message.channel.send("You do not have permission to use this command!")
 	addCooldown(message.author.id, "autorole", 5)
