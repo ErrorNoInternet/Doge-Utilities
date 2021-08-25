@@ -1443,7 +1443,7 @@ async def insultsCommand(message, prefix):
 				currentStatus = moderationDatabase[f"insults.toggle.{message.guild.id}"]
 			except:
 				currentStatus = False
-			await message.channel.send(f"The insults filter is current **{'enabled' if currentStatus else 'disabled'}**")
+			await message.channel.send(f"The insults filter is currently **{'enabled' if currentStatus else 'disabled'}**")
 		elif arguments[1] == "enable":
 			moderationDatabase[f"insults.toggle.{message.guild.id}"] = True
 			await message.channel.send("The insults filter has been successfully **enabled**")
