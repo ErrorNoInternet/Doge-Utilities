@@ -31,6 +31,7 @@ import simpleeval
 import sqlitedict
 from PIL import Image
 import discord_components
+from dateutil import parser
 from discord.ext import buttons
 
 if not os.path.exists("databases"):
@@ -1773,7 +1774,7 @@ async def githubCommand(message, prefix):
         embed.add_field(name="License", value=f"{response['license']['name'] if response['license'] != None else 'None'}")
         embed.add_field(name="Size", value=f"{round(response['size']/1000, 2)} MB")
         embed.add_field(name="Branch", value=f"{response['default_branch']}")
-        embed.add_field(name="Forked", value=f"{response['fork']}")
+        embed.add_field(name="Date", value=f"<t:{str(parser.isoparse(response['created_at']).timestamp()).split('.')[0]}:d>")
         embed.add_field(name="Description", value=f"{response['description']}")
         embed.set_thumbnail(url=response["owner"]["avatar_url"])
         await message.channel.send(embed=embed)
@@ -2222,7 +2223,7 @@ commandList = [
     Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
     Command("mute", [], muteCommand, "mute <user> <minutes>", "Mute the specified member for the specified duration"),
     Command("unmute", [], unmuteCommand, "unmute <user>", "Unmute the specified member on the current guild"),
-    Command("github", ["gh", "repo"], githubCommand, "github <repository>", "Display information about a GitHub repository"),
+    Command("github", ["gh", "repo", "git"], githubCommand, "github <repository>", "Display information about a GitHub repository"),
     Command("insults", [], insultsCommand, "insults <add/remove/enable/disable/list>", "Modify the insults filter"),
     Command("links", [], linksCommand, "links <enable/disable>", "Enable or disable the link/advertisement filter"),
     Command("spam", [], spammingCommand, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
