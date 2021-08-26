@@ -173,6 +173,8 @@ def parseVariables(text):
     text = text.replace("<nickname>", "Wumpus")
     text = text.replace("<minutes>", "2")
     text = text.replace("<enable/disable>", "enable")
+    text = text.replace("<item>", "apple")
+    text = text.replace("<repository>", "ErrorNoInternet/Doge-Utilities")
     return text
 
 def reloadData():
@@ -1279,7 +1281,7 @@ async def stackoverflowCommand(message, prefix):
 async def sourceCommand(message, prefix):
     description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)\n"
     response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
-    description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['watchers_count']}**"
+    description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
     embed = discord.Embed(title="Source Code", description=description, color=variables.embedColor)
     embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
     addCooldown(message.author.id, "source", 20)
@@ -1533,7 +1535,7 @@ async def spammingCommand(message, prefix):
                 except:
                     await message.channel.send("Please enter a valid number!"); return
             moderationDatabase[f"spamming.limit.{message.guild.id}"] = limit
-            await message.channel.send(f"The spam filter limit has been set to **{limit} messages** per **15 seconds**")
+            await message.channel.send(f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**")
         elif arguments[1] == "status" or arguments[1] == "filter" or arguments[1] == "limit":
             value = False
             try:
@@ -1686,6 +1688,7 @@ async def leaveCommand(message, prefix):
         await message.channel.send(f"The syntax is `{prefix}leave <enable/disable/channel/set/status>`"); return
 
 async def snipeCommand(message, prefix):
+    addCooldown(message.author.id, "snipe", 1)
     arguments = message.content.split(" ")
     if len(arguments) == 1:
         try:
@@ -1724,6 +1727,68 @@ async def snipeCommand(message, prefix):
             except:
                 pass
             await message.channel.send(f"Snipe is currently **{'enabled' if value else 'disabled'}** for this server")
+
+async def jokeCommand(message, prefix):
+    addCooldown(message.author.id, "joke", 3)
+    response = requests.get("https://official-joke-api.appspot.com/random_joke").json()
+    embed = discord.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embedColor)
+    await message.channel.send(embed=embed)
+
+async def membersCommand(message, prefix):
+    users = 0; bots = 0
+    for member in message.guild.members:
+        if member.bot:
+            bots += 1
+        else:
+            users += 1
+    embed = discord.Embed(
+        title="Guild Members",
+        description=f"User accounts: **{users}**\nBot accounts: **{bots}**\nTotal members: **{users + bots}**",
+        color=variables.embedColor
+    )
+    await message.channel.send(embed=embed)
+
+async def githubCommand(message, prefix):
+    arguments = message.content.split(" ")
+    if len(arguments) == 2:
+        try:
+            arguments[1] = arguments[1].split("github.com/")[1]
+        except:
+            pass
+        response = requests.get(f"https://api.github.com/repos/{arguments[1]}").json()
+        try:
+            if response["message"] == "Not Found":
+                await message.channel.send("That GitHub repository was not found"); return
+        except:
+            pass
+        embed = discord.Embed(color=variables.embedColor)
+        embed.add_field(name="Repository", value=f"[URL]({response['html_url']})")
+        embed.add_field(name="Owner", value=f"{response['owner']['login']}")
+        embed.add_field(name="Name", value=f"{response['name']}")
+        embed.add_field(name="Language", value=f"{response['language']}")
+        embed.add_field(name="Issues", value=f"{response['open_issues']}")
+        embed.add_field(name="Watchers", value=f"{response['subscribers_count']}")
+        embed.add_field(name="Stars", value=f"{response['stargazers_count']}")
+        embed.add_field(name="Forks", value=f"{response['forks']}")
+        embed.add_field(name="License", value=f"{response['license']['name'] if response['license'] != None else 'None'}")
+        embed.add_field(name="Size", value=f"{round(response['size']/1000, 2)} MB")
+        embed.add_field(name="Branch", value=f"{response['default_branch']}")
+        embed.add_field(name="Forked", value=f"{response['fork']}")
+        embed.add_field(name="Description", value=f"{response['description']}")
+        embed.set_thumbnail(url=response["owner"]["avatar_url"])
+        await message.channel.send(embed=embed)
+        addCooldown(message.author.id, "github", 8)
+    else:
+        await message.channel.send(f"The syntax is `{prefix}github <repository>`")
+
+async def chooseCommand(message, prefix):
+    arguments = message.content.split(" ")
+    if len(arguments) >= 2:
+        arguments.pop(0)
+        randomItem = random.choice(' '.join(arguments).replace(", ", ",").split(","))
+        await message.channel.send(f"I choose **{randomItem}**")
+    else:
+        await message.channel.send(f"The syntax is `{prefix}choose <item>, <item>`")
 
 async def helpCommand(message, prefix):
     pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
@@ -2156,9 +2221,13 @@ commandList = [
     Command("stackoverflow", ["so"], stackoverflowCommand, "stackoverflow <text>", "Search for code help on StackOverflow"),
     Command("mute", [], muteCommand, "mute <user> <minutes>", "Mute the specified member for the specified duration"),
     Command("unmute", [], unmuteCommand, "unmute <user>", "Unmute the specified member on the current guild"),
+    Command("github", ["gh", "repo"], githubCommand, "github <repository>", "Display information about a GitHub repository"),
     Command("insults", [], insultsCommand, "insults <add/remove/enable/disable/list>", "Modify the insults filter"),
     Command("links", [], linksCommand, "links <enable/disable>", "Enable or disable the link/advertisement filter"),
     Command("spam", [], spammingCommand, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
     Command("welcome", [], welcomeCommand, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", [], leaveCommand, "leave <enable/disable/channel/set>", "Modify the leave messages"),
+    Command("choose", [], chooseCommand, "choose <item>, <item>", "Choose a random item from the specified list"),
+    Command("joke", ["dadjoke"], jokeCommand, "joke", "Display a funny random joke from a random category"),
+    Command("members", ["users", "membercount"], membersCommand, "members", "Display information about this guild's members"),
 ]
