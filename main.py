@@ -94,14 +94,11 @@ async def on_ready():
 
 @functions.client.event
 async def on_member_join(member):
-	try:
-		autoroles = functions.autoroleDatabase[member.guild.id]
-		for role in member.guild.roles:
-			for roleID in autoroles:
-				if int(roleID) == role.id:
-					await member.add_roles(role)
-	except:
-		pass
+    await functions.on_member_join(member)
+
+@functions.client.event
+async def on_member_remove(member):
+    await functions.on_member_remove(member)
 
 @functions.client.event
 async def on_message(message):
@@ -112,8 +109,12 @@ async def on_message_delete(message):
 	await functions.on_message_delete(message)
 
 @functions.client.event
-async def on_message_edit(message, newMessage):
+async def on_message_edit(message, _):
 	await functions.on_message_delete(message)
+
+@functions.client.event
+async def on_guild_join(guild):
+    await functions.on_guild_join(guild)
 
 functions.client.topggpy = topgg.DBLClient(
 	functions.client,

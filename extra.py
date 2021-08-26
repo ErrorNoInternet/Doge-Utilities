@@ -27,3 +27,4 @@ async def postAnnouncement(title, text, mention=False):
           embed = discord.Embed(title=title, description=text, color=variables.embedColor)
           message = await channel.send("<@&879665075642835006>" if mention else "", embed=embed)
           await message.publish()
+
