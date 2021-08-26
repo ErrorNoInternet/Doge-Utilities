@@ -2062,7 +2062,7 @@ async def on_message(message):
             return
 
         if message.content.startswith(prefix) and len(message.content) > 1:
-            await message.channel.trigger_typing(); lastCommand = open("last-command", "w")
+            lastCommand = open("last-command", "w")
             lastCommand.write(str(round(time.time()))); lastCommand.close()
         else:
             return
@@ -2141,6 +2141,7 @@ async def on_message(message):
                 callCommand = True
 
             if callCommand:
+                await message.channel.trigger_typing()
                 if getCooldown(message.author.id, command.name) > 0:
                     cooldownString = generateCooldown(command.name, getCooldown(message.author.id, command.name))
                     embed = discord.Embed(title="Command Cooldown", description=cooldownString, color=variables.embedColor)
