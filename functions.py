@@ -2061,6 +2061,12 @@ async def on_message(message):
         else:
             return
 
+        if message.content.startswith(prefix) and len(message.content) > 1:
+            await message.channel.trigger_typing(); lastCommand = open("last-command", "w")
+            lastCommand.write(str(round(time.time()))); lastCommand.close()
+        else:
+            return
+
         if not message.author.guild_permissions.administrator:
             try:
                 if moderationDatabase[f"insults.toggle.{message.guild.id}"]:
@@ -2114,12 +2120,6 @@ async def on_message(message):
             await message.channel.send(f"My prefix here is `{prefix}`")
             lastCommand = open("last-command", "w")
             lastCommand.write(str(round(time.time()))); lastCommand.close()
-            return
-
-        if message.content.startswith(prefix) and len(message.content) > 1:
-            lastCommand = open("last-command", "w")
-            lastCommand.write(str(round(time.time()))); lastCommand.close()
-        else:
             return
 
         blacklistFile = open("blacklist.json", "r")
