@@ -2162,4 +2162,3 @@ commandList = [
     Command("welcome", [], welcomeCommand, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", [], leaveCommand, "leave <enable/disable/channel/set>", "Modify the leave messages"),
 ]
-
