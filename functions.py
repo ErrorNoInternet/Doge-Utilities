@@ -1811,8 +1811,10 @@ async def triviaCommand(message, prefix):
         color=variables.embedColor,
     )
     oldMessage = await message.channel.send(embed=embed, components=buttons)
+    def check(result):
+        return result.message == oldMessage and result.user.id == oldMessage.author.id
     while True:
-        result = await client.wait_for("button_click")
+        result = await client.wait_for("button_click", check=check)
         if result.channel == message.channel:
             if result.author == message.author:
                 if result.component.label == correctAnswer:
