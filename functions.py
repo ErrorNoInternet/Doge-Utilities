@@ -2055,7 +2055,9 @@ async def on_guild_join(guild):
 async def on_message_delete(message, *arguments):
     if len(arguments) > 0:
         await on_message(arguments[0])
-
+        if message.author.bot:
+            return
+    
     if not message.guild:
         return
 
