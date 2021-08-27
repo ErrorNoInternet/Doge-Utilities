@@ -1808,23 +1808,25 @@ async def triviaCommand(message, prefix):
         color=variables.embedColor,
     )
     oldMessage = await message.channel.send(embed=embed, components=buttons)
-    result = await client.wait_for("button_click")
-    if result.channel == message.channel:
-        if result.author == message.author:
-            if result.component.label == correctAnswer:
-                await result.respond(type=4, content="Correct answer!")
-            else:
-                await result.respond(type=4, content=f"Incorrect answer... The correct answer was **{correctAnswer}**.")
-            newButtons = [[]]
-            for oldButton in buttons[0]:
-                if oldButton.label == correctAnswer:
-                    newButton = discord_components.Button(style=discord_components.ButtonStyle.green, label=oldButton.label, disabled=True)
+    while True:
+        result = await client.wait_for("button_click")
+        if result.channel == message.channel:
+            if result.author == message.author:
+                if result.component.label == correctAnswer:
+                    await result.respond(type=4, content="Correct answer!")
                 else:
-                    newButton = discord_components.Button(style=discord_components.ButtonStyle.red, label=oldButton.label, disabled=True)
-                newButtons[0].append(newButton)
-            await oldMessage.edit(embed=embed, components=newButtons)
-        else:
-            await result.respond(type=4, content="You are not the sender of the command!")
+                    await result.respond(type=4, content=f"Incorrect answer... The correct answer was **{correctAnswer}**.")
+                newButtons = [[]]
+                for oldButton in buttons[0]:
+                    if oldButton.label == correctAnswer:
+                        newButton = discord_components.Button(style=discord_components.ButtonStyle.green, label=oldButton.label, disabled=True)
+                    else:
+                        newButton = discord_components.Button(style=discord_components.ButtonStyle.red, label=oldButton.label, disabled=True)
+                    newButtons[0].append(newButton)
+                await oldMessage.edit(embed=embed, components=newButtons)
+                break
+            else:
+                await result.respond(type=4, content="You are not the sender of the command!")
 
 async def helpCommand(message, prefix):
     pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
