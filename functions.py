@@ -1803,8 +1803,8 @@ async def triviaCommand(message, prefix):
     correctAnswer = html.unescape(response['results'][0]['correct_answer'])
     buttons = [[]]
     for i in range(len(answers)):
-        answer = html.unescape(random.choice(answers)); answers.remove(answer)
-        buttons[0].append(discord_components.Button(style=discord_components.ButtonStyle.gray, label=answer))
+        answer = random.choice(answers); answers.remove(answer)
+        buttons[0].append(discord_components.Button(style=discord_components.ButtonStyle.gray, label=html.unescape(answer)))
     embed = discord.Embed(
         description=description,
         color=variables.embedColor,
