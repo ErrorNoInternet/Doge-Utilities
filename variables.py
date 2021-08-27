@@ -19,10 +19,10 @@ for file in os.listdir():
 versionNumber = round((versionNumber / 10) / 4, 2)
 
 statusTypes = ["Playing", "Watching", "Listening", "Competing"]
-status1 = ["with Discord", "with users", "on some servers", "capture the flag"]
-status2 = ["over Discord", "over servers", "Dogecoin stocks", "over the world"]
-status3 = ["lofi music", "requests", "port 80", "suggestions", "the radio"]
-status4 = ["the Olympics", "some servers", "a contest", "a competition"]
+status1 = ["with Discord", "with [users] users", "on some servers", "capture the flag"]
+status2 = ["over Discord", "[servers] servers", "Dogecoin stocks", "over the world"]
+status3 = ["lofi music", "requests", "port 80", "suggestions", "the radio", "[servers] servers"]
+status4 = ["the Olympics", "[servers] servers", "a contest", "a competition"]
 weekdays = {1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday", 7: "Sunday"}
 publicFlags = {
 	"1": "Discord Employee",
