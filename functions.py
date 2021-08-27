@@ -141,16 +141,16 @@ except:
 async def selectStatus():
     clientStatus = discord.Status.online; statusType = random.choice(variables.statusTypes)
     if statusType == "Playing":
-        statusText = random.choice(variables.status1).replace("[users]", len(list(client.get_all_members()))).replace("[servers]", len(client.guilds))
+        statusText = random.choice(variables.status1).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
         await client.change_presence(status=clientStatus, activity=discord.Activity(type=discord.ActivityType.playing, name=statusText))
     elif statusType == "Watching":
-        statusText = random.choice(variables.status2).replace("[users]", len(list(client.get_all_members()))).replace("[servers]", len(client.guilds))
+        statusText = random.choice(variables.status2).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
         await client.change_presence(status=clientStatus, activity=discord.Activity(type=discord.ActivityType.watching, name=statusText))
     elif statusType == "Listening":
-        statusText = random.choice(variables.status3).replace("[users]", len(list(client.get_all_members()))).replace("[servers]", len(client.guilds))
+        statusText = random.choice(variables.status3).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
         await client.change_presence(status=clientStatus, activity=discord.Activity(type=discord.ActivityType.listening, name=statusText))
     elif statusType == "Competing":
-        statusText = random.choice(variables.status4).replace("[users]", len(list(client.get_all_members()))).replace("[servers]", len(client.guilds))
+        statusText = random.choice(variables.status4).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
         await client.change_presence(status=clientStatus, activity=discord.Activity(type=discord.ActivityType.competing, name=statusText))
 
 def parseVariables(text):
