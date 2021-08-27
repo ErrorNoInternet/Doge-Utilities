@@ -1197,7 +1197,7 @@ async def timeCommand(message, prefix):
             else:
                 userTimezone = pytz.timezone(text.replace(" ", "_"))
                 now = datetime.datetime.now(userTimezone)
-                embed = discord.Embed(title="Time", description=f"Information for **{text.replace(' ', '_')}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embedColor)
+                embed = discord.Embed(title="Time", description=f"Information for **{text.replace(' ', '_')}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embedColor)
                 await message.channel.send(embed=embed)
         except KeyError:
             text = "_".join(arguments)
@@ -1206,7 +1206,7 @@ async def timeCommand(message, prefix):
                     city = timezone.split("/")[1]
                     if text.lower() == city.lower():
                         userTimezone = pytz.timezone(timezone); now = datetime.datetime.now(userTimezone)
-                        embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embedColor)
+                        embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embedColor)
                         await message.channel.send(embed=embed); return
                 except:
                     pass
