@@ -959,7 +959,7 @@ async def hashCommand(message, prefix):
     if len(arguments) > 2:
         arguments.pop(0); hashType = arguments[0]; arguments.pop(0); text = " ".join(arguments)
         try:
-            outputHash = hash(hashType, text); embed = discord.Embed(color=variables.embedColor)
+            outputHash = hashText(hashType, text); embed = discord.Embed(color=variables.embedColor)
             embed.add_field(name="Text", value=text); embed.add_field(name=f"Hash ({hashType})", value="`" + outputHash + "`", inline=False)
             await message.channel.send(embed=embed)
         except:
@@ -1198,7 +1198,7 @@ async def timeCommand(message, prefix):
             else:
                 userTimezone = pytz.timezone(text.replace(" ", "_"))
                 now = datetime.datetime.now(userTimezone)
-                embed = discord.Embed(title="Time", description=f"Information for **{text.replace(' ', '_')}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday() + 1}**", color=variables.embedColor)
+                embed = discord.Embed(title="Time", description=f"Information for **{text.replace(' ', '_')}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embedColor)
                 await message.channel.send(embed=embed)
         except KeyError:
             text = "_".join(arguments)
@@ -1207,7 +1207,7 @@ async def timeCommand(message, prefix):
                     city = timezone.split("/")[1]
                     if text.lower() == city.lower():
                         userTimezone = pytz.timezone(timezone); now = datetime.datetime.now(userTimezone)
-                        embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay of the week: **{now.weekday() + 1}**", color=variables.embedColor)
+                        embed = discord.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nDay: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embedColor)
                         await message.channel.send(embed=embed); return
                 except:
                     pass
@@ -1860,7 +1860,7 @@ def dateToEpoch(timestamp):
     epoch = datetime.datetime(year, month, day, hour, minute, second).timestamp()
     return int(epoch)
 
-def hash(hashType, inputText):
+def hashText(hashType, inputText):
     hasher = hashlib.new(hashType)
     hasher.update(inputText.encode("utf-8"))
     return hasher.hexdigest()
@@ -2012,7 +2012,10 @@ async def on_guild_join(guild):
     except:
         pass
 
-async def on_message_delete(message):
+async def on_message_delete(message, *arguments):
+    if len(arguments) > 0:
+        await on_message(arguments[0])
+
     if not message.guild:
         return
 
@@ -2037,7 +2040,7 @@ async def on_message_delete(message):
     if messageData == "":
         if len(message.embeds) > 0:
             messageData = message.embeds[0].description
-    if messageData != "":
+    if messageData != "" or messageData != discord.Embed.Empty:
         snipes.append([
             message.author.name,
             message.author.discriminator,
@@ -2062,10 +2065,10 @@ async def on_message(message):
         else:
             return
 
-        if message.content.startswith(prefix) and len(message.content) > 1:
+        if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
+            await message.channel.send(f"My prefix here is `{prefix}`")
             lastCommand = open("last-command", "w")
             lastCommand.write(str(round(time.time()))); lastCommand.close()
-        else:
             return
 
         if not message.author.guild_permissions.administrator:
@@ -2117,10 +2120,10 @@ async def on_message(message):
                 pass
         lastMessages[message.author.id] = time.time()
 
-        if "<@" in message.content and str(client.user.id) in message.content:
-            await message.channel.send(f"My prefix here is `{prefix}`")
+        if message.content.startswith(prefix) and len(message.content) > 1:
             lastCommand = open("last-command", "w")
             lastCommand.write(str(round(time.time()))); lastCommand.close()
+        else:
             return
 
         blacklistFile = open("blacklist.json", "r")

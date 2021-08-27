@@ -23,6 +23,7 @@ status1 = ["with Discord", "with users", "on some servers", "with Dogecoin", "ca
 status2 = ["over Discord", "YouTube videos", "over servers", "Dogecoin stocks", "over the world", "people talk"]
 status3 = ["music", "jokes", "requests", "port 80", "announcements", "suggestions", "port 443"]
 status4 = ["the Olympics", "NBA", "some servers", "Discord", "a competition"]
+weekdays = {1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday", 7: "Sunday"}
 publicFlags = {
 	"1": "Discord Employee",
 	"2": "Discord Partner",

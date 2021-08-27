@@ -109,8 +109,8 @@ async def on_message_delete(message):
 	await functions.on_message_delete(message)
 
 @functions.client.event
-async def on_message_edit(message, _):
-	await functions.on_message_delete(message)
+async def on_message_edit(message, newMessage):
+	await functions.on_message_delete(message, newMessage)
 
 @functions.client.event
 async def on_guild_join(guild):
