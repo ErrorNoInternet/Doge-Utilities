@@ -507,16 +507,15 @@ async def prefixCommand(message, prefix):
                     discord_components.Button(style=discord_components.ButtonStyle.green, label="No")
                 ]]
             )
-            result = await client.wait_for("button_click")
-            if result.message.id == oldMessage.id:
-                if result.component.label == "No":
-                    await result.respond(type=4, content="Operation cancelled")
-                else:
-                    prefixDatabase[message.guild.id] = newPrefix
-                    await oldMessage.edit(content=f"This server's prefix has been set to `{newPrefix}`", components=[])
-                    await result.respond(type=4, content=f"Successfully changed server prefix")
+            def check(result):
+                return result.message == oldMessage and result.user.id == message.author.id
+            result = await client.wait_for("button_click", check=check)
+            if result.component.label == "No":
+                await result.respond(type=4, content="Operation cancelled")
             else:
-                await result.respond(type=4, content="You are not the sender of the command!")
+                prefixDatabase[message.guild.id] = newPrefix
+                await oldMessage.edit(content=f"This server's prefix has been set to `{newPrefix}`", components=[])
+                await result.respond(type=4, content=f"Successfully changed server prefix")
         else:
             await message.channel.send(f"The syntax is `{prefix}prefix <new prefix>`")
     else:
@@ -1812,26 +1811,20 @@ async def triviaCommand(message, prefix):
     )
     oldMessage = await message.channel.send(embed=embed, components=buttons)
     def check(result):
-        return result.message == oldMessage and result.user.id == oldMessage.author.id
-    while True:
-        result = await client.wait_for("button_click", check=check)
-        if result.channel == message.channel:
-            if result.author == message.author:
-                if result.component.label == correctAnswer:
-                    await result.respond(type=4, content="Correct answer!")
-                else:
-                    await result.respond(type=4, content=f"Incorrect answer... The correct answer was **{correctAnswer}**.")
-                newButtons = [[]]
-                for oldButton in buttons[0]:
-                    if oldButton.label == correctAnswer:
-                        newButton = discord_components.Button(style=discord_components.ButtonStyle.green, label=oldButton.label, disabled=True)
-                    else:
-                        newButton = discord_components.Button(style=discord_components.ButtonStyle.red, label=oldButton.label, disabled=True)
-                    newButtons[0].append(newButton)
-                await oldMessage.edit(embed=embed, components=newButtons)
-                break
-            else:
-                await result.respond(type=4, content="You are not the sender of the command!")
+        return result.message == oldMessage and result.user.id == message.author.id
+    result = await client.wait_for("button_click", check=check)
+    if result.component.label == correctAnswer:
+        await result.respond(type=4, content="Correct answer!")
+    else:
+        await result.respond(type=4, content=f"Incorrect answer... The correct answer was **{correctAnswer}**.")
+    newButtons = [[]]
+    for oldButton in buttons[0]:
+        if oldButton.label == correctAnswer:
+            newButton = discord_components.Button(style=discord_components.ButtonStyle.green, label=oldButton.label, disabled=True)
+        else:
+            newButton = discord_components.Button(style=discord_components.ButtonStyle.red, label=oldButton.label, disabled=True)
+        newButtons[0].append(newButton)
+    await oldMessage.edit(embed=embed, components=newButtons)
 
 async def helpCommand(message, prefix):
     pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
