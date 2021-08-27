@@ -1791,6 +1791,41 @@ async def chooseCommand(message, prefix):
     else:
         await message.channel.send(f"The syntax is `{prefix}choose <item>, <item>`")
 
+async def triviaCommand(message, prefix):
+    addCooldown(message.author.id, "trivia", 12)
+    url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 33)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
+    response = requests.get(url).json()
+    description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
+    answers = response['results'][0]['incorrect_answers']
+    answers.append(response['results'][0]['correct_answer'])
+    correctAnswer = html.unescape(response['results'][0]['correct_answer'])
+    buttons = [[]]
+    for i in range(len(answers)):
+        answer = html.unescape(random.choice(answers)); answers.remove(answer)
+        buttons[0].append(discord_components.Button(style=discord_components.ButtonStyle.gray, label=answer))
+    embed = discord.Embed(
+        description=description,
+        color=variables.embedColor,
+    )
+    oldMessage = await message.channel.send(embed=embed, components=buttons)
+    result = await client.wait_for("button_click")
+    if result.channel == message.channel:
+        if result.author == message.author:
+            if result.component.label == correctAnswer:
+                await result.respond(type=4, content="Correct answer!")
+            else:
+                await result.respond(type=4, content=f"Incorrect answer... The correct answer was **{correctAnswer}**.")
+            newButtons = [[]]
+            for oldButton in buttons[0]:
+                if oldButton.label == correctAnswer:
+                    newButton = discord_components.Button(style=discord_components.ButtonStyle.green, label=oldButton.label, disabled=True)
+                else:
+                    newButton = discord_components.Button(style=discord_components.ButtonStyle.red, label=oldButton.label, disabled=True)
+                newButtons[0].append(newButton)
+            await oldMessage.edit(embed=embed, components=newButtons)
+        else:
+            await result.respond(type=4, content="You are not the sender of the command!")
+
 async def helpCommand(message, prefix):
     pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
     try:
@@ -2235,4 +2270,5 @@ commandList = [
     Command("choose", [], chooseCommand, "choose <item>, <item>", "Choose a random item from the specified list"),
     Command("joke", ["dadjoke"], jokeCommand, "joke", "Display a funny random joke from a random category"),
     Command("members", ["users", "membercount"], membersCommand, "members", "Display information about this guild's members"),
+    Command("trivia", ["quiz"], triviaCommand, "trivia", "Display a random trivia question from a random category"),
 ]
