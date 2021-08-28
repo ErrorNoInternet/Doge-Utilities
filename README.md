@@ -6,12 +6,6 @@
 A simple lightweight Discord utility bot written in Python with [discord.py](https://github.com/Rapptz/discord.py)\
 Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
----
-
-⚠️ This version of Doge Utilities will no longer be updated, since discord.py is shutting down. The new version of the bot (written in Go) will be available soon. All the features will be re-written, and the old bot account will still be used.
-
----
-
 ## Installation
 - Requirements:
   - Python 3.8+
