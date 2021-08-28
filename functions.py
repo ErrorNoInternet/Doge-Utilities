@@ -1827,7 +1827,7 @@ async def triviaCommand(message, prefix):
     await oldMessage.edit(embed=embed, components=newButtons)
 
 async def helpCommand(message, prefix):
-    pages = {}; currentPage = 1; pageLimit = 10; currentItem = 0; index = 1; pageArguments = False
+    pages = {}; currentPage = 1; pageLimit = 12; currentItem = 0; index = 1; pageArguments = False
     try:
         currentPage = int(message.content.split(" ")[1])
         pageArguments = True
