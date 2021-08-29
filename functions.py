@@ -635,7 +635,12 @@ async def executeCommand(message, prefix):
     if message.author.id == variables.botOwner:
         try:
             outputLanguage = ""
-            code = message.content.split(prefix + "execute;")[1]
+            length = len(prefix+"execute ")
+            if len(message.content) >= length:
+                code = message.content[length:]
+            else:
+                await message.channel.send("No code specified")
+                return
             if code.startswith("```python"):
                 code = code[9:]
             if code.startswith("```py"):
@@ -1180,7 +1185,7 @@ async def timeCommand(message, prefix):
     if len(arguments) > 1:
         try:
             arguments.pop(0); text = " ".join(arguments)
-            if text.lower() == "list":
+            if text.lower() == "list" or text.lower() == "help":
                 output = ""
                 for timezone in pytz.all_timezones:
                     output += timezone + "\n"
@@ -1210,7 +1215,7 @@ async def timeCommand(message, prefix):
                         await message.channel.send(embed=embed); return
                 except:
                     pass
-            embed = discord.Embed(title="Time", description=f"That timezone was not found\nUse `{prefix}time list` to get a list of timezones", color=variables.embedColor)
+            embed = discord.Embed(title="Time", description=f"That timezone was not found", color=variables.embedColor)
             await message.channel.send(embed=embed); return
     else:
         await message.channel.send(f"The syntax is `{prefix}time <timezone>`")
@@ -1285,6 +1290,28 @@ async def sourceCommand(message, prefix):
     embed = discord.Embed(title="Source Code", description=description, color=variables.embedColor)
     embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
     addCooldown(message.author.id, "source", 20)
+
+async def uptimeCommand(message, prefix):
+    secondsTime = time.time() - startTime
+    minutesTime = secondsTime / 60
+    hoursTime = minutesTime / 60
+    daysTime = hoursTime / 24
+    secondsTime = secondsTime % 60
+    minutesTime = minutesTime % 60
+    hoursTime = hoursTime % 24
+    uptime = ""
+    if daysTime >= 1:
+        uptime += str(math.floor(daysTime)) + "d "
+    if hoursTime >= 1:
+        uptime += str(math.floor(hoursTime)) + "hr "
+    if minutesTime >= 1:
+        uptime += str(math.floor(minutesTime)) + "m "
+    if secondsTime >= 1:
+        uptime += str(math.floor(secondsTime)) + "s "
+    if uptime == "":
+        uptime = "Unknown"
+    embed = discord.Embed(title="Bot Uptime", description=f"Doge has been running for **{uptime}**", color=variables.embedColor)
+    await message.channel.send(embed=embed)
 
 async def donateCommand(message, prefix):
     embed = discord.Embed(title="Donate", description=":moneybag: Bitcoin: `bc1qer5es59d62pvwdhaplgyltzd63kyyd0je2fhjm`\n:dog: Dogecoin: `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`", color=variables.embedColor)
@@ -2212,10 +2239,10 @@ async def on_message(message):
         embed = discord.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=discord.Color.red(), timestamp=datetime.datetime.utcnow())
         embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
 
-hiddenCommands = ["execute;", "reload", "guilds", "D", "blacklist"]
+hiddenCommands = ["execute", "reload", "guilds", "D", "blacklist"]
 commandList = [
     Command("D", [], smileyCommand, "D", "=D"),
-    Command("execute;", [], executeCommand, "execute;<code>", "System Command"),
+    Command("execute", [], executeCommand, "execute <code>", "System Command"),
     Command("reload", [], reloadCommand, "reload", "System Command"),
     Command("guilds", ["servers"], guildsCommand, "guilds", "System Command"),
     Command("blacklist", [], blacklistCommand, "blacklist <add/remove/list>", "System Command"),
@@ -2225,6 +2252,7 @@ commandList = [
     Command("support", [], supportCommand, "support", "Display the official Discord server for Doge"),
     Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
     Command("source", ["src"], sourceCommand, "source", "Display a link to Doge Utilities' code"),
+    Command("uptime", [], uptimeCommand, "uptime", "Display Doge Utilities' current uptime"),
     Command("vote", ["upvote"], voteCommand, "vote", "Display a link to upvote Doge Utilities"),
     Command("donate", [], donateCommand, "donate", "Donate to the creators of Doge Utilities"),
     Command("version", ["ver"], versionCommand, "version", "Display the bot's current version"),
