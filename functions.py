@@ -1859,7 +1859,7 @@ async def pypiCommand(message, prefix):
     if len(arguments) == 2:
         response = requests.get(f"https://pypi.org/pypi/{arguments[1]}/json/")
         if response.status_code == 404:
-            await message.channels.send("That package was not found")
+            await message.channel.send("That package was not found")
             return
         response = response.json()
         sizeUnit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
