@@ -456,7 +456,7 @@ async def statusCommand(message, prefix):
     addCooldown(message.author.id, "status", 5)
 
 async def supportCommand(message, prefix):
-    embed = discord.Embed(title="Support Server", description=f"You can join Doge Utilities's official server [here](https://discord.gg/3Tp7R8FUsC)", color=variables.embedColor)
+    embed = discord.Embed(title="Support Server", description="You can join Doge Utilities's official server [here](https://discord.gg/3Tp7R8FUsC)", color=variables.embedColor)
     await message.channel.send(embed=embed)
 
 async def versionCommand(message, prefix):
