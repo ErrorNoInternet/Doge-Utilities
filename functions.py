@@ -1872,7 +1872,7 @@ async def pypiCommand(message, prefix):
         embed = discord.Embed(color=variables.embedColor)
         embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
         embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
-        embed.add_field(name="Owner", value=response["info"]["author"])
+        embed.add_field(name="Owner", value=response["info"]["author"] if response["info"]["author"] != "" else "None")
         embed.add_field(name="Name", value=response["info"]["name"])
         embed.add_field(name="Version", value=response["info"]["version"])
         embed.add_field(name="License", value=response["info"]["license"] if response["info"]["license"] != "" else "None")
