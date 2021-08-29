@@ -1875,7 +1875,7 @@ async def pypiCommand(message, prefix):
         embed.add_field(name="Owner", value=response["info"]["author"])
         embed.add_field(name="Name", value=response["info"]["name"])
         embed.add_field(name="Version", value=response["info"]["version"])
-        embed.add_field(name="License", value=response["info"]["license"])
+        embed.add_field(name="License", value=response["info"]["license"] if response["info"]["license"] != "" else "None")
         embed.add_field(name="Yanked", value=response["info"]["yanked"])
         embed.add_field(name="Size", value=f"{round(size, 2)} {sizeUnit}")
         embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
