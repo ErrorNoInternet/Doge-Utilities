@@ -176,6 +176,7 @@ def parseVariables(text):
     text = text.replace("<enable/disable>", "enable")
     text = text.replace("<item>", "apple")
     text = text.replace("<repository>", "ErrorNoInternet/Doge-Utilities")
+    text = text.replace("<project>", "discord.py")
     return text
 
 def reloadData():
@@ -1853,6 +1854,39 @@ async def triviaCommand(message, prefix):
         newButtons[0].append(newButton)
     await oldMessage.edit(embed=embed, components=newButtons)
 
+async def pypiCommand(message, prefix):
+    arguments = message.content.split(" ")
+    if len(arguments) == 2:
+        response = requests.get(f"https://pypi.org/pypi/{arguments[1]}/json/")
+        if response.status_code == 404:
+            await message.channels.send("That package was not found")
+            return
+        response = response.json()
+        sizeUnit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
+        if size > 1000:
+            sizeUnit = "KB"
+            size = size / 1000
+            if size > 1000:
+                sizeUnit = "MB"
+                size = size / 1000
+        embed = discord.Embed(color=variables.embedColor)
+        embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
+        embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
+        embed.add_field(name="Owner", value=response["info"]["author"])
+        embed.add_field(name="Name", value=response["info"]["name"])
+        embed.add_field(name="Version", value=response["info"]["version"])
+        embed.add_field(name="License", value=response["info"]["license"])
+        embed.add_field(name="Yanked", value=response["info"]["yanked"])
+        embed.add_field(name="Size", value=f"{round(size, 2)} {sizeUnit}")
+        embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
+        embed.add_field(name="Summary", value=response["info"]["summary"])
+        embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
+        await message.channel.send(embed=embed)
+        addCooldown(message.author.id, "pypi", 5)
+    else:
+        await message.channel.send(f"The syntax is `{prefix}pypi <project>`")
+        return
+
 async def helpCommand(message, prefix):
     pages = {}; currentPage = 1; pageLimit = 12; currentItem = 0; index = 1; pageArguments = False
     try:
@@ -2298,7 +2332,8 @@ commandList = [
     Command("welcome", [], welcomeCommand, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", [], leaveCommand, "leave <enable/disable/channel/set>", "Modify the leave messages"),
     Command("choose", [], chooseCommand, "choose <item>, <item>", "Choose a random item from the specified list"),
+    Command("pypi", ["pip"], pypiCommand, "pypi <project>", "Display information about a package on PyPi"),
     Command("joke", ["dadjoke"], jokeCommand, "joke", "Display a funny random joke from a random category"),
-    Command("members", ["users", "membercount"], membersCommand, "members", "Display information about this guild's members"),
+    Command("members", ["users"], membersCommand, "members", "Display information about this guild's members"),
     Command("trivia", ["quiz"], triviaCommand, "trivia", "Display a random trivia question from a random category"),
 ]
