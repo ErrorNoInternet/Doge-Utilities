@@ -42,7 +42,7 @@ autoroleDatabase = sqlitedict.SqliteDict("databases/autoroleDatabase.sql", autoc
 settingsDatabase = sqlitedict.SqliteDict("databases/settingsDatabase.sql", autocommit=True)
 moderationDatabase = sqlitedict.SqliteDict("databases/moderationDatabase.sql", autocommit=True)
 
-class Command(object):
+class Command:
     def __init__(self, name, aliases, function, usage, description):
         super().__init__()
         
@@ -52,7 +52,7 @@ class Command(object):
         self.usage = usage
         self.description = description
 
-class ContextObject(object):
+class ContextObject:
     def __init__(self, client, message):
         super().__init__()
 
