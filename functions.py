@@ -437,6 +437,9 @@ async def statusCommand(message, prefix):
         uptime += str(math.floor(secondsTime)) + "s "
     if uptime == "":
         uptime = "Unknown"
+    else:
+        uptime = uptime.split(" ")
+        uptime = " ".join(uptime[:3])
     
     embed = discord.Embed(color=variables.embedColor)
     embed.add_field(name="Bot Latency", value="```" + f"{round(client.get_shard(message.guild.shard_id).latency * 1000, 1)} ms" + "```")
