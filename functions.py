@@ -36,6 +36,7 @@ from discord.ext import buttons
 
 if not os.path.exists("databases"):
     os.mkdir("databases")
+sqlitedict.PICKLE_PROTOCOL = 3
 userCooldowns = {}; messageStrikes = {}; lastMessages = {}
 database = sqlitedict.SqliteDict("database.sql", autocommit=True)
 
