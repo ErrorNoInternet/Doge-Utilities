@@ -1973,7 +1973,7 @@ async def helpCommand(message, prefix):
         await message.channel.send(embed=embed); addCooldown(message.author.id, "help", 1.5)
 
 def epochToDate(epoch):
-    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(epoch))
 
 def dateToEpoch(timestamp):
     timestamp = timestamp.replace("Today", str(datetime.datetime.utcnow().date()))
