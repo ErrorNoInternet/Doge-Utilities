@@ -478,7 +478,7 @@ async def inviteCommand(message, prefix):
         guildMember = False
     await message.channel.send("Here's the link to invite me to another server",
         components=[[
-            discord_components.Button(style=discord_components.ButtonStyle.URL, label="Invite Link", url="https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&&scope=bot"),
+            discord_components.Button(style=discord_components.ButtonStyle.URL, label="Invite Link", url="https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"),
             discord_components.Button(style=discord_components.ButtonStyle.red, label="Leave Server", disabled=guildMember)
     ]])
     result = await client.wait_for("button_click", check = lambda item: item.component.label == "Leave Server")
