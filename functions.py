@@ -1976,7 +1976,8 @@ def epochToDate(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
 
 def dateToEpoch(timestamp):
-    timestamp = timestamp.replace("Today", str(datetime.datetime.now().date()))
+    timestamp = timestamp.replace("Today", str(datetime.datetime.utcnow().date()))
+    timestamp = timestamp.replace("/", "-")
     date = timestamp.split(" ")[0]; time = timestamp.split(" ")[1]
     dateParts = date.split("-"); timeParts = time.split(":")
     for i in range(len(dateParts)):
