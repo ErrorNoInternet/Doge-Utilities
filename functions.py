@@ -286,7 +286,7 @@ async def currencyCommand(message, prefix):
             output += f"{key}: {response[key]}\n"
         segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
         pager = CustomPager(
-            timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embedColor, title="Currency List", entries=segments
+            timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embedColor, title="Currency List", entries=segments,
         )
         await pager.start(ContextObject(client, message))
         addCooldown(message.author.id, "currency", 5)
@@ -677,7 +677,7 @@ async def executeCommand(message, prefix):
             if len(output) > 2001:
                 output = output.replace("`", "\`")
                 pager = CustomPager(
-                    timeout=120, length=1, prefix=f"```{outputLanguage}\n", suffix="```", color=variables.embedColor, title=f"Code Output ({len(segments)} pages)", entries=segments
+                    timeout=120, length=1, prefix=f"```{outputLanguage}\n", suffix="```", color=variables.embedColor, title=f"Code Output ({len(segments)} pages)", entries=segments,
                 )
                 await pager.start(ContextObject(client, message))
             else:
@@ -1195,7 +1195,7 @@ async def timeCommand(message, prefix):
                 pager = CustomPager(
                     timeout=60, color=variables.embedColor,
                     length=1, prefix="```\n", suffix="```",
-                    title=f"Timezone List", entries=segments
+                    title=f"Timezone List", entries=segments,
                 )
                 await pager.start(ContextObject(client, message))
             elif text.lower() == "epoch" or text.lower() == "unix":
@@ -1888,6 +1888,37 @@ async def pypiCommand(message, prefix):
         await message.channel.send(f"The syntax is `{prefix}pypi <project>`")
         return
 
+async def discriminatorCommand(message, prefix):
+    arguments = message.content.split(" ")
+    discriminator = message.author.discriminator
+    members = []
+    if len(arguments) > 1:
+        try:
+            int(arguments[1])
+            if len(arguments[1]) != 4:
+                raise Exception("invalid discriminator")
+        except:
+            await message.channel.send("That is not a valid discriminator!")
+            return
+        discriminator = arguments[1]
+
+    for member in client.get_all_members():
+        if member.discriminator == discriminator:
+            if str(member) not in members:
+                members.append(str(member))
+    newLine = "\n"
+    if members == []:
+        await message.channel.send("There are no other users with the same discriminator")
+        return
+
+    output = "\n".join(members)
+    segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
+    pager = CustomPager(
+        timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embedColor, title="Discriminator", entries=segments,
+    )
+    await pager.start(ContextObject(client, message))
+    addCooldown(message.author.id, "discriminator", 5)
+
 async def helpCommand(message, prefix):
     pages = {}; currentPage = 1; pageLimit = 12; currentItem = 0; index = 1; pageArguments = False
     try:
@@ -2337,4 +2368,5 @@ commandList = [
     Command("joke", ["dadjoke"], jokeCommand, "joke", "Display a funny random joke from a random category"),
     Command("members", ["users"], membersCommand, "members", "Display information about this guild's members"),
     Command("trivia", ["quiz"], triviaCommand, "trivia", "Display a random trivia question from a random category"),
+    Command("discriminator", ["discrim"], discriminatorCommand, "discriminator", "Display other users with the same discriminator")
 ]
