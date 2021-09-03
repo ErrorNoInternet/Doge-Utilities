@@ -2316,7 +2316,7 @@ commandList = [
     Command("help", ["h", "commands"], helpCommand, "help", "Displays a help page for Doge Utilities"),
     Command("ping", ["pong"], pingCommand, "ping", "Display the bot's current latency"),
     Command("status", ["stats"], statusCommand, "status", "Show the bot's current statistics"),
-    Command("support", [], supportCommand, "support", "Display the official Discord server for Doge"),
+    Command("support", ["report"], supportCommand, "support", "Display the official Discord server for Doge"),
     Command("tests", [], testsCommand, "tests", "Run a series of tests to diagnose Doge"),
     Command("source", ["src"], sourceCommand, "source", "Display a link to Doge Utilities' code"),
     Command("uptime", [], uptimeCommand, "uptime", "Display Doge Utilities' current uptime"),
