@@ -34,8 +34,6 @@ import discord_components
 from dateutil import parser
 from discord.ext import buttons
 
-if not os.path.exists("databases"):
-    os.mkdir("databases")
 sqlitedict.PICKLE_PROTOCOL = 3
 userCooldowns = {}; messageStrikes = {}; lastMessages = {}
 database = sqlitedict.SqliteDict("database.sql", autocommit=True)
@@ -2347,7 +2345,7 @@ commandList = [
     Command("base64", ["b64"], base64Command, "base64 <encode/decode> <text>", "Convert the text to/from base64"),
     Command("date-epoch", [], dateEpochCommand, "date-epoch <date>", "Covert a date into an epoch timestamp"),
     Command("hash", [], hashCommand, "hash <type> <text>", "Hash the text object with the specified type"),
-    Command("meme", [], memeCommand, "meme", "Search for a meme on Reddit and display it as an embed"),
+    Command("meme", [], memeCommand, "meme", "Search for a meme on Reddit and display it in an embed"),
     Command("snipe", [], snipeCommand, "snipe <enable/disable>", "Restore and bring deleted messages back to life"),
     Command("calculate", ["calc"], calculateCommand, "calculate <expression>", "Calculate the specified math expression"),
     Command("color", ["colour"], colorCommand, "color <color code>", "Display information about the color code"),

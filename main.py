@@ -52,7 +52,7 @@ async def randomStatus():
 @functions.client.event
 async def on_guild_channel_delete(channel):
     try:
-        currentSetting = functions.settingsDatabase[f"{channel.guild.id}|raid-protection"]
+        currentSetting = functions.settingsDatabase[f"{channel.guild.id}.raid-protection"]
         if not currentSetting:
             return
     except:
@@ -72,7 +72,7 @@ async def on_guild_channel_delete(channel):
 @functions.client.event
 async def on_guild_role_delete(role):
     try:
-        currentSetting = functions.settingsDatabase[f"{role.guild.id}|raid-protection"]
+        currentSetting = functions.settingsDatabase[f"{role.guild.id}.raid-protection"]
         if not currentSetting:
             return
     except:
