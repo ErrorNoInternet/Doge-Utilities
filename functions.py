@@ -1893,6 +1893,7 @@ async def discriminatorCommand(message, prefix):
     discriminator = message.author.discriminator
     members = []
     if len(arguments) > 1:
+        arguments[1] = arguments[1].replace("#", "")
         try:
             int(arguments[1])
             if len(arguments[1]) != 4:
