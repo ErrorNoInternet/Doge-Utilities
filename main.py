@@ -26,7 +26,6 @@ if os.getenv("TOPGG_TOKEN") == None:
 def updateObjects():
     time.sleep(2)
     while True:
-        print("updating yes")
         for guild in functions.client.guilds:
             serverChannels[guild.id] = guild.channels
             serverRoles[guild.id] = guild.roles
