@@ -26,6 +26,7 @@ if os.getenv("TOPGG_TOKEN") == None:
 def updateObjects():
     time.sleep(2)
     while True:
+        print("updating yes")
         for guild in functions.client.guilds:
             serverChannels[guild.id] = guild.channels
             serverRoles[guild.id] = guild.roles
@@ -52,7 +53,7 @@ async def randomStatus():
 @functions.client.event
 async def on_guild_channel_delete(channel):
     try:
-        currentSetting = functions.settingsDatabase[f"{channel.guild.id}.raid-protection"]
+        currentSetting = functions.database[f"{channel.guild.id}.raid-protection"]
         if not currentSetting:
             return
     except:
@@ -72,7 +73,7 @@ async def on_guild_channel_delete(channel):
 @functions.client.event
 async def on_guild_role_delete(role):
     try:
-        currentSetting = functions.settingsDatabase[f"{role.guild.id}.raid-protection"]
+        currentSetting = functions.database[f"{role.guild.id}.raid-protection"]
         if not currentSetting:
             return
     except:
@@ -92,7 +93,7 @@ async def on_ready():
     global firstRun
     if not firstRun:
         firstRun = True
-        threading.Thread(target=updateObjects).start()
+        threading.Thread(name="raid-protection", target=updateObjects).start()
         await randomStatus()
 
 @functions.client.event
