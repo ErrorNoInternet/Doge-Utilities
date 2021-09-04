@@ -3,7 +3,6 @@ import time
 import topgg
 import discord
 import asyncio
-import webServer
 import functions
 import threading
 
@@ -125,5 +124,4 @@ functions.client.topggpy = topgg.DBLClient(
     autopost=True,
     post_shard_count=True
 )
-webServer.start("Doge Utilities")
 functions.client.run(os.getenv("TOKEN"))
