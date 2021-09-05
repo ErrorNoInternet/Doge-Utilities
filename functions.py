@@ -2170,7 +2170,7 @@ async def on_message_delete(message, *arguments):
     if messageData == "":
         if len(message.embeds) > 0:
             messageData = message.embeds[0].description
-    if messageData != "" or messageData != discord.Embed.Empty:
+    if messageData != "" or type(messageData) != discord.Embed.Empty:
         snipes.append([
             message.author.name,
             message.author.discriminator,
