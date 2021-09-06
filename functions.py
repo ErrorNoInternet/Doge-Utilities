@@ -1720,9 +1720,9 @@ async def snipeCommand(message, prefix):
     if len(arguments) == 1:
         try:
             randomMessage = random.choice(snipeList[message.guild.id])
-            messageAuthor = f"{randomMessage[0]}#{randomMessage[1]}"
-            messageAuthorAvatar = randomMessage[2]; channelName = randomMessage[3]
-            messageSentTime = randomMessage[4]; messageData = randomMessage[5]
+            messageAuthor = randomMessage[0]
+            messageAuthorAvatar = randomMessage[1]; channelName = randomMessage[2]
+            messageSentTime = randomMessage[3]; messageData = randomMessage[4]
             embed = discord.Embed(description=messageData, color=variables.embedColor, timestamp=messageSentTime)
             embed.set_author(name=messageAuthor, icon_url=messageAuthorAvatar); embed.set_footer(text=f"Sent in #{channelName}")
             await message.channel.send(embed=embed)
@@ -2172,8 +2172,7 @@ async def on_message_delete(message, *arguments):
             messageData = message.embeds[0].description
     if messageData != "" or type(messageData) != discord.Embed.Empty:
         snipes.append([
-            message.author.name,
-            message.author.discriminator,
+            f"{message.author.name}#{message.author.discriminator}",
             message.author.avatar_url,
             message.channel.name,
             datetime.datetime.utcnow(),
