@@ -2200,7 +2200,7 @@ async def on_message(message):
             lastCommand.write(str(round(time.time()))); lastCommand.close()
             return
 
-        if not message.author.guild_permissions.administrator:
+        if not message.author.guild_permissions.administrator or message.author.id not in variables.permissionOverride:
             try:
                 if database[f"insults.toggle.{message.guild.id}"]:
                     insults = database[f"insults.list.{message.guild.id}"]
