@@ -2021,7 +2021,7 @@ def evaluateExpression(expression):
         "float": lambda value: float(value),
         "chr": lambda value: chr(value),
         "get": lambda name: getVariable(name),
-        "set": lambda name, value: setVariable(name, value)
+        "set": lambda name, value: setVariable(name, value),
         "bin": lambda value: bin(value),
     }
 
