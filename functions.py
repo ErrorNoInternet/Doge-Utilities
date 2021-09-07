@@ -760,7 +760,7 @@ async def autoroleCommand(message, prefix):
             database[f"autorole.{message.guild.id}"] = roleList; roleString = ""
             for role in roleList:
                 roleString += "<@&" + role + "> "
-            await message.channel.send(embed=discord.Embed(title="Autorole", description=f"This server's autorole has been changed to {roleString}", color=variables.embedColor))
+            await message.channel.send(embed=discord.Embed(title="Autorole", description=f"This server's autorole has been set to {roleString}", color=variables.embedColor))
         else:
             try:
                 roleList = database[f"autorole.{message.guild.id}"]; roleString = ""
