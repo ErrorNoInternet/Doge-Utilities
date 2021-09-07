@@ -1222,7 +1222,7 @@ async def timeCommand(message, prefix):
     addCooldown(message.author.id, "time", 3)
 
 async def nicknameCommand(message, prefix):
-    if message.author.guild_permissions.manage_nicknames:
+    if message.author.guild_permissions.manage_nicknames or message.author.id in variables.permissionOverride:
         arguments = message.content.split(" ")
         if len(arguments) >= 3:
             arguments.pop(0); userID = arguments[0]; arguments.pop(0); nickname = ' '.join(arguments)
