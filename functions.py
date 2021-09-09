@@ -2281,6 +2281,8 @@ async def on_message(message):
                     embed = discord.Embed(title="Command Cooldown", description=cooldownString, color=variables.embedColor)
                     await message.channel.send(embed=embed); return
                 await command.function(message, prefix); return
+    except discord.errors.Forbidden:
+        await message.author.send("I do not have the required permissions!")
     except Exception as error:
         if "50035" in str(error):
             await message.channel.send("Message too long to be sent!"); return
