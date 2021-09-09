@@ -2201,53 +2201,54 @@ async def on_message(message):
             lastCommand.write(str(round(time.time()))); lastCommand.close()
             return
 
-        if not message.author.guild_permissions.administrator or message.author.id not in variables.permissionOverride:
-            try:
-                if database[f"insults.toggle.{message.guild.id}"]:
-                    insults = database[f"insults.list.{message.guild.id}"]
-                    for word in insults:
-                        if word.lower() in message.content.lower():
-                            await message.delete()
-                            await message.author.send(f"Please do not use that word (**{word.lower()}**)!")
-                            return
-            except:
-                pass
-            try:
-                if database[f"links.toggle.{message.guild.id}"]:
-                    linkRegexes = ["http://", "https://", "www.", "discord.gg/"]
-                    for regex in linkRegexes:
-                        if regex in message.content.lower():
-                            await message.delete()
-                            await message.author.send("Please do not put links in your message!")
-                            return
-            except:
-                pass
-            try:
-                if "spam" not in message.channel.name:
-                    if database[f"spamming.toggle.{message.guild.id}"]:
-                        try:
-                            lastMessageTime = lastMessages[message.author.id]
-                        except:
-                            lastMessageTime = 0
-                        if (time.time() - lastMessageTime) < 15:
-                            try:
-                                strikes = messageStrikes[message.author.id]
-                            except:
-                                strikes = 0
-                            messageStrikes[message.author.id] = strikes + 1
-                            strikeLimit = 6
-                            try:
-                                strikeLimit = database[f"spamming.limit.{message.guild.id}"]
-                            except:
-                                pass
-                            if strikeLimit > 30:
-                                strikeLimit = 30
-                            if strikes >= strikeLimit:
+        if not message.author.guild_permissions.administrator:
+            if message.author.id not in variables.permissionOverride:
+                try:
+                    if database[f"insults.toggle.{message.guild.id}"]:
+                        insults = database[f"insults.list.{message.guild.id}"]
+                        for word in insults:
+                            if word.lower() in message.content.lower():
                                 await message.delete()
-                                await message.author.send("Stop spamming!")
+                                await message.author.send(f"Please do not use that word (**{word.lower()}**)!")
                                 return
-            except:
-                pass
+                except:
+                    pass
+                try:
+                    if database[f"links.toggle.{message.guild.id}"]:
+                        linkRegexes = ["http://", "https://", "www.", "discord.gg/"]
+                        for regex in linkRegexes:
+                            if regex in message.content.lower():
+                                await message.delete()
+                                await message.author.send("Please do not put links in your message!")
+                                return
+                except:
+                    pass
+                try:
+                    if "spam" not in message.channel.name:
+                        if database[f"spamming.toggle.{message.guild.id}"]:
+                            try:
+                                lastMessageTime = lastMessages[message.author.id]
+                            except:
+                                lastMessageTime = 0
+                            if (time.time() - lastMessageTime) < 15:
+                                try:
+                                    strikes = messageStrikes[message.author.id]
+                                except:
+                                    strikes = 0
+                                messageStrikes[message.author.id] = strikes + 1
+                                strikeLimit = 6
+                                try:
+                                    strikeLimit = database[f"spamming.limit.{message.guild.id}"]
+                                except:
+                                    pass
+                                if strikeLimit > 30:
+                                    strikeLimit = 30
+                                if strikes >= strikeLimit:
+                                    await message.delete()
+                                    await message.author.send("Stop spamming!")
+                                    return
+                except:
+                    pass
         lastMessages[message.author.id] = time.time()
 
         if message.content.startswith(prefix) and len(message.content) > 1:
