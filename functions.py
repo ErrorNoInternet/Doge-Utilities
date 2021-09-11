@@ -272,7 +272,7 @@ async def currencyCommand(message, prefix):
             amount = float(parts[1].replace(",", "").replace(" ", "")); inputCurrency = parts[2].lower(); outputCurrency = parts[3].lower()
             url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{inputCurrency}/{outputCurrency}.json"
             response = requests.get(url).json(); value = response[outputCurrency] * amount
-            embed = discord.Embed(title="Currency Convert", description=f"**{round(amount, 6):,} {inputCurrency.upper()}** = **{round(value, 6):,} {outputCurrency.upper()}**", color=variables.embedColor)
+            embed = discord.Embed(title="Currency Conversion", description=f"**{round(amount, 6):,} {inputCurrency.upper()}** = **{round(value, 6):,} {outputCurrency.upper()}**", color=variables.embedColor)
             await message.channel.send(embed=embed)
             addCooldown(message.author.id, "currency", 5)
         except:
