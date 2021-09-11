@@ -1757,7 +1757,7 @@ async def snipeCommand(message, prefix):
 
 async def jokeCommand(message, prefix):
     addCooldown(message.author.id, "joke", 3)
-    response = requests.get("https://official-joke-api.appspot.com/random_joke").json()
+    response = requests.get("http://random-joke-api.herokuapp.com/random").json()
     embed = discord.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embedColor)
     await message.channel.send(embed=embed)
 
