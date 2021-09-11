@@ -2368,8 +2368,8 @@ commandList = [
     Command("leave", [], leaveCommand, "leave <enable/disable/channel/set>", "Modify the leave messages"),
     Command("choose", [], chooseCommand, "choose <item>, <item>", "Choose a random item from the specified list"),
     Command("pypi", ["pip"], pypiCommand, "pypi <project>", "Display information about a package on PyPi"),
+    Command("discriminator", ["discrim"], discriminatorCommand, "discriminator", "Display other users with the same discriminator"),
     Command("joke", ["dadjoke"], jokeCommand, "joke", "Display a funny random joke from a random category"),
     Command("members", ["users"], membersCommand, "members", "Display information about this guild's members"),
     Command("trivia", ["quiz"], triviaCommand, "trivia", "Display a random trivia question from a random category"),
-    Command("discriminator", ["discrim"], discriminatorCommand, "discriminator", "Display other users with the same discriminator")
 ]
