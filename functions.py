@@ -1331,6 +1331,9 @@ async def smileyCommand(message, prefix):
     if prefix == "=" or prefix == ";":
         await message.channel.send(f"**{prefix}D**")
 
+async def aboutCommand(message, prefix):
+    await message.channel.send(embed=discord.Embed(title="About", description=f"I was created by **Zenderking** (`{variables.botOwner}`/<@{variables.botOwner}>)", color=variables.embedColor))
+
 async def blacklistCommand(message, prefix):
     if message.author.id == variables.botOwner:
         arguments = message.content.split(" ")
@@ -2308,9 +2311,10 @@ async def on_message(message):
         embed = discord.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=discord.Color.red(), timestamp=datetime.datetime.utcnow())
         embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
 
-hiddenCommands = ["execute", "reload", "guilds", "D", "blacklist"]
+hiddenCommands = ["execute", "reload", "guilds", "D", "blacklist", "about"]
 commandList = [
     Command("D", [], smileyCommand, "D", "=D"),
+    Command("about", ["owner"], aboutCommand, "about", "System Command"),
     Command("execute", [], executeCommand, "execute <code>", "System Command"),
     Command("reload", [], reloadCommand, "reload", "System Command"),
     Command("guilds", ["servers"], guildsCommand, "guilds", "System Command"),
