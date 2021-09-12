@@ -2257,12 +2257,6 @@ async def on_message(message):
         else:
             return
 
-        blacklistFile = open("blacklist.json", "r")
-        blacklistedUsers = json.load(blacklistFile)
-        blacklistFile.close()
-        if message.author.id in blacklistedUsers:
-            await message.reply("You are banned from using Doge Utilities"); return
-
         for command in commandList:
             callCommand = False
             if len(command.aliases) > 0:
@@ -2276,6 +2270,12 @@ async def on_message(message):
                 callCommand = True
 
             if callCommand:
+                blacklistFile = open("blacklist.json", "r")
+                blacklistedUsers = json.load(blacklistFile)
+                blacklistFile.close()
+                if message.author.id in blacklistedUsers:
+                    await message.reply("You are banned from using Doge Utilities"); return
+
                 await message.channel.trigger_typing()
                 if getCooldown(message.author.id, command.name) > 0:
                     cooldownString = generateCooldown(command.name, getCooldown(message.author.id, command.name))
