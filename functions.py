@@ -333,11 +333,11 @@ async def testsCommand(message, prefix):
                 for i in range(200):
                     process = psutil.Process(os.getpid())
                     memoryUsage = process.memory_info().rss / 1000000
-                    if memoryUsage > 100 and memoryUsage < 200:
+                    if memoryUsage > 100 and memoryUsage < 250:
                         description = description.replace(test, test.replace(":grey_question:", ":yellow_square:")); continue
-                    if memoryUsage > 200:
+                    if memoryUsage >= 250.0:
                         description = description.replace(test, test.replace(":grey_question:", ":orange_square:")); continue
-                    if round(psutil.cpu_percent()) == 100 or (client.latency * 1000) > 200:
+                    if round(psutil.cpu_percent()) >= 80 or (client.latency * 1000) > 800:
                         description = description.replace(test, test.replace(":grey_question:", ":yellow_square:")); continue
 
                     description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
