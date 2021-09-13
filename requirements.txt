@@ -1,0 +1,12 @@
+pytz
+flask
+psutil
+pillow
+buttons
+topggpy
+discord
+requests
+simpleeval
+sqlitedict
+python-dateutil
+discord-components
