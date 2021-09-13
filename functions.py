@@ -131,8 +131,8 @@ except:
         intents=requiredIntents,
     )
     client.max_messages = 512; snipeList = {}
-    threading.Thread(target=asyncio.run_coroutine_threadsafe, args=(manageMutedMembers(), client.loop, )).start()
-    threading.Thread(target=resetStrikes).start()
+    threading.Thread(name="manageMutedMembers", target=asyncio.run_coroutine_threadsafe, args=(manageMutedMembers(), client.loop, )).start()
+    threading.Thread(name="resetStrikes", target=resetStrikes).start()
 
 async def selectStatus():
     clientStatus = discord.Status.online; statusType = random.choice(variables.statusTypes)
@@ -345,7 +345,7 @@ async def testsCommand(message, prefix):
                 description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
         elif name == "Task Threads":
             try:
-                if threading.active_count() >= 5:
+                if threading.active_count() >= 3:
                     description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
                 else:
                     description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
