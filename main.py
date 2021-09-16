@@ -6,8 +6,10 @@ import asyncio
 import functions
 import threading
 
-firstRun = False; initializeTime = time.time()
-serverChannels = {}; serverRoles = {}
+initializeTime = time.time()
+firstRun = False
+serverRoles = {}
+serverChannels = {}
 if not os.path.exists("last-command"):
     file = open("last-command", "w+")
     file.write("0"); file.close()
@@ -85,8 +87,8 @@ async def on_guild_role_delete(role):
 
 @functions.client.event
 async def on_ready():
-    print("Initializing plugins...", end=''); functions.discord_components.DiscordComponents(functions.client)
-    print(f"\rSuccessfully logged in as {functions.client.user} in {round(time.time() - initializeTime, 1)} seconds")
+    functions.discord_components.DiscordComponents(functions.client)
+    print(f"Successfully logged in as {functions.client.user} in {round(time.time() - initializeTime, 1)} seconds")
     
     global firstRun
     if not firstRun:
