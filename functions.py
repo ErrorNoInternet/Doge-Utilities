@@ -994,11 +994,11 @@ async def binaryCommand(message, prefix):
     if len(arguments) > 2:
         arguments.pop(0); actionType = arguments[0]; arguments.pop(0); text = " ".join(arguments)
         try:
-            if actionType == "encode":
+            if actionType.lower() == "encode":
                 outputCode = ' '.join(format(ord(letter), '08b') for letter in text)
                 embed = discord.Embed(color=variables.embedColor)
                 embed.add_field(name="Text", value=text); embed.add_field(name="Binary", value="`" + outputCode + "`", inline=False)
-            elif actionType == "decode":
+            elif actionType.lower() == "decode":
                 outputText = ""
                 for letter in text.split():
                     number = int(letter, 2)
