@@ -1,5 +1,5 @@
 # Doge Utilities
-This is a simple Discord bot that has a ton of useful tools and utilities, such as raid protection, welcome/leave messages, autorole, auto-moderation, custom duration mutes, mute/ban roles, currency converters, color visualizers, memes, lookup commands, and a lot more!
+This is a simple Discord bot that has a ton of useful tools, such as raid protection, welcome/leave messages, autorole, auto-moderation, custom duration mutes, mute/ban roles, currency converters, color visualizers, memes, jokes, user lookup, filters, and a lot more!
 
 ### Server Setup
 - Setup-Muted
