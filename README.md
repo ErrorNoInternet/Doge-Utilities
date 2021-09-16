@@ -9,9 +9,7 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 ## Installation
 - Requirements:
   - Python 3.8+
-  - pip 20.x
-  - git (optional)
-  - port 8080
+  - a Discord developer application
 
 - Environment variables:
   - `TOKEN` - Discord bot token
@@ -20,7 +18,9 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
 ```sh
 git clone https://github.com/ErrorNoInternet/Doge-Utilities
-cd Doge-Utilities && pip install -r requirements.txt && python3 main.py
+cd Doge-Utilities
+pip install -r requirements.txt
+python3 main.py
 ```
 
 ## Links
