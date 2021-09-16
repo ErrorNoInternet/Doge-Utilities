@@ -79,6 +79,9 @@ async def on_guild_role_delete(role):
     except:
         return
 
+    if role.managed:
+        return
+
     global serverRoles
     for cachedRole in serverRoles[role.guild.id]:
         if role.id == cachedRole.id:
