@@ -6,7 +6,7 @@ botOwner = 531392146767347712
 messageManagers = [531392146767347712]
 permissionOverride = [531392146767347712]
 embedColor = 0x20c2f6
-largeNumber = 10000e1000+1000.1000
+largeNumber = 1e1000
 
 versionNumber = 0; buildNumber = 0
 for file in os.listdir():
@@ -21,7 +21,7 @@ versionNumber = round((versionNumber / 10) / 4, 2)
 statusTypes = ["Playing", "Watching", "Listening", "Competing"]
 status1 = ["with Discord", "with [users] users", "on some servers", "capture the flag"]
 status2 = ["over Discord", "[servers] servers", "Dogecoin stocks", "over the world"]
-status3 = ["lofi music", "requests", "port 80", "suggestions", "the radio", "[servers] servers"]
+status3 = ["lofi music", "requests", "suggestions", "the radio", "[servers] servers"]
 status4 = ["the Olympics", "[servers] servers", "a contest", "a competition"]
 weekdays = {1: "Monday", 2: "Tuesday", 3: "Wednesday", 4: "Thursday", 5: "Friday", 6: "Saturday", 7: "Sunday"}
 publicFlags = {
