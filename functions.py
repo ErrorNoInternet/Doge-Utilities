@@ -1808,7 +1808,7 @@ async def githubCommand(message, prefix):
         embed.add_field(name="Description", value=f"{response['description']}")
         embed.set_thumbnail(url=response["owner"]["avatar_url"])
         await message.channel.send(embed=embed)
-        addCooldown(message.author.id, "github", 8)
+        addCooldown(message.author.id, "github", 5)
     else:
         await message.channel.send(f"The syntax is `{prefix}github <repository>`")
 
@@ -1822,7 +1822,7 @@ async def chooseCommand(message, prefix):
         await message.channel.send(f"The syntax is `{prefix}choose <item>, <item>`")
 
 async def triviaCommand(message, prefix):
-    addCooldown(message.author.id, "trivia", 12)
+    addCooldown(message.author.id, "trivia", 10)
     url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 33)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
     response = requests.get(url).json()
     description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
