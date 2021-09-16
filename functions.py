@@ -1,6 +1,3 @@
-if __name__ == "__main__":
-    exit()
-
 import os
 import io
 import sys
@@ -551,7 +548,7 @@ async def setupBannedCommand(message, prefix):
         await oldMessage.edit(content=f"Unable to generate the **Banned** role for this guild")
         return
     await oldMessage.edit(content=f"Successfully generated the **Banned** role for this guild")
-    addCooldown(message.author.id, "setup", 120)
+    addCooldown(message.author.id, "setup", 60)
 
 async def setupMutedCommand(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.id in variables.permissionOverride:
@@ -588,7 +585,7 @@ async def setupMutedCommand(message, prefix):
         await oldMessage.edit(f"Unable to generate the **Muted** role for this guild")
         return
     await oldMessage.edit(f"Successfully generated the **Muted** role for this guild")
-    addCooldown(message.author.id, "setup", 120)
+    addCooldown(message.author.id, "setup", 60)
 
 async def randomCommand(message, prefix):
     arguments = message.content.split(" "); highNumber = 0; lowNumber = 0
@@ -975,11 +972,11 @@ async def base64Command(message, prefix):
     if len(arguments) > 2:
         arguments.pop(0); actionType = arguments[0]; arguments.pop(0); text = " ".join(arguments)
         try:
-            if actionType == "encode":
+            if actionType.lower() == "encode":
                 outputCode = base64.b64encode(text.encode("utf-8")).decode("utf-8")
                 embed = discord.Embed(color=variables.embedColor)
                 embed.add_field(name="Text", value=text); embed.add_field(name="Base64", value="`" + outputCode + "`", inline=False)
-            elif actionType == "decode":
+            elif actionType.lower() == "decode":
                 outputText = base64.b64decode(text.encode("utf-8")).decode("utf-8")
                 embed = discord.Embed(color=variables.embedColor)
                 embed.add_field(name="Base64", value="`" + text + "`"); embed.add_field(name="Text", value=outputText, inline=False)
