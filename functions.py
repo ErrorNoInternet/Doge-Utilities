@@ -642,7 +642,7 @@ async def execute_command(message, prefix):
             if "#go" in code:
                 output_language = "go"
 
-            stdout = io.stringIO()
+            stdout = io.StringIO()
             try:
                 with contextlib.redirect_stdout(stdout):
                     if "#globals" in code:
