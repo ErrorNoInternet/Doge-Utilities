@@ -320,14 +320,14 @@ async def testsCommand(message, prefix):
         name = test.split(":grey_question: ")[1].replace("`", "")
         if name == "Code Integrity":
             try:
-                for i in range(20):
+                for i in range(10):
                     reloadData()
                 description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
             except:
                 description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
         elif name == "Bot Status":
             try:
-                for i in range(200):
+                for i in range(100):
                     process = psutil.Process(os.getpid())
                     memoryUsage = process.memory_info().rss / 1000000
                     if memoryUsage >= 250:
@@ -348,7 +348,7 @@ async def testsCommand(message, prefix):
                 description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
         elif name == "Bot Version":
             try:
-                for i in range(20):
+                for i in range(10):
                     fileSize = 0
                     for object in os.listdir():
                         try:
@@ -361,7 +361,7 @@ async def testsCommand(message, prefix):
                 description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
         elif name == "Raid Protection":
             try:
-                for i in range(30):
+                for i in range(20):
                     serverRoles = {}; serverChannels = {}
                     for guild in client.guilds:
                         serverChannels[guild.id] = guild.channels
@@ -382,7 +382,7 @@ async def testsCommand(message, prefix):
                 description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
         elif name == "Cooldown System":
             try:
-                for i in range(300):
+                for i in range(50):
                     addCooldown(message.author.id, "test-command", 60)
                     if round(getCooldown(message.author.id, "test-command")) == 60:
                         description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
@@ -392,7 +392,7 @@ async def testsCommand(message, prefix):
                 description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
         elif name == "Image Library":
             try:
-                for i in range(150):
+                for i in range(10):
                     if generateColor(f"({random.randint(0, 256)}, {random.randint(0, 256)}, {random.randint(0, 256)})") == 1:
                         description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
                     else:
@@ -402,7 +402,7 @@ async def testsCommand(message, prefix):
             
         embed = discord.Embed(title="Doge Tests", description=description, color=variables.embedColor)
         await oldMessage.edit(embed=embed)
-    addCooldown(message.author.id, "tests", 60)
+    addCooldown(message.author.id, "tests", 300)
 
 async def statusCommand(message, prefix):
     memberCount = 0; channelCount = 0; uptime = ""
