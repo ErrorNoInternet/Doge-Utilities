@@ -434,7 +434,7 @@ async def status_command(message, prefix):
     embed.add_field(name="Member Count", value="```" + str(member_count) + "```")
     embed.add_field(name="Channel Count", value="```" + str(channel_count) + "```")
     embed.add_field(name="Command Count", value="```" + str(len(command_list)) + "```")
-    embed.add_field(name="Discord Version", value="```" + disnake.__version__ + "```")
+    embed.add_field(name="Disnake Version", value="```" + disnake.__version__ + "```")
     embed.add_field(name="Bot Version", value="```" + f"{variables.version_number}.{variables.build_number}" + "```")
     embed.add_field(name="Bot Uptime", value="```" + uptime + "```")
 
