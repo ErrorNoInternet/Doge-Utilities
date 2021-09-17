@@ -194,6 +194,7 @@ def reload_data():
         contextlib,
         simpleeval,
         sqlitedict,
+        discord_components,
     ]
     time_list = []
     for module in modules:
