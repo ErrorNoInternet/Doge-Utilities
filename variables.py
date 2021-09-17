@@ -5,7 +5,7 @@ shard_count = 2
 bot_owner = 531392146767347712
 message_managers = [531392146767347712]
 permission_override = [531392146767347712]
-embed_color = 0x20c2f6
+embed_color = 0xf1c40f
 large_number = 1e1000
 
 version_number = 0; build_number = 0

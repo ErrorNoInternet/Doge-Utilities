@@ -27,6 +27,7 @@ import contextlib
 import simpleeval
 import sqlitedict
 from PIL import Image
+import discord_components
 from dateutil import parser
 
 sqlitedict.PICKLE_PROTOCOL = 3
@@ -43,7 +44,7 @@ class Command:
         self.usage = usage
         self.description = description
 
-class context_object:
+class ContextObject:
     def __init__(self, client, message):
         super().__init__()
 
@@ -208,7 +209,7 @@ def reload_data():
             longest[0] = length; longest[1] = modules[time_list.index(length)]
     if round(total_time, 1) == 1.0:
         total_time = 1
-    return f"Successfully reloaded all modules in **{round(total_time, 1)} {'second' if round(total_time, 1) == 1 else 'seconds'}**\n_average: **{round(total_time/len(time_list), 2)} {'second' if round(total_time, 1) == 1 else 'seconds'}**, Longest: `{longest[1].__name__}` at **{round(longest[0], 2)} {'second' if round(total_time, 1) == 1 else 'seconds'}**"
+    return f"Successfully reloaded all modules in **{round(total_time, 1)} {'second' if round(total_time, 1) == 1 else 'seconds'}**\nAverage: **{round(total_time/len(time_list), 2)} {'second' if round(total_time, 1) == 1 else 'seconds'}**, Longest: `{longest[1].__name__}` at **{round(longest[0], 2)} {'second' if round(total_time, 1) == 1 else 'seconds'}**"
 
 def get_cooldown(id, command):
     try:
@@ -270,10 +271,10 @@ async def currency_command(message, prefix):
         for key in response.keys():
             output += f"{key}: {response[key]}\n"
         segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
-        pager = custom_pager(
+        pager = CustomPager(
             timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", entries=segments,
         )
-        await pager.start(context_object(client, message))
+        await pager.start(ContextObject(client, message))
         add_cooldown(message.author.id, "currency", 5)
     else:
         await message.channel.send(f"The syntax is `{prefix}currency <input> <amount> <output>`"); return
@@ -432,7 +433,7 @@ async def status_command(message, prefix):
     embed.add_field(name="Member Count", value="```" + str(member_count) + "```")
     embed.add_field(name="Channel Count", value="```" + str(channel_count) + "```")
     embed.add_field(name="Command Count", value="```" + str(len(command_list)) + "```")
-    embed.add_field(name="Discord Version", value="```" + discord.__version__ + "```")
+    embed.add_field(name="Discord Version", value="```" + disnake.__version__ + "```")
     embed.add_field(name="Bot Version", value="```" + f"{variables.version_number}.{variables.build_number}" + "```")
     embed.add_field(name="Bot Uptime", value="```" + uptime + "```")
 
@@ -451,7 +452,7 @@ async def version_command(message, prefix):
             file_size += len(file.read()); file.close()
         except:
             pass
-    embed = disnake.Embed(title="Bot Version", description=f"Version: **{variables.version_number}**\n_build: **{variables.build_number}**\n_python: **{sys.version.split(' ')[0]}**\n_discord: **{discord.__version__}**\n_size: **{round(file_size / 1000)} KB**", color=variables.embed_color)
+    embed = disnake.Embed(title="Bot Version", description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
     await message.channel.send(embed=embed)
     add_cooldown(message.author.id, "version", 5)
 
@@ -461,8 +462,8 @@ async def invite_command(message, prefix):
         guild_member = False
     await message.channel.send("Here's the link to invite me to another server",
         components=[[
-            discord_components.Button(style=discord_components.button_style.URL, label="Invite Link", url="https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"),
-            discord_components.Button(style=discord_components.button_style.red, label="Leave Server", disabled=guild_member)
+            discord_components.Button(style=discord_components.ButtonStyle.URL, label="Invite Link", url="https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"),
+            discord_components.Button(style=discord_components.ButtonStyle.red, label="Leave Server", disabled=guild_member)
     ]])
     result = await client.wait_for("button_click", check = lambda item: item.component.label == "Leave Server")
     if result.channel == message.channel:
@@ -488,8 +489,8 @@ async def prefix_command(message, prefix):
             old_message = await message.channel.send(
                 f"Are you sure you want to change this server's prefix to `{new_prefix}`?",
                 components=[[
-                    discord_components.Button(style=discord_components.button_style.green, label="Yes"),
-                    discord_components.Button(style=discord_components.button_style.green, label="No")
+                    discord_components.Button(style=discord_components.ButtonStyle.green, label="Yes"),
+                    discord_components.Button(style=discord_components.ButtonStyle.green, label="No")
                 ]]
             )
             def check(result):
@@ -601,7 +602,7 @@ async def random_command(message, prefix):
     old_message = await message.channel.send(
             f"Your random number is **{random_number}**",
             components=[
-                discord_components.Button(style=discord_components.button_style.gray, label=button_text)
+                discord_components.Button(style=discord_components.ButtonStyle.gray, label=button_text)
     ]); uses = 0
     while uses < 5:
         result = await client.wait_for("button_click", check = lambda item: item.component.label == button_text)
@@ -614,7 +615,7 @@ async def random_command(message, prefix):
                 await result.respond(content=f"Successfully generated a new number ({5 - uses} {display_text} left)")
             else:
                 await result.respond(type=4, content="You are not the sender of this command!")
-    await old_message.edit(components=[[discord_components.Button(style=discord_components.button_style.gray, label=button_text, disabled=True)]])
+    await old_message.edit(components=[[discord_components.Button(style=discord_components.ButtonStyle.gray, label=button_text, disabled=True)]])
 
 async def execute_command(message, prefix):
     if message.author.id == variables.bot_owner:
@@ -659,10 +660,10 @@ async def execute_command(message, prefix):
             segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
             if len(output) > 2001:
                 output = output.replace("`", "\`")
-                pager = custom_pager(
+                pager = CustomPager(
                     timeout=120, length=1, prefix=f"```{output_language}\n", suffix="```", color=variables.embed_color, title=f"Code Output ({len(segments)} pages)", entries=segments,
                 )
-                await pager.start(context_object(client, message))
+                await pager.start(ContextObject(client, message))
             else:
                 await message.channel.send(output)
         except Exception as error:
@@ -688,7 +689,7 @@ async def disconnect_members_command(message, prefix):
         add_cooldown(message.author.id, "disconnect-members", variables.large_number); members = 0; failed = 0
 
         for channel in message.guild.channels:
-            if type(channel) == discord.channel.voice_channel:
+            if type(channel) == disnake.channel.voice_channel:
                 for member in channel.members:
                     try:
                         await member.edit(voice_channel=None); members += 1
@@ -1030,8 +1031,8 @@ async def clear_command(message, prefix):
             await message.channel.send(
                 f"Are you sure you want to clear more than **500 messages** in this channel?",
                 components=[[
-                    discord_components.Button(style=discord_components.button_style.green, label="Yes"),
-                    discord_components.Button(style=discord_components.button_style.green, label="No")
+                    discord_components.Button(style=discord_components.ButtonStyle.green, label="Yes"),
+                    discord_components.Button(style=discord_components.ButtonStyle.green, label="No")
                 ]]
             )
             result = await client.wait_for("button_click")
@@ -1156,7 +1157,7 @@ async def color_command(message, prefix):
             embed.set_image(url="attachment://color.png")
             embed.add_field(name="Hex", value=hex_color)
             embed.add_field(name="RGB", value=str(rgb_color), inline=True)
-        await message.channel.send(embed=embed, file=discord.File("images/color.png"))
+        await message.channel.send(embed=embed, file=disnake.File("images/color.png"))
     else:
         await message.channel.send(f"The syntax is `{prefix}color <color code>`")
     add_cooldown(message.author.id, "color", 3)
@@ -1175,28 +1176,28 @@ async def time_command(message, prefix):
                 for timezone in pytz.all_timezones:
                     output += timezone + "\n"
                 segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
-                pager = custom_pager(
+                pager = CustomPager(
                     timeout=60, color=variables.embed_color,
                     length=1, prefix="```\n", suffix="```",
                     title=f"Timezone List", entries=segments,
                 )
-                await pager.start(context_object(client, message))
+                await pager.start(ContextObject(client, message))
             elif text.lower() == "epoch" or text.lower() == "unix":
                 embed = disnake.Embed(title="Time", description=f"Current epoch time: **{round(time.time())}**", color=variables.embed_color)
                 await message.channel.send(embed=embed)
             else:
                 user_timezone = pytz.timezone(text.replace(" ", "_"))
                 now = datetime.datetime.now(user_timezone)
-                embed = disnake.Embed(title="Time", description=f"Information for **{text.replace(' ', '_')}**\n\n_time: **{str(now.time()).split('.')[0]}**\n_date: **{now.date()}**\n_weekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
+                embed = disnake.Embed(title="Time", description=f"Information for **{text.replace(' ', '_')}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
                 await message.channel.send(embed=embed)
-        except key_error:
+        except KeyError:
             text = "_".join(arguments)
             for timezone in pytz.all_timezones:
                 try:
                     city = timezone.split("/")[1]
                     if text.lower() == city.lower():
                         user_timezone = pytz.timezone(timezone); now = datetime.datetime.now(user_timezone)
-                        embed = disnake.Embed(title="Time", description=f"Information for **{timezone}**\n\n_time: **{str(now.time()).split('.')[0]}**\n_date: **{now.date()}**\n_weekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
+                        embed = disnake.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
                         await message.channel.send(embed=embed); return
                 except:
                     pass
@@ -1240,10 +1241,10 @@ async def stackoverflow_command(message, prefix):
             stackoverflow_parameters["q"] = text; parameters = stackoverflow_parameters
             response = requests.get(url="https://api.stackexchange.com/2.2/search/advanced", params=parameters).json()
             if not response["items"]:
-                embed = disnake.Embed(title="stack_overflow", description=f"No search results found for **{text}**", color=disnake.Color.red())
+                embed = disnake.Embed(title="StackOverflow", description=f"No search results found for **{text}**", color=disnake.Color.red())
                 await message.channel.send(embed=embed); return
             final_results = response["items"][:5]
-            embed = disnake.Embed(title="stack_overflow", description=f"Here are the top **{len(final_results)}** results for **{text}**", color=variables.embed_color)
+            embed = disnake.Embed(title="StackOverflow", description=f"Here are the top **{len(final_results)}** results for **{text}**", color=variables.embed_color)
             for result in final_results:
                 tags = ""
                 for tag in result['tags'][:4]:
@@ -1260,7 +1261,7 @@ async def stackoverflow_command(message, prefix):
                     inline = False
                 )
             await message.channel.send(embed=embed)
-        except discord.HTTPException:
+        except disnake.HTTPException:
             await message.channel.send("The search result is too long!"); return
         except:
             await message.channel.send("Unable to search for item"); return
@@ -1271,7 +1272,7 @@ async def stackoverflow_command(message, prefix):
 async def source_command(message, prefix):
     description = "You can find my code [here](https://github.com/error_no_internet/Doge-Utilities)\n"
     response = requests.get("https://api.github.com/repos/error_no_internet/Doge-Utilities").json()
-    description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\n_stargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
+    description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
     embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
     embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
     add_cooldown(message.author.id, "source", 20)
@@ -1758,7 +1759,7 @@ async def members_command(message, prefix):
             users += 1
     embed = disnake.Embed(
         title="Guild Members",
-        description=f"User accounts: **{users}**\n_bot accounts: **{bots}**\n_total members: **{users + bots}**",
+        description=f"User accounts: **{users}**\nBot accounts: **{bots}**\nTotal members: **{users + bots}**",
         color=variables.embed_color
     )
     await message.channel.send(embed=embed)
@@ -1773,7 +1774,7 @@ async def github_command(message, prefix):
         response = requests.get(f"https://api.github.com/repos/{arguments[1]}").json()
         try:
             if response["message"] == "Not Found":
-                await message.channel.send("That git_hub repository was not found"); return
+                await message.channel.send("That GitHub repository was not found"); return
         except:
             pass
         embed = disnake.Embed(color=variables.embed_color)
@@ -1812,14 +1813,14 @@ async def trivia_command(message, prefix):
     add_cooldown(message.author.id, "trivia", 10)
     url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 33)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
     response = requests.get(url).json()
-    description = f"**{html.unescape(response['results'][0]['question'])}**\n_category: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
+    description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
     answers = response['results'][0]['incorrect_answers']
     answers.append(response['results'][0]['correct_answer'])
     correct_answer = html.unescape(response['results'][0]['correct_answer'])
     buttons = [[]]
     for i in range(len(answers)):
         answer = random.choice(answers); answers.remove(answer)
-        buttons[0].append(discord_components.Button(style=discord_components.button_style.gray, label=html.unescape(answer)))
+        buttons[0].append(discord_components.Button(style=discord_components.ButtonStyle.gray, label=html.unescape(answer)))
     embed = disnake.Embed(
         description=description,
         color=variables.embed_color,
@@ -1835,9 +1836,9 @@ async def trivia_command(message, prefix):
     new_buttons = [[]]
     for old_button in buttons[0]:
         if old_button.label == correct_answer:
-            new_button = discord_components.Button(style=discord_components.button_style.green, label=old_button.label, disabled=True)
+            new_button = discord_components.Button(style=discord_components.ButtonStyle.green, label=old_button.label, disabled=True)
         else:
-            new_button = discord_components.Button(style=discord_components.button_style.red, label=old_button.label, disabled=True)
+            new_button = discord_components.Button(style=discord_components.ButtonStyle.red, label=old_button.label, disabled=True)
         new_buttons[0].append(new_button)
     await old_message.edit(embed=embed, components=new_buttons)
 
@@ -1900,10 +1901,10 @@ async def discriminator_command(message, prefix):
 
     output = "\n".join(members)
     segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
-    pager = custom_pager(
+    pager = CustomPager(
         timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embed_color, title="Discriminator", entries=segments,
     )
-    await pager.start(context_object(client, message))
+    await pager.start(ContextObject(client, message))
     add_cooldown(message.author.id, "discriminator", 5)
 
 async def help_command(message, prefix):
@@ -1950,8 +1951,8 @@ async def help_command(message, prefix):
                 command_example = prefix + parse_variables(command.usage)
                 additional_arguments = ""
                 if command_arguments != "None":
-                    additional_arguments = f"\n_additional arguments: `{command_arguments}`"
-                command = f"Command: `{prefix}{command.name}`{additional_arguments}\n_usage example: `{command_example}`\n\n**{command.description}**"
+                    additional_arguments = f"\nAdditional arguments: `{command_arguments}`"
+                command = f"Command: `{prefix}{command.name}`{additional_arguments}\nUsage example: `{command_example}`\n\n**{command.description}**"
                 embed = disnake.Embed(title="Doge Commands", description=command, color=variables.embed_color, timestamp=datetime.datetime.utcnow())
                 embed.set_footer(text=f"Viewing command help page")
                 await message.channel.send(embed=embed); return
@@ -2117,7 +2118,7 @@ async def on_member_remove(member):
 async def on_guild_join(guild):
     try:
         async for entry in guild.audit_logs(limit=10):
-            if entry.action == discord.audit_log_action.bot_add:
+            if entry.action == disnake.AuditLogAction.bot_add:
                 if entry.target.id == client.user.id:
                     embed = disnake.Embed(
                         title="Hello there",
@@ -2270,7 +2271,7 @@ async def on_message(message):
                     embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)
                     await message.channel.send(embed=embed); return
                 await command.function(message, prefix); return
-    except discord.errors.Forbidden:
+    except disnake.errors.Forbidden:
         await message.author.send("I do not have the required permissions!")
     except Exception as error:
         if "50035" in str(error):
@@ -2293,7 +2294,7 @@ async def on_message(message):
                 except:
                     pass
 
-        embed = disnake.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\n_this error has been sent to our bot creators.\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.utcnow())
+        embed = disnake.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.utcnow())
         embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
 
 hidden_commands = ["execute", "reload", "guilds", "D", "blacklist", "about"]
@@ -2346,17 +2347,17 @@ command_list = [
     Command("binary", ["bin"], binary_command, "binary <encode/decode> <text>", "Convert the text to/from binary"),
     Command("nickname", ["nick"], nickname_command, "nickname <user> <nickname>", "Change or update a user's nickname"),
     Command("currency", ["cur"], currency_command, "currency <amount> <currency> <currency>", "Convert currencies"),
-    Command("stackoverflow", ["so"], stackoverflow_command, "stackoverflow <text>", "Search for code help on stack_overflow"),
+    Command("stackoverflow", ["so"], stackoverflow_command, "stackoverflow <text>", "Search for code help on StackOverflow"),
     Command("mute", [], mute_command, "mute <user> <minutes>", "Mute the specified member for the specified duration"),
     Command("unmute", [], unmute_command, "unmute <user>", "Unmute the specified member on the current guild"),
-    Command("github", ["gh", "repo", "git"], github_command, "github <repository>", "Display information about a git_hub repository"),
+    Command("github", ["gh", "repo", "git"], github_command, "github <repository>", "Display information about a GitHub repository"),
     Command("insults", [], insults_command, "insults <add/remove/enable/disable/list>", "Modify the insults filter"),
     Command("links", [], links_command, "links <enable/disable>", "Enable or disable the link/advertisement filter"),
     Command("spam", [], spamming_command, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
     Command("welcome", [], welcome_command, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", [], leave_command, "leave <enable/disable/channel/set>", "Modify the leave messages"),
     Command("choose", [], choose_command, "choose <item>, <item>", "Choose a random item from the specified list"),
-    Command("pypi", ["pip"], pypi_command, "pypi <project>", "Display information about a package on py_pi"),
+    Command("pypi", ["pip"], pypi_command, "pypi <project>", "Display information about a package on PyPi"),
     Command("discriminator", ["discrim"], discriminator_command, "discriminator", "Display other users with the same discriminator"),
     Command("joke", ["dadjoke"], joke_command, "joke", "Display a funny random joke from a random category"),
     Command("members", ["users"], members_command, "members", "Display information about this guild's members"),

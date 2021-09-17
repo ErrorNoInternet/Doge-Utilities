@@ -3,7 +3,7 @@
 [![Bot Status](https://top.gg/api/widget/status/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 [![Server Count](https://top.gg/api/widget/servers/854965721805226005.svg?noavatar=true)](https://top.gg/bot/854965721805226005)
 
-A simple lightweight Discord utility bot written in Python with [discord.py](https://github.com/Rapptz/discord.py)\
+A simple lightweight Discord utility bot written in Python with [disnake](https://github.com/EQUENOS/disnake)\
 Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
 ## Installation

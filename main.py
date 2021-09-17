@@ -6,6 +6,13 @@ import asyncio
 import functions
 import threading
 
+if os.getenv("TOKEN") == None:
+    print("Unable to load TOKEN variable"); exit()
+if os.getenv("SECRET") == None:
+    print("Unable to load SECRET variable"); exit()
+if os.getenv("TOPGG_TOKEN") == None:
+    print("Unable to load TOPGG_TOKEN variable"); exit()
+
 initialize_time = time.time()
 first_run = False
 server_roles = {}
@@ -16,13 +23,6 @@ if not os.path.exists("last-command"):
 if not os.path.exists("blacklist.json"):
     file = open("blacklist.json", "w+")
     file.write("[]"); file.close()
-
-if os.getenv("TOKEN") == None:
-    print("Unable to load TOKEN variable"); exit()
-if os.getenv("SECRET") == None:
-    print("Unable to load SECRET variable"); exit()
-if os.getenv("TOPGG_TOKEN") == None:
-    print("Unable to load TOPGG_TOKEN variable"); exit()
 
 def update_objects():
     time.sleep(2)
@@ -90,6 +90,7 @@ async def on_guild_role_delete(role):
 
 @functions.client.event
 async def on_ready():
+    functions.discord_components.DiscordComponents(functions.client)
     print(f"Successfully logged in as {functions.client.user} in {round(time.time() - initialize_time, 1)} seconds")
     
     global first_run
@@ -108,7 +109,10 @@ async def on_member_remove(member):
 
 @functions.client.event
 async def on_message(message):
-    await functions.on_message(message)
+    try:
+        await functions.on_message(message)
+    except Exception as error:
+        print("Uncaught exception: " + str(error))
 
 @functions.client.event
 async def on_message_delete(message):
