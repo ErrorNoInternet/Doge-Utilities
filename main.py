@@ -1,15 +1,15 @@
 import os
 import time
 import topgg
-import discord
+import disnake
 import asyncio
 import functions
 import threading
 
-initializeTime = time.time()
-firstRun = False
-serverRoles = {}
-serverChannels = {}
+initialize_time = time.time()
+first_run = False
+server_roles = {}
+server_channels = {}
 if not os.path.exists("last-command"):
     file = open("last-command", "w+")
     file.write("0"); file.close()
@@ -24,27 +24,27 @@ if os.getenv("SECRET") == None:
 if os.getenv("TOPGG_TOKEN") == None:
     print("Unable to load TOPGG_TOKEN variable"); exit()
 
-def updateObjects():
+def update_objects():
     time.sleep(2)
     while True:
         for guild in functions.client.guilds:
-            serverChannels[guild.id] = guild.channels
-            serverRoles[guild.id] = guild.roles
+            server_channels[guild.id] = guild.channels
+            server_roles[guild.id] = guild.roles
         time.sleep(8)
 
-async def randomStatus():
+async def random_status():
     idle = False; cycles = 120
     while True:
         cycles += 1
         try:
-            lastCommandFile = open("last-command", "r")
-            lastCommand = int(lastCommandFile.read()); lastCommandFile.close()
-            if time.time() - lastCommand > 180:
+            last_command_file = open("last-command", "r")
+            last_command = int(last_command_file.read()); last_command_file.close()
+            if time.time() - last_command > 180:
                 if not idle:
-                    await functions.client.change_presence(status=discord.Status.idle); idle = True
+                    await functions.client.change_presence(status=disnake.Status.idle); idle = True
             else:
                 if idle or cycles > 120:
-                    await functions.selectStatus()
+                    await functions.select_status()
                     cycles = 0; idle = False
         except Exception as error:
             print("Error: " + str(error))
@@ -53,28 +53,28 @@ async def randomStatus():
 @functions.client.event
 async def on_guild_channel_delete(channel):
     try:
-        currentSetting = functions.database[f"{channel.guild.id}.raid-protection"]
-        if not currentSetting:
+        current_setting = functions.database[f"{channel.guild.id}.raid-protection"]
+        if not current_setting:
             return
     except:
         return
 
-    global serverChannels
-    for cachedChannel in serverChannels[channel.guild.id]:
-        if channel.id == cachedChannel.id:
-            if type(channel) == discord.TextChannel:
-                newChannel = await channel.guild.create_text_channel(name=cachedChannel.name, position=cachedChannel.position, category=cachedChannel.category, slowmode_delay=cachedChannel.slowmode_delay, topic=cachedChannel.topic)
-                await newChannel.edit(is_nsfw=cachedChannel.is_nsfw())
-            elif type(channel) == discord.CategoryChannel:
-                await channel.guild.create_category(name=cachedChannel.name, position=cachedChannel.position)
+    global server_channels
+    for cached_channel in server_channels[channel.guild.id]:
+        if channel.id == cached_channel.id:
+            if type(channel) == disnake.text_channel:
+                new_channel = await channel.guild.create_text_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, slowmode_delay=cached_channel.slowmode_delay, topic=cached_channel.topic)
+                await new_channel.edit(is_nsfw=cached_channel.is_nsfw())
+            elif type(channel) == disnake.category_channel:
+                await channel.guild.create_category(name=cached_channel.name, position=cached_channel.position)
             else:
-                await channel.guild.create_voice_channel(name=cachedChannel.name, position=cachedChannel.position, category=cachedChannel.category, user_limit=cachedChannel.user_limit, bitrate=cachedChannel.bitrate)
+                await channel.guild.create_voice_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, user_limit=cached_channel.user_limit, bitrate=cached_channel.bitrate)
 
 @functions.client.event
 async def on_guild_role_delete(role):
     try:
-        currentSetting = functions.database[f"{role.guild.id}.raid-protection"]
-        if not currentSetting:
+        current_setting = functions.database[f"{role.guild.id}.raid-protection"]
+        if not current_setting:
             return
     except:
         return
@@ -82,22 +82,21 @@ async def on_guild_role_delete(role):
     if role.managed:
         return
 
-    global serverRoles
-    for cachedRole in serverRoles[role.guild.id]:
-        if role.id == cachedRole.id:
-            newRole = await role.guild.create_role(name=cachedRole.name, color=cachedRole.color, permissions=cachedRole.permissions)
-            await newRole.edit(position=cachedRole.position)
+    global server_roles
+    for cached_role in server_roles[role.guild.id]:
+        if role.id == cached_role.id:
+            new_role = await role.guild.create_role(name=cached_role.name, color=cached_role.color, permissions=cached_role.permissions)
+            await new_role.edit(position=cached_role.position)
 
 @functions.client.event
 async def on_ready():
-    functions.discord_components.DiscordComponents(functions.client)
-    print(f"Successfully logged in as {functions.client.user} in {round(time.time() - initializeTime, 1)} seconds")
+    print(f"Successfully logged in as {functions.client.user} in {round(time.time() - initialize_time, 1)} seconds")
     
-    global firstRun
-    if not firstRun:
-        firstRun = True
-        threading.Thread(name="raid-protection", target=updateObjects).start()
-        await randomStatus()
+    global first_run
+    if not first_run:
+        first_run = True
+        threading.Thread(name="raid-protection", target=update_objects).start()
+        await random_status()
 
 @functions.client.event
 async def on_member_join(member):
@@ -116,8 +115,8 @@ async def on_message_delete(message):
     await functions.on_message_delete(message)
 
 @functions.client.event
-async def on_message_edit(message, newMessage):
-    await functions.on_message_delete(message, newMessage)
+async def on_message_edit(message, new_message):
+    await functions.on_message_delete(message, new_message)
 
 @functions.client.event
 async def on_guild_join(guild):

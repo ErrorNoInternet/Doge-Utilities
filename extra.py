@@ -1,5 +1,5 @@
 import string
-import discord
+import disnake
 import variables
 import functions
 
@@ -25,7 +25,7 @@ async def postAnnouncement(title, text, mention=False):
         if guild.id == 879662689708806154:
             for channel in guild.channels:
                 if channel.id == 879665441545519134:
-                    embed = discord.Embed(title=title, description=text, color=variables.embedColor)
+                    embed = disnake.Embed(title=title, description=text, color=variables.embedColor)
                     announcement = await channel.send("<@&879665075642835006>" if mention else "", embed=embed)
                     await announcement.publish()
 

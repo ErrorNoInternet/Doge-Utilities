@@ -1,12 +1,9 @@
 pytz
-flask
 psutil
 pillow
-buttons
 topggpy
-discord
+disnake
 requests
 simpleeval
 sqlitedict
 python-dateutil
-discord-components
