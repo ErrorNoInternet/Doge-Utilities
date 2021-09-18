@@ -7,4 +7,3 @@ requests
 simpleeval
 sqlitedict
 python-dateutil
-discord-components

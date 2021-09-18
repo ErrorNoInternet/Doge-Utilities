@@ -90,7 +90,6 @@ async def on_guild_role_delete(role):
 
 @functions.client.event
 async def on_ready():
-    functions.discord_components.DiscordComponents(functions.client)
     print(f"Successfully logged in as {functions.client.user} in {round(time.time() - initialize_time, 1)} seconds")
     
     global first_run

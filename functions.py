@@ -27,7 +27,6 @@ import contextlib
 import simpleeval
 import sqlitedict
 from PIL import Image
-import discord_components
 from dateutil import parser
 
 sqlitedict.PICKLE_PROTOCOL = 3
@@ -194,7 +193,6 @@ def reload_data():
         contextlib,
         simpleeval,
         sqlitedict,
-        discord_components,
     ]
     time_list = []
     for module in modules:
@@ -442,7 +440,7 @@ async def status_command(message, prefix):
     add_cooldown(message.author.id, "status", 5)
 
 async def support_command(message, prefix):
-    embed = disnake.Embed(title="Support Server", description="You can join Doge Utilities's official server [here](https://discord.gg/3Tp7R8FUs_c)", color=variables.embed_color)
+    embed = disnake.Embed(title="Support Server", description=f"You can join Doge Utilities's official server [here]({variables.support_server_invite})", color=variables.embed_color)
     await message.channel.send(embed=embed)
 
 async def version_command(message, prefix):
@@ -461,48 +459,73 @@ async def invite_command(message, prefix):
     guild_member = True
     if message.author == message.guild.owner:
         guild_member = False
-    await message.channel.send("Here's the link to invite me to another server",
-        components=[[
-            discord_components.Button(style=discord_components.ButtonStyle.URL, label="Invite Link", url="https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"),
-            discord_components.Button(style=discord_components.ButtonStyle.red, label="Leave Server", disabled=guild_member)
-    ]])
-    result = await client.wait_for("button_click", check = lambda item: item.component.label == "Leave Server")
-    if result.channel == message.channel:
-        if result.author == message.author:
-            await result.respond(type=4, content="Are you sure you want me to leave this server? Please press the button again to confirm.")
-            result = await client.wait_for("button_click", check = lambda item: item.component.label == "Leave Server")
-            if result.channel == message.channel:
-                if result.author == message.author:
-                    if result.author == message.guild.owner:
-                        await result.respond(type=4, content="Leaving server...")
-                        await message.guild.leave()
-        else:
-            await result.respond(type=4, content="You are not the sender of the command!")
+
+    class CommandView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+
+            self.clicked = False
+            self.add_item(
+                disnake.ui.Button(
+                    label="Support Server",
+                    url=variables.support_server_invite,
+                )
+            )
+            self.add_item(
+                disnake.ui.Button(
+                    label="Invite Link",
+                    url=f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=8&scope=applications.commands%20bot",
+                )
+            )
+
+        @disnake.ui.button(label="Leave Server", style=disnake.ButtonStyle.red, disabled=guild_member)
+        async def leave_server(self, _, interaction):
+            if interaction.author == message.author:
+                if self.clicked:
+                    await interaction.response.send_message("Leaving server...", ephemeral=True)
+                    await message.guild.leave()
+                else:
+                    self.clicked = True
+                    await interaction.response.send_message(
+                        "Are you sure you want me to leave this server? Please press the button again to confirm.",
+                        ephemeral=True,
+                    )
+            else:
+                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+    await message.channel.send("Here's the link to invite me to another server", view=CommandView())
 
 async def prefix_command(message, prefix):
     new_prefix = message.content.split(" ")
     if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
         if len(new_prefix) == 2:
             new_prefix = new_prefix[1]
-            if " " in new_prefix:
-                await message.channel.send("Please do not put spaces in the bot's prefix")
-                return
+
+            class CommandView(disnake.ui.View):
+                def __init__(self):
+                    super().__init__()
+
+                @disnake.ui.button(label="Yes", style=disnake.ButtonStyle.green)
+                async def confirm_change(self, _, interaction):
+                    if interaction.author != message.author:
+                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                        return
+
+                    database[f"prefix.{message.guild.id}"] = new_prefix
+                    await old_message.edit(content=f"This server's prefix has been set to `{new_prefix}`", view=None)
+                    self.stop()
+
+                @disnake.ui.button(label="No", style=disnake.ButtonStyle.green)
+                async def reject_change(self, _, interaction):
+                    if interaction.author != message.author:
+                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                        return
+
+                    await old_message.edit(content=f"Prefix change request cancelled", view=None)
+                    self.stop()
             old_message = await message.channel.send(
                 f"Are you sure you want to change this server's prefix to `{new_prefix}`?",
-                components=[[
-                    discord_components.Button(style=discord_components.ButtonStyle.green, label="Yes"),
-                    discord_components.Button(style=discord_components.ButtonStyle.green, label="No")
-                ]]
+                view=CommandView(),
             )
-            def check(result):
-                return result.message == old_message and result.user.id == message.author.id
-            result = await client.wait_for("button_click", check=check)
-            if result.component.label == "No":
-                await result.respond(type=4, content="Operation cancelled")
-            else:
-                database[f"prefix.{message.guild.id}"] = new_prefix
-                await old_message.edit(content=f"This server's prefix has been set to `{new_prefix}`", components=[])
-                await result.respond(type=4, content=f"Successfully changed server prefix")
         else:
             await message.channel.send(f"The syntax is `{prefix}prefix <new prefix>`")
     else:
@@ -598,25 +621,28 @@ async def random_command(message, prefix):
     except:
         await message.channel.send("The lower number is larger than the higher number")
         return
-    add_cooldown(message.author.id, "random", 30)
+    add_cooldown(message.author.id, "random", 20)
     button_text = "Generate Number"
-    old_message = await message.channel.send(
-            f"Your random number is **{random_number}**",
-            components=[
-                discord_components.Button(style=discord_components.ButtonStyle.gray, label=button_text)
-    ]); uses = 0
-    while uses < 5:
-        result = await client.wait_for("button_click", check = lambda item: item.component.label == button_text)
-        if result.channel == message.channel:
-            if result.author == message.author:
+
+    class CommandView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+            self.uses = 0
+
+        @disnake.ui.button(label=button_text, style=disnake.ButtonStyle.gray)
+        async def generate_number(self, _, interaction):
+            if interaction.author != message.author:
+                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if self.uses < 5:
+                self.uses += 1
                 random_number = round(random.uniform(low_number, high_number), 2)
-                display_text = "uses"; uses += 1
-                if 5 - uses == 1: display_text = "use"
                 await old_message.edit(content=f"Your random number is **{random_number}**")
-                await result.respond(content=f"Successfully generated a new number ({5 - uses} {display_text} left)")
             else:
-                await result.respond(type=4, content="You are not the sender of this command!")
-    await old_message.edit(components=[[discord_components.Button(style=discord_components.ButtonStyle.gray, label=button_text, disabled=True)]])
+                await interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command.", ephemeral=True)
+                self.stop()
+    old_message = await message.channel.send(f"Your random number is **{random_number}**", view=CommandView())
 
 async def execute_command(message, prefix):
     if message.author.id == variables.bot_owner:
@@ -1029,27 +1055,39 @@ async def clear_command(message, prefix):
             await message.channel.send("Please specify a valid number")
             return
         if count > 500:
-            await message.channel.send(
-                f"Are you sure you want to clear more than **500 messages** in this channel?",
-                components=[[
-                    discord_components.Button(style=discord_components.ButtonStyle.green, label="Yes"),
-                    discord_components.Button(style=discord_components.ButtonStyle.green, label="No")
-                ]]
-            )
-            result = await client.wait_for("button_click")
-            if result.channel == message.channel:
-                if result.author == message.author:
-                    if result.component.label == "No":
-                        await result.respond(type=4, content="Operation cancelled")
+            class CommandView(disnake.ui.View):
+                def __init__(self):
+                    super().__init__()
+
+                @disnake.ui.button(label="Yes", style=disnake.ButtonStyle.green)
+                async def confirm(self, _, interaction):
+                    if interaction.author != message.author:
+                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                         return
-                    else:
-                        await result.respond(type=4, content=f"Deleting more than 500 messages in this channel...")
-                else:
-                    await result.respond(type=4, content="You are not the sender of the command!")
-        try:    
-            await message.channel.purge(limit=count + 1)
-        except:
-            await message.channel.send("Unable to delete messages")
+
+                    try:    
+                        await message.channel.purge(limit=count + 1)
+                    except:
+                        await message.channel.send("Unable to delete messages")
+                    await interaction.response.send_message(
+                        content=f"Successfully deleted more than **500 messages** in this channel",
+                        ephemeral=True,
+                    )
+                    self.stop()
+
+                @disnake.ui.button(label="No", style=disnake.ButtonStyle.green)
+                async def reject(self, _, interaction):
+                    if interaction.author != message.author:
+                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                        return
+
+                    await old_message.edit(content=f"Operation cancelled", view=None)
+                    self.stop()
+                
+            old_message = await message.channel.send(
+                f"Are you sure you want to clear more than **500 messages** in this channel?",
+                view=CommandView()
+            )
     else:
         await message.channel.send(variables.no_permission_text)
     add_cooldown(message.author.id, "clear", 10)
@@ -1818,30 +1856,80 @@ async def trivia_command(message, prefix):
     answers = response['results'][0]['incorrect_answers']
     answers.append(response['results'][0]['correct_answer'])
     correct_answer = html.unescape(response['results'][0]['correct_answer'])
-    buttons = [[]]
-    for i in range(len(answers)):
+
+    class CommandView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+
+        async def close(self, chosen_answer):
+            new_view = disnake.ui.View()
+            for button in old_message.components[0].children:
+                style = disnake.ButtonStyle.red
+                if chosen_answer == button.label:
+                    style = disnake.ButtonStyle.blurple
+                if correct_answer == button.label:
+                    style = disnake.ButtonStyle.green
+                new_view.add_item(disnake.ui.Button(label=button.label, style=style, disabled=True))
+            await old_message.edit(view=new_view)
+            self.stop()
+        
         answer = random.choice(answers); answers.remove(answer)
-        buttons[0].append(discord_components.Button(style=discord_components.ButtonStyle.gray, label=html.unescape(answer)))
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_1(self, button, interaction):
+            if interaction.author != message.author:
+                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
+        answer = random.choice(answers); answers.remove(answer)
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_2(self, button, interaction):
+            if interaction.author != message.author:
+                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
+        answer = random.choice(answers); answers.remove(answer)
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_3(self, button, interaction):
+            if interaction.author != message.author:
+                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
+        answer = random.choice(answers); answers.remove(answer)
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_4(self, button, interaction):
+            if interaction.author != message.author:
+                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
     embed = disnake.Embed(
         description=description,
         color=variables.embed_color,
     )
-    old_message = await message.channel.send(embed=embed, components=buttons)
-    def check(result):
-        return result.message == old_message and result.user.id == message.author.id
-    result = await client.wait_for("button_click", check=check)
-    if result.component.label == correct_answer:
-        await result.respond(type=4, content="Correct answer!")
-    else:
-        await result.respond(type=4, content=f"Incorrect answer... The correct answer was **{correct_answer}**.")
-    new_buttons = [[]]
-    for old_button in buttons[0]:
-        if old_button.label == correct_answer:
-            new_button = discord_components.Button(style=discord_components.ButtonStyle.green, label=old_button.label, disabled=True)
-        else:
-            new_button = discord_components.Button(style=discord_components.ButtonStyle.red, label=old_button.label, disabled=True)
-        new_buttons[0].append(new_button)
-    await old_message.edit(embed=embed, components=new_buttons)
+    old_message = await message.channel.send(embed=embed, view=CommandView())
 
 async def pypi_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1869,7 +1957,7 @@ async def pypi_command(message, prefix):
         embed.add_field(name="Size", value=f"{round(size, 2)} {size_unit}")
         embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
         embed.add_field(name="Summary", value=response["info"]["summary"])
-        embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/o_qNo_ey_wKGK4h_hg_w0x-sijvsh_bVYPz_z8g7zr_aRh_lb_hJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
+        embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
         await message.channel.send(embed=embed)
         add_cooldown(message.author.id, "pypi", 5)
     else:
@@ -2274,11 +2362,11 @@ async def on_message(message):
                 await command.function(message, prefix); return
     except disnake.errors.Forbidden:
         await message.author.send("I do not have the required permissions!")
+    except disnake.errors.InteractionResponded:
+        await message.channel.send("That interaction is already used!")
     except Exception as error:
         if "50035" in str(error):
             await message.channel.send("Message too long to be sent!"); return
-        elif "Interaction is unknown" in str(error):
-            await message.channel.send("That interaction is already used!"); return
 
         escaped_character = '\`'
         for user_iD in variables.message_managers:
