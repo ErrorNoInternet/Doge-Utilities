@@ -640,7 +640,10 @@ async def random_command(message, prefix):
                 random_number = round(random.uniform(low_number, high_number), 2)
                 await old_message.edit(content=f"Your random number is **{random_number}**")
             else:
-                await interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command.", ephemeral=True)
+                new_view = disnake.ui.View()
+                new_view.add_item(disnake.ui.Button(label=button_text, style=disnake.ButtonStyle.gray, disabled=True))
+                await old_message.edit(view=new_view)
+                await interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command to continue.", ephemeral=True)
                 self.stop()
     old_message = await message.channel.send(f"Your random number is **{random_number}**", view=CommandView())
 
@@ -865,20 +868,20 @@ async def lookup_command(message, prefix):
         embed.add_field(name="System User", value=f"`{system_value}`")
 
         if response['avatar'] == None:
-            avatar_uRL = f"https://cdn.discordapp.com/embed/avatars/{int(response['discriminator']) % 5}.png"
+            avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(response['discriminator']) % 5}.png"
         else:
             if response['avatar'].startswith("a_"):
-                avatar_uRL = f"https://cdn.discordapp.com/avatars/{response['id']}/{response['avatar']}.gif?size=512"
+                avatar_url = f"https://cdn.discordapp.com/avatars/{response['id']}/{response['avatar']}.gif?size=512"
             else:
-                avatar_uRL = f"https://cdn.discordapp.com/avatars/{response['id']}/{response['avatar']}.webp?size=512"
-        embed.set_thumbnail(url=avatar_uRL)
+                avatar_url = f"https://cdn.discordapp.com/avatars/{response['id']}/{response['avatar']}.webp?size=512"
+        embed.set_thumbnail(url=avatar_url)
 
         if response['banner'] != None:
             if response['banner'].startswith("a_"):
-                banner_uRL = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.gif?size=1024"
+                banner_url = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.gif?size=1024"
             else:
-                banner_uRL = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.webp?size=1024"
-            embed.set_image(url=banner_uRL)
+                banner_url = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.webp?size=1024"
+            embed.set_image(url=banner_url)
     else:
         embed = disnake.Embed(title="Unknown User", description="Unable to find the specified user", color=variables.embed_color)
     await message.channel.send(embed=embed)
@@ -1313,7 +1316,7 @@ async def source_command(message, prefix):
     response = requests.get("https://api.github.com/repos/error_no_internet/Doge-Utilities").json()
     description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
     embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
-    embed.set_thumbnail(url=client.user.avatar_url); await message.channel.send(embed=embed)
+    embed.set_thumbnail(url=client.user.avatar); await message.channel.send(embed=embed)
     add_cooldown(message.author.id, "source", 20)
 
 async def uptime_command(message, prefix):
@@ -1344,7 +1347,7 @@ async def donate_command(message, prefix):
 
 async def doge_command(message, prefix):
     embed = disnake.Embed(color=variables.embed_color)
-    embed.set_image(url=client.user.avatar_url); await message.channel.send(embed=embed)
+    embed.set_image(url=client.user.avatar); await message.channel.send(embed=embed)
 
 async def guilds_command(message, prefix):
     if message.author.id == variables.bot_owner:
@@ -2119,7 +2122,8 @@ def rgb_to_hex(rgb_color):
 
 def generate_color(color_code):
     image_width = 180; image_height = 80
-    color_code = color_code.replace("rgb", "")
+    if color_code.lower().startswith("rgb"):
+        color_code = color_code[3:]
     if len(color_code) == 8 and color_code.startswith("0x"):
         color_code = color_code[2:]
         color_code = "#" + color_code
@@ -2252,7 +2256,7 @@ async def on_message_delete(message, *arguments):
     if message_data != "" or type(message_data) != disnake.Embed.Empty:
         snipes.append([
             f"{message.author.name}#{message.author.discriminator}",
-            message.author.avatar_url,
+            message.author.avatar,
             message.channel.name,
             datetime.datetime.utcnow(),
             message_data,
