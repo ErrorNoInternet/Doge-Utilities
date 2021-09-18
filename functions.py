@@ -1869,7 +1869,7 @@ async def trivia_command(message, prefix):
             for button in old_message.components[0].children:
                 style = disnake.ButtonStyle.red
                 if chosen_answer == button.label:
-                    style = disnake.ButtonStyle.blurple
+                    style = disnake.ButtonStyle.gray
                 if correct_answer == button.label:
                     style = disnake.ButtonStyle.green
                 new_view.add_item(disnake.ui.Button(label=button.label, style=style, disabled=True))
