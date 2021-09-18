@@ -7,7 +7,6 @@ message_managers = [531392146767347712]
 permission_override = [531392146767347712]
 embed_color = 0xf1c40f
 large_number = 1e1000
-
 version_number = 0; build_number = 0
 for file in os.listdir():
 	try:
@@ -17,6 +16,8 @@ for file in os.listdir():
 	except:
 		pass
 version_number = round((version_number / 10) / 4, 2)
+
+no_permission_text = "You do not have permission to use this command"
 
 status_types = ["Playing", "Watching", "Listening", "Competing"]
 status1 = ["with Discord", "with [users] users", "on some servers", "capture the flag"]

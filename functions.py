@@ -506,13 +506,13 @@ async def prefix_command(message, prefix):
         else:
             await message.channel.send(f"The syntax is `{prefix}prefix <new prefix>`")
     else:
-        await message.channel.send("You do not have permission to use this command")
+        await message.channel.send(variables.no_permission_text)
 
 async def setup_banned_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.id in variables.permission_override:
         pass
     else:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
 
     roles = message.guild.roles
     for role in roles:
@@ -546,7 +546,7 @@ async def setup_muted_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.id in variables.permission_override:
         pass
     else:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
 
     roles = message.guild.roles
     for role in roles:
@@ -698,7 +698,7 @@ async def disconnect_members_command(message, prefix):
                         failed += 1
         await old_message.edit(f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
     else:
-        await message.channel.send("You do not have permission to use this command")
+        await message.channel.send(variables.no_permission_text)
     add_cooldown(message.author.id, "disconnect-members", 20)
 
 async def suggest_command(message, prefix):
@@ -757,7 +757,7 @@ async def autorole_command(message, prefix):
             except:
                 await message.channel.send(f"This server does not have autorole configured")
     else:
-        await message.channel.send("You do not have permission to use this command")
+        await message.channel.send(variables.no_permission_text)
     add_cooldown(message.author.id, "autorole", 5)
 
 async def shards_command(message, prefix):
@@ -917,7 +917,7 @@ async def raid_protection_command(message, prefix):
             await message.channel.send("Please specify a valid setting (on/off)")
             return
     else:
-        await message.channel.send("You do not have permission to use this command")
+        await message.channel.send(variables.no_permission_text)
 
 async def epoch_date_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1051,7 +1051,7 @@ async def clear_command(message, prefix):
         except:
             await message.channel.send("Unable to delete messages")
     else:
-        await message.channel.send("You do not have permission to use this command")
+        await message.channel.send(variables.no_permission_text)
     add_cooldown(message.author.id, "clear", 10)
 
 async def wide_command(message, prefix):
@@ -1227,7 +1227,7 @@ async def nickname_command(message, prefix):
         else:
             await message.channel.send(f"The syntax is `{prefix}nickname <user> <nickname>`")
     else:
-        await message.channel.send("You do not have permission to use this command")
+        await message.channel.send(variables.no_permission_text)
 
 async def stackoverflow_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1381,7 +1381,7 @@ async def unmute_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator:
         pass
     else:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
 
     arguments = message.content.split(" ")
     if len(arguments) == 2:
@@ -1407,7 +1407,7 @@ async def mute_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
         pass
     else:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
 
     arguments = message.content.split(" ")
     if len(arguments) >= 2:
@@ -1457,7 +1457,7 @@ async def insults_command(message, prefix):
     if message.author.guild_permissions.manage_messages:
         pass
     else:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
 
     arguments = message.content.split(" ")
     if len(arguments) >= 2:
@@ -1513,7 +1513,7 @@ async def insults_command(message, prefix):
 
 async def links_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
@@ -1535,7 +1535,7 @@ async def links_command(message, prefix):
 
 async def spamming_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
@@ -1570,7 +1570,7 @@ async def spamming_command(message, prefix):
 
 async def welcome_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
@@ -1638,7 +1638,7 @@ async def welcome_command(message, prefix):
 
 async def leave_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send("You do not have permission to use this command"); return
+        await message.channel.send(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
@@ -1721,19 +1721,19 @@ async def snipe_command(message, prefix):
     elif len(arguments) > 1:
         if arguments[1] == "enable":
             if not message.author.guild_permissions.administrator:
-                await message.channel.send("You do not have permission to use this command"); return
+                await message.channel.send(variables.no_permission_text); return
 
             database[f"snipe.{message.guild.id}"] = True
             await message.channel.send("Snipe has been **enabled** for this server")
         elif arguments[1] == "disable":
             if not message.author.guild_permissions.administrator:
-                await message.channel.send("You do not have permission to use this command"); return
+                await message.channel.send(variables.no_permission_text); return
 
             database[f"snipe.{message.guild.id}"] = False
             await message.channel.send("Snipe has been **disabled** for this server")
         elif arguments[1] == "clear":
             if not message.author.guild_permissions.administrator:
-                await message.channel.send("You do not have permission to use this command"); return
+                await message.channel.send(variables.no_permission_text); return
 
             snipe_list[message.guild.id] = []
             await message.channel.send("The snipe list for this server has been successfully cleared")
