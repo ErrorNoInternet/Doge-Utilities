@@ -1404,7 +1404,7 @@ async def unmute_command(message, prefix):
         await message.channel.send(f"The syntax is `{prefix}unmute <user>`"); return
 
 async def mute_command(message, prefix):
-    if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator:
+    if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
         pass
     else:
         await message.channel.send("You do not have permission to use this command"); return
