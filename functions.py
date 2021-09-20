@@ -1370,10 +1370,10 @@ async def blacklist_command(message, prefix):
                 blacklisted_users = []
                 blacklist_file = open("blacklist.json", "r"); raw_array = json.load(blacklist_file); blacklist_file.close()
                 for user in raw_array:
-                    blacklisted_users.append(str(user))
+                    blacklisted_users.append(f"{user} (<@{user}>)")
                 embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
                 await message.channel.send(embed=embed)
-            if arguments[1] == "add":
+            elif arguments[1] == "add":
                 if len(arguments) == 3:
                     try:
                         user_iD = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
@@ -1388,7 +1388,7 @@ async def blacklist_command(message, prefix):
                     await message.channel.send("Successfully added user to blacklist")
                 else:
                     await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
-            if arguments[1] == "remove":
+            elif arguments[1] == "remove":
                 if len(arguments) == 3:
                     try:
                         user_iD = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
@@ -1407,6 +1407,8 @@ async def blacklist_command(message, prefix):
                     await message.channel.send("Successfully removed user from blacklist")
                 else:
                     await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+            else:
+                await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
         else:
             await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
     else:
