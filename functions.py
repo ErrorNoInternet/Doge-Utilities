@@ -2109,6 +2109,7 @@ def evaluate_expression(expression):
         "get": lambda name: get_variable(name),
         "set": lambda name, value: set_variable(name, value),
         "bin": lambda value: bin(value),
+        "hex": lambda value: hex(value),
     }
 
     try:
@@ -2133,7 +2134,12 @@ def generate_color(color_code):
         color_code = color_code[2:]
         color_code = "#" + color_code
     if len(color_code) == 6:
-        color_code = "#" + color_code
+        text = True
+        for letter in color_code.lower():
+            if letter not in string.ascii_lowercase:
+                text = False
+        if not text:
+            color_code = "#" + color_code
     
     if not color_code.startswith("#") and not color_code.count(",") == 2:
         try:
