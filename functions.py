@@ -736,17 +736,17 @@ async def suggest_command(message, prefix):
         add_cooldown(message.author.id, "suggest", variables.large_number)
         arguments.pop(0); text = " ".join(arguments)
         old_message = await message.channel.send("Sending your suggestion...")
-        for user_iD in variables.message_managers:
+        for user_id in variables.message_managers:
             member = None
             for guild in client.guilds:
                 try:
-                    member = await guild.fetch_member(user_iD)
+                    member = await guild.fetch_member(user_id)
                     break
                 except:
                     continue
             if member:
                 try:
-                    await member.send(f"**{message.author.name}#{message.author.discriminator}** **(**`{member.id}`**)** **has sent a suggestion:**\n{text}")
+                    await member.send(f"**{message.author.name}#{message.author.discriminator}** (`{member.id}`) **has sent a suggestion**\n{text}")
                 except:
                     pass
         await old_message.edit("Your suggestion has been successfully sent")
@@ -826,15 +826,15 @@ async def shards_command(message, prefix):
     add_cooldown(message.author.id, "shards", 5)
 
 async def lookup_command(message, prefix):
-    user_iD = message.content.split(" ")
-    if len(user_iD) != 2:
-        user_iD.append(str(message.author.id))
+    user_id = message.content.split(" ")
+    if len(user_id) != 2:
+        user_id.append(str(message.author.id))
 
-    user_iD = user_iD[1]
-    user_iD = user_iD.replace("<", ""); user_iD = user_iD.replace("@", "")
-    user_iD = user_iD.replace("!", ""); user_iD = user_iD.replace(">", "")
+    user_id = user_id[1]
+    user_id = user_id.replace("<", ""); user_id = user_id.replace("@", "")
+    user_id = user_id.replace("!", ""); user_id = user_id.replace(">", "")
     headers = {"Authorization": "Bot " + os.getenv("TOKEN")}
-    url = "https://discord.com/api/users/" + user_iD
+    url = "https://discord.com/api/users/" + user_id
     response = requests.get(url, headers=headers).json()
     if "10013" not in str(response):
         try:
@@ -888,19 +888,19 @@ async def lookup_command(message, prefix):
     add_cooldown(message.author.id, "lookup", 6)
 
 async def permissions_command(message, prefix):
-    user_iD = message.content.split(" ")
-    if len(user_iD) != 2:
-        user_iD.append(str(message.author.id))
-    user_iD = user_iD[1]
-    user_iD = user_iD.replace("<", ""); user_iD = user_iD.replace("@", "")
-    user_iD = user_iD.replace("!", ""); user_iD = user_iD.replace(">", "")
+    user_id = message.content.split(" ")
+    if len(user_id) != 2:
+        user_id.append(str(message.author.id))
+    user_id = user_id[1]
+    user_id = user_id.replace("<", ""); user_id = user_id.replace("@", "")
+    user_id = user_id.replace("!", ""); user_id = user_id.replace(">", "")
     
     target_user = None
     try:
-        target_user = await message.guild.fetch_member(int(user_iD))
+        target_user = await message.guild.fetch_member(int(user_id))
     except:
         pass
-        if str(user.id) == user_iD:
+        if str(user.id) == user_id:
             target_user = user
     if target_user == None:
         await message.channel.send("Unable to find user"); return
@@ -1253,10 +1253,10 @@ async def nickname_command(message, prefix):
     if message.author.guild_permissions.manage_nicknames or message.author.id in variables.permission_override:
         arguments = message.content.split(" ")
         if len(arguments) >= 3:
-            arguments.pop(0); user_iD = arguments[0]; arguments.pop(0); nickname = ' '.join(arguments)
+            arguments.pop(0); user_id = arguments[0]; arguments.pop(0); nickname = ' '.join(arguments)
             try:
-                user_iD = int(user_iD.replace("<", "").replace(">", "").replace("@", "").replace("!", ""))
-                member = await message.guild.fetch_member(user_iD)
+                user_id = int(user_id.replace("<", "").replace(">", "").replace("@", "").replace("!", ""))
+                member = await message.guild.fetch_member(user_id)
             except:
                 await message.channel.send("Please mention a valid user!"); return
             try:
@@ -1312,9 +1312,12 @@ async def stackoverflow_command(message, prefix):
         await message.channel.send(f"The syntax is `{prefix}stackoverflow <text>`")
 
 async def source_command(message, prefix):
-    description = "You can find my code [here](https://github.com/error_no_internet/Doge-Utilities)\n"
-    response = requests.get("https://api.github.com/repos/error_no_internet/Doge-Utilities").json()
-    description += f"Open Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
+    description = "You can find my code [here](https://github.com/error_no_internet/Doge-Utilities)"
+    try:
+        response = requests.get("https://api.github.com/repos/error_no_internet/Doge-Utilities").json()
+        description += f"\nOpen Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
+    except:
+        pass
     embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
     embed.set_thumbnail(url=client.user.avatar); await message.channel.send(embed=embed)
     add_cooldown(message.author.id, "source", 20)
@@ -1376,12 +1379,12 @@ async def blacklist_command(message, prefix):
             elif arguments[1] == "add":
                 if len(arguments) == 3:
                     try:
-                        user_iD = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
+                        user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
                         await message.channel.send("Please enter a valid user ID"); return
                     blacklist_file = open("blacklist.json", "r")
                     blacklisted_users = json.load(blacklist_file); blacklist_file.close()
-                    blacklisted_users.append(user_iD)
+                    blacklisted_users.append(user_id)
                     blacklist_file = open("blacklist.json", "w")
                     json.dump(blacklisted_users, blacklist_file)
                     blacklist_file.close()
@@ -1391,14 +1394,14 @@ async def blacklist_command(message, prefix):
             elif arguments[1] == "remove":
                 if len(arguments) == 3:
                     try:
-                        user_iD = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
+                        user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
                         await message.channel.send("Please enter a valid user ID"); return
                     blacklist_file = open("blacklist.json", "r")
                     blacklisted_users = json.load(blacklist_file)
                     blacklist_file.close()
                     try:
-                        blacklisted_users.remove(user_iD)
+                        blacklisted_users.remove(user_id)
                     except:
                         pass
                     blacklist_file = open("blacklist.json", "w")
@@ -1429,8 +1432,8 @@ async def unmute_command(message, prefix):
     arguments = message.content.split(" ")
     if len(arguments) == 2:
         try:
-            user_iD = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
-            member = await message.guild.fetch_member(user_iD)
+            user_id = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
+            member = await message.guild.fetch_member(user_id)
         except:
             await message.channel.send("Please enter a valid user ID"); return
         mute_role = None; exists = False
@@ -1467,8 +1470,8 @@ async def mute_command(message, prefix):
         if not exists:
             await message.channel.send("Unable to find mute role"); return
         try:
-            user_iD = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
-            member = await message.guild.fetch_member(user_iD)
+            user_id = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
+            member = await message.guild.fetch_member(user_id)
         except:
             await message.channel.send("Please enter a valid user ID"); return
     if len(arguments) == 2:
@@ -1488,7 +1491,7 @@ async def mute_command(message, prefix):
             database["mute." + str(message.guild.id)] = []
             moderation_data = database["mute." + str(message.guild.id)]
         try:
-            await member.add_roles(mute_role); moderation_data.append([user_iD, time.time(), duration])
+            await member.add_roles(mute_role); moderation_data.append([user_id, time.time(), duration])
             database["mute." + str(message.guild.id)] = moderation_data
         except:
             await message.channel.send(f"Unable to mute **{member}**"); return
@@ -1647,7 +1650,7 @@ async def welcome_command(message, prefix):
             else:
                 await message.channel.send(f"The syntax is `{prefix}welcome set <text>`"); return
             database[f"welcome.text.{message.guild.id}"] = text
-            await message.channel.send(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_iD}`, `{discriminator}`, and `{members}` are also supported")
+            await message.channel.send(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported")
         elif arguments[1] == "channel":
             channel_iD = 0
             if len(arguments) > 2:
@@ -1715,7 +1718,7 @@ async def leave_command(message, prefix):
             else:
                 await message.channel.send(f"The syntax is `{prefix}leave set <text>`"); return
             database[f"leave.text.{message.guild.id}"] = text
-            await message.channel.send(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_iD}`, `{discriminator}`, and `{members}` are also supported")
+            await message.channel.send(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported")
         elif arguments[1] == "channel":
             channel_iD = 0
             if len(arguments) > 2:
@@ -2158,10 +2161,10 @@ def generate_color(color_code):
     else:
         return 1
 
-async def send_user_message(user_iD, message):
+async def send_user_message(user_id, message):
     for guild in client.guilds:
         try:
-            member = await guild.fetch_member(int(user_iD))
+            member = await guild.fetch_member(int(user_id))
             await member.send(message); return
         except:
             continue
@@ -2182,7 +2185,7 @@ async def on_member_join(member):
             for channel in member.guild.channels:
                 if welcome_channel == channel.id:
                     welcome_message = welcome_message.replace("{user}", member.name)
-                    welcome_message = welcome_message.replace("{user_iD}", str(member.id))
+                    welcome_message = welcome_message.replace("{user_id}", str(member.id))
                     welcome_message = welcome_message.replace("{user.id}", str(member.id))
                     welcome_message = welcome_message.replace("{user_id}", str(member.id))
                     welcome_message = welcome_message.replace("{discriminator}", member.discriminator)
@@ -2200,7 +2203,7 @@ async def on_member_remove(member):
             for channel in member.guild.channels:
                 if leave_channel == channel.id:
                     leave_message = leave_message.replace("{user}", member.name)
-                    leave_message = leave_message.replace("{user_iD}", str(member.id))
+                    leave_message = leave_message.replace("{user_id}", str(member.id))
                     leave_message = leave_message.replace("{user.id}", str(member.id))
                     leave_message = leave_message.replace("{user_id}", str(member.id))
                     leave_message = leave_message.replace("{discriminator}", member.discriminator)
@@ -2375,17 +2378,21 @@ async def on_message(message):
             await message.channel.send("Message too long to be sent!"); return
 
         escaped_character = '\`'
-        for user_iD in variables.message_managers:
+        permissions = 0
+        for user in message.guild.members:
+            if user.id == client.user.id:
+                permissions = user.guild_permissions.value
+        for user_id in variables.message_managers:
             member = None
             for guild in client.guilds:
                 try:
-                    member = await guild.fetch_member(user_iD)
+                    member = await guild.fetch_member(user_id)
                     break
                 except:
                     continue
             if member:
                 try:
-                    await member.send(f"**{message.author.name}#{message.author.discriminator}** (**`{message.author.id}`**) has ran into an error in **{message.author.guild.name}** (**`{message.author.guild.id}`**):\n\n**Message:**\n```\n{message.content.replace('`', escaped_character)}\n```**Error:**\n```\n{str(''.join(traceback.format_exception(error, error, error.__traceback__))).replace('`', escaped_character)}\n```")
+                    await member.send(f"**{message.author.name}#{message.author.discriminator}** (`{message.author.id}`) has ran into an error in **{message.author.guild.name}** (`{message.author.guild.id}`)\n\n**Message:**\n```\n{message.content.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n```\n{str(''.join(traceback.format_exception(error, error, error.__traceback__))).replace('`', escaped_character)}```")
                 except:
                     pass
 
