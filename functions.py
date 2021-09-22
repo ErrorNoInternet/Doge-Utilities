@@ -1420,7 +1420,7 @@ async def blacklist_command(message, prefix):
 async def meme_command(message, prefix):
     response = requests.get("https://meme-api.herokuapp.com/gimme").json()
     description = f"Posted by **{response['author']}** in **{response['subreddit']}** (**{response['ups']}** upvotes)"
-    embed = disnake.Embed(title=response["title"], url=response["post_link"], description=description, color=variables.embed_color)
+    embed = disnake.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embed_color)
     embed.set_image(url=response["url"]); add_cooldown(message.author.id, "meme", 5); await message.channel.send(embed=embed)
 
 async def unmute_command(message, prefix):
