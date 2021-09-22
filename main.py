@@ -8,8 +8,6 @@ import threading
 
 if os.getenv("TOKEN") == None:
     print("Unable to load TOKEN variable"); exit()
-if os.getenv("SECRET") == None:
-    print("Unable to load SECRET variable"); exit()
 if os.getenv("TOPGG_TOKEN") == None:
     print("Unable to load TOPGG_TOKEN variable"); exit()
 

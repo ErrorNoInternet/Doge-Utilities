@@ -13,7 +13,6 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 
 - Environment variables:
   - `TOKEN` - Discord bot token
-  - `SECRET` - Vote webhook secret
   - `TOPGG_TOKEN` - Top.GG bot token
 
 ```sh
