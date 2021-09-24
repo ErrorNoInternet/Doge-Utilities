@@ -29,8 +29,8 @@ import simpleeval
 from PIL import Image
 from dateutil import parser
 
-user_cooldowns = {}; message_strikes = {}; last_messages = {}; redis_url = os.getenv("REDIS_URL")
-database = redis.Redis(host=redis_url.split(":")[0], port=redis_url.split(":")[1], db=0)
+user_cooldowns = {}; message_strikes = {}; last_messages = {}
+database = redis.from_url(os.getenv("REDIS_URL"))
 
 class Command:
     def __init__(self, name, aliases, function, usage, description):
