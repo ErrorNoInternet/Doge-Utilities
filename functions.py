@@ -2544,7 +2544,6 @@ async def on_message(message):
                 if message.author.id in blacklisted_users:
                     await message.reply("You are banned from using Doge Utilities"); return
 
-                await message.channel.trigger_typing()
                 if get_cooldown(message.author.id, command.name) > 0:
                     cooldown_string = generate_cooldown(command.name, get_cooldown(message.author.id, command.name))
                     embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)

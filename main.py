@@ -24,6 +24,8 @@ if not os.path.exists("last-command"):
 if not os.path.exists("blacklist.json"):
     file = open("blacklist.json", "w+")
     file.write("[]"); file.close()
+if not os.path.exists("images"):
+    os.mkdir("images")
 
 def update_objects():
     time.sleep(2)
