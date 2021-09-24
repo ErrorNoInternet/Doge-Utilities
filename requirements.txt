@@ -1,9 +1,9 @@
 pytz
+redis
 psutil
 pillow
 topggpy
 disnake
 requests
 simpleeval
-sqlitedict
 python-dateutil

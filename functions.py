@@ -6,6 +6,7 @@ import html
 import pytz
 import time
 import math
+import redis
 import extra
 import urllib
 import base64
@@ -25,13 +26,11 @@ import functions
 import traceback
 import contextlib
 import simpleeval
-import sqlitedict
 from PIL import Image
 from dateutil import parser
 
-sqlitedict.PICKLE_PROTOCOL = 3
-user_cooldowns = {}; message_strikes = {}; last_messages = {}
-database = sqlitedict.SqliteDict("database.sql", autocommit=True)
+user_cooldowns = {}; message_strikes = {}; last_messages = {}; redis_url = os.getenv("REDIS_URL")
+database = redis.Redis(host=redis_url.split(":")[0], port=redis_url.split(":")[1], db=0)
 
 class Command:
     def __init__(self, name, aliases, function, usage, description):
@@ -97,17 +96,17 @@ async def manage_muted_members():
     while True:
         try:
             for key in database.keys():
-                if key.startswith("mute."):
-                    for value in database[key]:
+                if key.decode("utf-8").startswith("mute."):
+                    for value in json.loads(database[key]):
                         try:
-                            guild_id = int(key.split(".")[1])
+                            guild_id = int(key.decode("utf-8").split(".")[1])
                             user_id = int(value[0])
                             mute_start = float(value[1])
                             duration = float(value[2])
                         except:
-                            moderation_data = database[key]
+                            moderation_data = json.loads(database[key])
                             moderation_data.remove(value)
-                            database[key] = moderation_data
+                            database[key] = json.dumps(moderation_data)
                         if (time.time() / 60) > ((mute_start / 60) + duration):
                             try:
                                 mute_role = None; target_guild = None
@@ -123,13 +122,13 @@ async def manage_muted_members():
                                         await member.remove_roles(mute_role)
                                     except:
                                         pass
-                                    moderation_data = database[key]
+                                    moderation_data = json.loads(database[key])
                                     moderation_data.remove(value)
-                                    database[key] = moderation_data
+                                    database[key] = json.dumps(moderation_data)
                             except:
-                                moderation_data = database[key]
+                                moderation_data = json.loads(database[key])
                                 moderation_data.remove(value)
-                                database[key] = moderation_data
+                                database[key] = json.dumps(moderation_data)
         except Exception as error:
             print(f"Fatal error in manage_muted_members: {error}")
             try:
@@ -206,6 +205,7 @@ def reload_data():
         pytz,
         time,
         math,
+        redis,
         extra,
         urllib,
         base64,
@@ -225,7 +225,6 @@ def reload_data():
         traceback,
         contextlib,
         simpleeval,
-        sqlitedict,
     ]
     time_list = []
     for module in modules:
@@ -815,14 +814,15 @@ async def autorole_command(message, prefix):
             if not role_found:
                 await message.channel.send("That role is not found in this server")
                 return
-            database[f"autorole.{message.guild.id}"] = role_list
+            database[f"autorole.{message.guild.id}"] = json.dumps(role_list)
             role_string = ""
             for role in role_list:
                 role_string += "<@&" + role + "> "
             await message.channel.send(embed=disnake.Embed(title="Autorole", description=f"This server's autorole has been set to {role_string}", color=variables.embed_color))
         else:
             try:
-                role_list = database[f"autorole.{message.guild.id}"]; role_string = ""
+                role_list = json.loads(database[f"autorole.{message.guild.id}"])
+                role_string = ""
                 for role in role_list:
                     role_string += "<@&" + role + "> "
                 await message.channel.send(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color))
@@ -978,11 +978,11 @@ async def raid_protection_command(message, prefix):
                 await message.channel.send("This server's raid protection is turned **off**")
             return
         if setting.lower() == "on" or setting.lower() == "enable":
-            database[f"{message.author.guild.id}.raid-protection"] = True
+            database[f"{message.author.guild.id}.raid-protection"] = 1
             await message.channel.send("This server's raid protection has been turned **on**")
             return
         elif setting.lower() == "off" or setting.lower() == "disable":
-            database[f"{message.author.guild.id}.raid-protection"] = False
+            database[f"{message.author.guild.id}.raid-protection"] = 0
             await message.channel.send("This server's raid protection has been turned **off**")
             return
         else:
@@ -1531,13 +1531,14 @@ async def mute_command(message, prefix):
         except:
             await message.channel.send("Please enter a valid duration (in minutes)"); return
         try:
-            moderation_data = database["mute." + str(message.guild.id)]
+            moderation_data = json.loads(database["mute." + str(message.guild.id)])
         except:
-            database["mute." + str(message.guild.id)] = []
-            moderation_data = database["mute." + str(message.guild.id)]
+            database["mute." + str(message.guild.id)] = json.dumps([])
+            moderation_data = json.loads(database["mute." + str(message.guild.id)])
         try:
-            await member.add_roles(mute_role); moderation_data.append([user_id, time.time(), duration])
-            database["mute." + str(message.guild.id)] = moderation_data
+            await member.add_roles(mute_role)
+            moderation_data.append([user_id, time.time(), duration])
+            database["mute." + str(message.guild.id)] = json.dumps(moderation_data)
         except:
             await message.channel.send(f"Unable to mute **{member}**"); return
         await message.channel.send(f"Successfully muted **{member}** for **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
@@ -1554,10 +1555,10 @@ async def insults_command(message, prefix):
     if len(arguments) >= 2:
         if arguments[1] == "list":
             try:
-                insults_data = database[f"insults.list.{message.guild.id}"]
+                insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
             except:
                 insults_data = []
-                database[f"insults.list.{message.guild.id}"] = []
+                database[f"insults.list.{message.guild.id}"] = json.dumps([])
             embed = disnake.Embed(title="Insults List", description="There are no swear words configured for your server" if insults_data == [] else '\n'.join(insults_data), color=variables.embed_color)
             await message.channel.send(embed=embed)
         elif arguments[1] == "filter" or arguments[1] == "status":
@@ -1567,37 +1568,37 @@ async def insults_command(message, prefix):
                 current_status = False
             await message.channel.send(f"The insults filter is currently **{'enabled' if current_status else 'disabled'}**")
         elif arguments[1] == "enable":
-            database[f"insults.toggle.{message.guild.id}"] = True
+            database[f"insults.toggle.{message.guild.id}"] = 1
             await message.channel.send("The insults filter has been successfully **enabled**")
         elif arguments[1] == "disable":
-            database[f"insults.toggle.{message.guild.id}"] = False
+            database[f"insults.toggle.{message.guild.id}"] = 0
             await message.channel.send("The insults filter has been successfully **disabled**")
         elif arguments[1] == "add":
             if len(arguments) != 3:
                 await message.channel.send(f"The syntax is `{prefix}insults add <word>`"); return
             try:
-                insults_data = database[f"insults.list.{message.guild.id}"]
+                insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
             except:
                 insults_data = []
-                database[f"insults.list.{message.guild.id}"] = []
+                database[f"insults.list.{message.guild.id}"] = json.dumps([])
             if len(insults_data) >= 50:
                 await message.channel.send("You have reached the limit of **50 words**"); return
             insults_data.append(arguments[2])
-            database[f"insults.list.{message.guild.id}"] = insults_data
+            database[f"insults.list.{message.guild.id}"] = json.dumps(insults_data)
             await message.channel.send(f"Successfully added **{arguments[2]}** to your insults list")
         elif arguments[1] == "remove" or arguments[1] == "delete":
             if len(arguments) != 3:
                 await message.channel.send(f"The syntax is `{prefix}insults remove <word>`"); return
             try:
-                insults_data = database[f"insults.list.{message.guild.id}"]
+                insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
             except:
                 insults_data = []
-                database[f"insults.list.{message.guild.id}"] = []
+                database[f"insults.list.{message.guild.id}"] = json.dumps([])
             try:
                 insults_data.remove(arguments[2])
             except:
                 await message.channel.send("That word does not exist in the insults filter"); return
-            database[f"insults.list.{message.guild.id}"] = insults_data
+            database[f"insults.list.{message.guild.id}"] = json.dumps(insults_data)
             await message.channel.send(f"Successfully removed **{arguments[2]}** from the insults list")
     else:
         await message.channel.send(f"The syntax is `{prefix}insults <add/remove/enable/disable/list/status>`"); return
@@ -1609,10 +1610,10 @@ async def links_command(message, prefix):
     arguments = message.content.split(" ")
     if len(arguments) > 1:
         if arguments[1] == "enable":
-            database[f"links.toggle.{message.guild.id}"] = True
+            database[f"links.toggle.{message.guild.id}"] = 1
             await message.channel.send("The links filter has been successfully **enabled**")
         elif arguments[1] == "disable":
-            database[f"links.toggle.{message.guild.id}"] = False
+            database[f"links.toggle.{message.guild.id}"] = 0
             await message.channel.send("The links filter has been successfully **disabled**")
         elif arguments[1] == "status" or arguments[1] == "filter":
             value = False
@@ -1631,10 +1632,10 @@ async def spamming_command(message, prefix):
     arguments = message.content.split(" ")
     if len(arguments) > 1:
         if arguments[1] == "enable":
-            database[f"spamming.toggle.{message.guild.id}"] = True
+            database[f"spamming.toggle.{message.guild.id}"] = 1
             await message.channel.send("The spam filter has been successfully **enabled**")
         elif arguments[1] == "disable":
-            database[f"spamming.toggle.{message.guild.id}"] = False
+            database[f"spamming.toggle.{message.guild.id}"] = 0
             await message.channel.send("The spam filter has been successfully **disabled**")
         elif arguments[1] == "set":
             if len(arguments) > 2:
@@ -1671,20 +1672,20 @@ async def welcome_command(message, prefix):
             except:
                 await message.channel.send(f"Please set a welcome message with `{prefix}welcome set <text>` first"); return
             try:
-                channel_iD = database[f"welcome.channel.{message.guild.id}"]
+                channel_id = json.loads(database[f"welcome.channel.{message.guild.id}"])
                 found = False
                 for channel in message.guild.channels:
-                    if channel.id == channel_iD:
+                    if channel.id == channel_id:
                         found = True
                 if not found:
                     raise Exception("unable to find channel")
             except:
                 await message.channel.send(f"Please set a welcome channel with `{prefix}welcome channel <channel>` first"); return
 
-            database[f"welcome.toggle.{message.guild.id}"] = True
+            database[f"welcome.toggle.{message.guild.id}"] = 1
             await message.channel.send("Welcome messages have been successfully **enabled**")
         elif arguments[1] == "disable":
-            database[f"welcome.toggle.{message.guild.id}"] = False
+            database[f"welcome.toggle.{message.guild.id}"] = 0
             await message.channel.send("Welcome messages have been successfully **disabled**")
         elif arguments[1] == "set" or arguments[1] == "text":
             text = ""
@@ -1697,16 +1698,16 @@ async def welcome_command(message, prefix):
             database[f"welcome.text.{message.guild.id}"] = text
             await message.channel.send(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported")
         elif arguments[1] == "channel":
-            channel_iD = 0
+            channel_id = 0
             if len(arguments) > 2:
                 try:
-                    channel_iD = int(arguments[2].replace("<#", "").replace("!", "").replace(">", ""))
+                    channel_id = int(arguments[2].replace("<#", "").replace("!", "").replace(">", ""))
                 except:
                     await message.channel.send("That channel does not exist in this server"); return
             else:
                 await message.channel.send(f"The syntax is `{prefix}welcome channel <channel>`"); return
-            database[f"welcome.channel.{message.guild.id}"] = channel_iD
-            await message.channel.send(f"The welcome channel for this server has been set to <#{channel_iD}>")
+            database[f"welcome.channel.{message.guild.id}"] = channel_id
+            await message.channel.send(f"The welcome channel for this server has been set to <#{channel_id}>")
         elif arguments[1] == "status" or arguments[1] == "filter" or arguments[1] == "limit":
             value = False
             try:
@@ -1715,15 +1716,15 @@ async def welcome_command(message, prefix):
                 pass
             text = "There is nothing here..."
             try:
-                text = database[f"welcome.text.{message.guild.id}"]
+                text = database[f"welcome.text.{message.guild.id}"].decode("utf-8")
             except:
                 pass
-            channel_iD = "**#unknown-channel**"
+            channel_id = "**#unknown-channel**"
             try:
-                channel_iD = "<#" + str(database[f"welcome.channel.{message.guild.id}"]) + ">"
+                channel_id = "<#" + database[f"welcome.channel.{message.guild.id}"].decode("utf-8") + ">"
             except:
                 pass
-            await message.channel.send(f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_iD}\n```\n{text}```")
+            await message.channel.send(f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
     else:
         await message.channel.send(f"The syntax is `{prefix}welcome <enable/disable/channel/set/status>`"); return
 
@@ -1739,20 +1740,20 @@ async def leave_command(message, prefix):
             except:
                 await message.channel.send(f"Please set a leave message with `{prefix}leave set <text>` first"); return
             try:
-                channel_iD = database[f"leave.channel.{message.guild.id}"]
+                channel_id = json.loads(database[f"leave.channel.{message.guild.id}"])
                 found = False
                 for channel in message.guild.channels:
-                    if channel.id == channel_iD:
+                    if channel.id == channel_id:
                         found = True
                 if not found:
                     raise Exception("unable to find channel")
             except:
                 await message.channel.send(f"Please set a leave channel with `{prefix}leave channel <channel>` first"); return
 
-            database[f"leave.toggle.{message.guild.id}"] = True
+            database[f"leave.toggle.{message.guild.id}"] = 1
             await message.channel.send("Leave messages have been successfully **enabled**")
         elif arguments[1] == "disable":
-            database[f"leave.toggle.{message.guild.id}"] = False
+            database[f"leave.toggle.{message.guild.id}"] = 0
             await message.channel.send("Leave messages have been successfully **disabled**")
         elif arguments[1] == "set" or arguments[1] == "text":
             text = ""
@@ -1765,16 +1766,16 @@ async def leave_command(message, prefix):
             database[f"leave.text.{message.guild.id}"] = text
             await message.channel.send(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported")
         elif arguments[1] == "channel":
-            channel_iD = 0
+            channel_id = 0
             if len(arguments) > 2:
                 try:
-                    channel_iD = int(arguments[2].replace("<#", "").replace("!", "").replace(">", ""))
+                    channel_id = int(arguments[2].replace("<#", "").replace("!", "").replace(">", ""))
                 except:
                     await message.channel.send("That channel does not exist in this server"); return
             else:
                 await message.channel.send(f"The syntax is `{prefix}leave channel <channel>`"); return
-            database[f"leave.channel.{message.guild.id}"] = channel_iD
-            await message.channel.send(f"The leave channel for this server has been set to <#{channel_iD}>")
+            database[f"leave.channel.{message.guild.id}"] = channel_id
+            await message.channel.send(f"The leave channel for this server has been set to <#{channel_id}>")
         elif arguments[1] == "status" or arguments[1] == "filter" or arguments[1] == "limit":
             value = False
             try:
@@ -1783,15 +1784,15 @@ async def leave_command(message, prefix):
                 pass
             text = "There is nothing here..."
             try:
-                text = database[f"leave.text.{message.guild.id}"]
+                text = database[f"leave.text.{message.guild.id}"].decode("utf-8")
             except:
                 pass
-            channel_iD = "**#unknown-channel**"
+            channel_id = "**#unknown-channel**"
             try:
-                channel_iD = "<#" + str(database[f"leave.channel.{message.guild.id}"]) + ">"
+                channel_id = "<#" + database[f"leave.channel.{message.guild.id}"].decode("utf-8") + ">"
             except:
                 pass
-            await message.channel.send(f"Leave messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_iD}\n```\n{text}```")
+            await message.channel.send(f"Leave messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
     else:
         await message.channel.send(f"The syntax is `{prefix}leave <enable/disable/channel/set/status>`"); return
 
@@ -1814,13 +1815,13 @@ async def snipe_command(message, prefix):
             if not message.author.guild_permissions.administrator:
                 await message.channel.send(variables.no_permission_text); return
 
-            database[f"snipe.{message.guild.id}"] = True
+            database[f"snipe.{message.guild.id}"] = 1
             await message.channel.send("Snipe has been **enabled** for this server")
         elif arguments[1] == "disable":
             if not message.author.guild_permissions.administrator:
                 await message.channel.send(variables.no_permission_text); return
 
-            database[f"snipe.{message.guild.id}"] = False
+            database[f"snipe.{message.guild.id}"] = 0
             await message.channel.send("Snipe has been **disabled** for this server")
         elif arguments[1] == "clear":
             if not message.author.guild_permissions.administrator:
@@ -2351,7 +2352,7 @@ async def send_user_message(user_id, message):
 
 async def on_member_join(member):
     try:
-        autoroles = database[f"autorole.{member.guild.id}"]
+        autoroles = json.loads(database[f"autorole.{member.guild.id}"])
         for role in member.guild.roles:
             for role_id in autoroles:
                 if int(role_id) == role.id:
@@ -2456,7 +2457,7 @@ async def on_message(message):
         if message.guild:
             prefix = "="
             try:
-                prefix = database[f"prefix.{message.guild.id}"]
+                prefix = database[f"prefix.{message.guild.id}"].decode("utf-8")
             except:
                 database[f"prefix.{message.guild.id}"] = "="
         else:
@@ -2620,11 +2621,11 @@ command_list = [
     Command("base64", ["b64"], base64Command, "base64 <encode/decode> <text>", "Convert the text to/from base64"),
     Command("date-epoch", ["date-unix"], date_epoch_command, "date-epoch <date>", "Covert a date into an epoch timestamp"),
     Command("hash", [], hash_command, "hash <type> <text>", "Hash the text object with the specified type"),
-    Command("meme", [], meme_command, "meme", "Search for a meme on Reddit and display it in an embed"),
     Command("snipe", [], snipe_command, "snipe <enable/disable>", "Restore and bring deleted messages back to life"),
     Command("calculate", ["calc"], calculate_command, "calculate <expression>", "Calculate the specified math expression"),
     Command("color", ["colour"], color_command, "color <color code>", "Display information about the color code"),
     Command("permissions", ["perms"], permissions_command, "permissions <user>", "Display the permissions for the specified user"),
+    Command("meme", [], meme_command, "meme", "Search for a meme on Reddit and display it in an embed"),
     Command("time", ["date"], time_command, "time <timezone>", "Display the current time for the specified timezone"),
     Command("binary", ["bin"], binary_command, "binary <encode/decode> <text>", "Convert the text to/from binary"),
     Command("nickname", ["nick"], nickname_command, "nickname <user> <nickname>", "Change or update a user's nickname"),
