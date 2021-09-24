@@ -35,23 +35,56 @@ database = sqlitedict.SqliteDict("database.sql", autocommit=True)
 
 class Command:
     def __init__(self, name, aliases, function, usage, description):
-        super().__init__()
-        
         self.name = name
         self.aliases = aliases
         self.function = function
         self.usage = usage
         self.description = description
 
-class ContextObject:
-    def __init__(self, client, message):
-        super().__init__()
+class Paginator:
+    def __init__(self, title, segments, color, prefix, suffix):
+        self.embeds = []
+        self.current_page = 1
+        
+        for segment in segments:
+            self.embeds.append(
+                disnake.Embed(
+                    title=title,
+                    color=color,
+                    description=prefix + segment + suffix,
+                )
+            )
 
-        self.bot = client
-        self.message = message
-        self.author = message.author
-        self.guild = message.guild
-        self.send = message.channel.send
+    async def start(self, message):
+        class PaginatorView(disnake.ui.View):
+            def __init__(this):
+                super().__init__()
+                this.add_item(
+                    disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
+                )
+
+            @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def previous_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page -= 1
+                if self.current_page < 1:
+                    self.current_page = len(self.embeds)
+                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+
+            @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def next_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page += 1
+                if self.current_page > len(self.embeds):
+                    self.current_page = 1
+                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+        old_message = await message.channel.send(embed=self.embeds[0], view=PaginatorView())
 
 def reset_strikes():
     global message_strikes
@@ -270,10 +303,10 @@ async def currency_command(message, prefix):
         for key in response.keys():
             output += f"{key}: {response[key]}\n"
         segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
-        pager = CustomPager(
-            timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", entries=segments,
+        pager = Paginator(
+            prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", segments=segments,
         )
-        await pager.start(ContextObject(client, message))
+        await pager.start(message)
         add_cooldown(message.author.id, "currency", 5)
     else:
         await message.channel.send(f"The syntax is `{prefix}currency <input> <amount> <output>`"); return
@@ -690,10 +723,10 @@ async def execute_command(message, prefix):
             segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
             if len(output) > 2001:
                 output = output.replace("`", "\`")
-                pager = CustomPager(
-                    timeout=120, length=1, prefix=f"```{output_language}\n", suffix="```", color=variables.embed_color, title=f"Code Output ({len(segments)} pages)", entries=segments,
+                pager = Paginator(
+                    prefix=f"```{output_language}\n", suffix="```", color=variables.embed_color, title=f"Code Output", segments=segments,
                 )
-                await pager.start(ContextObject(client, message))
+                await pager.start(message)
             else:
                 await message.channel.send(output)
         except Exception as error:
@@ -719,10 +752,11 @@ async def disconnect_members_command(message, prefix):
         add_cooldown(message.author.id, "disconnect-members", variables.large_number); members = 0; failed = 0
 
         for channel in message.guild.channels:
-            if type(channel) == disnake.channel.voice_channel:
+            if type(channel) == disnake.channel.VoiceChannel:
                 for member in channel.members:
                     try:
-                        await member.edit(voice_channel=None); members += 1
+                        await member.edit(voice_channel=None)
+                        members += 1
                     except:
                         failed += 1
         await old_message.edit(f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
@@ -746,7 +780,7 @@ async def suggest_command(message, prefix):
                     continue
             if member:
                 try:
-                    await member.send(f"**{message.author.name}#{message.author.discriminator}** (`{member.id}`) **has sent a suggestion**\n{text}")
+                    await member.send(f"**{message.author.name}#{message.author.discriminator}** (`{message.author.id}`) **has sent a suggestion**\n{text}")
                 except:
                     pass
         await old_message.edit("Your suggestion has been successfully sent")
@@ -760,11 +794,19 @@ async def autorole_command(message, prefix):
         arguments = message.content.split(" ")
         if len(arguments) > 1:
             arguments.pop(0)
-            role_list = arguments; role_found = False
+            role_list = arguments
+            role_found = False
+            if role_list == ["disable"] or role_list == ["off"]:
+                del database[f"autorole.{message.guild.id}"]
+                await message.channel.send("Autorole has been **disabled** for this server")
+                return
+            if len(role_list) > 5:
+                await message.channel.send("You can only add up to **5 roles**")
+                return
             for role in message.guild.roles:
-                for role_iD in role_list:
+                for role_id in role_list:
                     try:
-                        if role.id == int(role_iD):
+                        if role.id == int(role_id):
                             role_found = True
                             break
                     except:
@@ -773,7 +815,8 @@ async def autorole_command(message, prefix):
             if not role_found:
                 await message.channel.send("That role is not found in this server")
                 return
-            database[f"autorole.{message.guild.id}"] = role_list; role_string = ""
+            database[f"autorole.{message.guild.id}"] = role_list
+            role_string = ""
             for role in role_list:
                 role_string += "<@&" + role + "> "
             await message.channel.send(embed=disnake.Embed(title="Autorole", description=f"This server's autorole has been set to {role_string}", color=variables.embed_color))
@@ -820,7 +863,7 @@ async def shards_command(message, prefix):
     except:
         help_page = "That page doesn't exist"
         current_page = 0
-    embed = disnake.Embed(title="Doge Shards", description=help_page, color=variables.embed_color, timestamp=datetime.datetime.utcnow())
+    embed = disnake.Embed(title="Doge Shards", description=help_page, color=variables.embed_color, timestamp=datetime.datetime.now())
     embed.set_footer(text=f"Viewing shards page {current_page} of {len(pages)}")
     await message.channel.send(embed=embed)
     add_cooldown(message.author.id, "shards", 5)
@@ -934,11 +977,11 @@ async def raid_protection_command(message, prefix):
             except:
                 await message.channel.send("This server's raid protection is turned **off**")
             return
-        if setting.lower() == "on":
+        if setting.lower() == "on" or setting.lower() == "enable":
             database[f"{message.author.guild.id}.raid-protection"] = True
             await message.channel.send("This server's raid protection has been turned **on**")
             return
-        elif setting.lower() == "off":
+        elif setting.lower() == "off" or setting.lower() == "disable":
             database[f"{message.author.guild.id}.raid-protection"] = False
             await message.channel.send("This server's raid protection has been turned **off**")
             return
@@ -1091,6 +1134,8 @@ async def clear_command(message, prefix):
                 f"Are you sure you want to clear more than **500 messages** in this channel?",
                 view=CommandView()
             )
+        else:
+            await message.channel.purge(limit=count + 1)
     else:
         await message.channel.send(variables.no_permission_text)
     add_cooldown(message.author.id, "clear", 10)
@@ -1218,12 +1263,12 @@ async def time_command(message, prefix):
                 for timezone in pytz.all_timezones:
                     output += timezone + "\n"
                 segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
-                pager = CustomPager(
-                    timeout=60, color=variables.embed_color,
-                    length=1, prefix="```\n", suffix="```",
-                    title=f"Timezone List", entries=segments,
+                pager = Paginator(
+                    color=variables.embed_color,
+                    prefix="```\n", suffix="```",
+                    title=f"Timezone List", segments=segments,
                 )
-                await pager.start(ContextObject(client, message))
+                await pager.start(message)
             elif text.lower() == "epoch" or text.lower() == "unix":
                 embed = disnake.Embed(title="Time", description=f"Current epoch time: **{round(time.time())}**", color=variables.embed_color)
                 await message.channel.send(embed=embed)
@@ -1312,9 +1357,9 @@ async def stackoverflow_command(message, prefix):
         await message.channel.send(f"The syntax is `{prefix}stackoverflow <text>`")
 
 async def source_command(message, prefix):
-    description = "You can find my code [here](https://github.com/error_no_internet/Doge-Utilities)"
+    description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)"
     try:
-        response = requests.get("https://api.github.com/repos/error_no_internet/Doge-Utilities").json()
+        response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
         description += f"\nOpen Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
     except:
         pass
@@ -1998,11 +2043,140 @@ async def discriminator_command(message, prefix):
 
     output = "\n".join(members)
     segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
-    pager = CustomPager(
-        timeout=60, length=1, prefix=f"```\n", suffix="```", color=variables.embed_color, title="Discriminator", entries=segments,
+    pager = Paginator(
+        prefix=f"```\n", suffix="```", color=variables.embed_color, title="Discriminator", segments=segments,
     )
-    await pager.start(ContextObject(client, message))
+    await pager.start(message)
     add_cooldown(message.author.id, "discriminator", 5)
+
+async def kick_command(message, prefix):
+    arguments = message.content.split(" ")
+    if message.author.guild_permissions.kick_members or message.author.id in variables.permission_override:
+        if len(arguments) >= 2:
+            try:
+                user_id = int(arguments[1].replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
+            except:
+                await message.channel.send("Please specify a valid user")
+                return
+            reason = "Reason not specified"
+            if len(arguments) > 2:
+                for i in range(2):
+                    arguments.pop(0)
+                reason = " ".join(arguments)
+            found = False
+            for member in message.guild.members:
+                if member.id == user_id:
+                    found = True
+                    try:
+                        await member.kick(reason=reason)
+                        await message.channel.send(
+                            embed=disnake.Embed(
+                                color=variables.embed_color,
+                                description=f":white_check_mark: **{member}** has been **successfully kicked**",
+                            )
+                        )
+                    except:
+                        await message.channel.send(
+                            embed=disnake.Embed(
+                                color=variables.embed_color,
+                                description=f":x: Unable to kick **{member}**",
+                            )
+                        )
+            if not found:
+                await message.channel.send("Unable to find the specified user")
+        else:
+            await message.channel.send(f"The syntax is `{prefix}kick <user>`")
+    else:
+        await message.channel.send(variables.no_permission_text)
+
+async def ban_command(message, prefix):
+    arguments = message.content.split(" ")
+    if message.author.guild_permissions.ban_members or message.author.id in variables.permission_override:
+        if len(arguments) >= 2:
+            try:
+                user_id = int(arguments[1].replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
+            except:
+                await message.channel.send("Please specify a valid user")
+                return
+            reason = "Reason not specified"
+            if len(arguments) > 2:
+                for i in range(2):
+                    arguments.pop(0)
+                reason = " ".join(arguments)
+            found = False
+            for member in message.guild.members:
+                if member.id == user_id:
+                    found = True
+                    try:
+                        await member.ban(reason=reason, delete_message_days=0)
+                        await message.channel.send(
+                            embed=disnake.Embed(
+                                color=variables.embed_color,
+                                description=f":white_check_mark: **{member}** has been **successfully banned**",
+                            )
+                        )
+                    except:
+                        await message.channel.send(
+                            embed=disnake.Embed(
+                                color=variables.embed_color,
+                                description=f":x: Unable to ban **{member}**",
+                            )
+                        )
+            if not found:
+                try:
+                    try:
+                        user = await client.fetch_user(user_id)
+                    except:
+                        await message.channel.send("Unable to find the specified user")
+                        return
+                    await message.guild.ban(user, reason=reason, delete_message_days=0)
+                    await message.channel.send(
+                        embed=disnake.Embed(
+                            color=variables.embed_color,
+                            description=f":white_check_mark: **{user}** has been **successfully banned**",
+                        )
+                    )
+                except:
+                    await message.channel.send(
+                        embed=disnake.Embed(
+                            color=variables.embed_color,
+                            description=f":x: Unable to ban **{user}**",
+                        )
+                    )
+        else:
+            await message.channel.send(f"The syntax is `{prefix}ban <user>`")
+    else:
+        await message.channel.send(variables.no_permission_text)
+
+async def unban_command(message, prefix):
+    arguments = message.content.split(" ")
+    if message.author.guild_permissions.ban_members or message.author.id in variables.permission_override:
+        if len(arguments) >= 2:
+            try:
+                user_id = int(arguments[1].replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
+                user = await client.fetch_user(user_id)
+            except:
+                await message.channel.send("Please specify a valid user")
+                return
+            try:
+                await message.guild.unban(user)
+                await message.channel.send(
+                    embed=disnake.Embed(
+                        color=variables.embed_color,
+                        description=f":white_check_mark: **{user}** has been **successfully unbanned**",
+                    )
+                )
+            except:
+                await message.channel.send(
+                    embed=disnake.Embed(
+                        color=variables.embed_color,
+                        description=f":x: Unable to unban **{user}**",
+                    )
+                )
+        else:
+            await message.channel.send(f"The syntax is `{prefix}ban <user>`")
+    else:
+        await message.channel.send(variables.no_permission_text)
 
 async def help_command(message, prefix):
     pages = {}; current_page = 1; page_limit = 12; current_item = 0; index = 1; page_arguments = False
@@ -2033,7 +2207,7 @@ async def help_command(message, prefix):
         except:
             help_page = "That page doesn't exist or wasn't found"
             current_page = 0
-        embed = disnake.Embed(title="Doge Commands", description=help_page, color=variables.embed_color, timestamp=datetime.datetime.utcnow())
+        embed = disnake.Embed(title="Doge Commands", description=help_page, color=variables.embed_color, timestamp=datetime.datetime.now())
         embed.set_footer(text=f"Viewing help page {current_page} of {len(pages)}")
         await message.channel.send(embed=embed); add_cooldown(message.author.id, "help", 1.5)
     else:
@@ -2049,11 +2223,11 @@ async def help_command(message, prefix):
                 additional_arguments = ""
                 if command_arguments != "None":
                     additional_arguments = f"\nAdditional arguments: `{command_arguments}`"
-                command = f"Command: `{prefix}{command.name}`{additional_arguments}\nUsage example: `{command_example}`\n\n**{command.description}**"
-                embed = disnake.Embed(title="Doge Commands", description=command, color=variables.embed_color, timestamp=datetime.datetime.utcnow())
+                command = f"Command: `{command.name}`{additional_arguments}\nUsage example: `{command_example}`\n\n**{command.description}**"
+                embed = disnake.Embed(title="Doge Commands", description=command, color=variables.embed_color, timestamp=datetime.datetime.now())
                 embed.set_footer(text=f"Viewing command help page")
                 await message.channel.send(embed=embed); return
-        embed = disnake.Embed(title="Doge Commands", description="That command doesn't exist or wasn't found", color=variables.embed_color, timestamp=datetime.datetime.utcnow())
+        embed = disnake.Embed(title="Doge Commands", description="That command doesn't exist or wasn't found", color=variables.embed_color, timestamp=datetime.datetime.now())
         embed.set_footer(text=f"Viewing command help page")
         await message.channel.send(embed=embed); add_cooldown(message.author.id, "help", 1.5)
 
@@ -2179,8 +2353,8 @@ async def on_member_join(member):
     try:
         autoroles = database[f"autorole.{member.guild.id}"]
         for role in member.guild.roles:
-            for role_iD in autoroles:
-                if int(role_iD) == role.id:
+            for role_id in autoroles:
+                if int(role_id) == role.id:
                     await member.add_roles(role)
     except:
         pass
@@ -2269,7 +2443,7 @@ async def on_message_delete(message, *arguments):
             f"{message.author.name}#{message.author.discriminator}",
             message.author.avatar,
             message.channel.name,
-            datetime.datetime.utcnow(),
+            datetime.datetime.now(),
             message_data,
         ])
         snipe_list[message.guild.id] = snipes
@@ -2402,7 +2576,7 @@ async def on_message(message):
                 except:
                     pass
 
-        embed = disnake.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.utcnow())
+        embed = disnake.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.now())
         embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
 
 hidden_commands = ["execute", "reload", "guilds", "D", "blacklist", "about"]
@@ -2470,4 +2644,7 @@ command_list = [
     Command("joke", ["dadjoke"], joke_command, "joke", "Display a funny random joke from a random category"),
     Command("members", ["users"], members_command, "members", "Display information about this guild's members"),
     Command("trivia", ["quiz"], trivia_command, "trivia", "Display a random trivia question from a random category"),
+    Command("ban", [], ban_command, "ban <user>", "Ban a specified user from the current server"),
+    Command("unban", [], unban_command, "unban <user>", "Unban a specified user from the current server"),
+    Command("kick", [], kick_command, "kick <user>", "Kick a specified user from the current server"),
 ]

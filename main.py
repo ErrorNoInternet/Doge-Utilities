@@ -60,10 +60,10 @@ async def on_guild_channel_delete(channel):
     global server_channels
     for cached_channel in server_channels[channel.guild.id]:
         if channel.id == cached_channel.id:
-            if type(channel) == disnake.text_channel:
+            if type(channel) == disnake.TextChannel:
                 new_channel = await channel.guild.create_text_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, slowmode_delay=cached_channel.slowmode_delay, topic=cached_channel.topic)
                 await new_channel.edit(is_nsfw=cached_channel.is_nsfw())
-            elif type(channel) == disnake.category_channel:
+            elif type(channel) == disnake.CategoryChannel:
                 await channel.guild.create_category(name=cached_channel.name, position=cached_channel.position)
             else:
                 await channel.guild.create_voice_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, user_limit=cached_channel.user_limit, bitrate=cached_channel.bitrate)

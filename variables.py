@@ -7,7 +7,8 @@ message_managers = [531392146767347712]
 permission_override = [531392146767347712]
 embed_color = 0x20c2f6
 large_number = 1e1000
-version_number = 0; build_number = 0
+version_number = 0
+build_number = 0
 for file in os.listdir():
 	try:
 		code_file = open(file, "r"); code = code_file.read(); code_file.close()
@@ -20,6 +21,8 @@ version_number = round((version_number / 10) / 4, 2)
 support_server_invite = "https://discord.gg/3Tp7R8FUsC"
 no_permission_text = "You do not have permission to use this command!"
 not_command_owner_text = "You are not the sender of that command!"
+previous_button_text = "<"
+next_button_text = ">"
 
 status_types = ["Playing", "Watching", "Listening", "Competing"]
 status1 = ["with Discord", "with [users] users", "on some servers", "capture the flag"]
@@ -55,4 +58,5 @@ badge_list = {
 	"Verified Bot Developer": "<:VerifiedBotDeveloper:879669786550890507>",
 	"Discord Certified Moderator": "<:DiscordModerator:879666882976837654>",
 	"Verified Bot": "<:VerifiedBot:879670687554498591>",
+    "Team User": "<:TeamUser:890866907996127305>",
 }
