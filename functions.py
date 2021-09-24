@@ -2587,7 +2587,7 @@ command_list = [
     Command("reload", [], reload_command, "reload", "System Command"),
     Command("guilds", ["servers"], guilds_command, "guilds", "System Command"),
     Command("blacklist", [], blacklist_command, "blacklist <add/remove/list>", "System Command"),
-    Command("help", ["h", "commands"], help_command, "help", "Displays a help page for Doge Utilities"),
+    Command("help", ["h", "commands", "?"], help_command, "help", "Displays a help page for Doge Utilities"),
     Command("ping", ["pong"], ping_command, "ping", "Display the bot's current latency"),
     Command("status", ["stats"], status_command, "status", "Show the bot's current statistics"),
     Command("support", ["report"], support_command, "support", "Display the official Discord server for Doge"),
