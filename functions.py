@@ -2267,7 +2267,7 @@ async def unban_command(message, prefix):
 
 async def convert_command(message, prefix):
     arguments = message.content.split(" ")
-    if arguments[1].lower() == "list":
+    if arguments[1].lower() == "list" or arguments[1].lower() == "help":
         embed = disnake.Embed(
             title="Conversions",
             description=", ".join(converter.abbreviations[abbreviation] for abbreviation in converter.abbreviations),
