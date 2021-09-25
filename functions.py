@@ -2267,10 +2267,16 @@ async def unban_command(message, prefix):
 
 async def convert_command(message, prefix):
     arguments = message.content.split(" ")
+    if len(arguments) == 1:
+        arguments.append("list")
     if arguments[1].lower() == "list" or arguments[1].lower() == "help":
+        conversions = []
+        for conversion in converter.conversions:
+            if conversion.input not in conversions:
+                conversions.append(conversion.output)
         embed = disnake.Embed(
             title="Conversions",
-            description=", ".join(converter.abbreviations[abbreviation] for abbreviation in converter.abbreviations),
+            description=", ".join(conversions),
             color=variables.embed_color
         )
         await message.channel.send(embed=embed)
@@ -2759,7 +2765,7 @@ command_list = [
     Command("spam", [], spamming_command, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
     Command("welcome", [], welcome_command, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", [], leave_command, "leave <enable/disable/channel/set>", "Modify the leave messages"),
-    Command("convert", [], convert_command, "convert <amount> <unit> <unit>", "Convert amounts to another unit"),
+    Command("convert", ["conversions"], convert_command, "convert <amount> <unit> <unit>", "Convert amounts to another unit"),
     Command("choose", [], choose_command, "choose <item>, <item>", "Choose a random item from the specified list"),
     Command("pypi", ["pip"], pypi_command, "pypi <project>", "Display information about a package on PyPi"),
     Command("discriminator", ["discrim"], discriminator_command, "discriminator", "Display other users with the same discriminator"),
