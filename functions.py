@@ -2505,6 +2505,11 @@ async def on_message(message):
             last_command = open("last-command", "w")
             last_command.write(str(round(time.time()))); last_command.close()
             return
+        
+        message.content = message.content.replace(f"<@{client.user.id}> ", prefix)
+        message.content = message.content.replace(f"<@!{client.user.id}> ", prefix)
+        message.content = message.content.replace(f"<@{client.user.id}>", prefix)
+        message.content = message.content.replace(f"<@!{client.user.id}>", prefix)
 
         if not message.author.guild_permissions.administrator:
             if message.author.id not in variables.permission_override:
