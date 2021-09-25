@@ -23,6 +23,8 @@ no_permission_text = "You do not have permission to use this command!"
 not_command_owner_text = "You are not the sender of that command!"
 previous_button_text = "<"
 next_button_text = ">"
+first_button_text = "<<"
+last_button_text = ">>"
 
 status_types = ["Playing", "Watching", "Listening", "Competing"]
 status1 = ["with Discord", "with [users] users", "on some servers", "capture the flag"]
