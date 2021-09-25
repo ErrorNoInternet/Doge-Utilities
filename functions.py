@@ -257,7 +257,8 @@ async def select_status():
 def parse_variables(text):
     text = text.replace("<text>", "hello")
     text = text.replace("<color code>", "#0068DB")
-    text = text.replace("<low>", "10"); text = text.replace("<high>", "100")
+    text = text.replace("<low>", "10")
+    text = text.replace("<high>", "100")
     text = text.replace("<suggestion>", "Make the bot better")
     text = text.replace("<expression>", "28 + 72")
     text = text.replace("<epoch>", str(round(time.time())))
@@ -275,10 +276,14 @@ def parse_variables(text):
     text = text.replace("<nickname>", "Wumpus")
     text = text.replace("<minutes>", "2")
     text = text.replace("<enable/disable>", "enable")
-    text = text.replace("<item>", "apple")
     text = text.replace("<repository>", "ErrorNoInternet/Doge-Utilities")
     text = text.replace("<project>", "disnake")
-    text = text.replace("<unit>", "km")
+
+    text = text.replace("<item>", "apple", 1)
+    text = text.replace("<item>", "banana")
+
+    text = text.replace("<unit>", "km", 1)
+    text = text.replace("<unit>", "meter")
     return text
 
 def reload_data():
