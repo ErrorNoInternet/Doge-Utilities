@@ -2273,7 +2273,7 @@ async def convert_command(message, prefix):
         conversions = []
         for conversion in converter.conversions:
             if conversion.input not in conversions:
-                conversions.append(conversion.output)
+                conversions.append(conversion.input)
         embed = disnake.Embed(
             title="Conversions",
             description=", ".join(conversions),
