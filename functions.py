@@ -40,6 +40,51 @@ class Command:
         self.usage = usage
         self.description = description
 
+class CommandPaginator:
+    def __init__(self, title, type, segments, target_page):
+        self.embeds = []
+        self.current_page = target_page
+        
+        index = 0
+        for segment in segments:
+            index += 1
+            embed = disnake.Embed(
+                title=title,
+                color=variables.embed_color,
+                description=segment,
+                timestamp=datetime.datetime.now(),
+            )
+            embed.set_footer(text=f"Viewing {type} page {index} of {len(segments)}")
+            self.embeds.append(embed)
+
+    async def start(self, message):
+        class CommandView(disnake.ui.View):
+            def __init__(_):
+                super().__init__()
+
+            @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def previous_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page -= 1
+                if self.current_page < 1:
+                    self.current_page = len(self.embeds)
+                await old_message.edit(embed=self.embeds[self.current_page-1])
+
+            @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def next_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page += 1
+                if self.current_page > len(self.embeds):
+                    self.current_page = 1
+                await old_message.edit(embed=self.embeds[self.current_page-1])
+        old_message = await message.channel.send(embed=self.embeds[self.current_page-1], view=CommandView())
+
 class Paginator:
     def __init__(self, title, segments, color, prefix, suffix):
         self.embeds = []
@@ -858,14 +903,8 @@ async def shards_command(message, prefix):
             pages[current_item] = f"Shard Count: `{len(client.shards)}`, Current Shard: `{message.guild.shard_id}`\n\n"
             pages[current_item] += temporary_text
         index += 1
-    try:
-        help_page = pages[current_page - 1]
-    except:
-        help_page = "That page doesn't exist"
-        current_page = 0
-    embed = disnake.Embed(title="Doge Shards", description=help_page, color=variables.embed_color, timestamp=datetime.datetime.now())
-    embed.set_footer(text=f"Viewing shards page {current_page} of {len(pages)}")
-    await message.channel.send(embed=embed)
+    pager = CommandPaginator(title="Doge Shards", type="shards", segments=pages.values(), target_page=current_page)
+    await pager.start(message)
     add_cooldown(message.author.id, "shards", 5)
 
 async def lookup_command(message, prefix):
@@ -2203,14 +2242,9 @@ async def help_command(message, prefix):
             except:
                 pages[current_item] = temporary_text
             index += 1
-        try:
-            help_page = pages[current_page - 1]
-        except:
-            help_page = "That page doesn't exist or wasn't found"
-            current_page = 0
-        embed = disnake.Embed(title="Doge Commands", description=help_page, color=variables.embed_color, timestamp=datetime.datetime.now())
-        embed.set_footer(text=f"Viewing help page {current_page} of {len(pages)}")
-        await message.channel.send(embed=embed); add_cooldown(message.author.id, "help", 1.5)
+        pager = CommandPaginator(title="Doge Commands", type="help", segments=pages.values(), target_page=current_page)
+        await pager.start(message)
+        add_cooldown(message.author.id, "help", 1.5)
     else:
         for command in command_list:
             if command.name in hidden_commands:
@@ -2236,7 +2270,7 @@ def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(epoch))
 
 def date_to_epoch(timestamp):
-    timestamp = timestamp.replace("Today", str(datetime.datetime.utcnow().date()))
+    timestamp = timestamp.replace("Today", str(datetime.datetime.now().date()))
     timestamp = timestamp.replace("/", "-")
     date = timestamp.split(" ")[0]; time = timestamp.split(" ")[1]
     date_parts = date.split("-"); time_parts = time.split(":")
