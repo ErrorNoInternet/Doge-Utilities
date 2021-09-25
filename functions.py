@@ -72,7 +72,7 @@ class CommandPaginator:
                     return
 
                 self.current_page = 1
-                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+                await old_message.edit(embed=self.embeds[self.current_page-1])
 
             @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
             async def previous_button(this, _, interaction):
@@ -103,7 +103,7 @@ class CommandPaginator:
                     return
 
                 self.current_page = len(self.embeds)
-                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+                await old_message.edit(embed=self.embeds[self.current_page-1])
         old_message = await message.channel.send(embed=self.embeds[self.current_page-1], view=CommandView())
 
 class Paginator:
