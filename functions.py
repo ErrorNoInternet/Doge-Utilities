@@ -969,7 +969,7 @@ async def lookup_command(message, prefix):
         try:
             response["public_flags"]
         except:
-            await message.channel.send("Please enter a valid user ID"); return
+            await message.channel.send("Please mention a valid user"); return
         badges = ""
         for flag in variables.public_flags:
             if response['public_flags'] & int(flag) == int(flag):
@@ -1512,7 +1512,7 @@ async def blacklist_command(message, prefix):
                     try:
                         user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
-                        await message.channel.send("Please enter a valid user ID"); return
+                        await message.channel.send("Please mention a valid user"); return
                     blacklist_file = open("blacklist.json", "r")
                     blacklisted_users = json.load(blacklist_file); blacklist_file.close()
                     blacklisted_users.append(user_id)
@@ -1527,7 +1527,7 @@ async def blacklist_command(message, prefix):
                     try:
                         user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
-                        await message.channel.send("Please enter a valid user ID"); return
+                        await message.channel.send("Please mention a valid user"); return
                     blacklist_file = open("blacklist.json", "r")
                     blacklisted_users = json.load(blacklist_file)
                     blacklist_file.close()
@@ -1566,7 +1566,7 @@ async def unmute_command(message, prefix):
             user_id = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
             member = await message.guild.fetch_member(user_id)
         except:
-            await message.channel.send("Please enter a valid user ID"); return
+            await message.channel.send("Please mention a valid user"); return
         mute_role = None; exists = False
         for role in message.guild.roles:
             if "mute" in role.name.lower():
@@ -1604,7 +1604,7 @@ async def mute_command(message, prefix):
             user_id = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
             member = await message.guild.fetch_member(user_id)
         except:
-            await message.channel.send("Please enter a valid user ID"); return
+            await message.channel.send("Please mention a valid user"); return
     if len(arguments) == 2:
         try:
             await member.add_roles(mute_role)
