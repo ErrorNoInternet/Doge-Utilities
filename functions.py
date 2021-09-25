@@ -19,6 +19,7 @@ import hashlib
 import textwrap
 import requests
 import datetime
+import converter
 import importlib
 import threading
 import variables
@@ -277,6 +278,7 @@ def parse_variables(text):
     text = text.replace("<item>", "apple")
     text = text.replace("<repository>", "ErrorNoInternet/Doge-Utilities")
     text = text.replace("<project>", "disnake")
+    text = text.replace("<unit>", "km")
     return text
 
 def reload_data():
@@ -302,6 +304,7 @@ def reload_data():
         textwrap,
         requests,
         datetime,
+        converter,
         importlib,
         threading,
         variables,
@@ -2257,6 +2260,38 @@ async def unban_command(message, prefix):
     else:
         await message.channel.send(variables.no_permission_text)
 
+async def convert_command(message, prefix):
+    arguments = message.content.split(" ")
+    if arguments[1].lower() == "list":
+        embed = disnake.Embed(
+            title="Conversions",
+            description=", ".join(converter.abbreviations[abbreviation] for abbreviation in converter.abbreviations),
+            color=variables.embed_color
+        )
+        await message.channel.send(embed=embed)
+        return
+    if len(arguments) == 4:
+        try:
+            amount = float(arguments[1].replace(",", ""))
+            input_unit = arguments[2]
+            output_unit = arguments[3]
+        except:
+            await message.channel.send("Please enter a valid amount!")
+        data = converter.convert(amount, input_unit, output_unit)
+        if data["error"] == 404:
+            await message.channel.send("That input/output pair is not supported")
+            return
+        description = f"**{amount:,} {data['input_abbreviation']}** = **{data['result']:,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
+        embed = disnake.Embed(
+            title="Conversion",
+            color=variables.embed_color,
+            description=description,
+        )
+        await message.channel.send(embed=embed)
+        add_cooldown(message.author.id, "convert", 2)
+    else:
+        await message.channel.send(f"The syntax is `{prefix}convert <amount> <unit> <unit>`")
+
 async def help_command(message, prefix):
     pages = {}; current_page = 1; page_limit = 12; current_item = 0; index = 1; page_arguments = False
     try:
@@ -2338,6 +2373,7 @@ def set_variable(name, value):
 
 def evaluate_expression(expression):
     expression = expression.replace("^", "**")
+    expression = expression.replace("×", "*")
 
     math_functions = {
         "boo": "Boo!",
@@ -2625,8 +2661,10 @@ async def on_message(message):
                 if get_cooldown(message.author.id, command.name) > 0:
                     cooldown_string = generate_cooldown(command.name, get_cooldown(message.author.id, command.name))
                     embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)
-                    await message.channel.send(embed=embed); return
-                await command.function(message, prefix); return
+                    await message.channel.send(embed=embed)
+                    return
+                await command.function(message, prefix)
+                return
     except disnake.errors.Forbidden:
         await message.author.send("I do not have the required permissions!")
     except disnake.errors.InteractionResponded:
@@ -2716,6 +2754,7 @@ command_list = [
     Command("spam", [], spamming_command, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
     Command("welcome", [], welcome_command, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", [], leave_command, "leave <enable/disable/channel/set>", "Modify the leave messages"),
+    Command("convert", [], convert_command, "convert <amount> <unit> <unit>", "Convert amounts to another unit"),
     Command("choose", [], choose_command, "choose <item>, <item>", "Choose a random item from the specified list"),
     Command("pypi", ["pip"], pypi_command, "pypi <project>", "Display information about a package on PyPi"),
     Command("discriminator", ["discrim"], discriminator_command, "discriminator", "Display other users with the same discriminator"),
