@@ -2496,7 +2496,7 @@ async def on_message(message):
             try:
                 prefix = database[f"prefix.{message.guild.id}"].decode("utf-8")
             except:
-                database[f"prefix.{message.guild.id}"] = "="
+                pass
         else:
             return
 
