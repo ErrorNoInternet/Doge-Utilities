@@ -57,6 +57,9 @@ class CommandPaginator:
             embed.set_footer(text=f"Viewing {type} page {index} of {len(segments)}")
             self.embeds.append(embed)
 
+        if self.current_page > len(self.embeds):
+            self.current_page = 1
+
     async def start(self, message):
         class CommandView(disnake.ui.View):
             def __init__(_):
