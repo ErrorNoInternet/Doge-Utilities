@@ -2371,7 +2371,7 @@ async def definition_command(message, prefix):
             pass
         origin = "unknown"
         try:
-            origin = response[0]['origin'].replace(" .", ".")
+            origin = response[0]['origin'].replace(" .", ".").replace(" )", ")")
         except:
             pass
         description = f"**Word:** {response[0]['word']} ({phonetic})\n**Origin:** {origin}"
@@ -2858,7 +2858,7 @@ command_list = [
     Command("spam", [], spamming_command, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
     Command("welcome", [], welcome_command, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", ["goodbye", "bye"], leave_command, "leave <enable/disable/channel/set>", "Modify the leave messages"),
-    Command("translate", [], translate_command, "translate <language> <text>", "Translate the specified text"),
+    Command("translate", ["trans"], translate_command, "translate <language> <text>", "Translate the specified text"),
     Command("definition", ["def", "define"], definition_command, "definition <word>", "Find the definition of the specified word"),
     Command("convert", ["conversions"], convert_command, "convert <amount> <unit> <unit>", "Convert amounts to another unit"),
     Command("choose", [], choose_command, "choose <item>, <item>", "Choose a random item from the specified list"),
