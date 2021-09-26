@@ -2369,7 +2369,12 @@ async def definition_command(message, prefix):
             phonetic = response[0]['phonetic']
         except:
             pass
-        description = f"**Word:** {response[0]['word']} ({phonetic})\n**Origin:** {response[0]['origin'].replace(' .', '.')}"
+        origin = "unknown"
+        try:
+            origin = response[0]['origin'].replace(" .", ".")
+        except:
+            pass
+        description = f"**Word:** {response[0]['word']} ({phonetic})\n**Origin:** {origin}"
         for meaning in response[0]['meanings']:
             synonyms = ', '.join(meaning['definitions'][0]['synonyms'][:3])
             if synonyms == "":
