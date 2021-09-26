@@ -27,6 +27,7 @@ import functions
 import traceback
 import contextlib
 import simpleeval
+import googletrans
 from PIL import Image
 from dateutil import parser
 
@@ -41,8 +42,11 @@ class Command:
         self.usage = usage
         self.description = description
 
+    def __repr__(self):
+        return f"<Command name={self.name} aliases={self.aliases} usage={self.usage}>"
+
 class CommandPaginator:
-    def __init__(self, title, type, segments, target_page):
+    def __init__(self, title, type, segments, target_page=1):
         self.embeds = []
         self.current_page = target_page
         
@@ -108,7 +112,7 @@ class CommandPaginator:
         old_message = await message.channel.send(embed=self.embeds[self.current_page-1], view=CommandView())
 
 class Paginator:
-    def __init__(self, title, segments, color, prefix, suffix):
+    def __init__(self, title, segments, color=0x000000, prefix="", suffix=""):
         self.embeds = []
         self.current_page = 1
         
@@ -228,14 +232,14 @@ try:
     start_time
 except:
     start_time = time.time()
-    last_command = time.time(); math_variables = {}
+    last_command = time.time()
     required_intents = disnake.Intents.default()
     required_intents.members = True
     client = disnake.AutoShardedClient(
         shard_count=variables.shard_count,
         intents=required_intents,
     )
-    client.max_messages = 512; snipe_list = {}
+    client.max_messages = 512; snipe_list = {}; math_variables = {}
     threading.Thread(name="manage_muted_members", target=asyncio.run_coroutine_threadsafe, args=(manage_muted_members(), client.loop, )).start()
     threading.Thread(name="reset_strikes", target=reset_strikes).start()
 
@@ -278,6 +282,8 @@ def parse_variables(text):
     text = text.replace("<enable/disable>", "enable")
     text = text.replace("<repository>", "ErrorNoInternet/Doge-Utilities")
     text = text.replace("<project>", "disnake")
+    text = text.replace("<language>", "en")
+    text = text.replace("<word>", "apple")
 
     text = text.replace("<item>", "apple", 1)
     text = text.replace("<item>", "banana")
@@ -317,6 +323,7 @@ def reload_data():
         traceback,
         contextlib,
         simpleeval,
+        googletrans,
     ]
     time_list = []
     for module in modules:
@@ -789,7 +796,6 @@ async def execute_command(message, prefix):
                 code = code[3:]
             if code.endswith("```"):
                 code = code[:-3]
-            code = code.replace("run_coroutine", "asyncio.run_coroutine_threadsafe")
             if "#python" in code:
                 output_language = "py"
             if "#go" in code:
@@ -892,7 +898,7 @@ async def autorole_command(message, prefix):
                 await message.channel.send("Autorole has been **disabled** for this server")
                 return
             if len(role_list) > 5:
-                await message.channel.send("You can only add up to **5 roles**")
+                await message.channel.send("You can only add up to **5 roles**!")
                 return
             for role in message.guild.roles:
                 for role_id in role_list:
@@ -1476,7 +1482,7 @@ async def uptime_command(message, prefix):
     await message.channel.send(embed=embed)
 
 async def donate_command(message, prefix):
-    embed = disnake.Embed(title="Donate", description=":moneybag: Bitcoin: `bc1qer5es59d62pvwdhaplgyltzd63kyyd0je2fhjm`\n:dog: Dogecoin: `D5Gy8ADPTbz_gLD3qvpv4Zk_nNr_pMNk_yX49j`", color=variables.embed_color)
+    embed = disnake.Embed(title="Donate", description=":dog: Dogecoin: `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`\n:moneybag: Bitcoin: `bc1qer5es59d62pvwdhaplgyltzd63kyyd0je2fhjm`\n:feather: Litecoin: `LLE9WPg6dTjNjDtdxx2HiyMDMqYRd4j5HZ`", color=variables.embed_color)
     await message.channel.send(embed=embed)
 
 async def doge_command(message, prefix):
@@ -1782,7 +1788,13 @@ async def welcome_command(message, prefix):
             else:
                 await message.channel.send(f"The syntax is `{prefix}welcome set <text>`"); return
             database[f"welcome.text.{message.guild.id}"] = text
-            await message.channel.send(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported")
+            await message.channel.send(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
+            try:
+                database[f"welcome.text.{message.guild.id}"]
+                database[f"welcome.channel.{message.guild.id}"]
+                database[f"welcome.toggle.{message.guild.id}"] = 1
+            except:
+                pass
         elif arguments[1] == "channel":
             channel_id = 0
             if len(arguments) > 2:
@@ -1794,6 +1806,12 @@ async def welcome_command(message, prefix):
                 await message.channel.send(f"The syntax is `{prefix}welcome channel <channel>`"); return
             database[f"welcome.channel.{message.guild.id}"] = channel_id
             await message.channel.send(f"The welcome channel for this server has been set to <#{channel_id}>")
+            try:
+                database[f"welcome.text.{message.guild.id}"]
+                database[f"welcome.channel.{message.guild.id}"]
+                database[f"welcome.toggle.{message.guild.id}"] = 1
+            except:
+                pass
         elif arguments[1] == "status" or arguments[1] == "filter" or arguments[1] == "limit":
             value = False
             try:
@@ -1850,7 +1868,13 @@ async def leave_command(message, prefix):
             else:
                 await message.channel.send(f"The syntax is `{prefix}leave set <text>`"); return
             database[f"leave.text.{message.guild.id}"] = text
-            await message.channel.send(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported")
+            await message.channel.send(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
+            try:
+                database[f"leave.text.{message.guild.id}"]
+                database[f"leave.channel.{message.guild.id}"]
+                database[f"leave.toggle.{message.guild.id}"] = 1
+            except:
+                pass
         elif arguments[1] == "channel":
             channel_id = 0
             if len(arguments) > 2:
@@ -1862,6 +1886,12 @@ async def leave_command(message, prefix):
                 await message.channel.send(f"The syntax is `{prefix}leave channel <channel>`"); return
             database[f"leave.channel.{message.guild.id}"] = channel_id
             await message.channel.send(f"The leave channel for this server has been set to <#{channel_id}>")
+            try:
+                database[f"leave.text.{message.guild.id}"]
+                database[f"leave.channel.{message.guild.id}"]
+                database[f"leave.toggle.{message.guild.id}"] = 1
+            except:
+                pass
         elif arguments[1] == "status" or arguments[1] == "filter" or arguments[1] == "limit":
             value = False
             try:
@@ -1916,9 +1946,9 @@ async def snipe_command(message, prefix):
             snipe_list[message.guild.id] = []
             await message.channel.send("The snipe list for this server has been successfully cleared")
         elif arguments[1] == "status":
-            value = False
+            value = 1
             try:
-                value = database[f"snipe.{message.guild.id}"]
+                value = json.loads(database[f"snipe.{message.guild.id}"])
             except:
                 pass
             await message.channel.send(f"Snipe is currently **{'enabled' if value else 'disabled'}** for this server")
@@ -2292,7 +2322,7 @@ async def convert_command(message, prefix):
         if data["error"] == 404:
             await message.channel.send("That input/output pair is not supported")
             return
-        description = f"**{amount:,} {data['input_abbreviation']}** = **{data['result']:,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
+        description = f"**{round(amount, 6):,} {data['input_abbreviation']}** = **{round(data['result'], 6):,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
         embed = disnake.Embed(
             title="Conversion",
             color=variables.embed_color,
@@ -2302,6 +2332,59 @@ async def convert_command(message, prefix):
         add_cooldown(message.author.id, "convert", 2)
     else:
         await message.channel.send(f"The syntax is `{prefix}convert <amount> <unit> <unit>`")
+
+async def translate_command(message, prefix):
+    arguments = message.content.split(" ")
+    if len(arguments) >= 3:
+        target_language = arguments[1]
+        for i in range(2):
+            arguments.pop(0)
+        text = ' '.join(arguments)
+        translator = googletrans.Translator()
+        try:
+            result = translator.translate(text, dest=target_language)
+            embed = disnake.Embed(color=variables.embed_color)
+            embed.add_field(name=f"Original Text ({result.src})", value=text, inline=False)
+            embed.add_field(name=f"Translated Text ({result.dest})", value=result.text)
+            await message.channel.send(embed=embed)
+            add_cooldown(message.author.id, "translate", 5)
+        except Exception as error:
+            await message.channel.send(f"There was an error while trying to translate the specified text: `{error}`")
+    else:
+        await message.channel.send(f"The syntax is `{prefix}translate <language> <text>`")
+
+async def definition_command(message, prefix):
+    arguments = message.content.split(" ")
+    if len(arguments) == 2:
+        word = arguments[1]
+        response = requests.get("https://api.dictionaryapi.dev/api/v2/entries/en/" + word).json()
+        try:
+            if response["title"] == "No Definitions Found":
+                await message.channel.send("That word was not found in the dictionary")
+                return
+        except:
+            pass
+        phonetic = "unknown"
+        try:
+            phonetic = response[0]['phonetic']
+        except:
+            pass
+        description = f"**Word:** {response[0]['word']} ({phonetic})\n**Origin:** {response[0]['origin'].replace(' .', '.')}"
+        for meaning in response[0]['meanings']:
+            synonyms = ', '.join(meaning['definitions'][0]['synonyms'][:3])
+            if synonyms == "":
+                synonyms = "none"
+            example = "none"
+            try:
+                example = meaning['definitions'][0]['example'].replace(response[0]['word'], '__' + response[0]['word'] + '__')
+            except:
+                pass
+            description += f"\n\n**Type:** {meaning['partOfSpeech']}\n**Definition:** {meaning['definitions'][0]['definition']}\n**Example:** {example}\n**Synonyms:** {synonyms}"
+        embed = disnake.Embed(title="Definition", description=description, color=variables.embed_color)
+        await message.channel.send(embed=embed)
+        add_cooldown(message.author.id, "definition", 10)
+    else:
+        await message.channel.send(f"The syntax is `{prefix}definition <word>`")
 
 async def help_command(message, prefix):
     pages = {}; current_page = 1; page_limit = 12; current_item = 0; index = 1; page_arguments = False
@@ -2385,6 +2468,7 @@ def set_variable(name, value):
 def evaluate_expression(expression):
     expression = expression.replace("^", "**")
     expression = expression.replace("×", "*")
+    expression = expression.replace("÷", "/")
 
     math_functions = {
         "boo": "Boo!",
@@ -2538,9 +2622,9 @@ async def on_message_delete(message, *arguments):
     if not message.guild:
         return
 
-    value = True
+    value = 1
     try:
-        value = database[f"snipe.{message.guild.id}"]
+        value = json.loads(database[f"snipe.{message.guild.id}"])
     except:
         pass
     if not value:
@@ -2589,10 +2673,14 @@ async def on_message(message):
             last_command.write(str(round(time.time()))); last_command.close()
             return
         
-        message.content = message.content.replace(f"<@{client.user.id}> ", prefix)
-        message.content = message.content.replace(f"<@!{client.user.id}> ", prefix)
-        message.content = message.content.replace(f"<@{client.user.id}>", prefix)
-        message.content = message.content.replace(f"<@!{client.user.id}>", prefix)
+        if message.content.startswith(f"<@{client.user.id}> "):
+            message.content = message.content.replace(f"<@{client.user.id}> ", prefix, 1)
+        if message.content.startswith(f"<@!{client.user.id}> "):
+            message.content = message.content.replace(f"<@!{client.user.id}> ", prefix, 1)
+        if message.content.startswith(f"<@{client.user.id}>"):
+            message.content = message.content.replace(f"<@{client.user.id}>", prefix, 1)
+        if message.content.startswith(f"<@!{client.user.id}>"):
+            message.content = message.content.replace(f"<@!{client.user.id}>", prefix, 1)
 
         if not message.author.guild_permissions.administrator:
             if message.author.id not in variables.permission_override:
@@ -2709,7 +2797,7 @@ async def on_message(message):
 hidden_commands = ["execute", "reload", "guilds", "D", "blacklist", "about"]
 command_list = [
     Command("D", [], smiley_command, "D", "=D"),
-    Command("about", ["owner"], about_command, "about", "System Command"),
+    Command("about", ["owner", "botinfo"], about_command, "about", "System Command"),
     Command("execute", [], execute_command, "execute <code>", "System Command"),
     Command("reload", [], reload_command, "reload", "System Command"),
     Command("guilds", ["servers"], guilds_command, "guilds", "System Command"),
@@ -2764,7 +2852,9 @@ command_list = [
     Command("links", [], links_command, "links <enable/disable>", "Enable or disable the link/advertisement filter"),
     Command("spam", [], spamming_command, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
     Command("welcome", [], welcome_command, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
-    Command("leave", [], leave_command, "leave <enable/disable/channel/set>", "Modify the leave messages"),
+    Command("leave", ["goodbye", "bye"], leave_command, "leave <enable/disable/channel/set>", "Modify the leave messages"),
+    Command("translate", [], translate_command, "translate <language> <text>", "Translate the specified text"),
+    Command("definition", ["def", "define"], definition_command, "definition <word>", "Find the definition of the specified word"),
     Command("convert", ["conversions"], convert_command, "convert <amount> <unit> <unit>", "Convert amounts to another unit"),
     Command("choose", [], choose_command, "choose <item>, <item>", "Choose a random item from the specified list"),
     Command("pypi", ["pip"], pypi_command, "pypi <project>", "Display information about a package on PyPi"),
@@ -2772,7 +2862,7 @@ command_list = [
     Command("joke", ["dadjoke"], joke_command, "joke", "Display a funny random joke from a random category"),
     Command("members", ["users"], members_command, "members", "Display information about this guild's members"),
     Command("trivia", ["quiz"], trivia_command, "trivia", "Display a random trivia question from a random category"),
-    Command("ban", [], ban_command, "ban <user>", "Ban a specified user from the current server"),
-    Command("unban", [], unban_command, "unban <user>", "Unban a specified user from the current server"),
-    Command("kick", [], kick_command, "kick <user>", "Kick a specified user from the current server"),
+    Command("ban", [], ban_command, "ban <user>", "Ban a specified member from the current server"),
+    Command("unban", [], unban_command, "unban <user>", "Unban a specified member from the current server"),
+    Command("kick", [], kick_command, "kick <user>", "Kick a specified member from the current server"),
 ]

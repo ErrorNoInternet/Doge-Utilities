@@ -1,4 +1,11 @@
 import os
+if os.getenv("TOKEN") == None:
+    print("Unable to load TOKEN variable"); exit()
+if os.getenv("TOPGG_TOKEN") == None:
+    print("Unable to load TOPGG_TOKEN variable"); exit()
+if os.getenv("REDIS_URL") == None:
+    print("Unable to load REDIS_URL variable"); exit()
+
 import json
 import time
 import topgg
@@ -6,13 +13,6 @@ import disnake
 import asyncio
 import functions
 import threading
-
-if os.getenv("TOKEN") == None:
-    print("Unable to load TOKEN variable"); exit()
-if os.getenv("TOPGG_TOKEN") == None:
-    print("Unable to load TOPGG_TOKEN variable"); exit()
-if os.getenv("REDIS_URL") == None:
-    print("Unable to load REDIS_URL variable"); exit()
 
 initialize_time = time.time()
 first_run = False

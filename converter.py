@@ -14,6 +14,7 @@ abbreviations = {
     "cm": "centimeter",
     "m": "meter",
     "km": "kilometer",
+    "mi": "mile",
     "ms": "millisecond",
     "s": "second",
     "min": "minute",
@@ -31,6 +32,7 @@ conversions = [
     Conversion("centimeter", "meter", "divide", 100),
     Conversion("centimeter", "kilometer", "divide", 100000),
     Conversion("meter", "kilometer", "divide", 1000),
+    Conversion("mile", "kilometer", "divide", 0.621371),
 
     Conversion("millisecond", "second", "divide", 1000),
     Conversion("millisecond", "minute", "divide", 60000),
@@ -60,6 +62,7 @@ conversions = [
     Conversion("week", "month", "divide", 4.2857),
     Conversion("week", "year", "divide", 52.177457),
     Conversion("month", "year", "divide", 12),
+
     Conversion("fahrenheit", "celcius", "custom:(x-32)*0.5556", shortened=False),
     Conversion("celcius", "fahrenheit", "custom:(x*1.8)+32", shortened=False),
 ]
