@@ -10,6 +10,8 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 - Requirements:
   - Python 3.8+
   - a Discord developer application
+  - a Top.gg bot token
+  - a Redis database server
 
 - Environment variables:
   - `TOKEN` - Discord bot token
