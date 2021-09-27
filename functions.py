@@ -228,6 +228,15 @@ async def manage_muted_members():
                 pass
         await asyncio.sleep(10)
 
+def manage_blacklist():
+    global blacklisted_users
+    while True:
+        try:
+            blacklisted_users = json.loads(database["blacklist"])
+        except:
+            database["blacklist"] = json.dumps([])
+        time.sleep(30)
+
 try:
     start_time
 except:
@@ -239,9 +248,15 @@ except:
         shard_count=variables.shard_count,
         intents=required_intents,
     )
-    client.max_messages = 512; snipe_list = {}; math_variables = {}
-    threading.Thread(name="manage_muted_members", target=asyncio.run_coroutine_threadsafe, args=(manage_muted_members(), client.loop, )).start()
+    client.max_messages = 512
+    snipe_list = {}; math_variables = {}; blacklisted_users = []
+    threading.Thread(
+        name="manage_muted_members",
+        target=asyncio.run_coroutine_threadsafe,
+        args=(manage_muted_members(), client.loop, ),
+    ).start()
     threading.Thread(name="reset_strikes", target=reset_strikes).start()
+    threading.Thread(name="blacklist_manager", target=manage_blacklist).start()
 
 async def select_status():
     client_status = disnake.Status.online; status_type = random.choice(variables.status_types)
@@ -798,8 +813,16 @@ async def execute_command(message, prefix):
                 code = code[:-3]
             if "#python" in code:
                 output_language = "py"
-            if "#go" in code:
+            if "#golang" in code:
                 output_language = "go"
+            if "#clang" in code:
+                output_language = "c"
+            if "#cs" in code:
+                output_language = "cs"
+            if "#cpp" in code:
+                output_language = "cpp"
+            if "#java" in code:
+                output_language = "java"
 
             stdout = io.StringIO()
             try:
@@ -1505,10 +1528,12 @@ async def about_command(message, prefix):
 async def blacklist_command(message, prefix):
     if message.author.id == variables.bot_owner:
         arguments = message.content.split(" ")
+        if len(arguments) == 1:
+            arguments.append("list")
         if len(arguments) >= 2:
             if arguments[1] == "list":
                 blacklisted_users = []
-                blacklist_file = open("blacklist.json", "r"); raw_array = json.load(blacklist_file); blacklist_file.close()
+                raw_array = json.loads(database["blacklist"])
                 for user in raw_array:
                     blacklisted_users.append(f"{user} (<@{user}>)")
                 embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
@@ -1519,12 +1544,9 @@ async def blacklist_command(message, prefix):
                         user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
                         await message.channel.send("Please mention a valid user"); return
-                    blacklist_file = open("blacklist.json", "r")
-                    blacklisted_users = json.load(blacklist_file); blacklist_file.close()
-                    blacklisted_users.append(user_id)
-                    blacklist_file = open("blacklist.json", "w")
-                    json.dump(blacklisted_users, blacklist_file)
-                    blacklist_file.close()
+                    current_users = json.loads(database["blacklist"])
+                    current_users.append(user_id)
+                    database["blacklist"] = json.dumps(current_users)
                     await message.channel.send("Successfully added user to blacklist")
                 else:
                     await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
@@ -1534,16 +1556,12 @@ async def blacklist_command(message, prefix):
                         user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
                         await message.channel.send("Please mention a valid user"); return
-                    blacklist_file = open("blacklist.json", "r")
-                    blacklisted_users = json.load(blacklist_file)
-                    blacklist_file.close()
+                    current_users = json.loads(database["blacklist"])
                     try:
-                        blacklisted_users.remove(user_id)
+                        current_users.remove(user_id)
                     except:
                         pass
-                    blacklist_file = open("blacklist.json", "w")
-                    json.dump(blacklisted_users, blacklist_file)
-                    blacklist_file.close()
+                    database["blacklist"] = json.dumps(current_users)
                     await message.channel.send("Successfully removed user from blacklist")
                 else:
                     await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
@@ -2335,11 +2353,29 @@ async def convert_command(message, prefix):
 
 async def translate_command(message, prefix):
     arguments = message.content.split(" ")
+    if len(arguments) == 2:
+        if arguments[1] == "list" or arguments[1] == "help":
+            output = ""
+            for language in googletrans.LANGUAGES:
+                output += f"{language}: {googletrans.LANGUAGES[language]}\n"
+            segments = [output[i: i + 500] for i in range(0, len(output), 500)]
+            pager = Paginator(
+                title="Languages",
+                color=variables.embed_color,
+                segments=segments,
+                prefix="```\n",
+                suffix="```",
+            )
+            await pager.start(message)
+            return
     if len(arguments) >= 3:
         target_language = arguments[1]
         for i in range(2):
             arguments.pop(0)
         text = ' '.join(arguments)
+        if text == "":
+            await message.channel.send("There is no text for that message!")
+            return
         translator = googletrans.Translator()
         try:
             result = translator.translate(text, dest=target_language)
@@ -2350,14 +2386,23 @@ async def translate_command(message, prefix):
             add_cooldown(message.author.id, "translate", 5)
         except Exception as error:
             await message.channel.send(f"There was an error while trying to translate the specified text: `{error}`")
+    elif len(arguments) == 2 and message.reference != None:
+        target_message = await message.channel.fetch_message(message.reference.message_id)
+        message.content = message.content + " " + target_message.content
+        await translate_command(message, prefix)
     else:
         await message.channel.send(f"The syntax is `{prefix}translate <language> <text>`")
 
 async def definition_command(message, prefix):
     arguments = message.content.split(" ")
-    if len(arguments) == 2:
-        word = arguments[1]
-        response = requests.get("https://api.dictionaryapi.dev/api/v2/entries/en/" + word).json()
+    if len(arguments) >= 2:
+        language = "en"
+        if len(arguments) == 3:
+            language = arguments[1]
+            word = arguments[2]
+        else:
+            word = arguments[1]
+        response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}").json()
         try:
             if response["title"] == "No Definitions Found":
                 await message.channel.send("That word was not found in the dictionary")
@@ -2387,7 +2432,7 @@ async def definition_command(message, prefix):
             description += f"\n\n**Type:** {meaning['partOfSpeech']}\n**Definition:** {meaning['definitions'][0]['definition']}\n**Example:** {example}\n**Synonyms:** {synonyms}"
         embed = disnake.Embed(title="Definition", description=description, color=variables.embed_color)
         await message.channel.send(embed=embed)
-        add_cooldown(message.author.id, "definition", 10)
+        add_cooldown(message.author.id, "definition", 5)
     else:
         await message.channel.send(f"The syntax is `{prefix}definition <word>`")
 
@@ -2756,9 +2801,6 @@ async def on_message(message):
                 call_command = True
 
             if call_command:
-                blacklist_file = open("blacklist.json", "r")
-                blacklisted_users = json.load(blacklist_file)
-                blacklist_file.close()
                 if message.author.id in blacklisted_users:
                     await message.reply("You are banned from using Doge Utilities"); return
 
