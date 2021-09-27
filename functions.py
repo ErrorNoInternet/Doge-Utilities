@@ -186,7 +186,10 @@ async def manage_muted_members():
         try:
             for key in database.keys():
                 if key.decode("utf-8").startswith("mute."):
-                    for value in json.loads(database[key]):
+                    database_value = json.loads(database[key])
+                    if database_value == []:
+                        del database[key]
+                    for value in database_value:
                         try:
                             guild_id = int(key.decode("utf-8").split(".")[1])
                             user_id = int(value[0])
