@@ -248,7 +248,7 @@ except:
         shard_count=variables.shard_count,
         intents=required_intents,
     )
-    client.max_messages = 512
+    client.max_messages = 1024
     snipe_list = {}; math_variables = {}; blacklisted_users = []
     threading.Thread(
         name="manage_muted_members",
@@ -2514,6 +2514,7 @@ def get_variable(name):
 
 def set_variable(name, value):
     math_variables[name] = value
+    return 0
 
 def evaluate_expression(expression):
     expression = expression.replace("^", "**")
