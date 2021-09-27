@@ -1,6 +1,4 @@
 __pycache__
 .env
 last-command
-blacklist.json
 images/*
-database.sql
