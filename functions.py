@@ -32,7 +32,7 @@ from PIL import Image
 from dateutil import parser
 
 user_cooldowns = {}; message_strikes = {}; last_messages = {}
-database = redis.from_url(os.getenv("REDIS_URL"))
+database = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"))
 
 class Command:
     def __init__(self, name, aliases, function, usage, description):

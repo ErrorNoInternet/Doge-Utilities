@@ -14,7 +14,9 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 - Environment variables:
   - `TOKEN` - Discord bot token
   - `TOPGG_TOKEN` - Top.gg bot token
-  - `REDIS_URL` - Redis database URL
+  - `REDIS_HOST` - Redis database host URL
+  - `REDIS_PORT` - Redis database port
+  - `REDIS_PASSWORD` - Redis database password
 
 ```sh
 git clone https://github.com/ErrorNoInternet/Doge-Utilities

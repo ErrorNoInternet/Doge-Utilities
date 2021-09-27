@@ -3,8 +3,12 @@ if os.getenv("TOKEN") == None:
     print("Unable to load TOKEN variable"); exit()
 if os.getenv("TOPGG_TOKEN") == None:
     print("Unable to load TOPGG_TOKEN variable"); exit()
-if os.getenv("REDIS_URL") == None:
-    print("Unable to load REDIS_URL variable"); exit()
+if os.getenv("REDIS_HOST") == None:
+    print("Unable to load REDIS_HOST variable"); exit()
+if os.getenv("REDIS_PORT") == None:
+    print("Unable to load REDIS_PORT variable"); exit()
+if os.getenv("REDIS_PASSWORD") == None:
+    print("Unable to load REDIS_PASSWORD variable"); exit()
 
 import json
 import time
