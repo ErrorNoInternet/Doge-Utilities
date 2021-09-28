@@ -21,6 +21,7 @@ version_number = round((version_number / 10) / 4, 2)
 support_server_invite = "https://discord.gg/3Tp7R8FUsC"
 no_permission_text = "You do not have permission to use this command!"
 not_command_owner_text = "You are not the sender of that command!"
+vote_message = "Thank you for voting for Doge Utilities!"
 previous_button_text = "<"
 next_button_text = ">"
 first_button_text = "<<"

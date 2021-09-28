@@ -8,6 +8,7 @@ import time
 import math
 import redis
 import extra
+import server
 import urllib
 import base64
 import string
@@ -260,6 +261,7 @@ except:
     ).start()
     threading.Thread(name="reset_strikes", target=reset_strikes).start()
     threading.Thread(name="blacklist_manager", target=manage_blacklist).start()
+    threading.Thread(name="web_server", target=server.run).start()
 
 async def select_status():
     client_status = disnake.Status.online; status_type = random.choice(variables.status_types)
@@ -322,6 +324,7 @@ def reload_data():
         math,
         redis,
         extra,
+        server,
         urllib,
         base64,
         string,

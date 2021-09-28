@@ -19,6 +19,7 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
   - `REDIS_HOST` - Redis database host
   - `REDIS_PORT` - Redis database port
   - `REDIS_PASSWORD` - Redis database password
+  - `WEB_SECRET` - Bot website secret
 
 ```sh
 git clone https://github.com/ErrorNoInternet/Doge-Utilities
