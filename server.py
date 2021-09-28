@@ -5,8 +5,6 @@ import variables
 import functions
 
 app = flask.Flask("doge-server")
-invite_link = "https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"
-support_server_link = "https://discord.gg/3Tp7R8FUsC"
 website_views = 0
 vote_counter = 0
 
@@ -63,11 +61,11 @@ def index():
 
 @app.route("/invite")
 def fetch_invite():
-    return "<meta http-equiv=\"refresh\" content=\"0; url=" + invite_link + "\">"
+    return "<meta http-equiv=\"refresh\" content=\"0; url=" + variables.bot_invite_link + "\">"
 
 @app.route("/support")
 def fetch_server_invite():
-    return "<meta http-equiv=\"refresh\" content=\"0; url=" + support_server_link + "\">"
+    return "<meta http-equiv=\"refresh\" content=\"0; url=" + variables.support_server_invite + "\">"
 
 def run():
     app.run("0.0.0.0", port=8080 if not os.getenv("PORT") else os.getenv("PORT"))

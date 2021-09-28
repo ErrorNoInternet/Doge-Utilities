@@ -18,6 +18,7 @@ for file in os.listdir():
 		pass
 version_number = round((version_number / 10) / 4, 2)
 
+bot_invite_link = "https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"
 support_server_invite = "https://discord.gg/3Tp7R8FUsC"
 no_permission_text = "You do not have permission to use this command!"
 not_command_owner_text = "You are not the sender of that command!"

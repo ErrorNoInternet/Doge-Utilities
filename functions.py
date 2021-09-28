@@ -626,7 +626,7 @@ async def invite_command(message, prefix):
             self.add_item(
                 disnake.ui.Button(
                     label="Invite Link",
-                    url=f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=8&scope=applications.commands%20bot",
+                    url=variables.bot_invite_link,
                 )
             )
 
