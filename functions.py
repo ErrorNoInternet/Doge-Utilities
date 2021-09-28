@@ -2626,7 +2626,7 @@ async def on_member_join(member):
             welcome_message = database[f"welcome.text.{member.guild.id}"].decode("utf-8")
             welcome_channel = database[f"welcome.channel.{member.guild.id}"].decode("utf-8")
             for channel in member.guild.channels:
-                if welcome_channel == channel.id:
+                if welcome_channel == str(channel.id):
                     welcome_message = welcome_message.replace("{user}", member.name)
                     welcome_message = welcome_message.replace("{user_id}", str(member.id))
                     welcome_message = welcome_message.replace("{user.id}", str(member.id))
@@ -2644,7 +2644,7 @@ async def on_member_remove(member):
             leave_message = database[f"leave.text.{member.guild.id}"].decode("utf-8")
             leave_channel = database[f"leave.channel.{member.guild.id}"].decode("utf-8")
             for channel in member.guild.channels:
-                if leave_channel == channel.id:
+                if leave_channel == str(channel.id):
                     leave_message = leave_message.replace("{user}", member.name)
                     leave_message = leave_message.replace("{user_id}", str(member.id))
                     leave_message = leave_message.replace("{user.id}", str(member.id))
