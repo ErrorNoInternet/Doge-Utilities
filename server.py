@@ -37,6 +37,7 @@ def fetch_doge_image():
 
 @app.route("/vote", methods=["POST"])
 def handle_vote():
+    global vote_counter
     vote_counter += 1
     if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
         vote_user_id = flask.request.json["user"]
