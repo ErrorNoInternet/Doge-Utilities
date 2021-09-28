@@ -2623,8 +2623,8 @@ async def on_member_join(member):
         pass
     try:
         if json.loads(database[f"welcome.toggle.{member.guild.id}"]):
-            welcome_message = json.loads(database[f"welcome.text.{member.guild.id}"])
-            welcome_channel = json.loads(database[f"welcome.channel.{member.guild.id}"])
+            welcome_message = database[f"welcome.text.{member.guild.id}"].decode("utf-8")
+            welcome_channel = database[f"welcome.channel.{member.guild.id}"].decode("utf-8")
             for channel in member.guild.channels:
                 if welcome_channel == channel.id:
                     welcome_message = welcome_message.replace("{user}", member.name)
@@ -2641,8 +2641,8 @@ async def on_member_join(member):
 async def on_member_remove(member):
     try:
         if json.loads(database[f"leave.toggle.{member.guild.id}"]):
-            leave_message = json.loads(database[f"leave.text.{member.guild.id}"])
-            leave_channel = json.loads(database[f"leave.channel.{member.guild.id}"])
+            leave_message = database[f"leave.text.{member.guild.id}"].decode("utf-8")
+            leave_channel = database[f"leave.channel.{member.guild.id}"].decode("utf-8")
             for channel in member.guild.channels:
                 if leave_channel == channel.id:
                     leave_message = leave_message.replace("{user}", member.name)
