@@ -1056,15 +1056,19 @@ async def permissions_command(message, prefix):
     user_id = user_id.replace("<", ""); user_id = user_id.replace("@", "")
     user_id = user_id.replace("!", ""); user_id = user_id.replace(">", "")
     
+    try:
+        user_id = int(user_id)
+    except:
+        await message.channel.send("Please mention a valid user!")
+        return
     target_user = None
     try:
-        target_user = await message.guild.fetch_member(int(user_id))
+        target_user = await message.guild.fetch_member(user_id)
     except:
         pass
-        if str(user.id) == user_id:
-            target_user = user
-    if target_user == None:
-        await message.channel.send("Unable to find user"); return
+    if not target_user:
+        await message.channel.send("Unable to find user")
+        return
     
     permission_list = ""
     for permission in target_user.guild_permissions:
@@ -2613,14 +2617,14 @@ async def on_member_join(member):
         autoroles = json.loads(database[f"autorole.{member.guild.id}"])
         for role in member.guild.roles:
             for role_id in autoroles:
-                if int(role_id) == role.id:
+                if role_id == str(role.id):
                     await member.add_roles(role)
     except:
         pass
     try:
-        if database[f"welcome.toggle.{member.guild.id}"]:
-            welcome_message = database[f"welcome.text.{member.guild.id}"]
-            welcome_channel = database[f"welcome.channel.{member.guild.id}"]
+        if json.loads(database[f"welcome.toggle.{member.guild.id}"]):
+            welcome_message = json.loads(database[f"welcome.text.{member.guild.id}"])
+            welcome_channel = json.loads(database[f"welcome.channel.{member.guild.id}"])
             for channel in member.guild.channels:
                 if welcome_channel == channel.id:
                     welcome_message = welcome_message.replace("{user}", member.name)
@@ -2636,9 +2640,9 @@ async def on_member_join(member):
 
 async def on_member_remove(member):
     try:
-        if database[f"leave.toggle.{member.guild.id}"]:
-            leave_message = database[f"leave.text.{member.guild.id}"]
-            leave_channel = database[f"leave.channel.{member.guild.id}"]
+        if json.loads(database[f"leave.toggle.{member.guild.id}"]):
+            leave_message = json.loads(database[f"leave.text.{member.guild.id}"])
+            leave_channel = json.loads(database[f"leave.channel.{member.guild.id}"])
             for channel in member.guild.channels:
                 if leave_channel == channel.id:
                     leave_message = leave_message.replace("{user}", member.name)
