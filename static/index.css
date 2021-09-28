@@ -1,11 +1,11 @@
 body {
-	background-color: rgb(84, 110, 122);
+    background-color: rgb(84, 110, 122);
 
-	-webkit-animation: fade 2s;
-	-moz-animation: fade 2s;
-	-ms-animation: fade 2s;
-	-o-animation: fade 2s;
-	animation: fade 2s;
+    -webkit-animation: fade 2s;
+    -moz-animation: fade 2s;
+    -ms-animation: fade 2s;
+    -o-animation: fade 2s;
+    animation: fade 2s;
 }
 
 @keyframes fade {
@@ -34,44 +34,74 @@ body {
 }
 
 p {
-	color: rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
 }
 
 button {
-	margin: auto;
-	display: block;
-	border-radius: 5px;
-	background-color: rgb(51, 51, 51);
-	border: 2px solid rgb(84, 110, 122);
-	color: white;
-	padding: 8px 8px;
-	text-align: center;
-	text-decoration: none;
-	font-size: 14px;
-	transition: 0.4s;
-	margin-bottom: 2px;
+    margin: auto;
+    display: block;
+    border-radius: 5px;
+    background-color: rgb(51, 51, 51);
+    border: 2px solid rgb(84, 110, 122);
+    color: white;
+    padding: 8px 8px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.4s;
+    margin-bottom: 2px;
 }
 
 button:hover {
-	margin: auto;
-	display: block;
-	color: black;
-	background-color: white;
-	border: 2px solid rgb(84, 110, 122);
-	margin-bottom: 2px;
+    margin: auto;
+    display: block;
+    color: black;
+    background-color: white;
+    border: 2px solid rgb(84, 110, 122);
+    margin-bottom: 2px;
 }
 
 #buttons {
-	display: inline-block;
+    display: inline-block;
 }
 
 .avatar {
-	border-radius: 20%;
+    border-radius: 20%;
 }
 
 .invisibleSeparator {
-	color: rgb(84, 110, 122);
-	margin: 0;
-	border: 0;
+    color: rgb(84, 110, 122);
+    margin: 0;
+    border: 0;
+}
+
+.links {
+    padding: 10px;
+    display: flex;
+    position: center;
+    align-items: space-around;
+    justify-content:center;
+}
+
+.links a {
+    margin: 10px;
+    font-size: 2rem;
+    text-align:center;
+    display: inline-block;
+    color: var(--main-fonts-color);
+}
+
+.links a i {
+    cursor: pointer;
+}
+
+.links a:hover {
+    color: var(--main-decor-color);
+    text-shadow: 0 0 50px var(--main-decor-color);
+}
+
+.donationText {
+    font-size: 120%;
+    margin: 5;
 }
 

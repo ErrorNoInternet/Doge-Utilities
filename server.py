@@ -51,6 +51,10 @@ def handle_vote():
         response = flask.make_response("Forbidden", 403)
         response.mimetype = "text/plain"; return response
 
+@app.route("/donate")
+def fetch_donations():
+    return load_file("donate.html")
+
 @app.route("/")
 def index():
     global website_views
