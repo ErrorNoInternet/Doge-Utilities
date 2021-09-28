@@ -35,7 +35,7 @@ def fetch_favicon():
 def fetch_doge_image():
     return load_file("doge.png", mimetype="image/png", binary=True)
 
-@app.route("/vote")
+@app.route("/vote", methods=["POST"])
 def handle_vote():
     vote_counter += 1
     if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
