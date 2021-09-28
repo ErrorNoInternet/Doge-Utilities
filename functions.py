@@ -739,12 +739,12 @@ async def setup_muted_command(message, prefix):
                 retry_count += 1
         for channel in message.guild.channels:
             try:
-                await channel.set_permissions(muted_role, send_messages=False)
-            except:
-                try:
+                if type(channel) == disnake.channel.TextChannel:
+                    await channel.set_permissions(muted_role, send_messages=False)
+                elif type(channel) == disnake.channel.VoiceChannel:
                     await channel.set_permissions(muted_role, connect=False)
-                except:
-                    pass
+            except:
+                pass
     except:
         await old_message.edit(f"Unable to generate the **Muted** role for this guild")
         return
