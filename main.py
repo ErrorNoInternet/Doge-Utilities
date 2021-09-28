@@ -9,6 +9,8 @@ if os.getenv("REDIS_PORT") == None:
     print("Unable to load REDIS_PORT variable"); exit()
 if os.getenv("REDIS_PASSWORD") == None:
     print("Unable to load REDIS_PASSWORD variable"); exit()
+if os.getenv("WEB_SECRET") == None:
+    print("Unable to load WEB_SECRET variable"); exit()
 
 import json
 import time
