@@ -200,6 +200,7 @@ async def manage_muted_members():
                             moderation_data = json.loads(database[key])
                             moderation_data.remove(value)
                             database[key] = json.dumps(moderation_data)
+                            continue
                         if (time.time() / 60) > ((mute_start / 60) + duration):
                             try:
                                 mute_role = None; target_guild = None
@@ -232,6 +233,52 @@ async def manage_muted_members():
                 pass
         await asyncio.sleep(10)
 
+async def manage_reminders():
+    await asyncio.sleep(10)
+    while True:
+        try:
+            for key in database.keys():
+                if key.decode("utf-8").startswith("reminders."):
+                    database_value = json.loads(database[key])
+                    if database_value == []:
+                        del database[key]
+                    for value in database_value:
+                        try:
+                            user_id = int(key.decode("utf-8").split(".")[1])
+                            start_time = value[0]
+                            duration = value[1]
+                            text = value[2]
+                        except:
+                            reminder_data = json.loads(database[key])
+                            reminder_data.remove(value)
+                            database[key] = json.dumps(reminder_data)
+                            continue
+                        if time.time() >= (start_time + duration):
+                            try:
+                                sent = False
+                                for guild in client.guilds:
+                                    for member in guild.members:
+                                        if member.id == user_id:
+                                            if not sent:
+                                                sent = True
+                                                await member.send(f"**Reminder:** {text}")
+                                reminder_data = json.loads(database[key])
+                                reminder_data.remove(value)
+                                database[key] = json.dumps(reminder_data)
+                            except:
+                                reminder_data = json.loads(database[key])
+                                reminder_data.remove(value)
+                                database[key] = json.dumps(reminder_data)
+        except Exception as error:
+            print(f"Fatal error in manage_reminders: {error}")
+            try:
+                reminder_data = database[key]
+                reminder_data.remove(value)
+                database[key] = reminder_data
+            except:
+                pass
+        await asyncio.sleep(10)
+
 def manage_blacklist():
     global blacklisted_users
     while True:
@@ -258,6 +305,11 @@ except:
         name="manage_muted_members",
         target=asyncio.run_coroutine_threadsafe,
         args=(manage_muted_members(), client.loop, ),
+    ).start()
+    threading.Thread(
+        name="manage_reminders",
+        target=asyncio.run_coroutine_threadsafe,
+        args=(manage_reminders(), client.loop, ),
     ).start()
     threading.Thread(name="reset_strikes", target=reset_strikes).start()
     threading.Thread(name="blacklist_manager", target=manage_blacklist).start()
@@ -2445,6 +2497,52 @@ async def definition_command(message, prefix):
     else:
         await message.channel.send(f"The syntax is `{prefix}definition <word>`")
 
+async def remind_command(message, prefix):
+    arguments = message.content.split(" ")
+    if len(arguments) == 2:
+        if arguments[1] == "list":
+            try:
+                current_reminders = json.loads(database[f"reminders.{message.author.id}"])
+            except:
+                current_reminders = []
+            text = ""
+            for reminder in current_reminders:
+                end_time = reminder[0] + reminder[1]
+                text += f"**Time:** <t:{round(end_time)}:R>\n**Text:** {reminder[2]}\n\n"
+            if text == "":
+                text = "You have no reminders"
+            embed = disnake.Embed(title="Reminders", description=text, color=variables.embed_color)
+            await message.channel.send(embed=embed)
+            add_cooldown(message.author.id, "remind", 10)
+            return
+    if len(arguments) >= 3:
+        try:
+            duration = float(arguments[1])
+        except:
+            await message.channel.send("Please enter a valid duration (in minutes)")
+            return
+        for i in range(2):
+            arguments.pop(0)
+        text = " ".join(arguments)
+        if len(text) > 200:
+            await message.channel.send("The specified text is too long!")
+            return
+        if duration > 10080:
+            await message.channel.send("The specified duration is too long!")
+            return
+        try:
+            current_reminders = json.loads(database[f"reminders.{message.author.id}"])
+        except:
+            current_reminders = []
+        if len(current_reminders) >= 5:
+            await message.channel.send("You already have **5 reminders**!")
+            return
+        current_reminders.append([time.time(), duration*60, text])
+        database[f"reminders.{message.author.id}"] = json.dumps(current_reminders)
+        await message.channel.send(f"You will be reminded in **{duration if duration != 1.0 else 1} {'minute' if duration == 1.0 or duration == 1 else 'minutes'}**")
+    else:
+        await message.channel.send(f"The syntax is `{prefix}remind <minutes> <text>`")
+
 async def help_command(message, prefix):
     pages = {}; current_page = 1; page_limit = 12; current_item = 0; index = 1; page_arguments = False
     try:
@@ -2922,4 +3020,5 @@ command_list = [
     Command("ban", [], ban_command, "ban <user>", "Ban a specified member from the current server"),
     Command("unban", [], unban_command, "unban <user>", "Unban a specified member from the current server"),
     Command("kick", [], kick_command, "kick <user>", "Kick a specified member from the current server"),
+    Command("remind", ["reminder", "reminders", "timer"], remind_command, "remind <minutes> <text>", "Remind yourself to do something"),
 ]
