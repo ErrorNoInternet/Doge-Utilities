@@ -2715,7 +2715,7 @@ async def send_user_message(user_id, message):
 async def send_vote_message(user_id):
     for guild in client.guilds:
         for member in guild.members:
-            if str(member.id) == user_id:
+            if member.id == user_id:
                 class CommandView(disnake.ui.View):
                     def __init__(self):
                         super().__init__()
