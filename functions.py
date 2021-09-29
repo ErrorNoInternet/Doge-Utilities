@@ -2713,9 +2713,12 @@ async def send_user_message(user_id, message):
             continue
 
 async def send_vote_message(user_id):
+    print(user_id)
+    print(type(user_id))
     for guild in client.guilds:
         for member in guild.members:
-            if member.id == user_id:
+            if str(member.id) == user_id:
+                print("found")
                 class CommandView(disnake.ui.View):
                     def __init__(self):
                         super().__init__()
@@ -2727,7 +2730,7 @@ async def send_vote_message(user_id):
                         except:
                             current_reminders = []
                         #current_reminders.append([time.time(), 43200, "Don't forget to vote for me!"])
-                        current_reminders.append([time.time(), 10, "Don't forget to vote for me!"])
+                        current_reminders.append([time.time(), 30, "Don't forget to vote for me!"])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
                         interaction.response.send_message("A **12 hour** reminder has been successfully added!")
                         self.stop()
