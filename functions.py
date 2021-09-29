@@ -2721,18 +2721,17 @@ async def send_vote_message(user_id):
                         super().__init__()
 
                     @disnake.ui.button(label="Add a reminder", style=disnake.ButtonStyle.green)
-                    def add_reminder(self, _, interaction):
+                    async def add_reminder(self, _, interaction):
                         try:
                             current_reminders = json.loads(database[f"reminders.{user_id}"])
                         except:
                             current_reminders = []
-                        #current_reminders.append([time.time(), 43200, "Don't forget to vote for me!"])
-                        current_reminders.append([time.time(), 30, "Don't forget to vote for me!"])
+                        current_reminders.append([time.time(), 43200, "Don't forget to vote for me!"])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
-                        interaction.response.send_message("A **12 hour** reminder has been successfully added!")
+                        await interaction.response.send_message("A **12 hour** reminder has been successfully added!")
                         self.stop()
-                channel = await member.create_dm_channel()
-                await channel.send(variables.vote_message, view=CommandView())
+                await member.send(variables.vote_message, view=CommandView())
+                return
 
 async def on_member_join(member):
     try:
