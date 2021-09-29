@@ -2722,11 +2722,21 @@ async def send_vote_message(user_id):
 
                     @disnake.ui.button(label="Add a reminder", style=disnake.ButtonStyle.green)
                     async def add_reminder(self, _, interaction):
+                        duration = 43200
+                        text = "Don't forget to vote for me!"
                         try:
                             current_reminders = json.loads(database[f"reminders.{user_id}"])
                         except:
                             current_reminders = []
-                        current_reminders.append([time.time(), 43200, "Don't forget to vote for me!"])
+                        exists = False
+                        for reminder in current_reminders:
+                            if reminder[1] == duration and reminder[2] == text:
+                                exists = True
+                        if exists:
+                            await interaction.response.send_message("A reminder already exists!")
+                            self.stop()
+                            return
+                        current_reminders.append([time.time(), duration, text])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
                         await interaction.response.send_message("A **12 hour reminder** has been successfully added!")
                         self.stop()
