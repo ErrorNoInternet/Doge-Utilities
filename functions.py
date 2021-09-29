@@ -1701,6 +1701,10 @@ async def mute_command(message, prefix):
             duration = float(arguments[2])
         except:
             await message.channel.send("Please enter a valid duration (in minutes)"); return
+        if duration > 43200:
+            await message.channel.send("The specified duration is too long!"); return
+        if duration < 0:
+            await message.channel.send("No negative numbers please!"); return
         try:
             moderation_data = json.loads(database["mute." + str(message.guild.id)])
         except:
@@ -2528,8 +2532,9 @@ async def remind_command(message, prefix):
             await message.channel.send("The specified text is too long!")
             return
         if duration > 10080:
-            await message.channel.send("The specified duration is too long!")
-            return
+            await message.channel.send("The specified duration is too long!"); return
+        if duration < 0:
+            await message.channel.send("No negative numbers please!"); return
         try:
             current_reminders = json.loads(database[f"reminders.{message.author.id}"])
         except:
