@@ -544,7 +544,7 @@ async def tests_command(message, prefix):
             
         embed = disnake.Embed(title="Doge Tests", description=description, color=variables.embed_color)
         await old_message.edit(embed=embed)
-    add_cooldown(message.author.id, "tests", 300)
+    add_cooldown(message.author.id, "tests", 600)
 
 async def status_command(message, prefix):
     member_count = 0; channel_count = 0; uptime = ""
@@ -592,8 +592,7 @@ async def status_command(message, prefix):
     add_cooldown(message.author.id, "status", 5)
 
 async def support_command(message, prefix):
-    embed = disnake.Embed(title="Support Server", description=f"You can join Doge Utilities's official server [here]({variables.support_server_invite})", color=variables.embed_color)
-    await message.channel.send(embed=embed)
+    await message.channel.send(f"Here's the link to Doge Utilities support server: {variables.support_server_invite}")
 
 async def version_command(message, prefix):
     file_size = 0
