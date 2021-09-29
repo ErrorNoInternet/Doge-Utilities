@@ -2541,7 +2541,7 @@ async def remind_command(message, prefix):
         database[f"reminders.{message.author.id}"] = json.dumps(current_reminders)
         await message.channel.send(f"You will be reminded in **{duration if duration != 1.0 else 1} {'minute' if duration == 1.0 or duration == 1 else 'minutes'}**")
     else:
-        await message.channel.send(f"The syntax is `{prefix}remind <minutes> <text>`")
+        await message.channel.send(f"The syntax is `{prefix}remind <minutes> <text>` or `{prefix}remind list`")
 
 async def help_command(message, prefix):
     pages = {}; current_page = 1; page_limit = 12; current_item = 0; index = 1; page_arguments = False
