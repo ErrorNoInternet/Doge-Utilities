@@ -2713,12 +2713,9 @@ async def send_user_message(user_id, message):
             continue
 
 async def send_vote_message(user_id):
-    print(user_id)
-    print(type(user_id))
     for guild in client.guilds:
         for member in guild.members:
             if str(member.id) == user_id:
-                print("found")
                 class CommandView(disnake.ui.View):
                     def __init__(self):
                         super().__init__()
@@ -2734,7 +2731,8 @@ async def send_vote_message(user_id):
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
                         interaction.response.send_message("A **12 hour** reminder has been successfully added!")
                         self.stop()
-                await member.send(variables.vote_message, view=CommandView())
+                channel = await member.create_dm_channel()
+                await channel.send(variables.vote_message, view=CommandView())
 
 async def on_member_join(member):
     try:
