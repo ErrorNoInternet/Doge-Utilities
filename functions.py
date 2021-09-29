@@ -2712,6 +2712,27 @@ async def send_user_message(user_id, message):
         except:
             continue
 
+async def send_vote_message(user_id):
+    for guild in client.guilds:
+        for member in guild.members:
+            if str(member.id) == user_id:
+                class CommandView(disnake.ui.View):
+                    def __init__(self):
+                        super().__init__()
+
+                    @disnake.ui.button(label="Add a reminder", style=disnake.ButtonStyle.green)
+                    def add_reminder(self, _, interaction):
+                        try:
+                            current_reminders = json.loads(database[f"reminders.{user_id}"])
+                        except:
+                            current_reminders = []
+                        #current_reminders.append([time.time(), 43200, "Don't forget to vote for me!"])
+                        current_reminders.append([time.time(), 10, "Don't forget to vote for me!"])
+                        database[f"reminders.{user_id}"] = json.dumps(current_reminders)
+                        interaction.response.send_message("A **12 hour** reminder has been successfully added!")
+                        self.stop()
+                await member.send(variables.vote_message, view=CommandView())
+
 async def on_member_join(member):
     try:
         autoroles = json.loads(database[f"autorole.{member.guild.id}"])

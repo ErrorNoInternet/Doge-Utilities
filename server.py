@@ -40,7 +40,7 @@ def handle_vote():
     if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
         vote_user_id = flask.request.json["user"]
         asyncio.run_coroutine_threadsafe(
-            functions.send_user_message(vote_user_id, variables.vote_message), functions.client.loop,
+            functions.send_vote_message(vote_user_id), functions.client.loop,
         )
 
         response = flask.make_response("OK", 200)
