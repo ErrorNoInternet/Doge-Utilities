@@ -2728,7 +2728,7 @@ async def send_vote_message(user_id):
                             current_reminders = []
                         current_reminders.append([time.time(), 43200, "Don't forget to vote for me!"])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
-                        await interaction.response.send_message("A **12 hour** reminder has been successfully added!")
+                        await interaction.response.send_message("A **12 hour reminder** has been successfully added!")
                         self.stop()
                 await member.send(variables.vote_message, view=CommandView())
                 return
