@@ -592,7 +592,7 @@ async def status_command(message, prefix):
     add_cooldown(message.author.id, "status", 5)
 
 async def support_command(message, prefix):
-    await message.channel.send(f"Here's the link to Doge Utilities support server: {variables.support_server_invite}")
+    await message.channel.send(f"Doge Utilities support server: {variables.support_server_invite}")
 
 async def version_command(message, prefix):
     file_size = 0
