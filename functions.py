@@ -884,7 +884,7 @@ async def execute_command(message, prefix):
                 output_language = "cpp"
             if "#java" in code:
                 output_language = "java"
-            if "#no_codeblock" in code:
+            if "#raw" in code:
                 output_language = ""
                 codeblock = ""
 
