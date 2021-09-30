@@ -347,7 +347,6 @@ def parse_variables(text):
     text = text.replace("<type>", "sha256")
     text = text.replace("<page>", "2")
     text = text.replace("<timezone>", "America/Denver")
-    text = text.replace("<currency>", "usd")
     text = text.replace("<amount>", "8")
     text = text.replace("<nickname>", "Wumpus")
     text = text.replace("<minutes>", "2")
@@ -356,12 +355,16 @@ def parse_variables(text):
     text = text.replace("<project>", "disnake")
     text = text.replace("<language>", "en")
     text = text.replace("<word>", "apple")
+    text = text.replace("<number>", "1337")
 
     text = text.replace("<item>", "apple", 1)
     text = text.replace("<item>", "banana")
 
     text = text.replace("<unit>", "km", 1)
     text = text.replace("<unit>", "meter")
+
+    text = text.replace("<currency>", "usd", 1)
+    text = text.replace("<currency>", "eur")
     return text
 
 def reload_data():
@@ -3049,7 +3052,7 @@ command_list = [
     Command("convert", ["conversions"], convert_command, "convert <amount> <unit> <unit>", "Convert amounts to another unit"),
     Command("choose", [], choose_command, "choose <item>, <item>", "Choose a random item from the specified list"),
     Command("pypi", ["pip"], pypi_command, "pypi <project>", "Display information about a package on PyPi"),
-    Command("discriminator", ["discrim"], discriminator_command, "discriminator", "Display other users with the same discriminator"),
+    Command("discriminator", ["discrim"], discriminator_command, "discriminator <number>", "Display other users with the same discriminator"),
     Command("joke", ["dadjoke"], joke_command, "joke", "Display a funny random joke from a random category"),
     Command("members", ["users"], members_command, "members", "Display information about this guild's members"),
     Command("trivia", ["quiz"], trivia_command, "trivia", "Display a random trivia question from a random category"),
