@@ -31,6 +31,8 @@ import simpleeval
 import googletrans
 from PIL import Image
 from dateutil import parser
+from disnake.ext import commands
+from disnake.ext.commands import Param
 
 user_cooldowns = {}; message_strikes = {}; last_messages = {}
 database = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), password=os.getenv("REDIS_PASSWORD"))
@@ -111,7 +113,7 @@ class CommandPaginator:
 
                 self.current_page = len(self.embeds)
                 await old_message.edit(embed=self.embeds[self.current_page-1])
-        old_message = await message.channel.send(embed=self.embeds[self.current_page-1], view=CommandView())
+        old_message = await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=CommandView())
 
 class Paginator:
     def __init__(self, title, segments, color=0x000000, prefix="", suffix=""):
@@ -174,7 +176,7 @@ class Paginator:
 
                 self.current_page = len(self.embeds)
                 await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
-        old_message = await message.channel.send(embed=self.embeds[0], view=PaginatorView())
+        old_message = await interaction.response.send_message(embed=self.embeds[0], view=PaginatorView())
 
 def reset_strikes():
     global message_strikes
@@ -296,9 +298,11 @@ except:
     last_command = time.time()
     required_intents = disnake.Intents.default()
     required_intents.members = True
-    client = disnake.AutoShardedClient(
+    client = commands.AutoShardedBot(
+        "=",
         shard_count=variables.shard_count,
         intents=required_intents,
+        test_guilds=variables.test_guilds,
     )
     client.max_messages = 1024
     snipe_list = {}; math_variables = {}; blacklisted_users = []
@@ -368,56 +372,6 @@ def parse_variables(text):
     text = text.replace("<currency>", "eur")
     return text
 
-def reload_data():
-    modules = [
-        os,
-        io,
-        sys,
-        json,
-        html,
-        pytz,
-        time,
-        math,
-        redis,
-        extra,
-        server,
-        urllib,
-        base64,
-        string,
-        psutil,
-        random,
-        asyncio,
-        disnake,
-        hashlib,
-        textwrap,
-        requests,
-        datetime,
-        converter,
-        importlib,
-        threading,
-        variables,
-        functions,
-        traceback,
-        contextlib,
-        simpleeval,
-        googletrans,
-    ]
-    time_list = []
-    for module in modules:
-        start_time = time.time()
-        for i in range(2):
-            importlib.reload(module)
-        end_time = time.time()
-        time_list.append(end_time - start_time)
-    
-    total_time = sum(time_list); longest = [0, None]
-    for length in time_list:
-        if length > longest[0]:
-            longest[0] = length; longest[1] = modules[time_list.index(length)]
-    if round(total_time, 1) == 1.0:
-        total_time = 1
-    return f"Successfully reloaded all modules in **{round(total_time, 1)} {'second' if round(total_time, 1) == 1 else 'seconds'}**\nAverage: **{round(total_time/len(time_list), 2)} {'second' if round(total_time, 1) == 1 else 'seconds'}**, Longest: `{longest[1].__name__}` at **{round(longest[0], 2)} {'second' if round(total_time, 1) == 1 else 'seconds'}**"
-
 def get_cooldown(id, command):
     try:
         cooldown = user_cooldowns[f"{id}.{command}"]
@@ -460,149 +414,36 @@ def generate_cooldown(command, cooldown_time):
         cooldown_unit = "eternity"
     return f"Please wait **{cooldown_time} {cooldown_unit}** before using the `{command}` command again"
 
-async def currency_command(message, prefix):
-    parts = message.content.split(" ")
-    if len(parts) == 4:
-        try:
-            amount = float(parts[1].replace(",", "").replace(" ", "")); input_currency = parts[2].lower(); output_currency = parts[3].lower()
-            url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{input_currency}/{output_currency}.json"
-            response = requests.get(url).json(); value = response[output_currency] * amount
-            embed = disnake.Embed(title="Currency Conversion", description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color)
-            await message.channel.send(embed=embed)
-            add_cooldown(message.author.id, "currency", 5)
-        except:
-            await message.channel.send("Unable to convert currency"); return
-    elif len(parts) == 2 and parts[1].lower() == "list":
-        response = requests.get("https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json").json()
-        output = ""
-        for key in response.keys():
-            output += f"{key}: {response[key]}\n"
-        segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
-        pager = Paginator(
-            prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", segments=segments,
-        )
-        await pager.start(message)
-        add_cooldown(message.author.id, "currency", 5)
-    else:
-        await message.channel.send(f"The syntax is `{prefix}currency <input> <amount> <output>`"); return
+@client.slash_command(name="currency", description="Convert currencies")
+async def currency_command(
+        interaction,
+        amount: float = Param(description="The amount (for the input currency)"),
+        input_currency: str = Param(name="input-currency", description="The input currency"),
+        output_currency: str = Param(name="output-currency", description="The output currency"),
+    ):
+    try:
+        input_currency = input_currency.lower()
+        output_currency = output_currency.lower()
+        url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{input_currency}/{output_currency}.json"
+        response = requests.get(url).json(); value = response[output_currency] * amount
+        embed = disnake.Embed(title="Currency Conversion", description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color)
+        await interaction.response.send_message(embed=embed)
+        add_cooldown(interaction.author.id, "currency", 5)
+    except:
+        await interaction.response.send_message("Unable to convert currency")
+        return
 
-async def ping_command(message, prefix):
-    embed = disnake.Embed(title="Pong :ping_pong:", description=f"Latency: **{round(client.latency * 1000, 1)} ms**", color=variables.embed_color)
-    await message.channel.send(embed=embed)
+@client.slash_command(name="ping", description="Display the bot's current latency")
+async def ping_command(interaction):
+    embed = disnake.Embed(
+        title="Pong :ping_pong:",
+        description=f"Latency: **{round(client.latency * 1000, 1)} ms**",
+        color=variables.embed_color
+    )
+    await interaction.response.send_message(embed=embed)
 
-async def tests_command(message, prefix):
-    add_cooldown(message.author.id, "tests", variables.large_number)
-    description = """
-:grey_question: `Code Integrity`
-:grey_question: `Bot Status`
-:grey_question: `Task Threads`
-:grey_question: `Bot Version`
-:grey_question: `Raid Protection`
-:grey_question: `User Lookup`
-:grey_question: `Cooldown System`
-:grey_question: `Image Library`
-    """
-    embed = disnake.Embed(title="Doge Tests", description=description, color=variables.embed_color)
-    old_message = await message.channel.send(embed=embed)
-
-    lines = description.split("\n"); tests = []
-    for line in lines:
-        if ":" in line:
-            tests.append(line)
-    for test in tests:
-        description = description.replace(test, test.replace(":grey_question:", ":hourglass_flowing_sand:"))
-        embed = disnake.Embed(title="Doge Tests", description=description, color=variables.embed_color)
-        await old_message.edit(embed=embed)
-        description = description.replace(":hourglass_flowing_sand:", ":grey_question:")
-
-        name = test.split(":grey_question: ")[1].replace("`", "")
-        if name == "Code Integrity":
-            try:
-                for i in range(10):
-                    reload_data()
-                description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-        elif name == "Bot Status":
-            try:
-                for i in range(100):
-                    process = psutil.Process(os.getpid())
-                    memory_usage = process.memory_info().rss / 1000000
-                    if memory_usage >= 250:
-                        description = description.replace(test, test.replace(":grey_question:", ":orange_square:")); continue
-                    if round(psutil.cpu_percent()) >= 80 or (client.latency * 1000) >= 800:
-                        description = description.replace(test, test.replace(":grey_question:", ":yellow_square:")); continue
-
-                    description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-        elif name == "Task Threads":
-            try:
-                if threading.active_count() >= 3:
-                    description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-                else:
-                    description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-        elif name == "Bot Version":
-            try:
-                for i in range(10):
-                    file_size = 0
-                    for object in os.listdir():
-                        try:
-                            file = open(object, "rb")
-                            file_size += len(file.read()); file.close()
-                        except:
-                            pass
-                description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-        elif name == "Raid Protection":
-            try:
-                for i in range(20):
-                    server_roles = {}; server_channels = {}
-                    for guild in client.guilds:
-                        server_channels[guild.id] = guild.channels
-                        server_roles[guild.id] = guild.roles
-                description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-        elif name == "User Lookup":
-            try:
-                for i in range(3):
-                    guild = random.choice(client.guilds)
-                    member = random.choice(guild.members)
-                    headers = {"Authorization": "Bot " + os.getenv("TOKEN")}
-                    url = "https://discord.com/api/users/" + str(member.id)
-                    requests.get(url, headers=headers)
-                description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-        elif name == "Cooldown System":
-            try:
-                for i in range(50):
-                    add_cooldown(message.author.id, "test-command", 60)
-                    if round(get_cooldown(message.author.id, "test-command")) == 60:
-                        description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-                    else:
-                        description = description.replace(test, test.replace(":grey_question:", ":yellow_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-        elif name == "Image Library":
-            try:
-                for i in range(10):
-                    if generate_color(f"({random.randint(0, 256)}, {random.randint(0, 256)}, {random.randint(0, 256)})") == 1:
-                        description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-                    else:
-                        description = description.replace(test, test.replace(":grey_question:", ":green_square:"))
-            except:
-                description = description.replace(test, test.replace(":grey_question:", ":red_square:"))
-            
-        embed = disnake.Embed(title="Doge Tests", description=description, color=variables.embed_color)
-        await old_message.edit(embed=embed)
-    add_cooldown(message.author.id, "tests", 600)
-
-async def status_command(message, prefix):
+@client.slash_command(name="status", description="Show the bot's current statistics")
+async def status_command(interaction):
     member_count = 0; channel_count = 0; uptime = ""
     for guild in client.guilds:
         member_count += guild.member_count
@@ -631,9 +472,9 @@ async def status_command(message, prefix):
         uptime = " ".join(uptime[:3])
     
     embed = disnake.Embed(color=variables.embed_color)
-    embed.add_field(name="Bot Latency", value="```" + f"{round(client.get_shard(message.guild.shard_id).latency * 1000, 1)} ms" + "```")
+    embed.add_field(name="Bot Latency", value="```" + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```")
     embed.add_field(name="CPU Usage", value="```" + f"{psutil.cpu_percent()}%" + "```")
-    embed.add_field(name="RAM Usage", value="```" + f"{round(memory_usage, 1)} MB{' (nice)' if round(memory_usage, 1) == 69.0 else ''}" + "```")
+    embed.add_field(name="RAM Usage", value="```" + f"{round(memory_usage, 1)} MB" + "```")
     embed.add_field(name="Thread Count", value="```" + str(threading.active_count()) + "```")
     embed.add_field(name="Joined Guilds", value="```" + str(len(client.guilds)) + "```")
     embed.add_field(name="Active Shards", value="```" + str(client.shards[0].shard_count) + "```")
@@ -643,14 +484,18 @@ async def status_command(message, prefix):
     embed.add_field(name="Disnake Version", value="```" + disnake.__version__ + "```")
     embed.add_field(name="Bot Version", value="```" + f"{variables.version_number}.{variables.build_number}" + "```")
     embed.add_field(name="Bot Uptime", value="```" + uptime + "```")
+    await interaction.response.send_message(embed=embed)
 
-    await message.channel.send(embed=embed)
-    add_cooldown(message.author.id, "status", 5)
+@client.group(name="links")
+async def links_command(interaction):
+    await interaction.response.send_message("Try `/links support` or `/links invite` to get more information")
 
-async def support_command(message, prefix):
-    await message.channel.send(f"Doge Utilities support server: {variables.support_server_invite}")
+@links_command.command(name="support", description="Display the official Discord server for Doge")
+async def support_command(interaction):
+    await interaction.response.send_message(f"Doge Utilities support server: {variables.support_server_invite}")
 
-async def version_command(message, prefix):
+@client.slash_command(name="version", description="Display the bot's current version")
+async def version_command(interaction):
     file_size = 0
     for object in os.listdir():
         try:
@@ -659,12 +504,12 @@ async def version_command(message, prefix):
         except:
             pass
     embed = disnake.Embed(title="Bot Version", description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
-    await message.channel.send(embed=embed)
-    add_cooldown(message.author.id, "version", 5)
+    await interaction.response.send_message(embed=embed)
 
-async def invite_command(message, prefix):
+@client.slash_command(name="invite", description="Invite this bot to another server")
+async def invite_command(interaction):
     guild_member = True
-    if message.author == message.guild.owner:
+    if interaction.author == interaction.guild.owner:
         guild_member = False
 
     class CommandView(disnake.ui.View):
@@ -699,57 +544,20 @@ async def invite_command(message, prefix):
                     )
             else:
                 await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-    await message.channel.send("Here's the link to invite me to another server", view=CommandView())
-
-async def prefix_command(message, prefix):
-    new_prefix = message.content.split(" ")
-    if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
-        if len(new_prefix) == 2:
-            new_prefix = new_prefix[1]
-
-            class CommandView(disnake.ui.View):
-                def __init__(self):
-                    super().__init__()
-
-                @disnake.ui.button(label="Yes", style=disnake.ButtonStyle.green)
-                async def confirm_change(self, _, interaction):
-                    if interaction.author != message.author:
-                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                        return
-
-                    database[f"prefix.{message.guild.id}"] = new_prefix
-                    await old_message.edit(content=f"This server's prefix has been set to `{new_prefix}`", view=None)
-                    self.stop()
-
-                @disnake.ui.button(label="No", style=disnake.ButtonStyle.green)
-                async def reject_change(self, _, interaction):
-                    if interaction.author != message.author:
-                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                        return
-
-                    await old_message.edit(content=f"Prefix change request cancelled", view=None)
-                    self.stop()
-            old_message = await message.channel.send(
-                f"Are you sure you want to change this server's prefix to `{new_prefix}`?",
-                view=CommandView(),
-            )
-        else:
-            await message.channel.send(f"The syntax is `{prefix}prefix <new prefix>`")
-    else:
-        await message.channel.send(variables.no_permission_text)
+    await interaction.response.send_message("Here's the link to invite me to another server", view=CommandView())
 
 async def setup_banned_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.id in variables.permission_override:
         pass
     else:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
 
     roles = message.guild.roles
     for role in roles:
         if role.name == "Banned":
-            await message.channel.send("The **Banned** role already exists in this guild")
+            await interaction.response.send_message("The **Banned** role already exists in this guild")
             return
-    old_message = await message.channel.send("Generating the **Banned** role for the current guild...")
+    old_message = await interaction.response.send_message("Generating the **Banned** role for the current guild...")
     try:
         banned_role = await message.guild.create_role(name="Banned")
         guild_roles = len(message.guild.roles); retry_count = 0
@@ -776,14 +584,14 @@ async def setup_muted_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.id in variables.permission_override:
         pass
     else:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
 
     roles = message.guild.roles
     for role in roles:
         if role.name == "Muted":
-            await message.channel.send("The **Muted** role already exists in this guild")
+            await interaction.response.send_message("The **Muted** role already exists in this guild")
             return
-    old_message = await message.channel.send("Generating the **Muted** role for the current guild...")
+    old_message = await interaction.response.send_message("Generating the **Muted** role for the current guild...")
     try:
         muted_role = await message.guild.create_role(name="Muted")
         guild_roles = len(message.guild.roles); retry_count = 0
@@ -818,15 +626,15 @@ async def random_command(message, prefix):
             low_number = float(arguments[1])
             high_number = float(arguments[2])
         else:
-            await message.channel.send(f"The syntax is `{prefix}random <low> <high>`")
+            await interaction.response.send_message(f"The syntax is `{prefix}random <low> <high>`")
             return
     except:
-        await message.channel.send("Please enter a valid number")
+        await interaction.response.send_message("Please enter a valid number")
         return
     try:
         random_number = round(random.uniform(low_number, high_number), 2)
     except:
-        await message.channel.send("The lower number is larger than the higher number")
+        await interaction.response.send_message("The lower number is larger than the higher number")
         return
     add_cooldown(message.author.id, "random", 20)
     button_text = "Generate Number"
@@ -852,7 +660,7 @@ async def random_command(message, prefix):
                 await old_message.edit(view=new_view)
                 await interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command to continue.", ephemeral=True)
                 self.stop()
-    old_message = await message.channel.send(f"Your random number is **{random_number}**", view=CommandView())
+    old_message = await interaction.response.send_message(f"Your random number is **{random_number}**", view=CommandView())
 
 async def execute_command(message, prefix):
     if message.author.id == variables.bot_owner:
@@ -863,7 +671,7 @@ async def execute_command(message, prefix):
             if len(message.content) >= length:
                 code = message.content[length:]
             else:
-                await message.channel.send("No code specified")
+                await interaction.response.send_message("No code specified")
                 return
             if code.startswith("```python"):
                 code = code[9:]
@@ -913,10 +721,10 @@ async def execute_command(message, prefix):
                 )
                 await pager.start(message)
             else:
-                await message.channel.send(output)
+                await interaction.response.send_message(output)
         except Exception as error:
             if not "empty message" in str(error):
-                await message.channel.send("`Error: " + str(error) + "`")
+                await interaction.response.send_message("`Error: " + str(error) + "`")
                 await message.add_reaction("❌")
             else:
                 await message.add_reaction("✅")
@@ -924,16 +732,9 @@ async def execute_command(message, prefix):
     else:
         await message.add_reaction("🚫")
 
-async def reload_command(message, prefix):
-    if message.author.id == variables.bot_owner:
-        embed = disnake.Embed(title="Reload", description=reload_data(), color=disnake.Color.green())
-        await message.channel.send(embed=embed)
-    else:
-        await message.add_reaction("🚫")
-
 async def disconnect_members_command(message, prefix):
     if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
-        old_message = await message.channel.send("Disconnecting all members from voice channels...")
+        old_message = await interaction.response.send_message("Disconnecting all members from voice channels...")
         add_cooldown(message.author.id, "disconnect-members", variables.large_number); members = 0; failed = 0
 
         for channel in message.guild.channels:
@@ -946,7 +747,7 @@ async def disconnect_members_command(message, prefix):
                         failed += 1
         await old_message.edit(f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
     add_cooldown(message.author.id, "disconnect-members", 20)
 
 async def suggest_command(message, prefix):
@@ -954,7 +755,7 @@ async def suggest_command(message, prefix):
     if len(arguments) > 1:
         add_cooldown(message.author.id, "suggest", variables.large_number)
         arguments.pop(0); text = " ".join(arguments)
-        old_message = await message.channel.send("Sending your suggestion...")
+        old_message = await interaction.response.send_message("Sending your suggestion...")
         for user_id in variables.message_managers:
             member = None
             for guild in client.guilds:
@@ -970,7 +771,7 @@ async def suggest_command(message, prefix):
                     pass
         await old_message.edit("Your suggestion has been successfully sent")
     else:
-        await message.channel.send(f"The syntax is `{prefix}suggest <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}suggest <text>`")
     add_cooldown(message.author.id, "suggest", 300)
 
 async def autorole_command(message, prefix):
@@ -983,10 +784,10 @@ async def autorole_command(message, prefix):
             role_found = False
             if role_list == ["disable"] or role_list == ["off"]:
                 del database[f"autorole.{message.guild.id}"]
-                await message.channel.send("Autorole has been **disabled** for this server")
+                await interaction.response.send_message("Autorole has been **disabled** for this server")
                 return
             if len(role_list) > 5:
-                await message.channel.send("You can only add up to **5 roles**!")
+                await interaction.response.send_message("You can only add up to **5 roles**!")
                 return
             for role in message.guild.roles:
                 for role_id in role_list:
@@ -995,27 +796,27 @@ async def autorole_command(message, prefix):
                             role_found = True
                             break
                     except:
-                        await message.channel.send("That role is not found in this server")
+                        await interaction.response.send_message("That role is not found in this server")
                         return
             if not role_found:
-                await message.channel.send("That role is not found in this server")
+                await interaction.response.send_message("That role is not found in this server")
                 return
             database[f"autorole.{message.guild.id}"] = json.dumps(role_list)
             role_string = ""
             for role in role_list:
                 role_string += "<@&" + role + "> "
-            await message.channel.send(embed=disnake.Embed(title="Autorole", description=f"This server's autorole has been set to {role_string}", color=variables.embed_color))
+            await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole has been set to {role_string}", color=variables.embed_color))
         else:
             try:
                 role_list = json.loads(database[f"autorole.{message.guild.id}"])
                 role_string = ""
                 for role in role_list:
                     role_string += "<@&" + role + "> "
-                await message.channel.send(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color))
+                await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color))
             except:
-                await message.channel.send(f"This server does not have autorole configured")
+                await interaction.response.send_message(f"This server does not have autorole configured")
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
     add_cooldown(message.author.id, "autorole", 5)
 
 async def shards_command(message, prefix):
@@ -1063,7 +864,7 @@ async def lookup_command(message, prefix):
         try:
             response["public_flags"]
         except:
-            await message.channel.send("Please mention a valid user"); return
+            await interaction.response.send_message("Please mention a valid user"); return
         badges = ""
         for flag in variables.public_flags:
             if response['public_flags'] & int(flag) == int(flag):
@@ -1107,7 +908,7 @@ async def lookup_command(message, prefix):
             embed.set_image(url=banner_url)
     else:
         embed = disnake.Embed(title="Unknown User", description="Unable to find the specified user", color=variables.embed_color)
-    await message.channel.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
     add_cooldown(message.author.id, "lookup", 6)
 
 async def permissions_command(message, prefix):
@@ -1121,7 +922,7 @@ async def permissions_command(message, prefix):
     try:
         user_id = int(user_id)
     except:
-        await message.channel.send("Please mention a valid user!")
+        await interaction.response.send_message("Please mention a valid user!")
         return
     target_user = None
     try:
@@ -1129,7 +930,7 @@ async def permissions_command(message, prefix):
     except:
         pass
     if not target_user:
-        await message.channel.send("Unable to find user")
+        await interaction.response.send_message("Unable to find user")
         return
     
     permission_list = ""
@@ -1144,7 +945,7 @@ async def permissions_command(message, prefix):
         permission_list += f":x: `owner`\n"
 
     embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{target_user.name}#{target_user.discriminator}**\n\n" + permission_list, color=variables.embed_color)
-    await message.channel.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
     add_cooldown(message.author.id, "permissions", 3)
 
 async def raid_protection_command(message, prefix):
@@ -1155,25 +956,25 @@ async def raid_protection_command(message, prefix):
             try:
                 current_setting = database[f"{message.author.guild.id}.raid-protection"]
                 if current_setting:
-                    await message.channel.send("This server's raid protection is turned **on**")
+                    await interaction.response.send_message("This server's raid protection is turned **on**")
                 else:
-                    await message.channel.send("This server's raid protection is turned **off**")
+                    await interaction.response.send_message("This server's raid protection is turned **off**")
             except:
-                await message.channel.send("This server's raid protection is turned **off**")
+                await interaction.response.send_message("This server's raid protection is turned **off**")
             return
         if setting.lower() == "on" or setting.lower() == "enable":
             database[f"{message.author.guild.id}.raid-protection"] = 1
-            await message.channel.send("This server's raid protection has been turned **on**")
+            await interaction.response.send_message("This server's raid protection has been turned **on**")
             return
         elif setting.lower() == "off" or setting.lower() == "disable":
             database[f"{message.author.guild.id}.raid-protection"] = 0
-            await message.channel.send("This server's raid protection has been turned **off**")
+            await interaction.response.send_message("This server's raid protection has been turned **off**")
             return
         else:
-            await message.channel.send("Please specify a valid setting (on/off)")
+            await interaction.response.send_message("Please specify a valid setting (on/off)")
             return
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
 
 async def epoch_date_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1182,11 +983,11 @@ async def epoch_date_command(message, prefix):
         try:
             date = functions.epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color)
             embed.add_field(name="Epoch", value="`" + text + "`"); embed.add_field(name="Date", value=date, inline=False)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         except:
-            await message.channel.send("Invalid timestamp"); return
+            await interaction.response.send_message("Invalid timestamp"); return
     else:
-        await message.channel.send(f"The syntax is `{prefix}epoch-date <epoch>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}epoch-date <epoch>`")
 
 async def date_epoch_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1195,11 +996,11 @@ async def date_epoch_command(message, prefix):
         try:
             epoch = functions.date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color)
             embed.add_field(name="Date", value=text); embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         except:
-            await message.channel.send("Invalid date"); return
+            await interaction.response.send_message("Invalid date"); return
     else:
-        await message.channel.send(f"The syntax is `{prefix}date-epoch <date>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}date-epoch <date>`")
 
 async def hash_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1208,11 +1009,11 @@ async def hash_command(message, prefix):
         try:
             output_hash = hash_text(hash_type, text); embed = disnake.Embed(color=variables.embed_color)
             embed.add_field(name="Text", value=text); embed.add_field(name=f"Hash ({hash_type})", value="`" + output_hash + "`", inline=False)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         except:
-            await message.channel.send("Invalid hash type"); return
+            await interaction.response.send_message("Invalid hash type"); return
     else:
-        await message.channel.send(f"The syntax is `{prefix}hash <type> <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}hash <type> <text>`")
     add_cooldown(message.author.id, "hash", 5)
 
 async def base64Command(message, prefix):
@@ -1230,11 +1031,11 @@ async def base64Command(message, prefix):
                 embed.add_field(name="Base64", value="`" + text + "`"); embed.add_field(name="Text", value=output_text, inline=False)
             else:
                 embed = disnake.Embed(title="Base64", description="Unknown action. Please use `encode` or `decode`.", color=variables.embed_color)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         except:
-            await message.channel.send("Unable to process command"); return
+            await interaction.response.send_message("Unable to process command"); return
     else:
-        await message.channel.send(f"The syntax is `{prefix}base64 <action> <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}base64 <action> <text>`")
     add_cooldown(message.author.id, "base64", 5)
 
 async def binary_command(message, prefix):
@@ -1255,11 +1056,11 @@ async def binary_command(message, prefix):
                 embed.add_field(name="Binary", value="`" + text + "`"); embed.add_field(name="Text", value=output_text, inline=False)
             else:
                 embed = disnake.Embed(title="Binary", description="Unknown action. Please use `encode` or `decode`.", color=variables.embed_color)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         except:
-            await message.channel.send("Unable to process command"); return
+            await interaction.response.send_message("Unable to process command"); return
     else:
-        await message.channel.send(f"The syntax is `{prefix}binary <action> <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}binary <action> <text>`")
     add_cooldown(message.author.id, "binary", 5)
 
 async def calculate_command(message, prefix):
@@ -1272,9 +1073,9 @@ async def calculate_command(message, prefix):
             expression = expression[:-1]
         answer = evaluate_expression(expression); embed = disnake.Embed(color=variables.embed_color)
         embed.add_field(name="Expression", value="`" + expression + "`"); embed.add_field(name="Result", value="`" + answer + "`", inline=False)
-        await message.channel.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
     else:
-        await message.channel.send(f"The syntax is `{prefix}calculate <expression>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}calculate <expression>`")
     add_cooldown(message.author.id, "calculate", 3)
 
 async def clear_command(message, prefix):
@@ -1282,7 +1083,7 @@ async def clear_command(message, prefix):
         try:
             count = int(message.content.split(prefix + "clear ")[1])
         except:
-            await message.channel.send("Please specify a valid number")
+            await interaction.response.send_message("Please specify a valid number")
             return
         if count > 500:
             class CommandView(disnake.ui.View):
@@ -1298,7 +1099,7 @@ async def clear_command(message, prefix):
                     try:    
                         await message.channel.purge(limit=count + 1)
                     except:
-                        await message.channel.send("Unable to delete messages")
+                        await interaction.response.send_message("Unable to delete messages")
                     await interaction.response.send_message(
                         content=f"Successfully deleted more than **500 messages** in this channel",
                         ephemeral=True,
@@ -1314,14 +1115,14 @@ async def clear_command(message, prefix):
                     await old_message.edit(content=f"Operation cancelled", view=None)
                     self.stop()
                 
-            old_message = await message.channel.send(
+            old_message = await interaction.response.send_message(
                 f"Are you sure you want to clear more than **500 messages** in this channel?",
                 view=CommandView()
             )
         else:
             await message.channel.purge(limit=count + 1)
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
     add_cooldown(message.author.id, "clear", 10)
 
 async def wide_command(message, prefix):
@@ -1330,9 +1131,9 @@ async def wide_command(message, prefix):
         arguments.pop(0); new_text = ""; text = " ".join(arguments)
         for letter in text:
             new_text += letter + " "
-        await message.channel.send(new_text.replace("@everyone", "everyone"))
+        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
     else:
-        await message.channel.send(f"The syntax is `{prefix}wide <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}wide <text>`")
     add_cooldown(message.author.id, "wide", 3)
 
 async def unwide_command(message, prefix):
@@ -1347,9 +1148,9 @@ async def unwide_command(message, prefix):
             else:
                 space_character = False
                 new_text += letter
-        await message.channel.send(new_text.replace("@everyone", "everyone"))
+        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
     else:
-        await message.channel.send(f"The syntax is `{prefix}unwide <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}unwide <text>`")
     add_cooldown(message.author.id, "unwide", 3)
 
 async def spoiler_command(message, prefix):
@@ -1358,9 +1159,9 @@ async def spoiler_command(message, prefix):
         arguments.pop(0); new_text = ""; text = " ".join(arguments)
         for letter in text:
             new_text += "||" + letter + "||"
-        await message.channel.send(new_text.replace("@everyone", "everyone"))
+        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
     else:
-        await message.channel.send(f"The syntax is `{prefix}spoiler <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}spoiler <text>`")
     add_cooldown(message.author.id, "spoiler", 3)
 
 async def cringe_command(message, prefix):
@@ -1379,18 +1180,18 @@ async def cringe_command(message, prefix):
                     new_text += letter.upper()
                 else:
                     new_text += letter.lower()
-        await message.channel.send(new_text.replace("@everyone", "everyone"))
+        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
     else:
-        await message.channel.send(f"The syntax is `{prefix}cringe <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}cringe <text>`")
     add_cooldown(message.author.id, "cringe", 3)
 
 async def reverse_command(message, prefix):
     arguments = message.content.split(" ")
     if len(arguments) > 1:
         arguments.pop(0); new_text = ""; text = " ".join(arguments)
-        new_text = text[::-1]; await message.channel.send(new_text.replace("@everyone", "everyone"))
+        new_text = text[::-1]; await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
     else:
-        await message.channel.send(f"The syntax is `{prefix}reverse <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}reverse <text>`")
     add_cooldown(message.author.id, "reverse", 3)
 
 async def corrupt_command(message, prefix):
@@ -1410,9 +1211,9 @@ async def corrupt_command(message, prefix):
                     punctuation = random.choice([True, False, False, False, False])
                     if punctuation:
                         new_text += string.punctuation[random.randint(0, len(string.punctuation) - 1)]
-        await message.channel.send(new_text.replace("@everyone", "everyone"))
+        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
     else:
-        await message.channel.send(f"The syntax is `{prefix}reverse <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}reverse <text>`")
     add_cooldown(message.author.id, "corrupt", 3)
 
 async def color_command(message, prefix):
@@ -1421,21 +1222,21 @@ async def color_command(message, prefix):
         arguments.pop(0); text = " ".join(arguments)
         colors = functions.generate_color(text)
         if colors == 1:
-            await message.channel.send("Invalid color code"); return
+            await interaction.response.send_message("Invalid color code"); return
         else:
             hex_color = colors[0]; rgb_color = colors[1]
             embed = disnake.Embed(color=int("0x" + hex_color[1:], 16))
             embed.set_image(url="attachment://color.png")
             embed.add_field(name="Hex", value=hex_color)
             embed.add_field(name="RGB", value=str(rgb_color), inline=True)
-        await message.channel.send(embed=embed, file=disnake.File("images/color.png"))
+        await interaction.response.send_message(embed=embed, file=disnake.File("images/color.png"))
     else:
-        await message.channel.send(f"The syntax is `{prefix}color <color code>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}color <color code>`")
     add_cooldown(message.author.id, "color", 3)
 
 async def vote_command(message, prefix):
     embed = disnake.Embed(title="Vote Link", description="You can upvote Doge Utilities on [top.gg](https://top.gg/bot/854965721805226005/vote), [discordbotlist](https://discordbotlist.com/bots/doge-utilities/upvote), or on [botsfordiscord](https://discords.com/bots/bot/854965721805226005/vote)", color=variables.embed_color)
-    await message.channel.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 async def time_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1455,12 +1256,12 @@ async def time_command(message, prefix):
                 await pager.start(message)
             elif text.lower() == "epoch" or text.lower() == "unix":
                 embed = disnake.Embed(title="Time", description=f"Current epoch time: **{round(time.time())}**", color=variables.embed_color)
-                await message.channel.send(embed=embed)
+                await interaction.response.send_message(embed=embed)
             else:
                 user_timezone = pytz.timezone(text.replace(" ", "_"))
                 now = datetime.datetime.now(user_timezone)
                 embed = disnake.Embed(title="Time", description=f"Information for **{text.replace(' ', '_')}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
-                await message.channel.send(embed=embed)
+                await interaction.response.send_message(embed=embed)
         except KeyError:
             text = "_".join(arguments)
             for timezone in pytz.all_timezones:
@@ -1469,13 +1270,13 @@ async def time_command(message, prefix):
                     if text.lower() == city.lower():
                         user_timezone = pytz.timezone(timezone); now = datetime.datetime.now(user_timezone)
                         embed = disnake.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
-                        await message.channel.send(embed=embed); return
+                        await interaction.response.send_message(embed=embed); return
                 except:
                     pass
             embed = disnake.Embed(title="Time", description=f"That timezone was not found", color=variables.embed_color)
-            await message.channel.send(embed=embed); return
+            await interaction.response.send_message(embed=embed); return
     else:
-        await message.channel.send(f"The syntax is `{prefix}time <timezone>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}time <timezone>`")
     add_cooldown(message.author.id, "time", 3)
 
 async def nickname_command(message, prefix):
@@ -1487,17 +1288,17 @@ async def nickname_command(message, prefix):
                 user_id = int(user_id.replace("<", "").replace(">", "").replace("@", "").replace("!", ""))
                 member = await message.guild.fetch_member(user_id)
             except:
-                await message.channel.send("Please mention a valid user!"); return
+                await interaction.response.send_message("Please mention a valid user!"); return
             try:
                 await member.edit(nick=nickname); add_cooldown(message.author.id, "nickname", 5)
-                await message.channel.send(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**"); return
+                await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**"); return
             except:
-                await message.channel.send("Unable to change user nickname"); return
-            await message.channel.send("Unable to find user"); return
+                await interaction.response.send_message("Unable to change user nickname"); return
+            await interaction.response.send_message("Unable to find user"); return
         else:
-            await message.channel.send(f"The syntax is `{prefix}nickname <user> <nickname>`")
+            await interaction.response.send_message(f"The syntax is `{prefix}nickname <user> <nickname>`")
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
 
 async def stackoverflow_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1513,7 +1314,7 @@ async def stackoverflow_command(message, prefix):
             response = requests.get(url="https://api.stackexchange.com/2.2/search/advanced", params=parameters).json()
             if not response["items"]:
                 embed = disnake.Embed(title="StackOverflow", description=f"No search results found for **{text}**", color=disnake.Color.red())
-                await message.channel.send(embed=embed); return
+                await interaction.response.send_message(embed=embed); return
             final_results = response["items"][:5]
             embed = disnake.Embed(title="StackOverflow", description=f"Here are the top **{len(final_results)}** results for **{text}**", color=variables.embed_color)
             for result in final_results:
@@ -1531,14 +1332,14 @@ async def stackoverflow_command(message, prefix):
                     ),
                     inline = False
                 )
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         except disnake.HTTPException:
-            await message.channel.send("The search result is too long!"); return
+            await interaction.response.send_message("The search result is too long!"); return
         except:
-            await message.channel.send("Unable to search for item"); return
+            await interaction.response.send_message("Unable to search for item"); return
         add_cooldown(message.author.id, "stackoverflow", 10)
     else:
-        await message.channel.send(f"The syntax is `{prefix}stackoverflow <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}stackoverflow <text>`")
 
 async def source_command(message, prefix):
     description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)"
@@ -1548,7 +1349,7 @@ async def source_command(message, prefix):
     except:
         pass
     embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
-    embed.set_thumbnail(url=client.user.avatar); await message.channel.send(embed=embed)
+    embed.set_thumbnail(url=client.user.avatar); await interaction.response.send_message(embed=embed)
     add_cooldown(message.author.id, "source", 20)
 
 async def uptime_command(message, prefix):
@@ -1571,28 +1372,28 @@ async def uptime_command(message, prefix):
     if uptime == "":
         uptime = "Unknown"
     embed = disnake.Embed(title="Bot Uptime", description=f"Doge has been running for **{uptime}**", color=variables.embed_color)
-    await message.channel.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 async def donate_command(message, prefix):
     embed = disnake.Embed(title="Donate", description=":dog: Dogecoin: `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`\n:moneybag: Bitcoin: `bc1qer5es59d62pvwdhaplgyltzd63kyyd0je2fhjm`\n:feather: Litecoin: `LLE9WPg6dTjNjDtdxx2HiyMDMqYRd4j5HZ`", color=variables.embed_color)
-    await message.channel.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 async def doge_command(message, prefix):
     embed = disnake.Embed(color=variables.embed_color)
-    embed.set_image(url=client.user.avatar); await message.channel.send(embed=embed)
+    embed.set_image(url=client.user.avatar); await interaction.response.send_message(embed=embed)
 
 async def guilds_command(message, prefix):
     if message.author.id == variables.bot_owner:
-        await message.channel.send(str(len(client.guilds)))
+        await interaction.response.send_message(str(len(client.guilds)))
     else:
         await message.add_reaction("🚫")
 
 async def smiley_command(message, prefix):
     if prefix == "=" or prefix == ";":
-        await message.channel.send(f"**{prefix}D**")
+        await interaction.response.send_message(f"**{prefix}D**")
 
 async def about_command(message, prefix):
-    await message.channel.send(embed=disnake.Embed(title="About", description=f"I was created by **Zenderking** (`{variables.bot_owner}`/<@{variables.bot_owner}>)", color=variables.embed_color))
+    await interaction.response.send_message(embed=disnake.Embed(title="About", description=f"I was created by **Zenderking** (`{variables.bot_owner}`/<@{variables.bot_owner}>)", color=variables.embed_color))
 
 async def blacklist_command(message, prefix):
     if message.author.id == variables.bot_owner:
@@ -1606,38 +1407,38 @@ async def blacklist_command(message, prefix):
                 for user in raw_array:
                     blacklisted_users.append(f"{user} (<@{user}>)")
                 embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
-                await message.channel.send(embed=embed)
+                await interaction.response.send_message(embed=embed)
             elif arguments[1] == "add":
                 if len(arguments) == 3:
                     try:
                         user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
-                        await message.channel.send("Please mention a valid user"); return
+                        await interaction.response.send_message("Please mention a valid user"); return
                     current_users = json.loads(database["blacklist"])
                     current_users.append(user_id)
                     database["blacklist"] = json.dumps(current_users)
-                    await message.channel.send("Successfully added user to blacklist")
+                    await interaction.response.send_message("Successfully added user to blacklist")
                 else:
-                    await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+                    await interaction.response.send_message(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
             elif arguments[1] == "remove":
                 if len(arguments) == 3:
                     try:
                         user_id = int(arguments[2].replace("<@", "").replace("!", "").replace(">", ""))
                     except:
-                        await message.channel.send("Please mention a valid user"); return
+                        await interaction.response.send_message("Please mention a valid user"); return
                     current_users = json.loads(database["blacklist"])
                     try:
                         current_users.remove(user_id)
                     except:
                         pass
                     database["blacklist"] = json.dumps(current_users)
-                    await message.channel.send("Successfully removed user from blacklist")
+                    await interaction.response.send_message("Successfully removed user from blacklist")
                 else:
-                    await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+                    await interaction.response.send_message(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
             else:
-                await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+                await interaction.response.send_message(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
         else:
-            await message.channel.send(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
+            await interaction.response.send_message(f"The syntax is `{prefix}blacklist <add/remove/list> <user>`"); return
     else:
         await message.add_reaction("🚫")
 
@@ -1645,13 +1446,13 @@ async def meme_command(message, prefix):
     response = requests.get("https://meme-api.herokuapp.com/gimme").json()
     description = f"Posted by **{response['author']}** in **{response['subreddit']}** (**{response['ups']}** upvotes)"
     embed = disnake.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embed_color)
-    embed.set_image(url=response["url"]); add_cooldown(message.author.id, "meme", 5); await message.channel.send(embed=embed)
+    embed.set_image(url=response["url"]); add_cooldown(message.author.id, "meme", 5); await interaction.response.send_message(embed=embed)
 
 async def unmute_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator:
         pass
     else:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
 
     arguments = message.content.split(" ")
     if len(arguments) == 2:
@@ -1659,7 +1460,7 @@ async def unmute_command(message, prefix):
             user_id = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
             member = await message.guild.fetch_member(user_id)
         except:
-            await message.channel.send("Please mention a valid user"); return
+            await interaction.response.send_message("Please mention a valid user"); return
         mute_role = None; exists = False
         for role in message.guild.roles:
             if "mute" in role.name.lower():
@@ -1669,15 +1470,15 @@ async def unmute_command(message, prefix):
                 await member.remove_roles(mute_role)
             except:
                 pass
-        await message.channel.send(f"Successfully unmuted **{member}**")
+        await interaction.response.send_message(f"Successfully unmuted **{member}**")
     else:
-        await message.channel.send(f"The syntax is `{prefix}unmute <user>`"); return
+        await interaction.response.send_message(f"The syntax is `{prefix}unmute <user>`"); return
 
 async def mute_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
         pass
     else:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
 
     arguments = message.content.split(" ")
     if len(arguments) >= 2:
@@ -1692,27 +1493,27 @@ async def mute_command(message, prefix):
             if "mute" in role.name.lower():
                 mute_role = role; exists = True
         if not exists:
-            await message.channel.send("Unable to find mute role"); return
+            await interaction.response.send_message("Unable to find mute role"); return
         try:
             user_id = int(arguments[1].replace("<@", "").replace(">", "").replace("!", ""))
             member = await message.guild.fetch_member(user_id)
         except:
-            await message.channel.send("Please mention a valid user"); return
+            await interaction.response.send_message("Please mention a valid user"); return
     if len(arguments) == 2:
         try:
             await member.add_roles(mute_role)
         except:
-            await message.channel.send(f"Unable to mute **{member}**"); return
-        await message.channel.send(f"Successfully muted **{member}** permanently")
+            await interaction.response.send_message(f"Unable to mute **{member}**"); return
+        await interaction.response.send_message(f"Successfully muted **{member}** permanently")
     elif len(arguments) == 3:
         try:
             duration = float(arguments[2])
         except:
-            await message.channel.send("Please enter a valid duration (in minutes)"); return
+            await interaction.response.send_message("Please enter a valid duration (in minutes)"); return
         if duration > 43200:
-            await message.channel.send("The specified duration is too long!"); return
+            await interaction.response.send_message("The specified duration is too long!"); return
         if duration < 0:
-            await message.channel.send("No negative numbers please!"); return
+            await interaction.response.send_message("No negative numbers please!"); return
         try:
             moderation_data = json.loads(database["mute." + str(message.guild.id)])
         except:
@@ -1723,16 +1524,16 @@ async def mute_command(message, prefix):
             moderation_data.append([user_id, time.time(), duration])
             database["mute." + str(message.guild.id)] = json.dumps(moderation_data)
         except:
-            await message.channel.send(f"Unable to mute **{member}**"); return
-        await message.channel.send(f"Successfully muted **{member}** for **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
+            await interaction.response.send_message(f"Unable to mute **{member}**"); return
+        await interaction.response.send_message(f"Successfully muted **{member}** for **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
     else:
-        await message.channel.send(f"The syntax is `{prefix}mute <user> <duration>`"); return
+        await interaction.response.send_message(f"The syntax is `{prefix}mute <user> <duration>`"); return
 
 async def insults_command(message, prefix):
     if message.author.guild_permissions.manage_messages:
         pass
     else:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
 
     arguments = message.content.split(" ")
     if len(arguments) >= 2:
@@ -1743,35 +1544,35 @@ async def insults_command(message, prefix):
                 insults_data = []
                 database[f"insults.list.{message.guild.id}"] = json.dumps([])
             embed = disnake.Embed(title="Insults List", description="There are no swear words configured for your server" if insults_data == [] else '\n'.join(insults_data), color=variables.embed_color)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         elif arguments[1] == "filter" or arguments[1] == "status":
             try:
                 current_status = database[f"insults.toggle.{message.guild.id}"]
             except:
                 current_status = False
-            await message.channel.send(f"The insults filter is currently **{'enabled' if current_status else 'disabled'}**")
+            await interaction.response.send_message(f"The insults filter is currently **{'enabled' if current_status else 'disabled'}**")
         elif arguments[1] == "enable":
             database[f"insults.toggle.{message.guild.id}"] = 1
-            await message.channel.send("The insults filter has been successfully **enabled**")
+            await interaction.response.send_message("The insults filter has been successfully **enabled**")
         elif arguments[1] == "disable":
             database[f"insults.toggle.{message.guild.id}"] = 0
-            await message.channel.send("The insults filter has been successfully **disabled**")
+            await interaction.response.send_message("The insults filter has been successfully **disabled**")
         elif arguments[1] == "add":
             if len(arguments) != 3:
-                await message.channel.send(f"The syntax is `{prefix}insults add <word>`"); return
+                await interaction.response.send_message(f"The syntax is `{prefix}insults add <word>`"); return
             try:
                 insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
             except:
                 insults_data = []
                 database[f"insults.list.{message.guild.id}"] = json.dumps([])
             if len(insults_data) >= 50:
-                await message.channel.send("You have reached the limit of **50 words**"); return
+                await interaction.response.send_message("You have reached the limit of **50 words**"); return
             insults_data.append(arguments[2])
             database[f"insults.list.{message.guild.id}"] = json.dumps(insults_data)
-            await message.channel.send(f"Successfully added **{arguments[2]}** to your insults list")
+            await interaction.response.send_message(f"Successfully added **{arguments[2]}** to your insults list")
         elif arguments[1] == "remove" or arguments[1] == "delete":
             if len(arguments) != 3:
-                await message.channel.send(f"The syntax is `{prefix}insults remove <word>`"); return
+                await interaction.response.send_message(f"The syntax is `{prefix}insults remove <word>`"); return
             try:
                 insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
             except:
@@ -1780,54 +1581,55 @@ async def insults_command(message, prefix):
             try:
                 insults_data.remove(arguments[2])
             except:
-                await message.channel.send("That word does not exist in the insults filter"); return
+                await interaction.response.send_message("That word does not exist in the insults filter"); return
             database[f"insults.list.{message.guild.id}"] = json.dumps(insults_data)
-            await message.channel.send(f"Successfully removed **{arguments[2]}** from the insults list")
+            await interaction.response.send_message(f"Successfully removed **{arguments[2]}** from the insults list")
     else:
-        await message.channel.send(f"The syntax is `{prefix}insults <add/remove/enable/disable/list/status>`"); return
+        await interaction.response.send_message(f"The syntax is `{prefix}insults <add/remove/enable/disable/list/status>`"); return
 
-async def links_command(message, prefix):
+async def filter_links_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
         if arguments[1] == "enable":
             database[f"links.toggle.{message.guild.id}"] = 1
-            await message.channel.send("The links filter has been successfully **enabled**")
+            await interaction.response.send_message("The links filter has been successfully **enabled**")
         elif arguments[1] == "disable":
             database[f"links.toggle.{message.guild.id}"] = 0
-            await message.channel.send("The links filter has been successfully **disabled**")
+            await interaction.response.send_message("The links filter has been successfully **disabled**")
         elif arguments[1] == "status" or arguments[1] == "filter":
             value = False
             try:
                 value = database[f"links.toggle.{message.guild.id}"]
             except:
                 pass
-            await message.channel.send(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
+            await interaction.response.send_message(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
     else:
-        await message.channel.send(f"The syntax is `{prefix}links <enable/disable/status>`"); return
+        await interaction.response.send_message(f"The syntax is `{prefix}links <enable/disable/status>`"); return
 
 async def spamming_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
         if arguments[1] == "enable":
             database[f"spamming.toggle.{message.guild.id}"] = 1
-            await message.channel.send("The spam filter has been successfully **enabled**")
+            await interaction.response.send_message("The spam filter has been successfully **enabled**")
         elif arguments[1] == "disable":
             database[f"spamming.toggle.{message.guild.id}"] = 0
-            await message.channel.send("The spam filter has been successfully **disabled**")
+            await interaction.response.send_message("The spam filter has been successfully **disabled**")
         elif arguments[1] == "set":
+            limit = 6
             if len(arguments) > 2:
                 try:
                     limit = int(arguments[2])
                 except:
-                    await message.channel.send("Please enter a valid number!"); return
+                    await interaction.response.send_message("Please enter a valid number!"); return
             database[f"spamming.limit.{message.guild.id}"] = limit
-            await message.channel.send(f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**")
+            await interaction.response.send_message(f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**")
         elif arguments[1] == "status" or arguments[1] == "filter" or arguments[1] == "limit":
             value = False
             try:
@@ -1839,13 +1641,13 @@ async def spamming_command(message, prefix):
                 limit = database[f"spamming.limit.{message.guild.id}"]
             except:
                 pass
-            await message.channel.send(f"The spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
+            await interaction.response.send_message(f"The spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
     else:
-        await message.channel.send(f"The syntax is `{prefix}spamming <enable/disable/set/status>`"); return
+        await interaction.response.send_message(f"The syntax is `{prefix}spamming <enable/disable/set/status>`"); return
 
 async def welcome_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
@@ -1853,7 +1655,7 @@ async def welcome_command(message, prefix):
             try:
                 database[f"welcome.text.{message.guild.id}"]
             except:
-                await message.channel.send(f"Please set a welcome message with `{prefix}welcome set <text>` first"); return
+                await interaction.response.send_message(f"Please set a welcome message with `{prefix}welcome set <text>` first"); return
             try:
                 channel_id = json.loads(database[f"welcome.channel.{message.guild.id}"])
                 found = False
@@ -1863,13 +1665,13 @@ async def welcome_command(message, prefix):
                 if not found:
                     raise Exception("unable to find channel")
             except:
-                await message.channel.send(f"Please set a welcome channel with `{prefix}welcome channel <channel>` first"); return
+                await interaction.response.send_message(f"Please set a welcome channel with `{prefix}welcome channel <channel>` first"); return
 
             database[f"welcome.toggle.{message.guild.id}"] = 1
-            await message.channel.send("Welcome messages have been successfully **enabled**")
+            await interaction.response.send_message("Welcome messages have been successfully **enabled**")
         elif arguments[1] == "disable":
             database[f"welcome.toggle.{message.guild.id}"] = 0
-            await message.channel.send("Welcome messages have been successfully **disabled**")
+            await interaction.response.send_message("Welcome messages have been successfully **disabled**")
         elif arguments[1] == "set" or arguments[1] == "text":
             text = ""
             if len(arguments) > 2:
@@ -1877,9 +1679,9 @@ async def welcome_command(message, prefix):
                     arguments.pop(0)
                 text = ' '.join(arguments)
             else:
-                await message.channel.send(f"The syntax is `{prefix}welcome set <text>`"); return
+                await interaction.response.send_message(f"The syntax is `{prefix}welcome set <text>`"); return
             database[f"welcome.text.{message.guild.id}"] = text
-            await message.channel.send(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
+            await interaction.response.send_message(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
             try:
                 database[f"welcome.text.{message.guild.id}"]
                 database[f"welcome.channel.{message.guild.id}"]
@@ -1892,11 +1694,11 @@ async def welcome_command(message, prefix):
                 try:
                     channel_id = int(arguments[2].replace("<#", "").replace("!", "").replace(">", ""))
                 except:
-                    await message.channel.send("That channel does not exist in this server"); return
+                    await interaction.response.send_message("That channel does not exist in this server"); return
             else:
-                await message.channel.send(f"The syntax is `{prefix}welcome channel <channel>`"); return
+                await interaction.response.send_message(f"The syntax is `{prefix}welcome channel <channel>`"); return
             database[f"welcome.channel.{message.guild.id}"] = channel_id
-            await message.channel.send(f"The welcome channel for this server has been set to <#{channel_id}>")
+            await interaction.response.send_message(f"The welcome channel for this server has been set to <#{channel_id}>")
             try:
                 database[f"welcome.text.{message.guild.id}"]
                 database[f"welcome.channel.{message.guild.id}"]
@@ -1919,13 +1721,13 @@ async def welcome_command(message, prefix):
                 channel_id = "<#" + database[f"welcome.channel.{message.guild.id}"].decode("utf-8") + ">"
             except:
                 pass
-            await message.channel.send(f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
+            await interaction.response.send_message(f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
     else:
-        await message.channel.send(f"The syntax is `{prefix}welcome <enable/disable/channel/set/status>`"); return
+        await interaction.response.send_message(f"The syntax is `{prefix}welcome <enable/disable/channel/set/status>`"); return
 
 async def leave_command(message, prefix):
     if not message.author.guild_permissions.administrator:
-        await message.channel.send(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
         
     arguments = message.content.split(" ")
     if len(arguments) > 1:
@@ -1933,7 +1735,7 @@ async def leave_command(message, prefix):
             try:
                 database[f"leave.text.{message.guild.id}"]
             except:
-                await message.channel.send(f"Please set a leave message with `{prefix}leave set <text>` first"); return
+                await interaction.response.send_message(f"Please set a leave message with `{prefix}leave set <text>` first"); return
             try:
                 channel_id = json.loads(database[f"leave.channel.{message.guild.id}"])
                 found = False
@@ -1943,13 +1745,13 @@ async def leave_command(message, prefix):
                 if not found:
                     raise Exception("unable to find channel")
             except:
-                await message.channel.send(f"Please set a leave channel with `{prefix}leave channel <channel>` first"); return
+                await interaction.response.send_message(f"Please set a leave channel with `{prefix}leave channel <channel>` first"); return
 
             database[f"leave.toggle.{message.guild.id}"] = 1
-            await message.channel.send("Leave messages have been successfully **enabled**")
+            await interaction.response.send_message("Leave messages have been successfully **enabled**")
         elif arguments[1] == "disable":
             database[f"leave.toggle.{message.guild.id}"] = 0
-            await message.channel.send("Leave messages have been successfully **disabled**")
+            await interaction.response.send_message("Leave messages have been successfully **disabled**")
         elif arguments[1] == "set" or arguments[1] == "text":
             text = ""
             if len(arguments) > 2:
@@ -1957,9 +1759,9 @@ async def leave_command(message, prefix):
                     arguments.pop(0)
                 text = ' '.join(arguments)
             else:
-                await message.channel.send(f"The syntax is `{prefix}leave set <text>`"); return
+                await interaction.response.send_message(f"The syntax is `{prefix}leave set <text>`"); return
             database[f"leave.text.{message.guild.id}"] = text
-            await message.channel.send(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
+            await interaction.response.send_message(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
             try:
                 database[f"leave.text.{message.guild.id}"]
                 database[f"leave.channel.{message.guild.id}"]
@@ -1972,11 +1774,11 @@ async def leave_command(message, prefix):
                 try:
                     channel_id = int(arguments[2].replace("<#", "").replace("!", "").replace(">", ""))
                 except:
-                    await message.channel.send("That channel does not exist in this server"); return
+                    await interaction.response.send_message("That channel does not exist in this server"); return
             else:
-                await message.channel.send(f"The syntax is `{prefix}leave channel <channel>`"); return
+                await interaction.response.send_message(f"The syntax is `{prefix}leave channel <channel>`"); return
             database[f"leave.channel.{message.guild.id}"] = channel_id
-            await message.channel.send(f"The leave channel for this server has been set to <#{channel_id}>")
+            await interaction.response.send_message(f"The leave channel for this server has been set to <#{channel_id}>")
             try:
                 database[f"leave.text.{message.guild.id}"]
                 database[f"leave.channel.{message.guild.id}"]
@@ -1999,9 +1801,9 @@ async def leave_command(message, prefix):
                 channel_id = "<#" + database[f"leave.channel.{message.guild.id}"].decode("utf-8") + ">"
             except:
                 pass
-            await message.channel.send(f"Leave messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
+            await interaction.response.send_message(f"Leave messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
     else:
-        await message.channel.send(f"The syntax is `{prefix}leave <enable/disable/channel/set/status>`"); return
+        await interaction.response.send_message(f"The syntax is `{prefix}leave <enable/disable/channel/set/status>`"); return
 
 async def snipe_command(message, prefix):
     add_cooldown(message.author.id, "snipe", 1)
@@ -2014,41 +1816,41 @@ async def snipe_command(message, prefix):
             message_sent_time = random_message[3]; message_data = random_message[4]
             embed = disnake.Embed(description=message_data, color=variables.embed_color, timestamp=message_sent_time)
             embed.set_author(name=message_author, icon_url=message_author_avatar); embed.set_footer(text=f"Sent in #{channel_name}")
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
         except:
-            await message.channel.send("There is nothing to snipe!")
+            await interaction.response.send_message("There is nothing to snipe!")
     elif len(arguments) > 1:
         if arguments[1] == "enable":
             if not message.author.guild_permissions.administrator:
-                await message.channel.send(variables.no_permission_text); return
+                await interaction.response.send_message(variables.no_permission_text); return
 
             database[f"snipe.{message.guild.id}"] = 1
-            await message.channel.send("Snipe has been **enabled** for this server")
+            await interaction.response.send_message("Snipe has been **enabled** for this server")
         elif arguments[1] == "disable":
             if not message.author.guild_permissions.administrator:
-                await message.channel.send(variables.no_permission_text); return
+                await interaction.response.send_message(variables.no_permission_text); return
 
             database[f"snipe.{message.guild.id}"] = 0
-            await message.channel.send("Snipe has been **disabled** for this server")
+            await interaction.response.send_message("Snipe has been **disabled** for this server")
         elif arguments[1] == "clear":
             if not message.author.guild_permissions.administrator:
-                await message.channel.send(variables.no_permission_text); return
+                await interaction.response.send_message(variables.no_permission_text); return
 
             snipe_list[message.guild.id] = []
-            await message.channel.send("The snipe list for this server has been successfully cleared")
+            await interaction.response.send_message("The snipe list for this server has been successfully cleared")
         elif arguments[1] == "status":
             value = 1
             try:
                 value = json.loads(database[f"snipe.{message.guild.id}"])
             except:
                 pass
-            await message.channel.send(f"Snipe is currently **{'enabled' if value else 'disabled'}** for this server")
+            await interaction.response.send_message(f"Snipe is currently **{'enabled' if value else 'disabled'}** for this server")
 
 async def joke_command(message, prefix):
     add_cooldown(message.author.id, "joke", 3)
     response = requests.get("http://random-joke-api.herokuapp.com/random").json()
     embed = disnake.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color)
-    await message.channel.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 async def members_command(message, prefix):
     users = 0; bots = 0
@@ -2062,7 +1864,7 @@ async def members_command(message, prefix):
         description=f"User accounts: **{users}**\nBot accounts: **{bots}**\nTotal members: **{users + bots}**",
         color=variables.embed_color
     )
-    await message.channel.send(embed=embed)
+    await interaction.response.send_message(embed=embed)
 
 async def github_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2074,7 +1876,7 @@ async def github_command(message, prefix):
         response = requests.get(f"https://api.github.com/repos/{arguments[1]}").json()
         try:
             if response["message"] == "Not Found":
-                await message.channel.send("That GitHub repository was not found"); return
+                await interaction.response.send_message("That GitHub repository was not found"); return
         except:
             pass
         embed = disnake.Embed(color=variables.embed_color)
@@ -2095,19 +1897,19 @@ async def github_command(message, prefix):
         embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>")
         embed.add_field(name="Description", value=f"{response['description']}")
         embed.set_thumbnail(url=response["owner"]["avatar_url"])
-        await message.channel.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
         add_cooldown(message.author.id, "github", 5)
     else:
-        await message.channel.send(f"The syntax is `{prefix}github <repository>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}github <repository>`")
 
 async def choose_command(message, prefix):
     arguments = message.content.split(" ")
     if len(arguments) >= 2:
         arguments.pop(0)
         random_item = random.choice(' '.join(arguments).replace(", ", ",").split(","))
-        await message.channel.send(f"I choose **{random_item}**")
+        await interaction.response.send_message(f"I choose **{random_item}**")
     else:
-        await message.channel.send(f"The syntax is `{prefix}choose <item>, <item>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}choose <item>, <item>`")
 
 async def trivia_command(message, prefix):
     add_cooldown(message.author.id, "trivia", 10)
@@ -2190,14 +1992,14 @@ async def trivia_command(message, prefix):
         description=description,
         color=variables.embed_color,
     )
-    old_message = await message.channel.send(embed=embed, view=CommandView())
+    old_message = await interaction.response.send_message(embed=embed, view=CommandView())
 
 async def pypi_command(message, prefix):
     arguments = message.content.split(" ")
     if len(arguments) == 2:
         response = requests.get(f"https://pypi.org/pypi/{arguments[1]}/json/")
         if response.status_code == 404:
-            await message.channel.send("That package was not found")
+            await interaction.response.send_message("That package was not found")
             return
         response = response.json()
         size_unit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
@@ -2219,10 +2021,10 @@ async def pypi_command(message, prefix):
         embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
         embed.add_field(name="Summary", value=response["info"]["summary"])
         embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
-        await message.channel.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
         add_cooldown(message.author.id, "pypi", 5)
     else:
-        await message.channel.send(f"The syntax is `{prefix}pypi <project>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}pypi <project>`")
         return
 
 async def discriminator_command(message, prefix):
@@ -2236,7 +2038,7 @@ async def discriminator_command(message, prefix):
             if len(arguments[1]) != 4:
                 raise Exception("invalid discriminator")
         except:
-            await message.channel.send("That is not a valid discriminator!")
+            await interaction.response.send_message("That is not a valid discriminator!")
             return
         discriminator = arguments[1]
 
@@ -2246,7 +2048,7 @@ async def discriminator_command(message, prefix):
                 members.append(str(member))
     new_line = "\n"
     if members == []:
-        await message.channel.send("There are no other users with the same discriminator")
+        await interaction.response.send_message("There are no other users with the same discriminator")
         return
 
     output = "\n".join(members)
@@ -2264,7 +2066,7 @@ async def kick_command(message, prefix):
             try:
                 user_id = int(arguments[1].replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
             except:
-                await message.channel.send("Please specify a valid user")
+                await interaction.response.send_message("Please specify a valid user")
                 return
             reason = "Reason not specified"
             if len(arguments) > 2:
@@ -2277,25 +2079,25 @@ async def kick_command(message, prefix):
                     found = True
                     try:
                         await member.kick(reason=reason)
-                        await message.channel.send(
+                        await interaction.response.send_message(
                             embed=disnake.Embed(
                                 color=variables.embed_color,
                                 description=f":white_check_mark: **{member}** has been **successfully kicked**",
                             )
                         )
                     except:
-                        await message.channel.send(
+                        await interaction.response.send_message(
                             embed=disnake.Embed(
                                 color=variables.embed_color,
                                 description=f":x: Unable to kick **{member}**",
                             )
                         )
             if not found:
-                await message.channel.send("Unable to find the specified user")
+                await interaction.response.send_message("Unable to find the specified user")
         else:
-            await message.channel.send(f"The syntax is `{prefix}kick <user>`")
+            await interaction.response.send_message(f"The syntax is `{prefix}kick <user>`")
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
 
 async def ban_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2304,7 +2106,7 @@ async def ban_command(message, prefix):
             try:
                 user_id = int(arguments[1].replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
             except:
-                await message.channel.send("Please specify a valid user")
+                await interaction.response.send_message("Please specify a valid user")
                 return
             reason = "Reason not specified"
             if len(arguments) > 2:
@@ -2317,14 +2119,14 @@ async def ban_command(message, prefix):
                     found = True
                     try:
                         await member.ban(reason=reason, delete_message_days=0)
-                        await message.channel.send(
+                        await interaction.response.send_message(
                             embed=disnake.Embed(
                                 color=variables.embed_color,
                                 description=f":white_check_mark: **{member}** has been **successfully banned**",
                             )
                         )
                     except:
-                        await message.channel.send(
+                        await interaction.response.send_message(
                             embed=disnake.Embed(
                                 color=variables.embed_color,
                                 description=f":x: Unable to ban **{member}**",
@@ -2335,26 +2137,26 @@ async def ban_command(message, prefix):
                     try:
                         user = await client.fetch_user(user_id)
                     except:
-                        await message.channel.send("Unable to find the specified user")
+                        await interaction.response.send_message("Unable to find the specified user")
                         return
                     await message.guild.ban(user, reason=reason, delete_message_days=0)
-                    await message.channel.send(
+                    await interaction.response.send_message(
                         embed=disnake.Embed(
                             color=variables.embed_color,
                             description=f":white_check_mark: **{user}** has been **successfully banned**",
                         )
                     )
                 except:
-                    await message.channel.send(
+                    await interaction.response.send_message(
                         embed=disnake.Embed(
                             color=variables.embed_color,
                             description=f":x: Unable to ban **{user}**",
                         )
                     )
         else:
-            await message.channel.send(f"The syntax is `{prefix}ban <user>`")
+            await interaction.response.send_message(f"The syntax is `{prefix}ban <user>`")
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
 
 async def unban_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2364,27 +2166,27 @@ async def unban_command(message, prefix):
                 user_id = int(arguments[1].replace("<", "").replace("@", "").replace("!", "").replace(">", ""))
                 user = await client.fetch_user(user_id)
             except:
-                await message.channel.send("Please specify a valid user")
+                await interaction.response.send_message("Please specify a valid user")
                 return
             try:
                 await message.guild.unban(user)
-                await message.channel.send(
+                await interaction.response.send_message(
                     embed=disnake.Embed(
                         color=variables.embed_color,
                         description=f":white_check_mark: **{user}** has been **successfully unbanned**",
                     )
                 )
             except:
-                await message.channel.send(
+                await interaction.response.send_message(
                     embed=disnake.Embed(
                         color=variables.embed_color,
                         description=f":x: Unable to unban **{user}**",
                     )
                 )
         else:
-            await message.channel.send(f"The syntax is `{prefix}ban <user>`")
+            await interaction.response.send_message(f"The syntax is `{prefix}ban <user>`")
     else:
-        await message.channel.send(variables.no_permission_text)
+        await interaction.response.send_message(variables.no_permission_text)
 
 async def convert_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2400,7 +2202,7 @@ async def convert_command(message, prefix):
             description=", ".join(conversions),
             color=variables.embed_color
         )
-        await message.channel.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
         return
     if len(arguments) == 4:
         try:
@@ -2408,10 +2210,10 @@ async def convert_command(message, prefix):
             input_unit = arguments[2]
             output_unit = arguments[3]
         except:
-            await message.channel.send("Please enter a valid amount!")
+            await interaction.response.send_message("Please enter a valid amount!")
         data = converter.convert(amount, input_unit, output_unit)
         if data["error"] == 404:
-            await message.channel.send("That input/output pair is not supported")
+            await interaction.response.send_message("That input/output pair is not supported")
             return
         description = f"**{round(amount, 6):,} {data['input_abbreviation']}** = **{round(data['result'], 6):,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
         embed = disnake.Embed(
@@ -2419,10 +2221,10 @@ async def convert_command(message, prefix):
             color=variables.embed_color,
             description=description,
         )
-        await message.channel.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
         add_cooldown(message.author.id, "convert", 2)
     else:
-        await message.channel.send(f"The syntax is `{prefix}convert <amount> <unit> <unit>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}convert <amount> <unit> <unit>`")
 
 async def translate_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2447,7 +2249,7 @@ async def translate_command(message, prefix):
             arguments.pop(0)
         text = ' '.join(arguments)
         if text == "":
-            await message.channel.send("There is no text for that message!")
+            await interaction.response.send_message("There is no text for that message!")
             return
         translator = googletrans.Translator()
         try:
@@ -2455,16 +2257,16 @@ async def translate_command(message, prefix):
             embed = disnake.Embed(color=variables.embed_color)
             embed.add_field(name=f"Original Text ({result.src})", value=text, inline=False)
             embed.add_field(name=f"Translated Text ({result.dest})", value=result.text)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
             add_cooldown(message.author.id, "translate", 5)
         except Exception as error:
-            await message.channel.send(f"There was an error while trying to translate the specified text: `{error}`")
+            await interaction.response.send_message(f"There was an error while trying to translate the specified text: `{error}`")
     elif len(arguments) == 2 and message.reference != None:
         target_message = await message.channel.fetch_message(message.reference.message_id)
         message.content = message.content + " " + target_message.content
         await translate_command(message, prefix)
     else:
-        await message.channel.send(f"The syntax is `{prefix}translate <language> <text>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}translate <language> <text>`")
 
 async def definition_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2478,7 +2280,7 @@ async def definition_command(message, prefix):
         response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}").json()
         try:
             if response["title"] == "No Definitions Found":
-                await message.channel.send("That word was not found in the dictionary")
+                await interaction.response.send_message("That word was not found in the dictionary")
                 return
         except:
             pass
@@ -2504,10 +2306,10 @@ async def definition_command(message, prefix):
                 pass
             description += f"\n\n**Type:** {meaning['partOfSpeech']}\n**Definition:** {meaning['definitions'][0]['definition']}\n**Example:** {example}\n**Synonyms:** {synonyms}"
         embed = disnake.Embed(title="Definition", description=description, color=variables.embed_color)
-        await message.channel.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
         add_cooldown(message.author.id, "definition", 5)
     else:
-        await message.channel.send(f"The syntax is `{prefix}definition <word>`")
+        await interaction.response.send_message(f"The syntax is `{prefix}definition <word>`")
 
 async def remind_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2524,37 +2326,37 @@ async def remind_command(message, prefix):
             if text == "":
                 text = "You have no reminders"
             embed = disnake.Embed(title="Reminders", description=text, color=variables.embed_color)
-            await message.channel.send(embed=embed)
+            await interaction.response.send_message(embed=embed)
             add_cooldown(message.author.id, "remind", 10)
             return
     if len(arguments) >= 3:
         try:
             duration = float(arguments[1])
         except:
-            await message.channel.send("Please enter a valid duration (in minutes)")
+            await interaction.response.send_message("Please enter a valid duration (in minutes)")
             return
         for i in range(2):
             arguments.pop(0)
         text = " ".join(arguments)
         if len(text) > 200:
-            await message.channel.send("The specified text is too long!")
+            await interaction.response.send_message("The specified text is too long!")
             return
         if duration > 10080:
-            await message.channel.send("The specified duration is too long!"); return
+            await interaction.response.send_message("The specified duration is too long!"); return
         if duration < 0:
-            await message.channel.send("No negative numbers please!"); return
+            await interaction.response.send_message("No negative numbers please!"); return
         try:
             current_reminders = json.loads(database[f"reminders.{message.author.id}"])
         except:
             current_reminders = []
         if len(current_reminders) >= 5:
-            await message.channel.send("You already have **5 reminders**!")
+            await interaction.response.send_message("You already have **5 reminders**!")
             return
         current_reminders.append([time.time(), duration*60, text])
         database[f"reminders.{message.author.id}"] = json.dumps(current_reminders)
-        await message.channel.send(f"You will be reminded in **{duration if duration != 1.0 else 1} {'minute' if duration == 1.0 or duration == 1 else 'minutes'}**")
+        await interaction.response.send_message(f"You will be reminded in **{duration if duration != 1.0 else 1} {'minute' if duration == 1.0 or duration == 1 else 'minutes'}**")
     else:
-        await message.channel.send(f"The syntax is `{prefix}remind <minutes> <text>` or `{prefix}remind list`")
+        await interaction.response.send_message(f"The syntax is `{prefix}remind <minutes> <text>` or `{prefix}remind list`")
 
 async def help_command(message, prefix):
     pages = {}; current_page = 1; page_limit = 12; current_item = 0; index = 1; page_arguments = False
@@ -2599,10 +2401,10 @@ async def help_command(message, prefix):
                 command = f"Command: `{command.name}`{additional_arguments}\nUsage example: `{command_example}`\n\n**{command.description}**"
                 embed = disnake.Embed(title="Doge Commands", description=command, color=variables.embed_color, timestamp=datetime.datetime.now())
                 embed.set_footer(text=f"Viewing command help page")
-                await message.channel.send(embed=embed); return
+                await interaction.response.send_message(embed=embed); return
         embed = disnake.Embed(title="Doge Commands", description="That command doesn't exist or wasn't found", color=variables.embed_color, timestamp=datetime.datetime.now())
         embed.set_footer(text=f"Viewing command help page")
-        await message.channel.send(embed=embed); add_cooldown(message.author.id, "help", 1.5)
+        await interaction.response.send_message(embed=embed); add_cooldown(message.author.id, "help", 1.5)
 
 def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(epoch))
@@ -2960,7 +2762,7 @@ async def on_message(message):
                 if get_cooldown(message.author.id, command.name) > 0:
                     cooldown_string = generate_cooldown(command.name, get_cooldown(message.author.id, command.name))
                     embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)
-                    await message.channel.send(embed=embed)
+                    await interaction.response.send_message(embed=embed)
                     return
                 await command.function(message, prefix)
                 return
@@ -2999,20 +2801,17 @@ command_list = [
     Command("D", [], smiley_command, "D", "=D"),
     Command("about", ["owner", "botinfo"], about_command, "about", "System Command"),
     Command("execute", [], execute_command, "execute <code>", "System Command"),
-    Command("reload", [], reload_command, "reload", "System Command"),
     Command("guilds", ["servers"], guilds_command, "guilds", "System Command"),
     Command("blacklist", [], blacklist_command, "blacklist <add/remove/list>", "System Command"),
     Command("help", ["h", "commands", "?"], help_command, "help", "Displays a help page for Doge Utilities"),
     Command("ping", ["pong"], ping_command, "ping", "Display the bot's current latency"),
     Command("status", ["stats"], status_command, "status", "Show the bot's current statistics"),
     Command("support", ["report"], support_command, "support", "Display the official Discord server for Doge"),
-    Command("tests", [], tests_command, "tests", "Run a series of tests to diagnose Doge"),
     Command("source", ["src"], source_command, "source", "Display a link to Doge Utilities' code"),
     Command("uptime", [], uptime_command, "uptime", "Display Doge Utilities' current uptime"),
     Command("vote", ["upvote"], vote_command, "vote", "Display a link to upvote Doge Utilities"),
     Command("donate", [], donate_command, "donate", "Donate to the creators of Doge Utilities"),
     Command("version", ["ver"], version_command, "version", "Display the bot's current version"),
-    Command("prefix", ["setprefix", "changeprefix"], prefix_command, "prefix", "Change the bot's prefix on this server"),
     Command("invite", ["inv"], invite_command, "invite", "Invite this bot to another server"),
     Command("doge", ["dog"], doge_command, "doge", "D O G E"),
     Command("shards", [], shards_command, "shards <page>", "View information about Doge's shards"),
