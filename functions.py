@@ -442,7 +442,79 @@ async def ping_command(interaction):
     )
     await interaction.response.send_message(embed=embed)
 
-@client.slash_command(name="status", description="Show the bot's current statistics")
+@client.slash_command(name="links")
+async def links_command(_):
+    pass
+
+@links_command.sub_command(name="support", description="Display the official Discord server for Doge")
+async def support_command(interaction):
+    await interaction.response.send_message(f"Doge Utilities support server: {variables.support_server_invite}")
+
+@links_command.sub_command(name="invite", description="Invite this bot to another server")
+async def invite_command(interaction):
+    guild_member = True
+    if interaction.author == interaction.guild.owner:
+        guild_member = False
+
+    class CommandView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+
+            self.clicked = False
+            self.add_item(
+                disnake.ui.Button(
+                    label="Invite Link",
+                    url=variables.bot_invite_link,
+                )
+            )
+
+        @disnake.ui.button(label="Leave Server", style=disnake.ButtonStyle.red, disabled=guild_member)
+        async def leave_server(self, _, interaction):
+            if interaction.author == message.author:
+                if self.clicked:
+                    await interaction.response.send_message("Leaving server...", ephemeral=True)
+                    await message.guild.leave()
+                else:
+                    self.clicked = True
+                    await interaction.response.send_message(
+                        "Are you sure you want me to leave this server? Please press the button again to confirm.",
+                        ephemeral=True,
+                    )
+            else:
+                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+    await interaction.response.send_message("Here is Doge Utilities' invite link", view=CommandView())
+
+@client.slash_command(name="information", description="Get information about the bot")
+async def information_command(_):
+    pass
+
+@information_command.sub_command(name="shards", description="Get information about Doge Utilities' shards")
+async def shards_command(interaction):
+    pages = {}; current_page = 1; page_limit = 20; current_item = 0; index = 1
+    for shard in client.shards:
+        current_server = ""
+        shard_guilds = 0
+        shard_members = 0
+        for guild in client.guilds:
+            if guild.shard_id == shard:
+                shard_guilds += 1
+                shard_members += guild.member_count
+                if guild.id == interaction.guild.id:
+                    current_server = "**"
+        temporary_text = f"{current_server}Shard `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
+        if index > page_limit:
+            index = 0
+            current_item += 1
+        try:
+            pages[current_item] += temporary_text
+        except:
+            pages[current_item] = f"Shard Count: `{len(client.shards)}`, Current Shard: `{interaction.guild.shard_id}`\n\n"
+            pages[current_item] += temporary_text
+        index += 1
+    pager = CommandPaginator(title="Doge Shards", type="shards", segments=pages.values(), target_page=current_page)
+    await pager.start(interaction)
+
+@information_command.sub_command(name="status", description="Show the bot's current statistics")
 async def status_command(interaction):
     member_count = 0; channel_count = 0; uptime = ""
     for guild in client.guilds:
@@ -486,15 +558,7 @@ async def status_command(interaction):
     embed.add_field(name="Bot Uptime", value="```" + uptime + "```")
     await interaction.response.send_message(embed=embed)
 
-@client.group(name="links")
-async def links_command(interaction):
-    await interaction.response.send_message("Try `/links support` or `/links invite` to get more information")
-
-@links_command.command(name="support", description="Display the official Discord server for Doge")
-async def support_command(interaction):
-    await interaction.response.send_message(f"Doge Utilities support server: {variables.support_server_invite}")
-
-@client.slash_command(name="version", description="Display the bot's current version")
+@information_command.sub_command(name="version", description="Display the bot's current version")
 async def version_command(interaction):
     file_size = 0
     for object in os.listdir():
@@ -506,61 +570,26 @@ async def version_command(interaction):
     embed = disnake.Embed(title="Bot Version", description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
-@client.slash_command(name="invite", description="Invite this bot to another server")
-async def invite_command(interaction):
-    guild_member = True
-    if interaction.author == interaction.guild.owner:
-        guild_member = False
+@client.slash_command(name="setup", description="Setup mute and ban roles in your server")
+async def setup_command(_):
+    pass
 
-    class CommandView(disnake.ui.View):
-        def __init__(self):
-            super().__init__()
-
-            self.clicked = False
-            self.add_item(
-                disnake.ui.Button(
-                    label="Support Server",
-                    url=variables.support_server_invite,
-                )
-            )
-            self.add_item(
-                disnake.ui.Button(
-                    label="Invite Link",
-                    url=variables.bot_invite_link,
-                )
-            )
-
-        @disnake.ui.button(label="Leave Server", style=disnake.ButtonStyle.red, disabled=guild_member)
-        async def leave_server(self, _, interaction):
-            if interaction.author == message.author:
-                if self.clicked:
-                    await interaction.response.send_message("Leaving server...", ephemeral=True)
-                    await message.guild.leave()
-                else:
-                    self.clicked = True
-                    await interaction.response.send_message(
-                        "Are you sure you want me to leave this server? Please press the button again to confirm.",
-                        ephemeral=True,
-                    )
-            else:
-                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-    await interaction.response.send_message("Here's the link to invite me to another server", view=CommandView())
-
-async def setup_banned_command(message, prefix):
-    if message.author.guild_permissions.manage_roles or message.author.id in variables.permission_override:
+@setup_command.sub_command(name="banned", description="Setup a 'Banned' role in your server")
+async def setup_banned_command(interaction):
+    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
         await interaction.response.send_message(variables.no_permission_text); return
 
-    roles = message.guild.roles
+    roles = interaction.guild.roles
     for role in roles:
         if role.name == "Banned":
             await interaction.response.send_message("The **Banned** role already exists in this guild")
             return
     old_message = await interaction.response.send_message("Generating the **Banned** role for the current guild...")
     try:
-        banned_role = await message.guild.create_role(name="Banned")
-        guild_roles = len(message.guild.roles); retry_count = 0
+        banned_role = await interaction.guild.create_role(name="Banned")
+        guild_roles = len(interaction.guild.roles); retry_count = 0
         while True:
             if retry_count > 100:
                 break
@@ -569,7 +598,7 @@ async def setup_banned_command(message, prefix):
                 break
             except:
                 retry_count += 1
-        for channel in message.guild.channels:
+        for channel in interaction.guild.channels:
             try:
                 await channel.set_permissions(banned_role, view_channel=False, connect=False, change_nickname=False, add_reactions=False)
             except:
@@ -578,23 +607,23 @@ async def setup_banned_command(message, prefix):
         await old_message.edit(content=f"Unable to generate the **Banned** role for this guild")
         return
     await old_message.edit(content=f"Successfully generated the **Banned** role for this guild")
-    add_cooldown(message.author.id, "setup", 60)
 
-async def setup_muted_command(message, prefix):
-    if message.author.guild_permissions.manage_roles or message.author.id in variables.permission_override:
+@setup_command.sub_command(name="muted", description="Setup a 'Muted' role in your server")
+async def setup_muted_command(interaction):
+    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text); return
+        await interaction.response.send_interaction(variables.no_permission_text); return
 
-    roles = message.guild.roles
+    roles = interaction.guild.roles
     for role in roles:
         if role.name == "Muted":
-            await interaction.response.send_message("The **Muted** role already exists in this guild")
+            await interaction.response.send_interaction("The **Muted** role already exists in this guild")
             return
-    old_message = await interaction.response.send_message("Generating the **Muted** role for the current guild...")
+    old_interaction = await interaction.response.send_interaction("Generating the **Muted** role for the current guild...")
     try:
-        muted_role = await message.guild.create_role(name="Muted")
-        guild_roles = len(message.guild.roles); retry_count = 0
+        muted_role = await interaction.guild.create_role(name="Muted")
+        guild_roles = len(interaction.guild.roles); retry_count = 0
         while True:
             if retry_count > 100:
                 break
@@ -603,7 +632,7 @@ async def setup_muted_command(message, prefix):
                 break
             except:
                 retry_count += 1
-        for channel in message.guild.channels:
+        for channel in interaction.guild.channels:
             try:
                 if type(channel) == disnake.channel.TextChannel:
                     await channel.set_permissions(muted_role, send_messages=False)
@@ -612,31 +641,20 @@ async def setup_muted_command(message, prefix):
             except:
                 pass
     except:
-        await old_message.edit(f"Unable to generate the **Muted** role for this guild")
+        await old_interaction.edit(f"Unable to generate the **Muted** role for this guild")
         return
-    await old_message.edit(f"Successfully generated the **Muted** role for this guild")
-    add_cooldown(message.author.id, "setup", 60)
+    await old_interaction.edit(f"Successfully generated the **Muted** role for this guild")
 
-async def random_command(message, prefix):
-    arguments = message.content.split(" "); high_number = 0; low_number = 0
-    try:
-        if len(arguments) == 2:
-            high_number = float(arguments[1])
-        elif len(arguments) == 3:
-            low_number = float(arguments[1])
-            high_number = float(arguments[2])
-        else:
-            await interaction.response.send_message(f"The syntax is `{prefix}random <low> <high>`")
-            return
-    except:
-        await interaction.response.send_message("Please enter a valid number")
-        return
-    try:
-        random_number = round(random.uniform(low_number, high_number), 2)
-    except:
-        await interaction.response.send_message("The lower number is larger than the higher number")
-        return
-    add_cooldown(message.author.id, "random", 20)
+@client.slash_command(name="random", description="Generate a random number between the range")
+async def random_command(
+        interaction,
+        low_number: float = Param(name="low", description="The lower number"),
+        high_number: float = Param(0, name="high", description="The higher number"),
+    ):
+    if low_number != 0 and high_number == 0:
+        high_number = low_number
+        low_number = 0
+    random_number = round(random.uniform(low_number, high_number), 2)
     button_text = "Generate Number"
 
     class CommandView(disnake.ui.View):
@@ -645,22 +663,22 @@ async def random_command(message, prefix):
             self.uses = 0
 
         @disnake.ui.button(label=button_text, style=disnake.ButtonStyle.gray)
-        async def generate_number(self, _, interaction):
-            if interaction.author != message.author:
-                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+        async def generate_number(self, _, button_interaction):
+            if button_interaction.author != interaction.author:
+                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                 return
 
             if self.uses < 5:
                 self.uses += 1
                 random_number = round(random.uniform(low_number, high_number), 2)
-                await old_message.edit(content=f"Your random number is **{random_number}**")
+                await interaction.edit_original_message(content=f"Your random number is **{random_number}**")
             else:
                 new_view = disnake.ui.View()
                 new_view.add_item(disnake.ui.Button(label=button_text, style=disnake.ButtonStyle.gray, disabled=True))
-                await old_message.edit(view=new_view)
-                await interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command to continue.", ephemeral=True)
+                await interaction.edit_original_message(view=new_view)
+                await button_interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command to continue.", ephemeral=True)
                 self.stop()
-    old_message = await interaction.response.send_message(f"Your random number is **{random_number}**", view=CommandView())
+    await interaction.response.send_message(f"Your random number is **{random_number}**", view=CommandView())
 
 async def execute_command(message, prefix):
     if message.author.id == variables.bot_owner:
@@ -732,12 +750,13 @@ async def execute_command(message, prefix):
     else:
         await message.add_reaction("🚫")
 
-async def disconnect_members_command(message, prefix):
-    if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
-        old_message = await interaction.response.send_message("Disconnecting all members from voice channels...")
-        add_cooldown(message.author.id, "disconnect-members", variables.large_number); members = 0; failed = 0
+@client.slash_command(name="disconnect-members", description="Disconnect all members from all voice channels")
+async def disconnect_members_command(interaction):
+    if interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
+        await interaction.response.send_message("Disconnecting all members from voice channels...")
+        members = 0; failed = 0
 
-        for channel in message.guild.channels:
+        for channel in interaction.guild.channels:
             if type(channel) == disnake.channel.VoiceChannel:
                 for member in channel.members:
                     try:
@@ -745,34 +764,28 @@ async def disconnect_members_command(message, prefix):
                         members += 1
                     except:
                         failed += 1
-        await old_message.edit(f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
+        await interaction.edit_original_message(content=f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
     else:
         await interaction.response.send_message(variables.no_permission_text)
-    add_cooldown(message.author.id, "disconnect-members", 20)
 
-async def suggest_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        add_cooldown(message.author.id, "suggest", variables.large_number)
-        arguments.pop(0); text = " ".join(arguments)
-        old_message = await interaction.response.send_message("Sending your suggestion...")
-        for user_id in variables.message_managers:
-            member = None
-            for guild in client.guilds:
-                try:
-                    member = await guild.fetch_member(user_id)
-                    break
-                except:
-                    continue
-            if member:
-                try:
-                    await member.send(f"**{message.author.name}#{message.author.discriminator}** (`{message.author.id}`) **has sent a suggestion**\n{text}")
-                except:
-                    pass
-        await old_message.edit("Your suggestion has been successfully sent")
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}suggest <text>`")
-    add_cooldown(message.author.id, "suggest", 300)
+@client.slash_command(name="suggest", description="Send a suggestion to the bot creators")
+async def suggest_command(
+        interaction,
+        suggestion: str = Param(description="The suggestion you want to send"),
+    ):
+    await interaction.response.send_message("Sending your suggestion...")
+    for user_id in variables.message_managers:
+        sent = False
+        for guild in client.guilds:
+            for member in guild.members:
+                if not sent:
+                    if member.id == user_id:
+                        sent = True
+                        try:
+                            await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}")
+                        except:
+                            pass
+    await interaction.edit_original_message(content="Your suggestion has been successfully sent")
 
 async def autorole_command(message, prefix):
     if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
@@ -818,36 +831,6 @@ async def autorole_command(message, prefix):
     else:
         await interaction.response.send_message(variables.no_permission_text)
     add_cooldown(message.author.id, "autorole", 5)
-
-async def shards_command(message, prefix):
-    pages = {}; current_page = 1; page_limit = 20; current_item = 0; index = 1
-    try:
-        current_page = int(message.content.split(prefix + "shards ")[1])
-    except:
-        pass
-    for shard in client.shards:
-        current_server = ""
-        shard_guilds = 0
-        shard_members = 0
-        for guild in client.guilds:
-            if guild.shard_id == shard:
-                shard_guilds += 1
-                shard_members += guild.member_count
-                if guild.id == message.guild.id:
-                    current_server = "**"
-        temporary_text = f"{current_server}Shard `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
-        if index > page_limit:
-            index = 0
-            current_item += 1
-        try:
-            pages[current_item] += temporary_text
-        except:
-            pages[current_item] = f"Shard Count: `{len(client.shards)}`, Current Shard: `{message.guild.shard_id}`\n\n"
-            pages[current_item] += temporary_text
-        index += 1
-    pager = CommandPaginator(title="Doge Shards", type="shards", segments=pages.values(), target_page=current_page)
-    await pager.start(message)
-    add_cooldown(message.author.id, "shards", 5)
 
 async def lookup_command(message, prefix):
     user_id = message.content.split(" ")
