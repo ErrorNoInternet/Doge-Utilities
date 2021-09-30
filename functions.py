@@ -42,6 +42,7 @@ class Command:
         self.function = function
         self.usage = usage
         self.description = description
+        self.uses = 0
 
     def __repr__(self):
         return f"<Command name={self.name} aliases={self.aliases} usage={self.usage}>"
@@ -2952,6 +2953,7 @@ async def on_message(message):
                 call_command = True
 
             if call_command:
+                command.uses += 1
                 if message.author.id in blacklisted_users:
                     await message.reply("You are banned from using Doge Utilities"); return
 
