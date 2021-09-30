@@ -135,7 +135,3 @@ button:hover {
   gap: 10px;
 }
 
-@media screen and (max-width: 500px) {
-  .sideBar a {font-size: 10px;}
-}
-
