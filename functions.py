@@ -857,6 +857,7 @@ async def execute_command(message, prefix):
     if message.author.id == variables.bot_owner:
         try:
             output_language = ""
+            codeblock = "```"
             length = len(prefix+"execute ")
             if len(message.content) >= length:
                 code = message.content[length:]
@@ -883,6 +884,9 @@ async def execute_command(message, prefix):
                 output_language = "cpp"
             if "#java" in code:
                 output_language = "java"
+            if "#no_codeblock" in code:
+                output_language = ""
+                codeblock = ""
 
             stdout = io.StringIO()
             try:
@@ -904,7 +908,7 @@ async def execute_command(message, prefix):
             if len(output) > 2001:
                 output = output.replace("`", "\`")
                 pager = Paginator(
-                    prefix=f"```{output_language}\n", suffix="```", color=variables.embed_color, title=f"Code Output", segments=segments,
+                    prefix=f"{codeblock}{output_language}\n", suffix=codeblock, color=variables.embed_color, title=f"Code Output", segments=segments,
                 )
                 await pager.start(message)
             else:
