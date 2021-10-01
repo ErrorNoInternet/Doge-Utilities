@@ -1,5 +1,4 @@
 __pycache__
-.env
+.secrets
 last-command
 images/*
-secrets
