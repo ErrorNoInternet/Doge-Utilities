@@ -3,6 +3,7 @@ import os
 prefix = "="
 shard_count = 2
 last_command = 0
+owner_commands = ["blacklist"]
 bot_owner = 531392146767347712
 message_managers = [531392146767347712]
 permission_override = [531392146767347712]

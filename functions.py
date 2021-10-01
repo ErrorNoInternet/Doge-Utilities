@@ -35,17 +35,6 @@ database = redis.Redis(
     password=os.environ["REDIS_PASSWORD"],
 )
 
-class Command:
-    def __init__(self, name, aliases, function, usage, description):
-        self.name = name
-        self.aliases = aliases
-        self.function = function
-        self.usage = usage
-        self.description = description
-
-    def __repr__(self):
-        return f"<Command name={self.name} aliases={self.aliases} usage={self.usage}>"
-
 class CommandPaginator:
     def __init__(self, title, type, segments, target_page=1):
         self.embeds = []
@@ -433,7 +422,7 @@ async def slash_command_handler(interaction):
         await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
         return
 
-    if interaction.data.name in owner_commands and interaction.author.id != variables.bot_owner:
+    if interaction.data.name in variables.owner_commands and interaction.author.id != variables.bot_owner:
         await interaction.response.send_message("You are not the owner of Doge Utilities!", ephemeral=True)
         return
 
@@ -549,9 +538,9 @@ async def source_command(interaction):
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "source", 10)
 
-@links_command.sub_command(name="website", description="Get links to the bot's website")
+@links_command.sub_command(name="website", description="Get a link to the bot's website")
 async def website_command(interaction):
-    embed = disnake.Embed(title="Website Link", description="You can find Doge Utilities' website [here](https://doge-utilities.herokuapp.com)", color=variables.embed_color)
+    embed = disnake.Embed(title="Website Link", description="You can find Doge Utilities' website [here](https://doge-utilities.herokuapp.com/)", color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="get", description="Get information about the bot")
@@ -2720,5 +2709,3 @@ async def on_slash_command_error(interaction, error):
                 await interaction.edit_original_message(embed=embed)
             except:
                 await interaction.channel.send(embed=embed)
-
-owner_commands = ["blacklist"]
