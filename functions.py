@@ -897,7 +897,7 @@ async def lookup_command(
         try:
             response["public_flags"]
         except:
-            await interaction.response.send_message("Please mention a valid user")
+            await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
             return
         badges = ""
         for flag in variables.public_flags:
@@ -1389,7 +1389,7 @@ async def blacklist_add_command(
     try:
         user_id = int(remove_mention(user))
     except:
-        await interaction.response.send_message("Please mention a valid user")
+        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
     current_users = json.loads(database["blacklist"])
     current_users.append(user_id)
@@ -1404,7 +1404,7 @@ async def blacklist_remove_command(
     try:
         user_id = int(remove_mention(user))
     except:
-        await interaction.response.send_message("Please mention a valid user")
+        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
     current_users = json.loads(database["blacklist"])
     try:
@@ -2155,7 +2155,7 @@ async def ban_command(
     try:
         user_id = int(remove_mention(member))
     except:
-        await interaction.response.send_message("Please specify a valid user")
+        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
 
     found = False
@@ -2214,7 +2214,7 @@ async def unban_command(
         user_id = int(remove_mention(member))
         user = await client.fetch_user(user_id)
     except:
-        await interaction.response.send_message("Please specify a valid user")
+        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
     try:
         await interaction.guild.unban(user)
