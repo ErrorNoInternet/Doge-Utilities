@@ -430,7 +430,7 @@ async def slash_command_handler(interaction):
         return
 
     if not interaction.guild:
-        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience")
+        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
         return
 
     if interaction.data.name in owner_commands and interaction.author.id != variables.bot_owner:
@@ -548,6 +548,11 @@ async def source_command(interaction):
     embed.set_thumbnail(url=client.user.avatar)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "source", 10)
+
+@links_command.sub_command(name="website", description="Get links to the bot's website")
+async def website_command(interaction):
+    embed = disnake.Embed(title="Website Link", description="You can find Doge Utilities' website [here](https://doge-utilities.herokuapp.com)", color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="get", description="Get information about the bot")
 async def get_command(_):
@@ -2596,7 +2601,7 @@ async def on_message(message):
 
     prefix = variables.prefix
     if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
-        await message.channel.send(embed=disnake.Embed(title="Hello there", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
+        await message.channel.send(embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
         return
     
     if message.content.startswith(f"<@{client.user.id}> "):
@@ -2659,7 +2664,7 @@ async def on_message(message):
     last_messages[message.author.id] = time.time()
 
     if message.content.startswith(prefix) and len(message.content) > 1:
-        await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="Hello there", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
+        await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
 
 async def on_slash_command_error(interaction, error):
     error_text = str(error)
