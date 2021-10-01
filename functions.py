@@ -727,9 +727,9 @@ async def setup_muted_command(interaction):
             except:
                 pass
     except:
-        await interaction.edit_original_message(f"Unable to generate the **Muted** role for this guild")
+        await interaction.edit_original_message(content=f"Unable to generate the **Muted** role for this guild")
         return
-    await interaction.edit_original_message(f"Successfully generated the **Muted** role for this guild")
+    await interaction.edit_original_message(content=f"Successfully generated the **Muted** role for this guild")
     add_cooldown(interaction.author.id, "setup", 30)
 
 @client.slash_command(name="random", description="Generate a random number between the range")
@@ -1352,9 +1352,9 @@ async def stackoverflow_command(
             )
         await interaction.edit_original_message(embed=embed)
     except disnake.HTTPException:
-        await interaction.edit_original_message("The search result is too long!"); return
+        await interaction.edit_original_message(content="The search result is too long!"); return
     except:
-        await interaction.edit_original_message("Unable to search for item"); return
+        await interaction.edit_original_message(content="Unable to search for item"); return
     add_cooldown(interaction.author.id, "stackoverflow", 10)
 
 @client.slash_command(name="blacklist", description="Owner Command")
@@ -2259,7 +2259,7 @@ async def translate_command(
         await interaction.edit_original_message(embed=embed)
         add_cooldown(interaction.author.id, "translate", 5)
     except Exception as error:
-        await interaction.edit_original_message(f"There was an error while trying to translate the specified text: `{error}`")
+        await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
 
 @client.slash_command(name="definition", description="Find the definition of a word")
 async def definition_command(
