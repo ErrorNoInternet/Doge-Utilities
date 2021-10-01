@@ -131,6 +131,10 @@ async def on_message_edit(message, new_message):
 async def on_guild_join(guild):
     await functions.on_guild_join(guild)
 
+@functions.client.event
+async def on_slash_command_error(interaction, error):
+    await functions.on_slash_command_error(interaction, error)
+
 functions.client.topggpy = topgg.DBLClient(
     functions.client,
     os.getenv("TOPGG_TOKEN"),

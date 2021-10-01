@@ -69,51 +69,51 @@ class CommandPaginator:
         if self.current_page > len(self.embeds):
             self.current_page = 1
 
-    async def start(self, message):
+    async def start(self, interaction):
         class CommandView(disnake.ui.View):
             def __init__(_):
                 super().__init__()
 
             @disnake.ui.button(label=variables.first_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def first_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def first_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page = 1
-                await old_message.edit(embed=self.embeds[self.current_page-1])
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
 
             @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def previous_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def previous_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page -= 1
                 if self.current_page < 1:
                     self.current_page = len(self.embeds)
-                await old_message.edit(embed=self.embeds[self.current_page-1])
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
 
             @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def next_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def next_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page += 1
                 if self.current_page > len(self.embeds):
                     self.current_page = 1
-                await old_message.edit(embed=self.embeds[self.current_page-1])
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
 
             @disnake.ui.button(label=variables.last_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def last_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def last_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page = len(self.embeds)
-                await old_message.edit(embed=self.embeds[self.current_page-1])
-        old_message = await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=CommandView())
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
+        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=CommandView())
 
 class Paginator:
     def __init__(self, title, segments, color=0x000000, prefix="", suffix=""):
@@ -129,7 +129,7 @@ class Paginator:
                 )
             )
 
-    async def start(self, message):
+    async def start(self, interaction):
         class PaginatorView(disnake.ui.View):
             def __init__(this):
                 super().__init__()
@@ -138,45 +138,45 @@ class Paginator:
                 )
 
             @disnake.ui.button(label=variables.first_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def first_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def first_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page = 1
-                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
 
             @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def previous_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def previous_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page -= 1
                 if self.current_page < 1:
                     self.current_page = len(self.embeds)
-                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
 
             @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def next_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def next_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page += 1
                 if self.current_page > len(self.embeds):
                     self.current_page = 1
-                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
 
             @disnake.ui.button(label=variables.last_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def last_button(this, _, interaction):
-                if interaction.author != message.author:
-                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+            async def last_button(this, _, button_interaction):
+                if button_interaction.author != interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
                 self.current_page = len(self.embeds)
-                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
-        old_message = await interaction.response.send_message(embed=self.embeds[0], view=PaginatorView())
+                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
+        await interaction.response.send_message(embed=self.embeds[0], view=PaginatorView())
 
 def reset_strikes():
     global message_strikes
@@ -299,7 +299,7 @@ except:
     required_intents = disnake.Intents.default()
     required_intents.members = True
     client = commands.AutoShardedBot(
-        "=",
+        variables.prefix,
         shard_count=variables.shard_count,
         intents=required_intents,
         test_guilds=variables.test_guilds,
@@ -334,6 +334,18 @@ async def select_status():
     elif status_type == "Competing":
         status_text = random.choice(variables.status4).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
         await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.competing, name=status_text))
+
+def clean(text):
+    text = text.replace("@everyone", "everyone")
+    text = text.replace("@here", "here")
+    return text
+
+def remove_mention(user):
+    user = user.replace("<", "")
+    user = user.replace("@", "")
+    user = user.replace("!", "")
+    user = user.replace(">", "")
+    return user
 
 def parse_variables(text):
     text = text.replace("<text>", "hello")
@@ -414,8 +426,32 @@ def generate_cooldown(command, cooldown_time):
         cooldown_unit = "eternity"
     return f"Please wait **{cooldown_time} {cooldown_unit}** before using the `{command}` command again"
 
+@client.before_slash_command_invoke
+async def slash_command_handler(interaction):
+    if not interaction.guild:
+        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience")
+        return
+
+    if interaction.author.id in blacklisted_users:
+        await interaction.response.send_message("You are banned from using Doge Utilities", ephemeral=True)
+        return
+
+    if get_cooldown(interaction.author.id, interaction.data.name) > 0:
+        cooldown_string = generate_cooldown(interaction.data.name, get_cooldown(interaction.author.id, interaction.data.name))
+        embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        return
+
+    last_command = open("last-command", "w")
+    last_command.write(str(round(time.time())))
+    last_command.close()
+
 @client.slash_command(name="currency", description="Convert currencies")
-async def currency_command(
+async def currency_command(_):
+    pass
+
+@currency_command.sub_command(name="convert", description="Convert amounts from one currency to another")
+async def currency_convert_command(
         interaction,
         amount: float = Param(description="The amount (for the input currency)"),
         input_currency: str = Param(name="input-currency", description="The input currency"),
@@ -430,8 +466,20 @@ async def currency_command(
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "currency", 5)
     except:
-        await interaction.response.send_message("Unable to convert currency")
-        return
+        await interaction.response.send_message("Unable to convert currency", ephemeral=True)
+
+@currency_command.sub_command(name="list", description="List all the available currencies")
+async def currency_list_command(interaction):
+    response = requests.get("https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json").json()
+    output = ""
+    for key in response.keys():
+        output += f"{key}: {response[key]}\n"
+    segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
+    pager = Paginator(
+        prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", segments=segments,
+    )
+    await pager.start(interaction)
+    add_cooldown(interaction.author.id, "currency", 5)
 
 @client.slash_command(name="ping", description="Display the bot's current latency")
 async def ping_command(interaction):
@@ -484,11 +532,29 @@ async def invite_command(interaction):
                 await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
     await interaction.response.send_message("Here is Doge Utilities' invite link", view=CommandView())
 
-@client.slash_command(name="information", description="Get information about the bot")
-async def information_command(_):
+@links_command.sub_command(name="vote", description="Get links to vote for the bot")
+async def vote_command(interaction):
+    embed = disnake.Embed(title="Vote Link", description="You can upvote Doge Utilities on [top.gg](https://top.gg/bot/854965721805226005/vote), [discordbotlist](https://discordbotlist.com/bots/doge-utilities/upvote), or on [botsfordiscord](https://discords.com/bots/bot/854965721805226005/vote)", color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
+
+@links_command.sub_command(name="source", description="Get the link to Doge's source code")
+async def source_command(interaction):
+    description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)"
+    try:
+        response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
+        description += f"\nOpen Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
+    except:
+        pass
+    embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
+    embed.set_thumbnail(url=client.user.avatar)
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "source", 10)
+
+@client.slash_command(name="get", description="Get information about the bot")
+async def get_command(_):
     pass
 
-@information_command.sub_command(name="shards", description="Get information about Doge Utilities' shards")
+@get_command.sub_command(name="shards", description="Get information about Doge Utilities' shards")
 async def shards_command(interaction):
     pages = {}; current_page = 1; page_limit = 20; current_item = 0; index = 1
     for shard in client.shards:
@@ -513,8 +579,9 @@ async def shards_command(interaction):
         index += 1
     pager = CommandPaginator(title="Doge Shards", type="shards", segments=pages.values(), target_page=current_page)
     await pager.start(interaction)
+    add_cooldown(interaction.author.id, "shards", 3)
 
-@information_command.sub_command(name="status", description="Show the bot's current statistics")
+@get_command.sub_command(name="status", description="Show the bot's current statistics")
 async def status_command(interaction):
     member_count = 0; channel_count = 0; uptime = ""
     for guild in client.guilds:
@@ -557,8 +624,9 @@ async def status_command(interaction):
     embed.add_field(name="Bot Version", value="```" + f"{variables.version_number}.{variables.build_number}" + "```")
     embed.add_field(name="Bot Uptime", value="```" + uptime + "```")
     await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "status", 3)
 
-@information_command.sub_command(name="version", description="Display the bot's current version")
+@get_command.sub_command(name="version", description="Display the bot's current version")
 async def version_command(interaction):
     file_size = 0
     for object in os.listdir():
@@ -568,6 +636,30 @@ async def version_command(interaction):
         except:
             pass
     embed = disnake.Embed(title="Bot Version", description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "version", 5)
+
+@get_command.sub_command(name="uptime", description="Get Doge Utilities' current uptime")
+async def uptime_command(interaction):
+    seconds_time = time.time() - start_time
+    minutes_time = seconds_time / 60
+    hours_time = minutes_time / 60
+    days_time = hours_time / 24
+    seconds_time = seconds_time % 60
+    minutes_time = minutes_time % 60
+    hours_time = hours_time % 24
+    uptime = ""
+    if days_time >= 1:
+        uptime += str(math.floor(days_time)) + "d "
+    if hours_time >= 1:
+        uptime += str(math.floor(hours_time)) + "hr "
+    if minutes_time >= 1:
+        uptime += str(math.floor(minutes_time)) + "m "
+    if seconds_time >= 1:
+        uptime += str(math.floor(seconds_time)) + "s "
+    if uptime == "":
+        uptime = "Unknown"
+    embed = disnake.Embed(title="Bot Uptime", description=f"Doge has been running for **{uptime}**", color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="setup", description="Setup mute and ban roles in your server")
@@ -586,7 +678,7 @@ async def setup_banned_command(interaction):
         if role.name == "Banned":
             await interaction.response.send_message("The **Banned** role already exists in this guild")
             return
-    old_message = await interaction.response.send_message("Generating the **Banned** role for the current guild...")
+    await interaction.response.send_message("Generating the **Banned** role for the current guild...")
     try:
         banned_role = await interaction.guild.create_role(name="Banned")
         guild_roles = len(interaction.guild.roles); retry_count = 0
@@ -604,9 +696,10 @@ async def setup_banned_command(interaction):
             except:
                 pass
     except:
-        await old_message.edit(content=f"Unable to generate the **Banned** role for this guild")
+        await interaction.edit_original_message(content=f"Unable to generate the **Banned** role for this guild")
         return
-    await old_message.edit(content=f"Successfully generated the **Banned** role for this guild")
+    await interaction.edit_original_message(content=f"Successfully generated the **Banned** role for this guild")
+    add_cooldown(interaction.author.id, "setup", 30)
 
 @setup_command.sub_command(name="muted", description="Setup a 'Muted' role in your server")
 async def setup_muted_command(interaction):
@@ -620,7 +713,7 @@ async def setup_muted_command(interaction):
         if role.name == "Muted":
             await interaction.response.send_interaction("The **Muted** role already exists in this guild")
             return
-    old_interaction = await interaction.response.send_interaction("Generating the **Muted** role for the current guild...")
+    await interaction.response.send_interaction("Generating the **Muted** role for the current guild...")
     try:
         muted_role = await interaction.guild.create_role(name="Muted")
         guild_roles = len(interaction.guild.roles); retry_count = 0
@@ -641,9 +734,10 @@ async def setup_muted_command(interaction):
             except:
                 pass
     except:
-        await old_interaction.edit(f"Unable to generate the **Muted** role for this guild")
+        await interaction.edit_original_message(f"Unable to generate the **Muted** role for this guild")
         return
-    await old_interaction.edit(f"Successfully generated the **Muted** role for this guild")
+    await interaction.edit_original_message(f"Successfully generated the **Muted** role for this guild")
+    add_cooldown(interaction.author.id, "setup", 30)
 
 @client.slash_command(name="random", description="Generate a random number between the range")
 async def random_command(
@@ -679,6 +773,7 @@ async def random_command(
                 await button_interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command to continue.", ephemeral=True)
                 self.stop()
     await interaction.response.send_message(f"Your random number is **{random_number}**", view=CommandView())
+    add_cooldown(interaction.author.id, "random", 10)
 
 async def execute_command(message, prefix):
     if message.author.id == variables.bot_owner:
@@ -765,6 +860,7 @@ async def disconnect_members_command(interaction):
                     except:
                         failed += 1
         await interaction.edit_original_message(content=f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
+        add_cooldown(interaction.author.id, "disconnect-members", 30)
     else:
         await interaction.response.send_message(variables.no_permission_text)
 
@@ -786,62 +882,82 @@ async def suggest_command(
                         except:
                             pass
     await interaction.edit_original_message(content="Your suggestion has been successfully sent")
+    add_cooldown(interaction.author.id, "suggest", 300)
 
-async def autorole_command(message, prefix):
-    if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
-        message.content = message.content.replace("<", "").replace("@", "").replace("!", "").replace("&", "").replace(">", "")
-        arguments = message.content.split(" ")
-        if len(arguments) > 1:
-            arguments.pop(0)
-            role_list = arguments
-            role_found = False
-            if role_list == ["disable"] or role_list == ["off"]:
-                del database[f"autorole.{message.guild.id}"]
-                await interaction.response.send_message("Autorole has been **disabled** for this server")
-                return
-            if len(role_list) > 5:
-                await interaction.response.send_message("You can only add up to **5 roles**!")
-                return
-            for role in message.guild.roles:
-                for role_id in role_list:
-                    try:
-                        if role.id == int(role_id):
-                            role_found = True
-                            break
-                    except:
-                        await interaction.response.send_message("That role is not found in this server")
-                        return
-            if not role_found:
-                await interaction.response.send_message("That role is not found in this server")
-                return
-            database[f"autorole.{message.guild.id}"] = json.dumps(role_list)
-            role_string = ""
-            for role in role_list:
-                role_string += "<@&" + role + "> "
-            await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole has been set to {role_string}", color=variables.embed_color))
-        else:
-            try:
-                role_list = json.loads(database[f"autorole.{message.guild.id}"])
-                role_string = ""
-                for role in role_list:
-                    role_string += "<@&" + role + "> "
-                await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color))
-            except:
-                await interaction.response.send_message(f"This server does not have autorole configured")
-    else:
+@client.slash_command(name="autorole", description="Manage automatically assigned roles")
+async def autorole_command(_):
+    pass
+
+@autorole_command.sub_command(name="disable", description="Disable autorole in your server")
+async def disable_autorole_command(interaction):
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
-    add_cooldown(message.author.id, "autorole", 5)
+        return
 
-async def lookup_command(message, prefix):
-    user_id = message.content.split(" ")
-    if len(user_id) != 2:
-        user_id.append(str(message.author.id))
+    del database[f"autorole.{interaction.guild.id}"]
+    await interaction.response.send_message("Autorole has been **disabled** for this server")
 
-    user_id = user_id[1]
-    user_id = user_id.replace("<", ""); user_id = user_id.replace("@", "")
-    user_id = user_id.replace("!", ""); user_id = user_id.replace(">", "")
+@autorole_command.sub_command(name="list", description="List all the automatically assigned roles")
+async def list_autorole_command(interaction):
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+
+    try:
+        role_list = json.loads(database[f"autorole.{interaction.guild.id}"])
+        role_string = ""
+        for role in role_list:
+            role_string += "<@&" + role + "> "
+        await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color))
+    except:
+        await interaction.response.send_message(f"This server does not have autorole configured")
+
+@autorole_command.sub_command(name="set", description="Change the automatically assigned roles")
+async def set_autorole_command(
+        interaction,
+        role1: disnake.Role = Param(description="An automatically assigned role"),
+        role2: disnake.Role = Param(0, description="An automatically assigned role"),
+        role3: disnake.Role = Param(0, description="An automatically assigned role"),
+        role4: disnake.Role = Param(0, description="An automatically assigned role"),
+        role5: disnake.Role = Param(0, description="An automatically assigned role"),
+    ):
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    
+    role_list = []
+    if role1 != 0:
+        role_list.append(str(role1.id))
+    if role2 != 0:
+        role_list.append(str(role2.id))
+    if role3 != 0:
+        role_list.append(str(role3.id))
+    if role4 != 0:
+        role_list.append(str(role4.id))
+    if role5 != 0:
+        role_list.append(str(role5.id))
+    database[f"autorole.{interaction.guild.id}"] = json.dumps(role_list)
+    role_string = ""
+    for role in role_list:
+        role_string += f"<@&{role}> "
+    await interaction.response.send_message(
+        embed=disnake.Embed(
+            title="Autorole",
+            description=f"This server's autorole has been set to {role_string}",
+            color=variables.embed_color,
+        )
+    )
+
+@client.slash_command(name="lookup", description="Find a user on Discord")
+async def lookup_command(
+        interaction,
+        user: str = Param(0, description="The ID of the target user")
+    ):
+    if user == 0:
+        user = str(interaction.author.id)
+    user = remove_mention(user)
     headers = {"Authorization": "Bot " + os.getenv("TOKEN")}
-    url = "https://discord.com/api/users/" + user_id
+    url = "https://discord.com/api/users/" + user
     response = requests.get(url, headers=headers).json()
     if "10013" not in str(response):
         try:
@@ -892,72 +1008,67 @@ async def lookup_command(message, prefix):
     else:
         embed = disnake.Embed(title="Unknown User", description="Unable to find the specified user", color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
-    add_cooldown(message.author.id, "lookup", 6)
+    add_cooldown(interaction.author.id, "lookup", 5)
 
-async def permissions_command(message, prefix):
-    user_id = message.content.split(" ")
-    if len(user_id) != 2:
-        user_id.append(str(message.author.id))
-    user_id = user_id[1]
-    user_id = user_id.replace("<", ""); user_id = user_id.replace("@", "")
-    user_id = user_id.replace("!", ""); user_id = user_id.replace(">", "")
-    
-    try:
-        user_id = int(user_id)
-    except:
-        await interaction.response.send_message("Please mention a valid user!")
-        return
-    target_user = None
-    try:
-        target_user = await message.guild.fetch_member(user_id)
-    except:
-        pass
-    if not target_user:
-        await interaction.response.send_message("Unable to find user")
-        return
+@client.slash_command(name="permissions", description="Check the permissions of a specified member")
+async def permissions_command(
+        interaction,
+        member: disnake.Member = Param(0, name="member", description="The member you want to check permissions for"),
+    ):
+    if member == 0:
+        member = interaction.author
     
     permission_list = ""
-    for permission in target_user.guild_permissions:
+    for permission in member.guild_permissions:
         if permission[1] == True:
             permission_list += f":white_check_mark: `{permission[0]}`\n"
         else:
             permission_list += f":x: `{permission[0]}`\n"
-    if target_user == message.author.guild.owner:
+    if member == interaction.author.guild.owner:
         permission_list += f":white_check_mark: `owner`\n"
     else:
         permission_list += f":x: `owner`\n"
 
-    embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{target_user.name}#{target_user.discriminator}**\n\n" + permission_list, color=variables.embed_color)
+    embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{member.name}#{member.discriminator}**\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
-    add_cooldown(message.author.id, "permissions", 3)
+    add_cooldown(interaction.author.id, "permissions", 3)
 
-async def raid_protection_command(message, prefix):
-    if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
-        try:
-            setting = message.content.split(prefix + "raid-protection ")[1]
-        except:
-            try:
-                current_setting = database[f"{message.author.guild.id}.raid-protection"]
-                if current_setting:
-                    await interaction.response.send_message("This server's raid protection is turned **on**")
-                else:
-                    await interaction.response.send_message("This server's raid protection is turned **off**")
-            except:
-                await interaction.response.send_message("This server's raid protection is turned **off**")
-            return
-        if setting.lower() == "on" or setting.lower() == "enable":
-            database[f"{message.author.guild.id}.raid-protection"] = 1
-            await interaction.response.send_message("This server's raid protection has been turned **on**")
-            return
-        elif setting.lower() == "off" or setting.lower() == "disable":
-            database[f"{message.author.guild.id}.raid-protection"] = 0
-            await interaction.response.send_message("This server's raid protection has been turned **off**")
-            return
-        else:
-            await interaction.response.send_message("Please specify a valid setting (on/off)")
-            return
-    else:
+@client.slash_command(name="raid-protection", description="Change the raid protection settings")
+async def raid_protection_command(_):
+    pass
+
+@raid_protection_command.sub_command(name="status", description="See the current setting for raid protection")
+async def raid_protection_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
+        return
+
+    try:
+        current_setting = json.loads(database[f"{interaction.guild.id}.raid-protection"])
+        if current_setting:
+            await interaction.response.send_message("This server's raid protection is turned **on**")
+        else:
+            await interaction.response.send_message("This server's raid protection is turned **off**")
+    except:
+        await interaction.response.send_message("This server's raid protection is turned **off**")
+
+@raid_protection_command.sub_command(name="enable", description="Enable raid protection for this server")
+async def raid_protection_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+
+    database[f"{interaction.guild.id}.raid-protection"] = 1
+    await interaction.response.send_message("This server's raid protection has been turned **on**")
+
+@raid_protection_command.sub_command(name="disable", description="Disable raid protection for this server")
+async def raid_protection_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+
+    database[f"{interaction.guild.id}.raid-protection"] = 0
+    await interaction.response.send_message("This server's raid protection has been turned **off**")
 
 async def epoch_date_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1046,180 +1157,153 @@ async def binary_command(message, prefix):
         await interaction.response.send_message(f"The syntax is `{prefix}binary <action> <text>`")
     add_cooldown(message.author.id, "binary", 5)
 
-async def calculate_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); expression = ' '.join(arguments)
-        if expression.startswith("`"):
-            expression = expression[1:]
-        if expression.endswith("`"):
-            expression = expression[:-1]
-        answer = evaluate_expression(expression); embed = disnake.Embed(color=variables.embed_color)
-        embed.add_field(name="Expression", value="`" + expression + "`"); embed.add_field(name="Result", value="`" + answer + "`", inline=False)
-        await interaction.response.send_message(embed=embed)
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}calculate <expression>`")
-    add_cooldown(message.author.id, "calculate", 3)
+@client.slash_command(name="calculate", description="Evaluate a math expression")
+async def calculate_command(
+        interaction,
+        expression: str = Param(description="The math expression you want to evaluate")
+    ):
+    if expression.startswith("`"):
+        expression = expression[1:]
+    if expression.endswith("`"):
+        expression = expression[:-1]
+    answer = evaluate_expression(expression); embed = disnake.Embed(color=variables.embed_color)
+    embed.add_field(name="Expression", value="`" + expression + "`")
+    embed.add_field(name="Result", value="`" + answer + "`", inline=False)
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "calculate", 3)
 
-async def clear_command(message, prefix):
-    if message.author.guild_permissions.administrator or message.author.id in variables.permission_override:
+@client.slash_command(name="clear", description="Delete the specified amount of messages")
+async def clear_command(
+        interaction,
+        count: int = Param(description="The amount of messages you want to delete"),
+    ):
+    if interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
+        await interaction.response.defer(ephemeral=True)
         try:
-            count = int(message.content.split(prefix + "clear ")[1])
+            await interaction.channel.purge(limit=count)
         except:
-            await interaction.response.send_message("Please specify a valid number")
+            await interaction.edit_original_message(content="Unable to clear messages")
             return
-        if count > 500:
-            class CommandView(disnake.ui.View):
-                def __init__(self):
-                    super().__init__()
-
-                @disnake.ui.button(label="Yes", style=disnake.ButtonStyle.green)
-                async def confirm(self, _, interaction):
-                    if interaction.author != message.author:
-                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                        return
-
-                    try:    
-                        await message.channel.purge(limit=count + 1)
-                    except:
-                        await interaction.response.send_message("Unable to delete messages")
-                    await interaction.response.send_message(
-                        content=f"Successfully deleted more than **500 messages** in this channel",
-                        ephemeral=True,
-                    )
-                    self.stop()
-
-                @disnake.ui.button(label="No", style=disnake.ButtonStyle.green)
-                async def reject(self, _, interaction):
-                    if interaction.author != message.author:
-                        await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                        return
-
-                    await old_message.edit(content=f"Operation cancelled", view=None)
-                    self.stop()
-                
-            old_message = await interaction.response.send_message(
-                f"Are you sure you want to clear more than **500 messages** in this channel?",
-                view=CommandView()
-            )
-        else:
-            await message.channel.purge(limit=count + 1)
+        await interaction.edit_original_message(content=f"Successfully deleted **{count} {'message' if count == 1 else 'messages'}**")
     else:
         await interaction.response.send_message(variables.no_permission_text)
-    add_cooldown(message.author.id, "clear", 10)
+    add_cooldown(interaction.author.id, "clear", 10)
 
-async def wide_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); new_text = ""; text = " ".join(arguments)
-        for letter in text:
-            new_text += letter + " "
-        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}wide <text>`")
-    add_cooldown(message.author.id, "wide", 3)
+@client.slash_command(name="text", description="Change what text looks like")
+async def text_command(_):
+    pass
 
-async def unwide_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); new_text = ""; text = " ".join(arguments); space_character = False
-        for letter in text.replace("   ", "  "):
-            if letter == " ":
-                if space_character:
-                    new_text += " "
-                space_character = True
-            else:
-                space_character = False
-                new_text += letter
-        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}unwide <text>`")
-    add_cooldown(message.author.id, "unwide", 3)
+@text_command.sub_command(name="wide", description="Make text appear to be wider")
+async def wide_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
 
-async def spoiler_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); new_text = ""; text = " ".join(arguments)
-        for letter in text:
-            new_text += "||" + letter + "||"
-        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}spoiler <text>`")
-    add_cooldown(message.author.id, "spoiler", 3)
+    new_text = ""
+    for letter in text:
+        new_text += letter + " "
+    await interaction.response.send_message(clean(new_text))
+    add_cooldown(interaction.author.id, "wide", 3)
 
-async def cringe_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); new_text = ""; text = " ".join(arguments)
-        for letter in text:
-            case = random.randint(1, 2)
-            if case == 1:
-                if letter.upper() == letter:
-                    new_text += letter.lower()
-                else:
-                    new_text += letter.upper()
-            else:
-                if letter.upper() == letter:
-                    new_text += letter.upper()
-                else:
-                    new_text += letter.lower()
-        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}cringe <text>`")
-    add_cooldown(message.author.id, "cringe", 3)
+@text_command.sub_command(name="unwide", description="Un-wide the specified text")
+async def unwide_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
 
-async def reverse_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); new_text = ""; text = " ".join(arguments)
-        new_text = text[::-1]; await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}reverse <text>`")
-    add_cooldown(message.author.id, "reverse", 3)
-
-async def corrupt_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); new_text = ""; text = " ".join(arguments)
-        for letter in text:
-            switch = random.randint(0, 100)
-            if switch > 95:
-                new_text += text[random.randint(0, len(text) - 1)]
-            else:
-                number = random.randint(0, 100)
-                if number > 80:
-                    new_text += random.choice(["0", "1"])
-                else:
-                    new_text += letter
-                    punctuation = random.choice([True, False, False, False, False])
-                    if punctuation:
-                        new_text += string.punctuation[random.randint(0, len(string.punctuation) - 1)]
-        await interaction.response.send_message(new_text.replace("@everyone", "everyone"))
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}reverse <text>`")
-    add_cooldown(message.author.id, "corrupt", 3)
-
-async def color_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        arguments.pop(0); text = " ".join(arguments)
-        colors = functions.generate_color(text)
-        if colors == 1:
-            await interaction.response.send_message("Invalid color code"); return
+    new_text = ""
+    space_character = False
+    for letter in text.replace("   ", "  "):
+        if letter == " ":
+            if space_character:
+                new_text += " "
+            space_character = True
         else:
-            hex_color = colors[0]; rgb_color = colors[1]
-            embed = disnake.Embed(color=int("0x" + hex_color[1:], 16))
-            embed.set_image(url="attachment://color.png")
-            embed.add_field(name="Hex", value=hex_color)
-            embed.add_field(name="RGB", value=str(rgb_color), inline=True)
-        await interaction.response.send_message(embed=embed, file=disnake.File("images/color.png"))
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}color <color code>`")
-    add_cooldown(message.author.id, "color", 3)
+            space_character = False
+            new_text += letter
+    await interaction.response.send_message(clean(new_text))
+    add_cooldown(interaction.author.id, "unwide", 3)
 
-async def vote_command(message, prefix):
-    embed = disnake.Embed(title="Vote Link", description="You can upvote Doge Utilities on [top.gg](https://top.gg/bot/854965721805226005/vote), [discordbotlist](https://discordbotlist.com/bots/doge-utilities/upvote), or on [botsfordiscord](https://discords.com/bots/bot/854965721805226005/vote)", color=variables.embed_color)
-    await interaction.response.send_message(embed=embed)
+@text_command.sub_command(name="spoiler", description="Add spoilers to every single character")
+async def spoiler_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+    new_text = ""
+    for letter in text:
+        new_text += "||" + letter + "||"
+    await interaction.response.send_message(clean(new_text))
+    add_cooldown(interaction.author.id, "spoiler", 3)
+
+@text_command.sub_command(name="cringe", description="Make the text look CrIngY")
+async def cringe_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+    new_text = ""
+    for letter in text:
+        case = random.randint(1, 2)
+        if case == 1:
+            if letter.upper() == letter:
+                new_text += letter.lower()
+            else:
+                new_text += letter.upper()
+        else:
+            if letter.upper() == letter:
+                new_text += letter.upper()
+            else:
+                new_text += letter.lower()
+    await interaction.response.send_message(clean(new_text))
+    add_cooldown(interaction.author.id, "cringe", 3)
+
+@text_command.sub_command(name="reverse", description="Reverse the specified text")
+async def reverse_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+    new_text = text[::-1]
+    await interaction.response.send_message(clean(new_text))
+    add_cooldown(interaction.author.id, "reverse", 3)
+
+@text_command.sub_command(name="corrupt", description="Make the text appear to be corrupted")
+async def corrupt_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+    new_text = ""
+    for letter in text:
+        switch = random.randint(0, 100)
+        if switch > 95:
+            new_text += text[random.randint(0, len(text) - 1)]
+        else:
+            number = random.randint(0, 100)
+            if number > 80:
+                new_text += random.choice(["0", "1"])
+            else:
+                new_text += letter
+                punctuation = random.choice([True, False, False, False, False])
+                if punctuation:
+                    new_text += string.punctuation[random.randint(0, len(string.punctuation) - 1)]
+    await interaction.response.send_message(clean(new_text))
+    add_cooldown(interaction.author.id, "corrupt", 3)
+
+@client.slash_command(name="color", description="Visualize a color code")
+async def color_command(
+        interaction,
+        color_code: str = Param(name="color", description="The color code you want to visualize"),
+    ):
+    colors = functions.generate_color(color_code)
+    if colors == 1:
+        await interaction.response.send_message("Invalid color code")
+        return
+    else:
+        hex_color = colors[0]; rgb_color = colors[1]
+        embed = disnake.Embed(color=int("0x" + hex_color[1:], 16))
+        embed.set_image(url="attachment://color.png")
+        embed.add_field(name="Hex", value=hex_color)
+        embed.add_field(name="RGB", value=str(rgb_color), inline=True)
+    await interaction.response.send_message(embed=embed, file=disnake.File("images/color.png"))
+    add_cooldown(interaction.author.id, "color", 3)
 
 async def time_command(message, prefix):
     arguments = message.content.split(" ")
@@ -1324,60 +1408,6 @@ async def stackoverflow_command(message, prefix):
     else:
         await interaction.response.send_message(f"The syntax is `{prefix}stackoverflow <text>`")
 
-async def source_command(message, prefix):
-    description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)"
-    try:
-        response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
-        description += f"\nOpen Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
-    except:
-        pass
-    embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
-    embed.set_thumbnail(url=client.user.avatar); await interaction.response.send_message(embed=embed)
-    add_cooldown(message.author.id, "source", 20)
-
-async def uptime_command(message, prefix):
-    seconds_time = time.time() - start_time
-    minutes_time = seconds_time / 60
-    hours_time = minutes_time / 60
-    days_time = hours_time / 24
-    seconds_time = seconds_time % 60
-    minutes_time = minutes_time % 60
-    hours_time = hours_time % 24
-    uptime = ""
-    if days_time >= 1:
-        uptime += str(math.floor(days_time)) + "d "
-    if hours_time >= 1:
-        uptime += str(math.floor(hours_time)) + "hr "
-    if minutes_time >= 1:
-        uptime += str(math.floor(minutes_time)) + "m "
-    if seconds_time >= 1:
-        uptime += str(math.floor(seconds_time)) + "s "
-    if uptime == "":
-        uptime = "Unknown"
-    embed = disnake.Embed(title="Bot Uptime", description=f"Doge has been running for **{uptime}**", color=variables.embed_color)
-    await interaction.response.send_message(embed=embed)
-
-async def donate_command(message, prefix):
-    embed = disnake.Embed(title="Donate", description=":dog: Dogecoin: `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`\n:moneybag: Bitcoin: `bc1qer5es59d62pvwdhaplgyltzd63kyyd0je2fhjm`\n:feather: Litecoin: `LLE9WPg6dTjNjDtdxx2HiyMDMqYRd4j5HZ`", color=variables.embed_color)
-    await interaction.response.send_message(embed=embed)
-
-async def doge_command(message, prefix):
-    embed = disnake.Embed(color=variables.embed_color)
-    embed.set_image(url=client.user.avatar); await interaction.response.send_message(embed=embed)
-
-async def guilds_command(message, prefix):
-    if message.author.id == variables.bot_owner:
-        await interaction.response.send_message(str(len(client.guilds)))
-    else:
-        await message.add_reaction("🚫")
-
-async def smiley_command(message, prefix):
-    if prefix == "=" or prefix == ";":
-        await interaction.response.send_message(f"**{prefix}D**")
-
-async def about_command(message, prefix):
-    await interaction.response.send_message(embed=disnake.Embed(title="About", description=f"I was created by **Zenderking** (`{variables.bot_owner}`/<@{variables.bot_owner}>)", color=variables.embed_color))
-
 async def blacklist_command(message, prefix):
     if message.author.id == variables.bot_owner:
         arguments = message.content.split(" ")
@@ -1425,11 +1455,113 @@ async def blacklist_command(message, prefix):
     else:
         await message.add_reaction("🚫")
 
-async def meme_command(message, prefix):
+@client.slash_command(name="fetch", description="Fetch something fun")
+async def fetch_command(_):
+    pass
+
+@fetch_command.sub_command(name="meme", description="Fetch a random meme from Reddit")
+async def meme_command(interaction):
+    await interaction.response.defer()
     response = requests.get("https://meme-api.herokuapp.com/gimme").json()
     description = f"Posted by **{response['author']}** in **{response['subreddit']}** (**{response['ups']}** upvotes)"
     embed = disnake.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embed_color)
-    embed.set_image(url=response["url"]); add_cooldown(message.author.id, "meme", 5); await interaction.response.send_message(embed=embed)
+    embed.set_image(url=response["url"])
+    await interaction.edit_original_message(embed=embed)
+    add_cooldown(interaction.author.id, "meme", 3)
+
+@fetch_command.sub_command(name="joke", description="Fetch a random joke")
+async def joke_command(interaction):
+    await interaction.response.defer()
+    response = requests.get("http://random-joke-api.herokuapp.com/random").json()
+    embed = disnake.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color)
+    await interaction.edit_original_message(embed=embed)
+    add_cooldown(interaction.author.id, "joke", 3)
+
+@fetch_command.sub_command(name="trivia", description="Fetch a trivia question")
+async def trivia_command(interaction):
+    await interaction.response.defer()
+    url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 33)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
+    response = requests.get(url).json()
+    description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
+    answers = response['results'][0]['incorrect_answers']
+    answers.append(response['results'][0]['correct_answer'])
+    correct_answer = html.unescape(response['results'][0]['correct_answer'])
+
+    class CommandView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+
+        async def close(self, chosen_answer):
+            new_view = disnake.ui.View()
+            original_message = await interaction.original_message()
+            for button in original_message.components[0].children:
+                style = disnake.ButtonStyle.red
+                if chosen_answer == button.label:
+                    style = disnake.ButtonStyle.gray
+                if correct_answer == button.label:
+                    style = disnake.ButtonStyle.green
+                new_view.add_item(disnake.ui.Button(label=button.label, style=style, disabled=True))
+            await interaction.edit_original_message(view=new_view)
+            self.stop()
+        
+        answer = random.choice(answers); answers.remove(answer)
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_1(self, button, button_interaction):
+            if button_interaction.author != button_interaction.author:
+                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
+        answer = random.choice(answers); answers.remove(answer)
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_2(self, button, button_interaction):
+            if button_interaction.author != button_interaction.author:
+                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
+        answer = random.choice(answers); answers.remove(answer)
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_3(self, button, button_interaction):
+            if button_interaction.author != button_interaction.author:
+                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
+        answer = random.choice(answers); answers.remove(answer)
+        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
+        async def trivia_response_4(self, button, button_interaction):
+            if button_interaction.author != button_interaction.author:
+                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                return
+
+            if button.label == correct_answer:
+                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+            else:
+                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+            await self.close(button.label)
+
+    embed = disnake.Embed(
+        description=description,
+        color=variables.embed_color,
+    )
+    await interaction.edit_original_message(embed=embed, view=CommandView())
+    add_cooldown(interaction.author.id, "trivia", 10)
 
 async def unmute_command(message, prefix):
     if message.author.guild_permissions.manage_roles or message.author.guild_permissions.administrator:
@@ -1512,121 +1644,172 @@ async def mute_command(message, prefix):
     else:
         await interaction.response.send_message(f"The syntax is `{prefix}mute <user> <duration>`"); return
 
-async def insults_command(message, prefix):
-    if message.author.guild_permissions.manage_messages:
+@client.slash_command(name="filter", description="Manage the auto-moderation filters")
+async def filter_command(_):
+    pass
+
+@filter_command.sub_command_group(name="insults", description="Manage the insults filter")
+async def insults_command(_):
+    pass
+
+@insults_command.sub_command(name="list", description="List all the words in the insults filter")
+async def insults_list_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    try:
+        insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
+    except:
+        insults_data = []
+    embed = disnake.Embed(title="Insults List", description="There are no swear words configured for your server" if insults_data == [] else '\n'.join(insults_data), color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
+
+@insults_command.sub_command(name="status", description="See the current status of the insults filter")
+async def insults_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    try:
+        current_status = json.loads(database[f"insults.toggle.{interaction.guild.id}"])
+    except:
+        current_status = False
+    await interaction.response.send_message(f"The insults filter is currently **{'enabled' if current_status else 'disabled'}**")
+
+@insults_command.sub_command(name="enable", description="Enable the insults filter")
+async def insults_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    database[f"insults.toggle.{interaction.guild.id}"] = 1
+    await interaction.response.send_message("The insults filter has been successfully **enabled**")
+
+@insults_command.sub_command(name="disable", description="Disable the insults filter")
+async def insults_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    database[f"insults.toggle.{interaction.guild.id}"] = 0
+    await interaction.response.send_message("The insults filter has been successfully **disabled**")
+
+@insults_command.sub_command(name="add", description="Add a word to the insults filter")
+async def insults_add_command(
+        interaction,
+        word: str = Param(description="The word you want to add"),
+    ):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    try:
+        insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
+    except:
+        insults_data = []
+        database[f"insults.list.{interaction.guild.id}"] = json.dumps([])
+    if len(insults_data) >= 20:
+        await interaction.response.send_message("You can only add up to **20 words**!")
+        return
+    insults_data.append(word)
+    database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
+    await interaction.response.send_message(f"Successfully added **{word}** to your insults list")
+
+@insults_command.sub_command(name="remove", description="Remove a word from the insults filter")
+async def insults_remove_command(
+        interaction,
+        word: str = Param(description="The word you want to remove")
+    ):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    try:
+        insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
+    except:
+        insults_data = []
+        database[f"insults.list.{interaction.guild.id}"] = json.dumps([])
+    try:
+        insults_data.remove(word)
+    except:
+        await interaction.response.send_message("That word does not exist in the insults filter"); return
+    database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
+    await interaction.response.send_message(f"Successfully removed **{word}** from the insults list")
+
+@filter_command.sub_command_group(name="links", description="Manage the links filter")
+async def links_filter_command(_):
+    pass
+
+@links_filter_command.sub_command(name="enable", description="Enable the links filter")
+async def links_filter_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    database[f"links.toggle.{interaction.guild.id}"] = 1
+    await interaction.response.send_message("The links filter has been successfully **enabled**")
+
+@links_filter_command.sub_command(name="disable", description="Disable the links filter")
+async def links_filter_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    database[f"links.toggle.{interaction.guild.id}"] = 0
+    await interaction.response.send_message("The links filter has been successfully **disabled**")
+
+@links_filter_command.sub_command(name="status", description="See the current status of the links filter")
+async def links_filter_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    value = False
+    try:
+        value = json.loads(database[f"links.toggle.{interaction.guild.id}"])
+    except:
         pass
-    else:
-        await interaction.response.send_message(variables.no_permission_text); return
+    await interaction.response.send_message(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
 
-    arguments = message.content.split(" ")
-    if len(arguments) >= 2:
-        if arguments[1] == "list":
-            try:
-                insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
-            except:
-                insults_data = []
-                database[f"insults.list.{message.guild.id}"] = json.dumps([])
-            embed = disnake.Embed(title="Insults List", description="There are no swear words configured for your server" if insults_data == [] else '\n'.join(insults_data), color=variables.embed_color)
-            await interaction.response.send_message(embed=embed)
-        elif arguments[1] == "filter" or arguments[1] == "status":
-            try:
-                current_status = database[f"insults.toggle.{message.guild.id}"]
-            except:
-                current_status = False
-            await interaction.response.send_message(f"The insults filter is currently **{'enabled' if current_status else 'disabled'}**")
-        elif arguments[1] == "enable":
-            database[f"insults.toggle.{message.guild.id}"] = 1
-            await interaction.response.send_message("The insults filter has been successfully **enabled**")
-        elif arguments[1] == "disable":
-            database[f"insults.toggle.{message.guild.id}"] = 0
-            await interaction.response.send_message("The insults filter has been successfully **disabled**")
-        elif arguments[1] == "add":
-            if len(arguments) != 3:
-                await interaction.response.send_message(f"The syntax is `{prefix}insults add <word>`"); return
-            try:
-                insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
-            except:
-                insults_data = []
-                database[f"insults.list.{message.guild.id}"] = json.dumps([])
-            if len(insults_data) >= 50:
-                await interaction.response.send_message("You have reached the limit of **50 words**"); return
-            insults_data.append(arguments[2])
-            database[f"insults.list.{message.guild.id}"] = json.dumps(insults_data)
-            await interaction.response.send_message(f"Successfully added **{arguments[2]}** to your insults list")
-        elif arguments[1] == "remove" or arguments[1] == "delete":
-            if len(arguments) != 3:
-                await interaction.response.send_message(f"The syntax is `{prefix}insults remove <word>`"); return
-            try:
-                insults_data = json.loads(database[f"insults.list.{message.guild.id}"])
-            except:
-                insults_data = []
-                database[f"insults.list.{message.guild.id}"] = json.dumps([])
-            try:
-                insults_data.remove(arguments[2])
-            except:
-                await interaction.response.send_message("That word does not exist in the insults filter"); return
-            database[f"insults.list.{message.guild.id}"] = json.dumps(insults_data)
-            await interaction.response.send_message(f"Successfully removed **{arguments[2]}** from the insults list")
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}insults <add/remove/enable/disable/list/status>`"); return
+@filter_command.sub_command_group(name="spam", description="Manage the spam filter")
+async def spam_command(_):
+    pass
 
-async def filter_links_command(message, prefix):
-    if not message.author.guild_permissions.administrator:
-        await interaction.response.send_message(variables.no_permission_text); return
-        
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        if arguments[1] == "enable":
-            database[f"links.toggle.{message.guild.id}"] = 1
-            await interaction.response.send_message("The links filter has been successfully **enabled**")
-        elif arguments[1] == "disable":
-            database[f"links.toggle.{message.guild.id}"] = 0
-            await interaction.response.send_message("The links filter has been successfully **disabled**")
-        elif arguments[1] == "status" or arguments[1] == "filter":
-            value = False
-            try:
-                value = database[f"links.toggle.{message.guild.id}"]
-            except:
-                pass
-            await interaction.response.send_message(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}links <enable/disable/status>`"); return
+@spam_command.sub_command(name="enable", description="Enable the spam filter")
+async def spam_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    database[f"spamming.toggle.{interaction.guild.id}"] = 1
+    await interaction.response.send_message("The spam filter has been successfully **enabled**")
 
-async def spamming_command(message, prefix):
-    if not message.author.guild_permissions.administrator:
-        await interaction.response.send_message(variables.no_permission_text); return
-        
-    arguments = message.content.split(" ")
-    if len(arguments) > 1:
-        if arguments[1] == "enable":
-            database[f"spamming.toggle.{message.guild.id}"] = 1
-            await interaction.response.send_message("The spam filter has been successfully **enabled**")
-        elif arguments[1] == "disable":
-            database[f"spamming.toggle.{message.guild.id}"] = 0
-            await interaction.response.send_message("The spam filter has been successfully **disabled**")
-        elif arguments[1] == "set":
-            limit = 6
-            if len(arguments) > 2:
-                try:
-                    limit = int(arguments[2])
-                except:
-                    await interaction.response.send_message("Please enter a valid number!"); return
-            database[f"spamming.limit.{message.guild.id}"] = limit
-            await interaction.response.send_message(f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**")
-        elif arguments[1] == "status" or arguments[1] == "filter" or arguments[1] == "limit":
-            value = False
-            try:
-                value = database[f"spamming.toggle.{message.guild.id}"]
-            except:
-                pass
-            limit = 6
-            try:
-                limit = database[f"spamming.limit.{message.guild.id}"]
-            except:
-                pass
-            await interaction.response.send_message(f"The spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}spamming <enable/disable/set/status>`"); return
+@spam_command.sub_command(name="disable", description="Disable the spam filter")
+async def spam_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    database[f"spamming.toggle.{interaction.guild.id}"] = 0
+    await interaction.response.send_message("The spam filter has been successfully **disabled**")
+
+@spam_command.sub_command(name="set", description="Set the limit for the spam filter")
+async def spam_set_command(
+        interaction,
+        limit: int = Param(description="The limit you want to set"),
+    ):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    database[f"spamming.limit.{interaction.guild.id}"] = limit
+    await interaction.response.send_message(f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**")
+
+@spam_command.sub_command(name="status", description="See the current status for the spam filter")
+async def spam_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator:
+        await interaction.response.send_message(variables.no_permission_text)
+        return
+    value = 0
+    try:
+        value = json.loads(database[f"spamming.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    limit = 6
+    try:
+        limit = json.loads(database[f"spamming.limit.{interaction.guild.id}"])
+    except:
+        pass
+    await interaction.response.send_message(f"The spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
 
 async def welcome_command(message, prefix):
     if not message.author.guild_permissions.administrator:
@@ -1788,56 +1971,25 @@ async def leave_command(message, prefix):
     else:
         await interaction.response.send_message(f"The syntax is `{prefix}leave <enable/disable/channel/set/status>`"); return
 
-async def snipe_command(message, prefix):
-    add_cooldown(message.author.id, "snipe", 1)
-    arguments = message.content.split(" ")
-    if len(arguments) == 1:
-        try:
-            random_message = random.choice(snipe_list[message.guild.id])
-            message_author = random_message[0]
-            message_author_avatar = random_message[1]; channel_name = random_message[2]
-            message_sent_time = random_message[3]; message_data = random_message[4]
-            embed = disnake.Embed(description=message_data, color=variables.embed_color, timestamp=message_sent_time)
-            embed.set_author(name=message_author, icon_url=message_author_avatar); embed.set_footer(text=f"Sent in #{channel_name}")
-            await interaction.response.send_message(embed=embed)
-        except:
-            await interaction.response.send_message("There is nothing to snipe!")
-    elif len(arguments) > 1:
-        if arguments[1] == "enable":
-            if not message.author.guild_permissions.administrator:
-                await interaction.response.send_message(variables.no_permission_text); return
+@client.slash_command(name="snipe", description="Bring deleted messages back to life")
+async def snipe_command(interaction):
+    try:
+        random_message = random.choice(snipe_list[interaction.guild.id])
+        message_author = random_message[0]
+        message_author_avatar = random_message[1]
+        channel_name = random_message[2]
+        message_sent_time = random_message[3]
+        message_data = random_message[4]
+        embed = disnake.Embed(description=message_data, color=variables.embed_color, timestamp=message_sent_time)
+        embed.set_author(name=message_author, icon_url=message_author_avatar); embed.set_footer(text=f"Sent in #{channel_name}")
+        await interaction.response.send_message(embed=embed)
+    except:
+        await interaction.response.send_message("There is nothing to snipe!")
 
-            database[f"snipe.{message.guild.id}"] = 1
-            await interaction.response.send_message("Snipe has been **enabled** for this server")
-        elif arguments[1] == "disable":
-            if not message.author.guild_permissions.administrator:
-                await interaction.response.send_message(variables.no_permission_text); return
-
-            database[f"snipe.{message.guild.id}"] = 0
-            await interaction.response.send_message("Snipe has been **disabled** for this server")
-        elif arguments[1] == "clear":
-            if not message.author.guild_permissions.administrator:
-                await interaction.response.send_message(variables.no_permission_text); return
-
-            snipe_list[message.guild.id] = []
-            await interaction.response.send_message("The snipe list for this server has been successfully cleared")
-        elif arguments[1] == "status":
-            value = 1
-            try:
-                value = json.loads(database[f"snipe.{message.guild.id}"])
-            except:
-                pass
-            await interaction.response.send_message(f"Snipe is currently **{'enabled' if value else 'disabled'}** for this server")
-
-async def joke_command(message, prefix):
-    add_cooldown(message.author.id, "joke", 3)
-    response = requests.get("http://random-joke-api.herokuapp.com/random").json()
-    embed = disnake.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color)
-    await interaction.response.send_message(embed=embed)
-
-async def members_command(message, prefix):
+@client.slash_command(name="members", description="Count the members in this server")
+async def members_command(interaction):
     users = 0; bots = 0
-    for member in message.guild.members:
+    for member in interaction.guild.members:
         if member.bot:
             bots += 1
         else:
@@ -1849,166 +2001,107 @@ async def members_command(message, prefix):
     )
     await interaction.response.send_message(embed=embed)
 
-async def github_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) == 2:
-        try:
-            arguments[1] = arguments[1].split("github.com/")[1]
-        except:
-            pass
-        response = requests.get(f"https://api.github.com/repos/{arguments[1]}").json()
-        try:
-            if response["message"] == "Not Found":
-                await interaction.response.send_message("That GitHub repository was not found"); return
-        except:
-            pass
-        embed = disnake.Embed(color=variables.embed_color)
-        embed.add_field(name="Repository", value=f"[URL]({response['html_url']})")
-        embed.add_field(name="Owner", value=f"{response['owner']['login']}")
-        embed.add_field(name="Name", value=f"{response['name']}")
-        embed.add_field(name="Language", value=f"{response['language']}")
-        embed.add_field(name="Issues", value=f"{response['open_issues']:,}")
-        embed.add_field(name="Watchers", value=f"{response['subscribers_count']:,}")
-        embed.add_field(name="Stars", value=f"{response['stargazers_count']:,}")
-        embed.add_field(name="Forks", value=f"{response['forks']:,}")
-        embed.add_field(name="License", value=f"{response['license']['name'] if response['license'] != None else 'None'}")
-        embed.add_field(name="Size", value=f"{round(response['size']/1000, 2):,} MB")
-        embed.add_field(name="Branch", value=f"{response['default_branch']}")
-        embed.add_field(name="Forked", value=f"{response['fork']}")
-        embed.add_field(name="Archived", value=f"{response['archived']}")
-        embed.add_field(name="Created", value=f"<t:{str(parser.isoparse(response['created_at']).timestamp()).split('.')[0]}:d>")
-        embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>")
-        embed.add_field(name="Description", value=f"{response['description']}")
-        embed.set_thumbnail(url=response["owner"]["avatar_url"])
-        await interaction.response.send_message(embed=embed)
-        add_cooldown(message.author.id, "github", 5)
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}github <repository>`")
+@client.slash_command(name="github", description="Fetch a repository on GitHub")
+async def github_command(
+        interaction,
+        repository: str = Param(description="The repository you want to fetch"),
+    ):
+    response = requests.get(f"https://api.github.com/repos/{repository}").json()
+    try:
+        if response["message"] == "Not Found":
+            await interaction.response.send_message("That GitHub repository was not found"); return
+    except:
+        pass
+    embed = disnake.Embed(color=variables.embed_color)
+    embed.add_field(name="Repository", value=f"[URL]({response['html_url']})")
+    embed.add_field(name="Owner", value=f"{response['owner']['login']}")
+    embed.add_field(name="Name", value=f"{response['name']}")
+    embed.add_field(name="Language", value=f"{response['language']}")
+    embed.add_field(name="Issues", value=f"{response['open_issues']:,}")
+    embed.add_field(name="Watchers", value=f"{response['subscribers_count']:,}")
+    embed.add_field(name="Stars", value=f"{response['stargazers_count']:,}")
+    embed.add_field(name="Forks", value=f"{response['forks']:,}")
+    embed.add_field(name="License", value=f"{response['license']['name'] if response['license'] != None else 'None'}")
+    embed.add_field(name="Size", value=f"{round(response['size']/1000, 2):,} MB")
+    embed.add_field(name="Branch", value=f"{response['default_branch']}")
+    embed.add_field(name="Forked", value=f"{response['fork']}")
+    embed.add_field(name="Archived", value=f"{response['archived']}")
+    embed.add_field(name="Created", value=f"<t:{str(parser.isoparse(response['created_at']).timestamp()).split('.')[0]}:d>")
+    embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>")
+    embed.add_field(name="Description", value=f"{response['description']}")
+    embed.set_thumbnail(url=response["owner"]["avatar_url"])
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "github", 5)
 
-async def choose_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) >= 2:
-        arguments.pop(0)
-        random_item = random.choice(' '.join(arguments).replace(", ", ",").split(","))
-        await interaction.response.send_message(f"I choose **{random_item}**")
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}choose <item>, <item>`")
+@client.slash_command(name="choose", description="Choose a random item from the list")
+async def choose_command(
+        interaction,
+        item1: str = Param(description="An item"),
+        item2: str = Param(description="An item"),
+        item3: str = Param("", description="An item"),
+        item4: str = Param("", description="An item"),
+        item5: str = Param("", description="An item"),
+        item6: str = Param("", description="An item"),
+        item7: str = Param("", description="An item"),
+        item8: str = Param("", description="An item"),
+        item9: str = Param("", description="An item"),
+        item10: str = Param("", description="An item"),
+    ):
+    items = []
+    if item1 != "":
+        items.append(item1)
+    if item2 != "":
+        items.append(item2)
+    if item3 != "":
+        items.append(item3)
+    if item4 != "":
+        items.append(item4)
+    if item5 != "":
+        items.append(item5)
+    if item6 != "":
+        items.append(item6)
+    if item7 != "":
+        items.append(item7)
+    if item8 != "":
+        items.append(item8)
+    if item9 != "":
+        items.append(item9)
+    if item10 != "":
+        items.append(item10)
+    random_item = random.choice(items)
+    await interaction.response.send_message(f"I choose **{random_item}**")
 
-async def trivia_command(message, prefix):
-    add_cooldown(message.author.id, "trivia", 10)
-    url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 33)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
-    response = requests.get(url).json()
-    description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
-    answers = response['results'][0]['incorrect_answers']
-    answers.append(response['results'][0]['correct_answer'])
-    correct_answer = html.unescape(response['results'][0]['correct_answer'])
-
-    class CommandView(disnake.ui.View):
-        def __init__(self):
-            super().__init__()
-
-        async def close(self, chosen_answer):
-            new_view = disnake.ui.View()
-            for button in old_message.components[0].children:
-                style = disnake.ButtonStyle.red
-                if chosen_answer == button.label:
-                    style = disnake.ButtonStyle.gray
-                if correct_answer == button.label:
-                    style = disnake.ButtonStyle.green
-                new_view.add_item(disnake.ui.Button(label=button.label, style=style, disabled=True))
-            await old_message.edit(view=new_view)
-            self.stop()
-        
-        answer = random.choice(answers); answers.remove(answer)
-        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
-        async def trivia_response_1(self, button, interaction):
-            if interaction.author != message.author:
-                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                return
-
-            if button.label == correct_answer:
-                await interaction.response.send_message("Correct answer!", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
-            await self.close(button.label)
-
-        answer = random.choice(answers); answers.remove(answer)
-        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
-        async def trivia_response_2(self, button, interaction):
-            if interaction.author != message.author:
-                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                return
-
-            if button.label == correct_answer:
-                await interaction.response.send_message("Correct answer!", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
-            await self.close(button.label)
-
-        answer = random.choice(answers); answers.remove(answer)
-        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
-        async def trivia_response_3(self, button, interaction):
-            if interaction.author != message.author:
-                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                return
-
-            if button.label == correct_answer:
-                await interaction.response.send_message("Correct answer!", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
-            await self.close(button.label)
-
-        answer = random.choice(answers); answers.remove(answer)
-        @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
-        async def trivia_response_4(self, button, interaction):
-            if interaction.author != message.author:
-                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                return
-
-            if button.label == correct_answer:
-                await interaction.response.send_message("Correct answer!", ephemeral=True)
-            else:
-                await interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
-            await self.close(button.label)
-
-    embed = disnake.Embed(
-        description=description,
-        color=variables.embed_color,
-    )
-    old_message = await interaction.response.send_message(embed=embed, view=CommandView())
-
-async def pypi_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) == 2:
-        response = requests.get(f"https://pypi.org/pypi/{arguments[1]}/json/")
-        if response.status_code == 404:
-            await interaction.response.send_message("That package was not found")
-            return
-        response = response.json()
-        size_unit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
-        if size > 1000:
-            size_unit = "KB"
-            size = size / 1000
-            if size > 1000:
-                size_unit = "MB"
-                size = size / 1000
-        embed = disnake.Embed(color=variables.embed_color)
-        embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
-        embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
-        embed.add_field(name="Owner", value=response["info"]["author"] if response["info"]["author"] != "" else "None")
-        embed.add_field(name="Name", value=response["info"]["name"])
-        embed.add_field(name="Version", value=response["info"]["version"])
-        embed.add_field(name="License", value=response["info"]["license"] if response["info"]["license"] != "" else "None")
-        embed.add_field(name="Yanked", value=response["info"]["yanked"])
-        embed.add_field(name="Size", value=f"{round(size, 2)} {size_unit}")
-        embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
-        embed.add_field(name="Summary", value=response["info"]["summary"])
-        embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
-        await interaction.response.send_message(embed=embed)
-        add_cooldown(message.author.id, "pypi", 5)
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}pypi <project>`")
+@client.slash_command(name="pypi", description="Fetch a project on PyPi")
+async def pypi_command(
+        interaction,
+        project: str = Param(description="The PyPi project that you want to search"),
+    ):
+    response = requests.get(f"https://pypi.org/pypi/{project}/json/")
+    if response.status_code == 404:
+        await interaction.response.send_message("That package was not found")
         return
+    response = response.json()
+    size_unit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
+    if size > 1000:
+        size_unit = "KB"
+        size = size / 1000
+        if size > 1000:
+            size_unit = "MB"
+            size = size / 1000
+    embed = disnake.Embed(color=variables.embed_color)
+    embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
+    embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
+    embed.add_field(name="Owner", value=response["info"]["author"] if response["info"]["author"] != "" else "None")
+    embed.add_field(name="Name", value=response["info"]["name"])
+    embed.add_field(name="Version", value=response["info"]["version"])
+    embed.add_field(name="License", value=response["info"]["license"] if response["info"]["license"] != "" else "None")
+    embed.add_field(name="Yanked", value=response["info"]["yanked"])
+    embed.add_field(name="Size", value=f"{round(size, 2)} {size_unit}")
+    embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
+    embed.add_field(name="Summary", value=response["info"]["summary"])
+    embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "pypi", 5)
 
 async def discriminator_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2171,128 +2264,82 @@ async def unban_command(message, prefix):
     else:
         await interaction.response.send_message(variables.no_permission_text)
 
-async def convert_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) == 1:
-        arguments.append("list")
-    if arguments[1].lower() == "list" or arguments[1].lower() == "help":
-        conversions = []
-        for conversion in converter.conversions:
-            if conversion.input not in conversions:
-                conversions.append(conversion.input)
-        embed = disnake.Embed(
-            title="Conversions",
-            description=", ".join(conversions),
-            color=variables.embed_color
-        )
-        await interaction.response.send_message(embed=embed)
+@client.slash_command(name="convert", description="Convert amounts to different units")
+async def convert_command(
+        interaction,
+        amount: float = Param(description="The amount (for the input unit)"),
+        input_unit: str = Param(name="input-unit", description="The input unit"),
+        output_unit: str = Param(name="output-unit", description="The output unit"),
+    ):
+    data = converter.convert(amount, input_unit, output_unit)
+    if data["error"] == 404:
+        await interaction.response.send_message("That input/output pair is not supported")
         return
-    if len(arguments) == 4:
-        try:
-            amount = float(arguments[1].replace(",", ""))
-            input_unit = arguments[2]
-            output_unit = arguments[3]
-        except:
-            await interaction.response.send_message("Please enter a valid amount!")
-        data = converter.convert(amount, input_unit, output_unit)
-        if data["error"] == 404:
-            await interaction.response.send_message("That input/output pair is not supported")
-            return
-        description = f"**{round(amount, 6):,} {data['input_abbreviation']}** = **{round(data['result'], 6):,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
-        embed = disnake.Embed(
-            title="Conversion",
-            color=variables.embed_color,
-            description=description,
-        )
-        await interaction.response.send_message(embed=embed)
-        add_cooldown(message.author.id, "convert", 2)
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}convert <amount> <unit> <unit>`")
+    description = f"**{round(amount, 6):,} {data['input_abbreviation']}** = **{round(data['result'], 6):,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
+    embed = disnake.Embed(
+        title="Conversion",
+        color=variables.embed_color,
+        description=description,
+    )
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "convert", 2)
 
-async def translate_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) == 2:
-        if arguments[1] == "list" or arguments[1] == "help":
-            output = ""
-            for language in googletrans.LANGUAGES:
-                output += f"{language}: {googletrans.LANGUAGES[language]}\n"
-            segments = [output[i: i + 500] for i in range(0, len(output), 500)]
-            pager = Paginator(
-                title="Languages",
-                color=variables.embed_color,
-                segments=segments,
-                prefix="```\n",
-                suffix="```",
-            )
-            await pager.start(message)
-            return
-    if len(arguments) >= 3:
-        target_language = arguments[1]
-        for i in range(2):
-            arguments.pop(0)
-        text = ' '.join(arguments)
-        if text == "":
-            await interaction.response.send_message("There is no text for that message!")
-            return
+@client.slash_command(name="translate", description="Translate text to different languages")
+async def translate_command(
+        interaction,
+        language: str = Param(description="The language you want to translate to"),
+        text: str = Param(description="The text you want to translate"),
+    ):
+    await interaction.response.defer()
+    try:
         translator = googletrans.Translator()
-        try:
-            result = translator.translate(text, dest=target_language)
-            embed = disnake.Embed(color=variables.embed_color)
-            embed.add_field(name=f"Original Text ({result.src})", value=text, inline=False)
-            embed.add_field(name=f"Translated Text ({result.dest})", value=result.text)
-            await interaction.response.send_message(embed=embed)
-            add_cooldown(message.author.id, "translate", 5)
-        except Exception as error:
-            await interaction.response.send_message(f"There was an error while trying to translate the specified text: `{error}`")
-    elif len(arguments) == 2 and message.reference != None:
-        target_message = await message.channel.fetch_message(message.reference.message_id)
-        message.content = message.content + " " + target_message.content
-        await translate_command(message, prefix)
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}translate <language> <text>`")
+        result = translator.translate(text, dest=language.strip())
+        embed = disnake.Embed(color=variables.embed_color)
+        embed.add_field(name=f"Original Text ({result.src})", value=text, inline=False)
+        embed.add_field(name=f"Translated Text ({result.dest})", value=result.text)
+        await interaction.edit_original_message(embed=embed)
+        add_cooldown(interaction.author.id, "translate", 5)
+    except Exception as error:
+        await interaction.edit_original_message(f"There was an error while trying to translate the specified text: `{error}`")
 
-async def definition_command(message, prefix):
-    arguments = message.content.split(" ")
-    if len(arguments) >= 2:
-        language = "en"
-        if len(arguments) == 3:
-            language = arguments[1]
-            word = arguments[2]
-        else:
-            word = arguments[1]
-        response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language}/{word}").json()
+@client.slash_command(name="definition", description="Find the definition of a word")
+async def definition_command(
+        interaction,
+        word: str = Param(description="The word you want to find the definition of"),
+        language: str = Param("en", description="The word's language"),
+    ):
+    await interaction.response.defer()
+    response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language.strip()}/{word.strip()}").json()
+    try:
+        if response["title"] == "No Definitions Found":
+            await interaction.response.send_message("That word was not found in the dictionary")
+            return
+    except:
+        pass
+    phonetic = "unknown"
+    try:
+        phonetic = response[0]['phonetic']
+    except:
+        pass
+    origin = "unknown"
+    try:
+        origin = response[0]['origin'].replace(" .", ".").replace(" )", ")")
+    except:
+        pass
+    description = f"**Word:** {response[0]['word']} ({phonetic})\n**Origin:** {origin}"
+    for meaning in response[0]['meanings']:
+        synonyms = ', '.join(meaning['definitions'][0]['synonyms'][:3])
+        if synonyms == "":
+            synonyms = "none"
+        example = "none"
         try:
-            if response["title"] == "No Definitions Found":
-                await interaction.response.send_message("That word was not found in the dictionary")
-                return
+            example = meaning['definitions'][0]['example'].replace(response[0]['word'], '__' + response[0]['word'] + '__')
         except:
             pass
-        phonetic = "unknown"
-        try:
-            phonetic = response[0]['phonetic']
-        except:
-            pass
-        origin = "unknown"
-        try:
-            origin = response[0]['origin'].replace(" .", ".").replace(" )", ")")
-        except:
-            pass
-        description = f"**Word:** {response[0]['word']} ({phonetic})\n**Origin:** {origin}"
-        for meaning in response[0]['meanings']:
-            synonyms = ', '.join(meaning['definitions'][0]['synonyms'][:3])
-            if synonyms == "":
-                synonyms = "none"
-            example = "none"
-            try:
-                example = meaning['definitions'][0]['example'].replace(response[0]['word'], '__' + response[0]['word'] + '__')
-            except:
-                pass
-            description += f"\n\n**Type:** {meaning['partOfSpeech']}\n**Definition:** {meaning['definitions'][0]['definition']}\n**Example:** {example}\n**Synonyms:** {synonyms}"
-        embed = disnake.Embed(title="Definition", description=description, color=variables.embed_color)
-        await interaction.response.send_message(embed=embed)
-        add_cooldown(message.author.id, "definition", 5)
-    else:
-        await interaction.response.send_message(f"The syntax is `{prefix}definition <word>`")
+        description += f"\n\n**Type:** {meaning['partOfSpeech']}\n**Definition:** {meaning['definitions'][0]['definition']}\n**Example:** {example}\n**Synonyms:** {synonyms}"
+    embed = disnake.Embed(title="Definition", description=description, color=variables.embed_color)
+    await interaction.edit_original_message(embed=embed)
+    add_cooldown(interaction.author.id, "definition", 5)
 
 async def remind_command(message, prefix):
     arguments = message.content.split(" ")
@@ -2340,54 +2387,6 @@ async def remind_command(message, prefix):
         await interaction.response.send_message(f"You will be reminded in **{duration if duration != 1.0 else 1} {'minute' if duration == 1.0 or duration == 1 else 'minutes'}**")
     else:
         await interaction.response.send_message(f"The syntax is `{prefix}remind <minutes> <text>` or `{prefix}remind list`")
-
-async def help_command(message, prefix):
-    pages = {}; current_page = 1; page_limit = 12; current_item = 0; index = 1; page_arguments = False
-    try:
-        current_page = int(message.content.split(" ")[1])
-        page_arguments = True
-    except:
-        try:
-            current_page = message.content.split(" ")[1]
-        except:
-            page_arguments = True
-            pass
-    if page_arguments:
-        for command in command_list:
-            if command.name in hidden_commands:
-                continue
-            temporary_text = f"`{prefix}{command.usage}` - {command.description}\n"
-            if index > page_limit:
-                index = 0
-                current_item += 1
-            try:
-                pages[current_item] += temporary_text
-            except:
-                pages[current_item] = temporary_text
-            index += 1
-        pager = CommandPaginator(title="Doge Commands", type="help", segments=pages.values(), target_page=current_page)
-        await pager.start(message)
-        add_cooldown(message.author.id, "help", 1.5)
-    else:
-        for command in command_list:
-            if command.name in hidden_commands:
-                continue
-            if command.name == current_page:
-                command_arguments = command.usage.split(" "); command_arguments.pop(0)
-                command_arguments = ' '.join(command_arguments)
-                if command_arguments == "":
-                    command_arguments = "None"
-                command_example = prefix + parse_variables(command.usage)
-                additional_arguments = ""
-                if command_arguments != "None":
-                    additional_arguments = f"\nAdditional arguments: `{command_arguments}`"
-                command = f"Command: `{command.name}`{additional_arguments}\nUsage example: `{command_example}`\n\n**{command.description}**"
-                embed = disnake.Embed(title="Doge Commands", description=command, color=variables.embed_color, timestamp=datetime.datetime.now())
-                embed.set_footer(text=f"Viewing command help page")
-                await interaction.response.send_message(embed=embed); return
-        embed = disnake.Embed(title="Doge Commands", description="That command doesn't exist or wasn't found", color=variables.embed_color, timestamp=datetime.datetime.now())
-        embed.set_footer(text=f"Viewing command help page")
-        await interaction.response.send_message(embed=embed); add_cooldown(message.author.id, "help", 1.5)
 
 def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(epoch))
@@ -2600,21 +2599,8 @@ async def on_guild_join(guild):
     except:
         pass
 
-async def on_message_delete(message, *arguments):
-    if len(arguments) > 0:
-        await on_message(arguments[0])
-        if message.author.bot:
-            return
-    
+async def on_message_delete(message, *_):
     if not message.guild:
-        return
-
-    value = 1
-    try:
-        value = json.loads(database[f"snipe.{message.guild.id}"])
-    except:
-        pass
-    if not value:
         return
 
     try:
@@ -2641,209 +2627,144 @@ async def on_message_delete(message, *arguments):
         snipe_list[message.guild.id] = snipes
 
 async def on_message(message):
-    try:
-        if message.author.bot:
-            return
+    if message.author.bot:
+        return
 
-        if message.guild:
-            prefix = "="
+    prefix = variables.prefix
+    if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
+        await message.channel.send(embed=disnake.Embed(title="Hello there", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
+        return
+    
+    if message.content.startswith(f"<@{client.user.id}> "):
+        message.content = message.content.replace(f"<@{client.user.id}> ", prefix, 1)
+    if message.content.startswith(f"<@!{client.user.id}> "):
+        message.content = message.content.replace(f"<@!{client.user.id}> ", prefix, 1)
+    if message.content.startswith(f"<@{client.user.id}>"):
+        message.content = message.content.replace(f"<@{client.user.id}>", prefix, 1)
+    if message.content.startswith(f"<@!{client.user.id}>"):
+        message.content = message.content.replace(f"<@!{client.user.id}>", prefix, 1)
+
+    if not message.author.guild_permissions.administrator:
+        if message.author.id not in variables.permission_override:
             try:
-                prefix = database[f"prefix.{message.guild.id}"].decode("utf-8")
+                if database[f"insults.toggle.{message.guild.id}"]:
+                    insults = database[f"insults.list.{message.guild.id}"]
+                    for word in insults:
+                        if word.lower() in message.content.lower():
+                            await message.delete()
+                            await message.author.send(f"Please do not use that word (**{word.lower()}**)!")
+                            return
             except:
                 pass
-        else:
-            return
-
-        if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
-            await message.channel.send(f"My prefix here is `{prefix}`")
-            last_command = open("last-command", "w")
-            last_command.write(str(round(time.time()))); last_command.close()
-            return
-        
-        if message.content.startswith(f"<@{client.user.id}> "):
-            message.content = message.content.replace(f"<@{client.user.id}> ", prefix, 1)
-        if message.content.startswith(f"<@!{client.user.id}> "):
-            message.content = message.content.replace(f"<@!{client.user.id}> ", prefix, 1)
-        if message.content.startswith(f"<@{client.user.id}>"):
-            message.content = message.content.replace(f"<@{client.user.id}>", prefix, 1)
-        if message.content.startswith(f"<@!{client.user.id}>"):
-            message.content = message.content.replace(f"<@!{client.user.id}>", prefix, 1)
-
-        if not message.author.guild_permissions.administrator:
-            if message.author.id not in variables.permission_override:
-                try:
-                    if database[f"insults.toggle.{message.guild.id}"]:
-                        insults = database[f"insults.list.{message.guild.id}"]
-                        for word in insults:
-                            if word.lower() in message.content.lower():
-                                await message.delete()
-                                await message.author.send(f"Please do not use that word (**{word.lower()}**)!")
-                                return
-                except:
-                    pass
-                try:
-                    if database[f"links.toggle.{message.guild.id}"]:
-                        link_regexes = ["http://", "https://", "www.", "discord.gg/"]
-                        for regex in link_regexes:
-                            if regex in message.content.lower():
-                                await message.delete()
-                                await message.author.send("Please do not put links in your message!")
-                                return
-                except:
-                    pass
-                try:
-                    if "spam" not in message.channel.name:
-                        if database[f"spamming.toggle.{message.guild.id}"]:
+            try:
+                if database[f"links.toggle.{message.guild.id}"]:
+                    link_regexes = ["http://", "https://", "www.", "discord.gg/"]
+                    for regex in link_regexes:
+                        if regex in message.content.lower():
+                            await message.delete()
+                            await message.author.send("Please do not put links in your message!")
+                            return
+            except:
+                pass
+            try:
+                if "spam" not in message.channel.name:
+                    if database[f"spamming.toggle.{message.guild.id}"]:
+                        try:
+                            last_message_time = last_messages[message.author.id]
+                        except:
+                            last_message_time = 0
+                        if (time.time() - last_message_time) < 15:
                             try:
-                                last_message_time = last_messages[message.author.id]
+                                strikes = message_strikes[message.author.id]
                             except:
-                                last_message_time = 0
-                            if (time.time() - last_message_time) < 15:
-                                try:
-                                    strikes = message_strikes[message.author.id]
-                                except:
-                                    strikes = 0
-                                message_strikes[message.author.id] = strikes + 1
-                                strike_limit = 6
-                                try:
-                                    strike_limit = database[f"spamming.limit.{message.guild.id}"]
-                                except:
-                                    pass
-                                if strike_limit > 30:
-                                    strike_limit = 30
-                                if strikes >= strike_limit:
-                                    await message.delete()
-                                    await message.author.send("Stop spamming!")
-                                    return
-                except:
-                    pass
-        last_messages[message.author.id] = time.time()
+                                strikes = 0
+                            message_strikes[message.author.id] = strikes + 1
+                            strike_limit = 6
+                            try:
+                                strike_limit = database[f"spamming.limit.{message.guild.id}"]
+                            except:
+                                pass
+                            if strike_limit > 30:
+                                strike_limit = 30
+                            if strikes >= strike_limit:
+                                await message.delete()
+                                await message.author.send("Stop spamming!")
+                                return
+            except:
+                pass
+    last_messages[message.author.id] = time.time()
 
-        if message.content.startswith(prefix) and len(message.content) > 1:
-            last_command = open("last-command", "w")
-            last_command.write(str(round(time.time()))); last_command.close()
-        else:
-            return
+async def on_slash_command_error(interaction, error):
+    error_text = str(error)
+    if error_text.startswith("InteractionResponded"):
+        return
 
-        for command in command_list:
-            call_command = False
-            if len(command.aliases) > 0:
-                for alias in command.aliases:
-                    if " " not in message.content:
-                        if message.content == f"{prefix}{alias}":
-                            message.content = f"{prefix}{command.name}"
-                    else:
-                        message.content = message.content.replace(f"{prefix}{alias} ", f"{prefix}{command.name} ")
-            if message.content.startswith(prefix + command.name):
-                call_command = True
-
-            if call_command:
-                command.uses += 1
-                if message.author.id in blacklisted_users:
-                    await message.reply("You are banned from using Doge Utilities"); return
-
-                if get_cooldown(message.author.id, command.name) > 0:
-                    cooldown_string = generate_cooldown(command.name, get_cooldown(message.author.id, command.name))
-                    embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)
-                    await interaction.response.send_message(embed=embed)
-                    return
-                await command.function(message, prefix)
-                return
-    except disnake.errors.Forbidden:
-        await message.author.send("I do not have the required permissions!")
-    except disnake.errors.InteractionResponded:
-        await message.channel.send("That interaction is already used!")
-    except Exception as error:
+    if type(error) == disnake.errors.Forbidden:
+        await interaction.author.send("I do not have the required permissions!")
+    elif type(error) == disnake.errors.InteractionResponded:
+        await interaction.channel.send("That interaction is already used!")
+    else:
         if "50035" in str(error):
-            await message.channel.send("Message too long to be sent!"); return
+            await interaction.channel.send("Message too long to be sent!")
+            return
 
         escaped_character = '\`'
         permissions = 0
-        for user in message.guild.members:
+        for user in interaction.guild.members:
             if user.id == client.user.id:
                 permissions = user.guild_permissions.value
+        interaction_data = "/" + interaction.data.name + " "
+        for option in interaction.data.options:
+            interaction_data += option.name
+            if option.value != "":
+                interaction_data += f":{option.value}"
+            interaction_data += " "
+            for sub_option in option.options:
+                interaction_data += f"{sub_option.name}:{sub_option.value} "
+        formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
+        formatted_error = formatted_error.replace("`", escaped_character)
+        formatted_error = formatted_error.replace("The above exception was the direct cause of the following exception:", "Caused:")
+        formatted_error = formatted_error.replace("During handling of the above exception, another exception occurred:", "Another:")
+        formatted_error = formatted_error.replace("Traceback (most recent call last):", "Traceback:")
+        formatted_error = formatted_error.replace("local/lib/python3.9/site-packages", ".../site-packages")
         for user_id in variables.message_managers:
-            member = None
+            sent = False
             for guild in client.guilds:
-                try:
-                    member = await guild.fetch_member(user_id)
-                    break
-                except:
-                    continue
-            if member:
-                try:
-                    await member.send(f"**{message.author.name}#{message.author.discriminator}** (`{message.author.id}`) has ran into an error in **{message.author.guild.name}** (`{message.author.guild.id}`)\n\n**Message:**\n```\n{message.content.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n```\n{str(''.join(traceback.format_exception(error, error, error.__traceback__))).replace('`', escaped_character)}```")
-                except:
-                    pass
+                for member in guild.members:
+                    if member.id == user_id:
+                        try:
+                            if not sent:
+                                await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n```\n{formatted_error}```")
+                                sent = True
+                        except Exception as new_error:
+                            print(f"Unable to send error: {new_error}")
 
         embed = disnake.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.now())
-        embed.set_footer(text="Doge Utilities error report"); await message.reply(embed=embed); return "error"
+        embed.set_footer(text="Doge Utilities error report")
+        try:
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+        except:
+            try:
+                await interaction.edit_original_message(embed=embed)
+            except:
+                await interaction.channel.send(embed=embed)
 
 hidden_commands = ["execute", "reload", "guilds", "D", "blacklist", "about"]
 command_list = [
-    Command("D", [], smiley_command, "D", "=D"),
-    Command("about", ["owner", "botinfo"], about_command, "about", "System Command"),
-    Command("execute", [], execute_command, "execute <code>", "System Command"),
-    Command("guilds", ["servers"], guilds_command, "guilds", "System Command"),
     Command("blacklist", [], blacklist_command, "blacklist <add/remove/list>", "System Command"),
-    Command("help", ["h", "commands", "?"], help_command, "help", "Displays a help page for Doge Utilities"),
-    Command("ping", ["pong"], ping_command, "ping", "Display the bot's current latency"),
-    Command("status", ["stats"], status_command, "status", "Show the bot's current statistics"),
-    Command("support", ["report"], support_command, "support", "Display the official Discord server for Doge"),
-    Command("source", ["src"], source_command, "source", "Display a link to Doge Utilities' code"),
-    Command("uptime", [], uptime_command, "uptime", "Display Doge Utilities' current uptime"),
-    Command("vote", ["upvote"], vote_command, "vote", "Display a link to upvote Doge Utilities"),
-    Command("donate", [], donate_command, "donate", "Donate to the creators of Doge Utilities"),
-    Command("version", ["ver"], version_command, "version", "Display the bot's current version"),
-    Command("invite", ["inv"], invite_command, "invite", "Invite this bot to another server"),
-    Command("doge", ["dog"], doge_command, "doge", "D O G E"),
-    Command("shards", [], shards_command, "shards <page>", "View information about Doge's shards"),
-    Command("setup-muted", [], setup_muted_command, "setup-muted", "Generate a role that mutes members"),
-    Command("setup-banned", [], setup_banned_command, "setup-banned", "Generate a role that disables access to channels"),
-    Command("random", ["rand"], random_command, "random <low> <high>", "Generate a random number within the range"),
-    Command("disconnect-members", ["disconnect-users"], disconnect_members_command, "disconnect-members", "Disconnect all the members in voice channels"),
-    Command("suggest", [], suggest_command, "suggest <suggestion>", "Send a suggestion to the bot creators"),
-    Command("autorole", [], autorole_command, "autorole <role>", "Change the role that is automatically given to users"),
-    Command("lookup", ["ui", "userinfo"], lookup_command, "lookup <user>", "Display profile information for the specified user"),
-    Command("clear", ["purge"], clear_command, "clear <messages>", "Delete the specified amount of messages"),
-    Command("raid-protection", ["raidp"], raid_protection_command, "raid-protection <on/off>", "Toggle server's raid protection"),
-    Command("wide", [], wide_command, "wide <text>", "Add spaces to every character in the text"),
-    Command("unwide", [], unwide_command, "unwide <text>", "Remove spaces from every character in the text"),
-    Command("cringe", [], cringe_command, "cringe <text>", "Randomly change the cases of the text"),
-    Command("spoiler", [], spoiler_command, "spoiler <text>", "Add spoilers to every character in the text"),
-    Command("reverse", [], reverse_command, "reverse <text>", "Reverse the specified text (last character first)"),
-    Command("corrupt", [], corrupt_command, "corrupt <text>", "Make the specified text appear to be corrupted"),
     Command("epoch-date", ["unix-date"], epoch_date_command, "epoch-date <epoch>", "Convert an epoch timestamp into a date"),
     Command("base64", ["b64"], base64Command, "base64 <encode/decode> <text>", "Convert the text to/from base64"),
     Command("date-epoch", ["date-unix"], date_epoch_command, "date-epoch <date>", "Covert a date into an epoch timestamp"),
     Command("hash", [], hash_command, "hash <type> <text>", "Hash the text object with the specified type"),
-    Command("snipe", [], snipe_command, "snipe <enable/disable>", "Restore and bring deleted messages back to life"),
-    Command("calculate", ["calc"], calculate_command, "calculate <expression>", "Calculate the specified math expression"),
-    Command("color", ["colour"], color_command, "color <color code>", "Display information about the color code"),
-    Command("permissions", ["perms"], permissions_command, "permissions <user>", "Display the permissions for the specified user"),
-    Command("meme", [], meme_command, "meme", "Search for a meme on Reddit and display it in an embed"),
     Command("time", ["date"], time_command, "time <timezone>", "Display the current time for the specified timezone"),
     Command("binary", ["bin"], binary_command, "binary <encode/decode> <text>", "Convert the text to/from binary"),
     Command("nickname", ["nick"], nickname_command, "nickname <user> <nickname>", "Change or update a user's nickname"),
-    Command("currency", ["cur"], currency_command, "currency <amount> <currency> <currency>", "Convert currencies"),
     Command("stackoverflow", ["so"], stackoverflow_command, "stackoverflow <text>", "Search for code help on StackOverflow"),
     Command("mute", [], mute_command, "mute <user> <minutes>", "Mute the specified member for the specified duration"),
     Command("unmute", [], unmute_command, "unmute <user>", "Unmute the specified member on the current guild"),
-    Command("github", ["gh", "repo", "git"], github_command, "github <repository>", "Display information about a GitHub repository"),
-    Command("insults", [], insults_command, "insults <add/remove/enable/disable/list>", "Modify the insults filter"),
-    Command("links", [], links_command, "links <enable/disable>", "Enable or disable the link/advertisement filter"),
-    Command("spam", [], spamming_command, "spamming <enable/disable/set>", "Enable or disable the spam filter"),
     Command("welcome", [], welcome_command, "welcome <enable/disable/channel/set>", "Modify the welcome messages"),
     Command("leave", ["goodbye", "bye"], leave_command, "leave <enable/disable/channel/set>", "Modify the leave messages"),
-    Command("translate", ["trans"], translate_command, "translate <language> <text>", "Translate the specified text"),
-    Command("definition", ["def", "define"], definition_command, "definition <word>", "Find the definition of the specified word"),
-    Command("convert", ["conversions"], convert_command, "convert <amount> <unit> <unit>", "Convert amounts to another unit"),
-    Command("choose", [], choose_command, "choose <item>, <item>", "Choose a random item from the specified list"),
-    Command("pypi", ["pip"], pypi_command, "pypi <project>", "Display information about a package on PyPi"),
     Command("discriminator", ["discrim"], discriminator_command, "discriminator <number>", "Display other users with the same discriminator"),
-    Command("joke", ["dadjoke"], joke_command, "joke", "Display a funny random joke from a random category"),
-    Command("members", ["users"], members_command, "members", "Display information about this guild's members"),
-    Command("trivia", ["quiz"], trivia_command, "trivia", "Display a random trivia question from a random category"),
     Command("ban", [], ban_command, "ban <user>", "Ban a specified member from the current server"),
     Command("unban", [], unban_command, "unban <user>", "Unban a specified member from the current server"),
     Command("kick", [], kick_command, "kick <user>", "Kick a specified member from the current server"),
