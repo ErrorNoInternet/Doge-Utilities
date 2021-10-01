@@ -7,9 +7,7 @@ import pytz
 import time
 import math
 import redis
-import extra
 import server
-import urllib
 import base64
 import string
 import psutil
@@ -21,7 +19,6 @@ import textwrap
 import requests
 import datetime
 import converter
-import importlib
 import threading
 import variables
 import functions
@@ -44,7 +41,6 @@ class Command:
         self.function = function
         self.usage = usage
         self.description = description
-        self.uses = 0
 
     def __repr__(self):
         return f"<Command name={self.name} aliases={self.aliases} usage={self.usage}>"
@@ -2271,6 +2267,8 @@ async def convert_command(
         input_unit: str = Param(name="input-unit", description="The input unit"),
         output_unit: str = Param(name="output-unit", description="The output unit"),
     ):
+    input_unit = input_unit.strip()
+    output_unit = output_unit.strip()
     data = converter.convert(amount, input_unit, output_unit)
     if data["error"] == 404:
         await interaction.response.send_message("That input/output pair is not supported")
