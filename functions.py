@@ -699,14 +699,14 @@ async def setup_muted_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_interaction(variables.no_permission_text); return
+        await interaction.response.send_message(variables.no_permission_text); return
 
     roles = interaction.guild.roles
     for role in roles:
         if role.name == "Muted":
-            await interaction.response.send_interaction("The **Muted** role already exists in this guild")
+            await interaction.response.send_message("The **Muted** role already exists in this guild")
             return
-    await interaction.response.send_interaction("Generating the **Muted** role for the current guild...")
+    await interaction.response.send_message("Generating the **Muted** role for the current guild...")
     try:
         muted_role = await interaction.guild.create_role(name="Muted")
         guild_roles = len(interaction.guild.roles); retry_count = 0
