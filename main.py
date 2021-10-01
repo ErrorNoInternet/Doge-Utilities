@@ -1,22 +1,10 @@
 import os
-if os.getenv("TOKEN") == None:
-    print("Unable to load TOKEN variable"); exit()
-if os.getenv("TOPGG_TOKEN") == None:
-    print("Unable to load TOPGG_TOKEN variable"); exit()
-if os.getenv("REDIS_HOST") == None:
-    print("Unable to load REDIS_HOST variable"); exit()
-if os.getenv("REDIS_PORT") == None:
-    print("Unable to load REDIS_PORT variable"); exit()
-if os.getenv("REDIS_PASSWORD") == None:
-    print("Unable to load REDIS_PASSWORD variable"); exit()
-if os.getenv("WEB_SECRET") == None:
-    print("Unable to load WEB_SECRET variable"); exit()
-
 import json
 import time
 import topgg
 import disnake
 import asyncio
+import variables
 import functions
 import threading
 
@@ -24,9 +12,6 @@ initialize_time = time.time()
 first_run = False
 server_roles = {}
 server_channels = {}
-if not os.path.exists("last-command"):
-    file = open("last-command", "w+")
-    file.write("0"); file.close()
 if not os.path.exists("images"):
     os.mkdir("images")
 
@@ -43,9 +28,7 @@ async def random_status():
     while True:
         cycles += 1
         try:
-            last_command_file = open("last-command", "r")
-            last_command = int(last_command_file.read()); last_command_file.close()
-            if time.time() - last_command > 180:
+            if time.time() - variables.last_command > 180:
                 if not idle:
                     await functions.client.change_presence(status=disnake.Status.idle); idle = True
             else:
@@ -137,8 +120,8 @@ async def on_slash_command_error(interaction, error):
 
 functions.client.topggpy = topgg.DBLClient(
     functions.client,
-    os.getenv("TOPGG_TOKEN"),
+    os.environ["TOPGG_TOKEN"],
     autopost=True,
     post_shard_count=True
 )
-functions.client.run(os.getenv("TOKEN"))
+functions.client.run(os.environ["TOKEN"])

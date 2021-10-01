@@ -1,12 +1,12 @@
 import os
-import functions
 
 prefix = "="
 shard_count = 2
+last_command = 0
 bot_owner = 531392146767347712
 message_managers = [531392146767347712]
 permission_override = [531392146767347712]
-test_guilds = [879662689708806154]
+test_guilds = None
 embed_color = 0x20c2f6
 large_number = 1e1000
 version_number = 0
@@ -18,7 +18,7 @@ for file in os.listdir():
 		build_number += int(str(len(code) / 1000).split(".")[1])
 	except:
 		pass
-version_number = round((version_number / 10) / 16, 2)
+version_number = round((version_number / 10) / 14, 2)
 
 bot_invite_link = "https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"
 support_server_invite = "https://discord.gg/3Tp7R8FUsC"
