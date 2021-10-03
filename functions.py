@@ -446,8 +446,8 @@ async def currency_convert_command(
         output_currency: str = Param(name="output-currency", description="The output currency"),
     ):
     try:
-        input_currency = input_currency.lower()
-        output_currency = output_currency.lower()
+        input_currency = input_currency.lower().strip()
+        output_currency = output_currency.lower().strip()
         url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{input_currency}/{output_currency}.json"
         response = requests.get(url).json(); value = response[output_currency] * amount
         embed = disnake.Embed(title="Currency Conversion", description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color)
@@ -792,7 +792,7 @@ async def suggest_command(
         interaction,
         suggestion: str = Param(description="The suggestion you want to send"),
     ):
-    await interaction.response.send_message("Sending your suggestion...")
+    await interaction.response.send_message("Sending your suggestion...", ephemeral=True)
     for user_id in variables.message_managers:
         sent = False
         for guild in client.guilds:
@@ -1261,6 +1261,7 @@ async def time_command(
         interaction,
         region: str = Param(description="The target region")
     ):
+    region = region.strip()
     try:
         if region.lower() == "list" or region.lower() == "help":
             output = ""
@@ -2558,7 +2559,7 @@ async def on_guild_join(guild):
         pass
 
 async def on_message_delete(message, *_):
-    if not message.guild:
+    if not message.guild or message.author.id == client.user.id:
         return
 
     try:
@@ -2687,7 +2688,7 @@ async def on_slash_command_error(interaction, error):
         formatted_error = formatted_error.replace("The above exception was the direct cause of the following exception:", "Caused:")
         formatted_error = formatted_error.replace("During handling of the above exception, another exception occurred:", "Another:")
         formatted_error = formatted_error.replace("Traceback (most recent call last):", "Traceback:")
-        formatted_error = formatted_error.replace("local/lib/python3.9/site-packages", ".../site-packages")
+        formatted_error = formatted_error.replace("/python/lib/python3.9/site-packages/", "/.../site-packages/")
         for user_id in variables.message_managers:
             sent = False
             for guild in client.guilds:
