@@ -2631,6 +2631,7 @@ async def on_guild_join(guild):
 
                     class FakeInteraction:
                         def __init__(self, user):
+                            self.author = user
                             self.response = FakeResponse(user)
 
                         async def edit_original_message(self, content=None, embed=None, view=None):
