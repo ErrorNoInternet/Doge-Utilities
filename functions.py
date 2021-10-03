@@ -166,7 +166,7 @@ class Paginator:
 
                 self.current_page = len(self.embeds)
                 await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
-        await interaction.response.send_message(embed=self.embeds[0], view=PaginatorView())
+        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
 
 def reset_strikes():
     global message_strikes
