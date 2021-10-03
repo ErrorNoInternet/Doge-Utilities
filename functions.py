@@ -1609,7 +1609,7 @@ async def insults_command(_):
 
 @insults_command.sub_command(name="list", description="List all the words in the insults filter")
 async def insults_list_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     try:
@@ -1621,7 +1621,7 @@ async def insults_list_command(interaction):
 
 @insults_command.sub_command(name="status", description="See the current status of the insults filter")
 async def insults_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     try:
@@ -1632,7 +1632,7 @@ async def insults_status_command(interaction):
 
 @insults_command.sub_command(name="enable", description="Enable the insults filter")
 async def insults_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"insults.toggle.{interaction.guild.id}"] = 1
@@ -1640,7 +1640,7 @@ async def insults_enable_command(interaction):
 
 @insults_command.sub_command(name="disable", description="Disable the insults filter")
 async def insults_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"insults.toggle.{interaction.guild.id}"] = 0
@@ -1651,7 +1651,7 @@ async def insults_add_command(
         interaction,
         word: str = Param(description="The word you want to add"),
     ):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     try:
@@ -1671,7 +1671,7 @@ async def insults_remove_command(
         interaction,
         word: str = Param(description="The word you want to remove")
     ):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     try:
@@ -1692,7 +1692,7 @@ async def links_filter_command(_):
 
 @links_filter_command.sub_command(name="enable", description="Enable the links filter")
 async def links_filter_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"links.toggle.{interaction.guild.id}"] = 1
@@ -1700,7 +1700,7 @@ async def links_filter_enable_command(interaction):
 
 @links_filter_command.sub_command(name="disable", description="Disable the links filter")
 async def links_filter_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"links.toggle.{interaction.guild.id}"] = 0
@@ -1708,7 +1708,7 @@ async def links_filter_disable_command(interaction):
 
 @links_filter_command.sub_command(name="status", description="See the current status of the links filter")
 async def links_filter_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     value = False
@@ -1724,7 +1724,7 @@ async def spam_command(_):
 
 @spam_command.sub_command(name="enable", description="Enable the spam filter")
 async def spam_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"spamming.toggle.{interaction.guild.id}"] = 1
@@ -1732,7 +1732,7 @@ async def spam_enable_command(interaction):
 
 @spam_command.sub_command(name="disable", description="Disable the spam filter")
 async def spam_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"spamming.toggle.{interaction.guild.id}"] = 0
@@ -1743,7 +1743,7 @@ async def spam_set_command(
         interaction,
         limit: int = Param(description="The limit you want to set"),
     ):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"spamming.limit.{interaction.guild.id}"] = limit
@@ -1751,7 +1751,7 @@ async def spam_set_command(
 
 @spam_command.sub_command(name="status", description="See the current status for the spam filter")
 async def spam_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     value = 0
@@ -1776,7 +1776,7 @@ async def leave_command(_):
 
 @leave_command.sub_command(name="enable", description="Enable leave messages")
 async def leave_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     try:
@@ -1800,7 +1800,7 @@ async def leave_enable_command(interaction):
 
 @leave_command.sub_command(name="disable", description="Disable leave messages")
 async def leave_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"leave.toggle.{interaction.guild.id}"] = 0
@@ -1811,7 +1811,7 @@ async def leave_text_command(
         interaction,
         text: str = Param(description="The leave message text"),
     ):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"leave.text.{interaction.guild.id}"] = text
@@ -1828,7 +1828,7 @@ async def leave_channel_command(
         interaction,
         channel: disnake.channel.TextChannel = Param(description="The leave channel"),
     ):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"leave.channel.{interaction.guild.id}"] = channel.id
@@ -1842,7 +1842,7 @@ async def leave_channel_command(
 
 @leave_command.sub_command(name="status", description="See the current status of the leave message")
 async def leave_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     value = False
@@ -1868,7 +1868,7 @@ async def welcome_command(_):
 
 @welcome_command.sub_command(name="enable", description="Enable welcome messages")
 async def welcome_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     try:
@@ -1892,7 +1892,7 @@ async def welcome_enable_command(interaction):
 
 @welcome_command.sub_command(name="disable", description="Disable welcome messages")
 async def welcome_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"welcome.toggle.{interaction.guild.id}"] = 0
@@ -1903,7 +1903,7 @@ async def welcome_text_command(
         interaction,
         text: str = Param(description="The welcome message text"),
     ):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"welcome.text.{interaction.guild.id}"] = text
@@ -1920,7 +1920,7 @@ async def welcome_channel_command(
         interaction,
         channel: disnake.channel.TextChannel = Param(description="The welcome channel"),
     ):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     database[f"welcome.channel.{interaction.guild.id}"] = channel.id
@@ -1934,7 +1934,7 @@ async def welcome_channel_command(
 
 @welcome_command.sub_command(name="status", description="See the current status of the welcome message")
 async def welcome_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator:
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
         return
     value = False
