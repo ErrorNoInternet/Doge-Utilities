@@ -39,6 +39,25 @@ database = redis.Redis(
     password=os.environ["REDIS_PASSWORD"],
 )
 
+class FakeResponse:
+    def __init__(self, user):
+        self.user = user
+        self.sent_message = None
+    
+    async def send_message(self, content=None, embed=None, view=None, *_):
+        self.sent_message = await self.user.send(content=content, embed=embed, view=view)
+
+    async def edit_message(self, content=None, embed=None, view=None):
+        await self.sent_message.edit(content=content, embed=embed, view=view)
+
+class FakeInteraction:
+    def __init__(self, user):
+        self.author = user
+        self.response = FakeResponse(user)
+
+    async def edit_original_message(self, content=None, embed=None, view=None):
+        await self.response.edit_message(content=content, embed=embed, view=view)
+
 class MessagePaginator:
     def __init__(self, title, segments, color=0x000000, prefix="", suffix=""):
         self.embeds = []
@@ -2618,24 +2637,6 @@ async def on_guild_join(guild):
         async for entry in guild.audit_logs(limit=10):
             if entry.action == disnake.AuditLogAction.bot_add:
                 if entry.target.id == client.user.id:
-                    class FakeResponse:
-                        def __init__(self, user):
-                            self.user = user
-                            self.sent_message = None
-                        
-                        async def send_message(self, content=None, embed=None, view=None, *_):
-                            self.sent_message = await self.user.send(content=content, embed=embed, view=view)
-
-                        async def edit_message(self, content=None, embed=None, view=None):
-                            await self.sent_message.edit(content=content, embed=embed, view=view)
-
-                    class FakeInteraction:
-                        def __init__(self, user):
-                            self.author = user
-                            self.response = FakeResponse(user)
-
-                        async def edit_original_message(self, content=None, embed=None, view=None):
-                            await self.response.edit_message(content=content, embed=embed, view=view)
                     await help_paginator.start(FakeInteraction(entry.user))
                     break
     except:
