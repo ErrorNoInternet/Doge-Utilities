@@ -215,9 +215,9 @@ async def manage_muted_members():
         except Exception as error:
             print(f"Fatal error in manage_muted_members: {error}")
             try:
-                moderation_data = database[key]
+                moderation_data = json.loads(database[key])
                 moderation_data.remove(value)
-                database[key] = moderation_data
+                database[key] = json.dunps(moderation_data)
             except:
                 pass
         await asyncio.sleep(10)
@@ -261,9 +261,9 @@ async def manage_reminders():
         except Exception as error:
             print(f"Fatal error in manage_reminders: {error}")
             try:
-                reminder_data = database[key]
+                reminder_data = json.loads(database[key])
                 reminder_data.remove(value)
-                database[key] = reminder_data
+                database[key] = json.dumps(reminder_data)
             except:
                 pass
         await asyncio.sleep(10)
@@ -332,43 +332,6 @@ def remove_mention(user):
     user = user.replace("!", "")
     user = user.replace(">", "")
     return user
-
-def parse_variables(text):
-    text = text.replace("<text>", "hello")
-    text = text.replace("<color code>", "#0068DB")
-    text = text.replace("<low>", "10")
-    text = text.replace("<high>", "100")
-    text = text.replace("<suggestion>", "Make the bot better")
-    text = text.replace("<expression>", "28 + 72")
-    text = text.replace("<epoch>", str(round(time.time())))
-    text = text.replace("<date>", "2021-01-01 08:00:00")
-    text = text.replace("<on/off>", "on")
-    text = text.replace("<encode/decode>", "encode")
-    text = text.replace("<role>", "@Members")
-    text = text.replace("<user>", "531392146767347712")
-    text = text.replace("<messages>", "5")
-    text = text.replace("<type>", "sha256")
-    text = text.replace("<page>", "2")
-    text = text.replace("<timezone>", "America/Denver")
-    text = text.replace("<amount>", "8")
-    text = text.replace("<nickname>", "Wumpus")
-    text = text.replace("<minutes>", "2")
-    text = text.replace("<enable/disable>", "enable")
-    text = text.replace("<repository>", "ErrorNoInternet/Doge-Utilities")
-    text = text.replace("<project>", "disnake")
-    text = text.replace("<language>", "en")
-    text = text.replace("<word>", "apple")
-    text = text.replace("<number>", "1337")
-
-    text = text.replace("<item>", "apple", 1)
-    text = text.replace("<item>", "banana")
-
-    text = text.replace("<unit>", "km", 1)
-    text = text.replace("<unit>", "meter")
-
-    text = text.replace("<currency>", "usd", 1)
-    text = text.replace("<currency>", "eur")
-    return text
 
 def get_cooldown(id, command):
     try:
@@ -574,7 +537,7 @@ async def shards_command(interaction):
     await pager.start(interaction)
     add_cooldown(interaction.author.id, "shards", 3)
 
-@get_command.sub_command(name="status", description="Show the bot's current statistics")
+@get_command.sub_command(name="status", description="Display the bot's current statistics")
 async def status_command(interaction):
     member_count = 0; channel_count = 0; uptime = ""
     for guild in client.guilds:
@@ -934,6 +897,10 @@ async def lookup_command(
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "lookup", 5)
 
+@client.user_command(name="Lookup User")
+async def user_lookup_command(interaction):
+    await lookup_command(interaction, str(interaction.target.id))
+
 @client.slash_command(name="permissions", description="Check the permissions of a specified member")
 async def permissions_command(
         interaction,
@@ -942,20 +909,16 @@ async def permissions_command(
     if member == 0:
         member = interaction.author
     
-    permission_list = ""
-    for permission in member.guild_permissions:
-        if permission[1] == True:
-            permission_list += f":white_check_mark: `{permission[0]}`\n"
-        else:
-            permission_list += f":x: `{permission[0]}`\n"
-    if member == interaction.author.guild.owner:
-        permission_list += f":white_check_mark: `owner`\n"
-    else:
-        permission_list += f":x: `owner`\n"
-
+    permission_list = build_permissions(interaction.author)
     embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{member.name}#{member.discriminator}**\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
+
+@client.user_command(name="View Permissions")
+async def user_permissions_command(interaction):
+    permission_list = build_permissions(interaction.target)
+    embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{interaction.target.name}#{interaction.target.discriminator}**\n\n" + permission_list, color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="raid-protection", description="Change the raid protection settings")
 async def raid_protection_command(_):
@@ -1023,10 +986,12 @@ async def date_epoch_command(
 @client.slash_command(name="hash", description="Hash text using different algorithms")
 async def hash_command(
         interaction,
-        hash_type: str = Param(name="hash-type", description="The type of the output hash (md5, sha256, etc)"),
+        hash_type: str = Param(name="algorithm", description="The type of the output hash (md5, sha256, etc)"),
         text: str = Param(description="The text you want to hash"),
     ):
     try:
+        hash_type = hash_type.strip()
+        text = text.strip()
         output_hash = hash_text(hash_type, text)
         embed = disnake.Embed(color=variables.embed_color)
         embed.add_field(name="Text", value=text)
@@ -1512,6 +1477,16 @@ async def trivia_command(interaction):
     await interaction.edit_original_message(embed=embed, view=CommandView())
     add_cooldown(interaction.author.id, "trivia", 10)
 
+@fetch_command.sub_command(name="quote", description="Fetch an inspirational quote")
+async def quote_command(interaction):
+    await interaction.response.defer()
+    try:
+        response = json.loads(requests.get("https://zenquotes.io/api/random").content)[0]
+        await interaction.edit_original_message(content=f'"{response["q"]}"\n\n\t\t\t\t**- {response["a"]}**')
+        add_cooldown(interaction.author.id, "quote", 5)
+    except:
+        await interaction.edit_original_message(content="Unable to fetch quote")
+
 @client.slash_command(name="unmute", description="Unmute the specified member")
 async def unmute_command(
         interaction,
@@ -1973,7 +1948,7 @@ async def github_command(
         interaction,
         repository: str = Param(description="The repository you want to fetch"),
     ):
-    response = requests.get(f"https://api.github.com/repos/{repository}").json()
+    response = requests.get(f"https://api.github.com/repos/{repository.strip()}").json()
     try:
         if response["message"] == "Not Found":
             await interaction.response.send_message("That GitHub repository was not found"); return
@@ -2262,6 +2237,24 @@ async def translate_command(
     except Exception as error:
         await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
 
+@client.message_command(name="Translate (English)")
+async def message_translate_command(interaction):
+    await interaction.response.defer() 
+    try:
+        text = interaction.target.content
+        if text == "":
+            await interaction.edit_original_message(content="That message does not have any text!")
+            return
+        translator = googletrans.Translator()
+        result = translator.translate(text, dest="en")
+        embed = disnake.Embed(color=variables.embed_color)
+        embed.add_field(name=f"Original Text ({result.src})", value=text, inline=False)
+        embed.add_field(name=f"Translated Text ({result.dest})", value=result.text)
+        await interaction.edit_original_message(embed=embed)
+        add_cooldown(interaction.author.id, "translate", 5)
+    except Exception as error:
+        await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
+
 @client.slash_command(name="definition", description="Find the definition of a word")
 async def definition_command(
         interaction,
@@ -2272,7 +2265,7 @@ async def definition_command(
     response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language.strip()}/{word.strip()}").json()
     try:
         if response["title"] == "No Definitions Found":
-            await interaction.response.send_message("That word was not found in the dictionary")
+            await interaction.edit_original_message(content="That word was not found in the dictionary")
             return
     except:
         pass
@@ -2345,7 +2338,7 @@ async def remind_add_command(
         return
     current_reminders.append([time.time(), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
-    await interaction.response.send_message(f"You will be reminded in **{duration if duration != 1.0 else 1} {'minute' if duration == 1.0 or duration == 1 else 'minutes'}**")
+    await interaction.response.send_message(f"You will be reminded in **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
 
 def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
@@ -2378,6 +2371,19 @@ def get_variable(name):
 def set_variable(name, value):
     math_variables[name] = value
     return 0
+
+def build_permissions(member):
+    permission_list = ""
+    for permission in member.guild_permissions:
+        if permission[1] == True:
+            permission_list += f":white_check_mark: `{permission[0]}`\n"
+        else:
+            permission_list += f":x: `{permission[0]}`\n"
+    if member == member.guild.owner:
+        permission_list += f":white_check_mark: `owner`\n"
+    else:
+        permission_list += f":x: `owner`\n"
+    return permission_list
 
 def evaluate_expression(expression):
     expression = expression.replace("^", "**")
@@ -2606,8 +2612,8 @@ async def on_message(message):
     if not message.author.guild_permissions.administrator:
         if message.author.id not in variables.permission_override:
             try:
-                if database[f"insults.toggle.{message.guild.id}"]:
-                    insults = database[f"insults.list.{message.guild.id}"]
+                if json.loads(database[f"insults.toggle.{message.guild.id}"]):
+                    insults = json.loads(database[f"insults.list.{message.guild.id}"])
                     for word in insults:
                         if word.lower() in message.content.lower():
                             await message.delete()
@@ -2616,7 +2622,7 @@ async def on_message(message):
             except:
                 pass
             try:
-                if database[f"links.toggle.{message.guild.id}"]:
+                if json.loads(database[f"links.toggle.{message.guild.id}"]):
                     link_regexes = ["http://", "https://", "www.", "discord.gg/"]
                     for regex in link_regexes:
                         if regex in message.content.lower():
@@ -2627,7 +2633,7 @@ async def on_message(message):
                 pass
             try:
                 if "spam" not in message.channel.name:
-                    if database[f"spamming.toggle.{message.guild.id}"]:
+                    if json.loads(database[f"spamming.toggle.{message.guild.id}"]):
                         try:
                             last_message_time = last_messages[message.author.id]
                         except:
@@ -2640,11 +2646,11 @@ async def on_message(message):
                             message_strikes[message.author.id] = strikes + 1
                             strike_limit = 6
                             try:
-                                strike_limit = database[f"spamming.limit.{message.guild.id}"]
+                                strike_limit = json.loads(database[f"spamming.limit.{message.guild.id}"])
                             except:
                                 pass
-                            if strike_limit > 30:
-                                strike_limit = 30
+                            if strike_limit > 20:
+                                strike_limit = 20
                             if strikes >= strike_limit:
                                 await message.delete()
                                 await message.author.send("Stop spamming!")
@@ -2663,11 +2669,15 @@ async def on_slash_command_error(interaction, error):
 
     if type(error) == disnake.errors.Forbidden:
         await interaction.author.send("I do not have the required permissions!")
-    elif type(error) == disnake.errors.InteractionResponded:
-        await interaction.channel.send("That interaction is already used!")
     else:
         if "50035" in str(error):
-            await interaction.channel.send("Message too long to be sent!")
+            try:
+                await interaction.response.send_message("Message too long to be sent!")
+            except:
+                try:
+                    await interaction.edit_original_message(content="Message too long to be sent!")
+                except:
+                    await interaction.channel.send("Message too long to be sent!")
             return
 
         escaped_character = '\`'
