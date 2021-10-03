@@ -1,4 +1,5 @@
 import os
+import io
 import sys
 import json
 import html
@@ -16,12 +17,14 @@ import disnake
 import hashlib
 import requests
 import datetime
+import textwrap
 import converter
 import threading
 import variables
 import functions
 import traceback
 import simpleeval
+import contextlib
 import googletrans
 from PIL import Image
 from dateutil import parser
@@ -35,73 +38,7 @@ database = redis.Redis(
     password=os.environ["REDIS_PASSWORD"],
 )
 
-class CommandPaginator:
-    def __init__(self, title, type, segments, target_page=1):
-        self.embeds = []
-        self.current_page = target_page
-        
-        index = 0
-        for segment in segments:
-            index += 1
-            embed = disnake.Embed(
-                title=title,
-                color=variables.embed_color,
-                description=segment,
-                timestamp=datetime.datetime.now(),
-            )
-            embed.set_footer(text=f"Viewing {type} page {index} of {len(segments)}")
-            self.embeds.append(embed)
-
-        if self.current_page > len(self.embeds):
-            self.current_page = 1
-
-    async def start(self, interaction):
-        class CommandView(disnake.ui.View):
-            def __init__(_):
-                super().__init__()
-
-            @disnake.ui.button(label=variables.first_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def first_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page = 1
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
-
-            @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def previous_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page -= 1
-                if self.current_page < 1:
-                    self.current_page = len(self.embeds)
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
-
-            @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def next_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page += 1
-                if self.current_page > len(self.embeds):
-                    self.current_page = 1
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
-
-            @disnake.ui.button(label=variables.last_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def last_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page = len(self.embeds)
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1])
-        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=CommandView())
-
-class Paginator:
+class MessagePaginator:
     def __init__(self, title, segments, color=0x000000, prefix="", suffix=""):
         self.embeds = []
         self.current_page = 1
@@ -114,6 +51,72 @@ class Paginator:
                     description=prefix + segment + suffix,
                 )
             )
+
+    async def start(self, message):
+        class PaginatorView(disnake.ui.View):
+            def __init__(this):
+                super().__init__()
+                this.add_item(
+                    disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
+                )
+
+            @disnake.ui.button(label=variables.first_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def first_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page = 1
+                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+
+            @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def previous_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page -= 1
+                if self.current_page < 1:
+                    self.current_page = len(self.embeds)
+                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+
+            @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def next_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page += 1
+                if self.current_page > len(self.embeds):
+                    self.current_page = 1
+                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+
+            @disnake.ui.button(label=variables.last_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def last_button(this, _, interaction):
+                if interaction.author != message.author:
+                    await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page = len(self.embeds)
+                await old_message.edit(embed=self.embeds[self.current_page-1], view=PaginatorView())
+        old_message = await message.channel.send(embed=self.embeds[0], view=PaginatorView())
+
+class Paginator:
+    def __init__(self, title, segments, color=0x000000, prefix="", suffix="", target_page=1):
+        self.embeds = []
+        self.current_page = target_page
+        
+        for segment in segments:
+            self.embeds.append(
+                disnake.Embed(
+                    title=title,
+                    color=color,
+                    description=prefix + segment + suffix,
+                )
+            )
+
+        if self.current_page > len(self.embeds):
+            self.current_page = 1
 
     async def start(self, interaction):
         class PaginatorView(disnake.ui.View):
@@ -441,7 +444,7 @@ async def ping_command(interaction):
     )
     await interaction.response.send_message(embed=embed)
 
-@client.slash_command(name="links")
+@client.slash_command(name="links", description="Get links for Doge Utilities")
 async def links_command(_):
     pass
 
@@ -533,7 +536,7 @@ async def shards_command(interaction):
             pages[current_item] = f"Shard Count: `{len(client.shards)}`, Current Shard: `{interaction.guild.shard_id}`\n\n"
             pages[current_item] += temporary_text
         index += 1
-    pager = CommandPaginator(title="Doge Shards", type="shards", segments=pages.values(), target_page=current_page)
+    pager = Paginator(title="Doge Shards", segments=pages.values(), target_page=current_page, color=variables.embed_color)
     await pager.start(interaction)
     add_cooldown(interaction.author.id, "shards", 3)
 
@@ -801,11 +804,11 @@ async def list_autorole_command(interaction):
 @autorole_command.sub_command(name="set", description="Change the automatically assigned roles")
 async def set_autorole_command(
         interaction,
-        role1: disnake.Role = Param(description="An automatically assigned role"),
-        role2: disnake.Role = Param(0, description="An automatically assigned role"),
-        role3: disnake.Role = Param(0, description="An automatically assigned role"),
-        role4: disnake.Role = Param(0, description="An automatically assigned role"),
-        role5: disnake.Role = Param(0, description="An automatically assigned role"),
+        role1: disnake.Role = Param(description="A role you want to automatically assign"),
+        role2: disnake.Role = Param(0, description="A role you want to automatically assign"),
+        role3: disnake.Role = Param(0, description="A role you want to automatically assign"),
+        role4: disnake.Role = Param(0, description="A role you want to automatically assign"),
+        role5: disnake.Role = Param(0, description="A role you want to automatically assign"),
     ):
     if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text)
@@ -2659,8 +2662,66 @@ async def on_message(message):
                 pass
     last_messages[message.author.id] = time.time()
 
-    if message.content.startswith(prefix) and len(message.content) > 1:
+    if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id != variables.bot_owner:
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
+
+    if message.content.startswith("=execute "):
+        code = message.content.split("=execute ")[1]
+        output_language = ""
+        codeblock = "```"
+        if code.startswith("```python"):
+            code = code[9:]
+        if code.startswith("```py"):
+            code = code[5:]
+        if code.startswith("```"):
+            code = code[3:]
+        if code.endswith("```"):
+            code = code[:-3]
+        if "#python" in code:
+            output_language = "py"
+        if "#golang" in code:
+            output_language = "go"
+        if "#clang" in code:
+            output_language = "c"
+        if "#cs" in code:
+            output_language = "cs"
+        if "#cpp" in code:
+            output_language = "cpp"
+        if "#java" in code:
+            output_language = "java"
+        if "#raw" in code:
+            output_language = ""
+            codeblock = ""
+
+        stdout = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(stdout):
+                if "#globals" in code:
+                    exec(f"async def run_code():\n{textwrap.indent(code, '   ')}", globals())
+                    await globals()["run_code"]()
+                else:
+                    dictionary = dict(locals(), **globals())
+                    exec(f"async def run_code():\n{textwrap.indent(code, '   ')}", dictionary, dictionary)
+                    await dictionary["run_code"]()
+
+                output = stdout.getvalue()
+        except Exception as error:
+            output = "`" + str(error) + "`"
+        
+        output = output.replace(os.getenv("TOKEN"), "<token>")
+        segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
+        if len(output) > 2001:
+            output = output.replace("`", "\`")
+            pager = MessagePaginator(
+                prefix=f"{codeblock}{output_language}\n", 
+                suffix=codeblock, 
+                color=variables.embed_color, 
+                title=f"Code Output", 
+                segments=segments,
+            )
+            await pager.start(message)
+        else:
+            await message.channel.send(output)
 
 async def on_slash_command_error(interaction, error):
     error_text = str(error)

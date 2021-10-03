@@ -78,15 +78,37 @@ def fetch_commands():
     file.close()
 
     text = "<div class='wrapper'>"
-    for command in functions.command_list:
-        if command.name not in functions.hidden_commands:
-            usage_text = f"<b>Usage:</b> <code>{command.usage.replace('<', '[').replace('>', ']')}</code><br>"
-            example_text = f"<b>Example:</b> <code>={functions.parse_variables(command.usage)}</code><br>"
-            text += f"<p style='color: #ffffff;'><b>Name:</b> <code>{command.name}</code><br>{usage_text if command.usage != command.name else ''}{example_text if command.usage != command.name else ''}{command.description}</p>"
+    for command in functions.client.slash_commands:
+        usages = []
+        if command.name in variables.owner_commands:
+            continue
+        text += f"<p style='color: #ffffff; margin: 25;'>"
+        text += f"<b>{command.name}</b><br>{command.description}<br><br>"
+        for option in command.options:
+            if str(option.type) == "OptionType.sub_command_group":
+                for sub_option in option.options:
+                    for argument in sub_option.options:
+                        text += f"<code>/{command.name} {option.name} {sub_option.name} [{argument.name}]</code><br>"
+            elif str(option.type) == "OptionType.sub_command":
+                arguments = ""
+                for argument in option.options:
+                    arguments += "[" + argument.name + "] "
+                arguments = arguments.strip()
+                if arguments != "":
+                    text += f"<code>/{command.name} {option.name} {arguments}</code><br>"
+                else:
+                    text += f"<code>/{command.name} {option.name}</code><br>"
+            else:
+                usages.append(f"[{option.name}]")
+        if usages != []:
+            text += f"<code>/{command.name} {' '.join(usages)}</code>"
+        if command.options == []:
+            text += f"<code>/{command.name}</code>"
+        text += "</p>"
     text += "</div>"
     
     html = html.replace("(text)", text)
-    html = html.replace("(count)", str(len(functions.command_list) - len(functions.hidden_commands)))
+    html = html.replace("(count)", str(len(functions.client.slash_commands) - len(variables.owner_commands)))
     response = flask.make_response(html, 200)
     response.mimetype = "text/html"
     return response
