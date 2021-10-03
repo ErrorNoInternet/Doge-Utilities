@@ -2641,7 +2641,7 @@ async def on_message(message):
         return
 
     prefix = variables.prefix
-    if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
+    if (message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>") or (message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>" and "prefix" in message.content.lower()):
         await message.channel.send(embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
         return
     
