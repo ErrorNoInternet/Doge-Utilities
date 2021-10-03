@@ -116,7 +116,7 @@ class Paginator:
                 )
             )
 
-        if self.current_page > len(self.embeds):
+        if self.current_page > len(self.embeds) or self.current_page < 1:
             self.current_page = 1
 
     async def start(self, interaction):
