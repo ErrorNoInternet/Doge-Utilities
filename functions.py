@@ -142,7 +142,8 @@ class Paginator:
         class PaginatorView(disnake.ui.View):
             def __init__(this, interaction):
                 super().__init__()
-
+                
+                this.timeout = self.timeout
                 this.interaction = interaction
                 this.add_item(
                     disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
