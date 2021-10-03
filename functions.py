@@ -2221,7 +2221,7 @@ async def convert_command(
         description=description,
     )
     await interaction.response.send_message(embed=embed)
-    add_cooldown(interaction.author.id, "convert", 2)
+    add_cooldown(interaction.author.id, "convert", 3)
 
 @client.slash_command(name="translate", description="Translate text to different languages")
 async def translate_command(
