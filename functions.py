@@ -2670,7 +2670,7 @@ async def on_message(message):
                 if json.loads(database[f"links.toggle.{message.guild.id}"]):
                     link_regexes = ["http://", "https://", "www.", "discord.gg/"]
                     for regex in link_regexes:
-                        if regex in message.content.lower():
+                        if regex in message.content.lower().replace(" ", ""):
                             await message.delete()
                             await message.author.send("Please do not put links in your message!")
                             return
@@ -2708,8 +2708,8 @@ async def on_message(message):
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
         return
 
-    if message.content.startswith("=execute "):
-        code = message.content.split("=execute ")[1]
+    if message.content.startswith(f"{prefix}execute "):
+        code = message.content.split(f"{prefix}execute ")[1]
         output_language = ""
         codeblock = "```"
         if code.startswith("```python"):
