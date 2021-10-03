@@ -79,9 +79,9 @@ def fetch_commands():
 
     text = "<div class='wrapper'>"
     for command in functions.client.slash_commands:
-        usages = []
         if command.name in variables.owner_commands:
             continue
+        usages = []
         text += f"<p style='color: #ffffff; margin: 25;'>"
         text += f"<b>{command.name}</b><br>{command.description}<br><br>"
         for option in command.options:
