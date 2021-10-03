@@ -2243,7 +2243,7 @@ async def translate_command(
 
 @client.message_command(name="Translate (English)")
 async def message_translate_command(interaction):
-    await interaction.response.defer() 
+    await interaction.response.defer(ephemeral=True) 
     try:
         text = interaction.target.content
         if text == "":
