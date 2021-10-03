@@ -103,9 +103,59 @@ class MessagePaginator:
         old_message = await message.channel.send(embed=self.embeds[0], view=PaginatorView())
 
 class Paginator:
-    def __init__(self, title, segments, color=0x000000, prefix="", suffix="", target_page=1):
+    def __init__(self, title, segments, color=0x000000, prefix="", suffix="", target_page=1, timeout=180):
         self.embeds = []
         self.current_page = target_page
+        self.timeout = timeout
+
+        class PaginatorView(disnake.ui.View):
+            def __init__(this, interaction):
+                super().__init__()
+
+                this.interaction = interaction
+                this.add_item(
+                    disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
+                )
+
+            @disnake.ui.button(label=variables.first_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def first_button(this, _, button_interaction):
+                if button_interaction.author != this.interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page = 1
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
+
+            @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def previous_button(this, _, button_interaction):
+                if button_interaction.author != this.interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page -= 1
+                if self.current_page < 1:
+                    self.current_page = len(self.embeds)
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
+
+            @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def next_button(this, _, button_interaction):
+                if button_interaction.author != this.interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page += 1
+                if self.current_page > len(self.embeds):
+                    self.current_page = 1
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
+
+            @disnake.ui.button(label=variables.last_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            async def last_button(this, _, button_interaction):
+                if button_interaction.author != this.interaction.author:
+                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    return
+
+                self.current_page = len(self.embeds)
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
         
         for segment in segments:
             self.embeds.append(
@@ -118,55 +168,10 @@ class Paginator:
 
         if self.current_page > len(self.embeds) or self.current_page < 1:
             self.current_page = 1
+        self.view = PaginatorView
 
     async def start(self, interaction):
-        class PaginatorView(disnake.ui.View):
-            def __init__(this):
-                super().__init__()
-                this.add_item(
-                    disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
-                )
-
-            @disnake.ui.button(label=variables.first_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def first_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page = 1
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
-
-            @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def previous_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page -= 1
-                if self.current_page < 1:
-                    self.current_page = len(self.embeds)
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
-
-            @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def next_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page += 1
-                if self.current_page > len(self.embeds):
-                    self.current_page = 1
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
-
-            @disnake.ui.button(label=variables.last_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
-            async def last_button(this, _, button_interaction):
-                if button_interaction.author != interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
-                    return
-
-                self.current_page = len(self.embeds)
-                await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
-        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=PaginatorView())
+        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=self.view(interaction))
 
 def reset_strikes():
     global message_strikes
@@ -281,34 +286,37 @@ def manage_blacklist():
             database["blacklist"] = json.dumps([])
         time.sleep(30)
 
-try:
-    start_time
-except:
-    start_time = time.time()
-    last_command = time.time()
-    required_intents = disnake.Intents.default()
-    required_intents.members = True
-    client = commands.AutoShardedBot(
-        variables.prefix,
-        shard_count=variables.shard_count,
-        intents=required_intents,
-        test_guilds=variables.test_guilds,
-    )
-    client.max_messages = 1024
-    snipe_list = {}; math_variables = {}; blacklisted_users = []
-    threading.Thread(
-        name="manage_muted_members",
-        target=asyncio.run_coroutine_threadsafe,
-        args=(manage_muted_members(), client.loop, ),
-    ).start()
-    threading.Thread(
-        name="manage_reminders",
-        target=asyncio.run_coroutine_threadsafe,
-        args=(manage_reminders(), client.loop, ),
-    ).start()
-    threading.Thread(name="reset_strikes", target=reset_strikes).start()
-    threading.Thread(name="blacklist_manager", target=manage_blacklist).start()
-    threading.Thread(name="web_server", target=server.run).start()
+start_time = time.time()
+last_command = time.time()
+required_intents = disnake.Intents.default()
+required_intents.members = True
+client = commands.AutoShardedBot(
+    variables.prefix,
+    shard_count=variables.shard_count,
+    intents=required_intents,
+    test_guilds=variables.test_guilds,
+)
+client.max_messages = 1024
+snipe_list = {}; math_variables = {}; blacklisted_users = []
+threading.Thread(
+    name="manage_muted_members",
+    target=asyncio.run_coroutine_threadsafe,
+    args=(manage_muted_members(), client.loop, ),
+).start()
+threading.Thread(
+    name="manage_reminders",
+    target=asyncio.run_coroutine_threadsafe,
+    args=(manage_reminders(), client.loop, ),
+).start()
+threading.Thread(name="reset_strikes", target=reset_strikes).start()
+threading.Thread(name="blacklist_manager", target=manage_blacklist).start()
+threading.Thread(name="web_server", target=server.run).start()
+help_paginator = Paginator(
+    title="Getting Started",
+    color=variables.embed_color,
+    timeout=None,
+    segments=[variables.help_text[i: i + 1000] for i in range(0, len(variables.help_text), 1000)],
+)
 
 async def select_status():
     client_status = disnake.Status.online; status_type = random.choice(variables.status_types)
@@ -420,6 +428,11 @@ async def slash_command_handler(interaction):
         return
 
     variables.last_command = time.time()
+
+@client.slash_command(name="help", description="Get started with Doge Utilities")
+async def help_command(interaction):
+    await help_paginator.start(interaction)
+    add_cooldown(interaction.author.id, "help", 60)
 
 @client.slash_command(name="currency", description="Convert currencies")
 async def currency_command(_):
@@ -2605,12 +2618,25 @@ async def on_guild_join(guild):
         async for entry in guild.audit_logs(limit=10):
             if entry.action == disnake.AuditLogAction.bot_add:
                 if entry.target.id == client.user.id:
-                    embed = disnake.Embed(
-                        title="Hello there",
-                        color=variables.embed_color,
-                        description="Thank you for inviting me to your server! My name is **Doge Utilities**, and I am a Discord utility bot that can help you with all sorts of tasks. I am using slash commands, so just type `/` and you will see all of my commands. Some of the most used tools that I have are `/raid-protection`, `/setup muted`, `/setup banned`, `/autorole`, `/lookup`, `/mute`, `/color`, `/permissions`, and `/filter insults`. Feel free to try them out! If you have issues or need help with a few commands, please join the [official support server](https://discord.gg/3Tp7R8FUs_c). Once again, thank you for inviting Doge Utilities!"
-                    )
-                    await entry.user.send(embed=embed)
+                    class FakeResponse:
+                        def __init__(self, user):
+                            self.user = user
+                            self.sent_message = None
+                        
+                        async def send_message(self, content=None, embed=None, view=None, *_):
+                            self.sent_message = await self.user.send(content=content, embed=embed, view=view)
+
+                        async def edit_message(self, content=None, embed=None, view=None):
+                            await self.sent_message.edit(content=content, embed=embed, view=view)
+
+                    class FakeInteraction:
+                        def __init__(self, user):
+                            self.response = FakeResponse(user)
+
+                        async def edit_original_message(self, content=None, embed=None, view=None):
+                            await self.response.edit_message(content=content, embed=embed, view=view)
+
+                    await help_paginator.start(FakeInteraction(entry.user))
                     break
     except:
         pass
