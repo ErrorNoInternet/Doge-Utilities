@@ -127,6 +127,18 @@ class Paginator:
         self.current_page = target_page
         self.timeout = timeout
 
+        for segment in segments:
+            self.embeds.append(
+                disnake.Embed(
+                    title=title,
+                    color=color,
+                    description=prefix + segment + suffix,
+                )
+            )
+
+        if self.current_page > len(self.embeds) or self.current_page < 1:
+            self.current_page = 1
+
         class PaginatorView(disnake.ui.View):
             def __init__(this, interaction):
                 super().__init__()
@@ -175,18 +187,6 @@ class Paginator:
 
                 self.current_page = len(self.embeds)
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
-        
-        for segment in segments:
-            self.embeds.append(
-                disnake.Embed(
-                    title=title,
-                    color=color,
-                    description=prefix + segment + suffix,
-                )
-            )
-
-        if self.current_page > len(self.embeds) or self.current_page < 1:
-            self.current_page = 1
         self.view = PaginatorView
 
     async def start(self, interaction):
