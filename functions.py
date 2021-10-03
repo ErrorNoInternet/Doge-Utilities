@@ -2708,8 +2708,13 @@ async def on_message(message):
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
         return
 
-    if message.content.startswith(f"{prefix}execute "):
-        code = message.content.split(f"{prefix}execute ")[1]
+    if message.content.startswith(f"{prefix}execute"):
+        if " " not in message.content:
+            await message.channel.send("No code specified!")
+            return
+        arguments = message.content.split(" ")
+        arguments.pop(0)
+        code = " ".join(arguments)
         output_language = ""
         codeblock = "```"
         if code.startswith("```python"):
