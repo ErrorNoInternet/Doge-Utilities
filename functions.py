@@ -2759,7 +2759,7 @@ async def on_message(message):
                 segments=segments,
             )
             await pager.start(message)
-        elif len(output) == 0:
+        elif len(output.strip()) == 0:
             await message.add_reaction("✅")
         else:
             await message.channel.send(output)
