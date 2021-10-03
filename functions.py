@@ -1330,7 +1330,7 @@ async def stackoverflow_command(
     await interaction.response.defer()
     try:
         stackoverflow_parameters = {
-            "order": "title",
+            "order": "desc",
             "sort": "activity",
             "site": "stackoverflow"
         }
@@ -2271,8 +2271,8 @@ async def translate_command(
         translator = googletrans.Translator()
         result = translator.translate(text, dest=language.strip())
         embed = disnake.Embed(color=variables.embed_color)
-        embed.add_field(name=f"Original Text ({result.src})", value=text, inline=False)
-        embed.add_field(name=f"Translated Text ({result.dest})", value=result.text)
+        embed.add_field(name=f"Original Text ({googletrans.LANGUAGES[result.src].title()})", value=text, inline=False)
+        embed.add_field(name=f"Translated Text ({googletrans.LANGUAGES[result.dest].title()})", value=result.text)
         await interaction.edit_original_message(embed=embed)
         add_cooldown(interaction.author.id, "translate", 5)
     except Exception as error:
@@ -2303,7 +2303,11 @@ async def definition_command(
         language: str = Param("en", description="The word's language"),
     ):
     await interaction.response.defer()
-    response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language.strip()}/{word.strip()}").json()
+    language = language.strip().lower()
+    reversed_languages = {value: key for key, value in googletrans.LANGUAGES.items()}
+    if language in reversed_languages.keys():
+        language = reversed_languages[language]
+    response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language}/{word.strip()}").json()
     try:
         if response["title"] == "No Definitions Found":
             await interaction.edit_original_message(content="That word was not found in the dictionary")
