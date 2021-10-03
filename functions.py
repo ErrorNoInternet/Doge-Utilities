@@ -409,7 +409,7 @@ async def slash_command_handler(interaction):
         await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
         return
 
-    if interaction.data.name in variables.owner_commands and interaction.author.id != variables.bot_owner:
+    if interaction.data.name in variables.owner_commands and interaction.author.id not in variables.bot_owners:
         await interaction.response.send_message("You are not the owner of Doge Utilities!", ephemeral=True)
         return
 
@@ -787,13 +787,13 @@ async def suggest_command(
 
         @disnake.ui.button(label="Accept", style=disnake.ButtonStyle.green)
         async def accept_button(self, _, button_interaction):
-            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **accepted**")
+            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **accepted** by **{button_interaction.author}**")
             await button_interaction.response.send_message("Accepted successfully")
             self.stop()
 
         @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
         async def reject_button(self, _, button_interaction):
-            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **rejected**")
+            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **rejected** by **{button_interaction.author}**")
             await button_interaction.response.send_message("Rejected successfully")
             self.stop()
 
@@ -2704,7 +2704,7 @@ async def on_message(message):
                 pass
     last_messages[message.author.id] = time.time()
     
-    if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id != variables.bot_owner:
+    if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id not in variables.bot_owners:
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
         return
 

@@ -4,9 +4,9 @@ prefix = "="
 shard_count = 2
 last_command = 0
 owner_commands = ["blacklist"]
-bot_owner = 531392146767347712
-message_managers = [531392146767347712]
-permission_override = [531392146767347712]
+bot_owners = [531392146767347712, 599186408925560833]
+message_managers = bot_owners
+permission_override = bot_owners
 test_guilds = None
 embed_color = 0x20c2f6
 large_number = 1e1000
