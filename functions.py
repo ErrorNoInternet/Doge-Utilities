@@ -2387,6 +2387,9 @@ def epoch_to_date(epoch):
 def date_to_epoch(timestamp):
     timestamp = timestamp.replace("Today", str(datetime.datetime.now().date()))
     timestamp = timestamp.replace("/", "-")
+    if timestamp.count(" ") == 0:
+        if timestamp.count("-") == 2:
+            timestamp += " 00:00:00"
     date = timestamp.split(" ")[0]; time = timestamp.split(" ")[1]
     date_parts = date.split("-"); time_parts = time.split(":")
     for i in range(len(date_parts)):
