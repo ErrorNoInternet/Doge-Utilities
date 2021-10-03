@@ -2641,7 +2641,7 @@ async def on_message(message):
         return
 
     prefix = variables.prefix
-    if (message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>") or (message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>" and "prefix" in message.content.lower()):
+    if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
         await message.channel.send(embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
         return
     
@@ -2703,7 +2703,7 @@ async def on_message(message):
             except:
                 pass
     last_messages[message.author.id] = time.time()
-
+    
     if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id != variables.bot_owner:
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
         return
