@@ -379,6 +379,26 @@ def generate_cooldown(command, cooldown_time):
         cooldown_unit = "eternity"
     return f"Please wait **{cooldown_time} {cooldown_unit}** before using the `{command}` command again"
 
+@client.before_message_command_invoke
+async def message_command_handler(interaction):
+    if interaction.author.id in blacklisted_users:
+        await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
+        return
+
+    if not interaction.guild:
+        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
+        return
+
+@client.before_user_command_invoke
+async def user_command_handler(interaction):
+    if interaction.author.id in blacklisted_users:
+        await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
+        return
+
+    if not interaction.guild:
+        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
+        return
+
 @client.before_slash_command_invoke
 async def slash_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
@@ -760,6 +780,23 @@ async def suggest_command(
         suggestion: str = Param(description="The suggestion you want to send"),
     ):
     await interaction.response.send_message("Sending your suggestion...", ephemeral=True)
+    class SuggestionView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+            self.timeout = None
+
+        @disnake.ui.button(label="Accept", style=disnake.ButtonStyle.green)
+        async def accept_button(self, _, button_interaction):
+            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **accepted**")
+            await button_interaction.response.send_message("Accepted successfully")
+            self.stop()
+
+        @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
+        async def reject_button(self, _, button_interaction):
+            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **rejected**")
+            await button_interaction.response.send_message("Rejected successfully")
+            self.stop()
+
     for user_id in variables.message_managers:
         sent = False
         for guild in client.guilds:
@@ -768,7 +805,7 @@ async def suggest_command(
                     if member.id == user_id:
                         sent = True
                         try:
-                            await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}")
+                            await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}", view=SuggestionView())
                         except:
                             pass
     await interaction.edit_original_message(content="Your suggestion has been successfully sent")
@@ -2596,7 +2633,7 @@ async def on_message_delete(message, *_):
         snipe_list[message.guild.id] = snipes
 
 async def on_message(message):
-    if message.author.bot:
+    if message.author.bot or not message.guild:
         return
 
     prefix = variables.prefix
@@ -2722,6 +2759,8 @@ async def on_message(message):
                 segments=segments,
             )
             await pager.start(message)
+        elif len(output) == 0:
+            await message.add_reaction("✅")
         else:
             await message.channel.send(output)
 
