@@ -2522,6 +2522,7 @@ async def send_vote_message(user_id):
                 class CommandView(disnake.ui.View):
                     def __init__(self):
                         super().__init__()
+                        self.timeout = None
 
                     @disnake.ui.button(label="Add a reminder", style=disnake.ButtonStyle.green)
                     async def add_reminder(self, _, interaction):
