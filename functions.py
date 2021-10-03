@@ -1533,7 +1533,7 @@ async def unmute_command(
         interaction,
         member: disnake.Member = Param(description="The member you want to unmute"),
     ):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator:
+    if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         pass
     else:
         await interaction.response.send_message(variables.no_permission_text); return
