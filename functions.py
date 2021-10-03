@@ -2271,8 +2271,10 @@ async def translate_command(
         translator = googletrans.Translator()
         result = translator.translate(text, dest=language.strip())
         embed = disnake.Embed(color=variables.embed_color)
-        embed.add_field(name=f"Original Text ({googletrans.LANGUAGES[result.src.lower()].title()})", value=text, inline=False)
-        embed.add_field(name=f"Translated Text ({googletrans.LANGUAGES[result.dest.lower()].title()})", value=result.text)
+        source_language = googletrans.LANGUAGES[result.src.lower()].title().replace("(", "").replace(")", "")
+        destination_language = googletrans.LANGUAGES[result.dest.lower()].title().replace("(", "").replace(")", "")
+        embed.add_field(name=f"Original Text ({source_language})", value=text, inline=False)
+        embed.add_field(name=f"Translated Text ({destination_language})", value=result.text)
         await interaction.edit_original_message(embed=embed)
         add_cooldown(interaction.author.id, "translate", 5)
     except Exception as error:
