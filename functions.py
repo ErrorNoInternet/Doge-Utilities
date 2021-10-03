@@ -1330,7 +1330,7 @@ async def stackoverflow_command(
     await interaction.response.defer()
     try:
         stackoverflow_parameters = {
-            "order": "desc",
+            "order": "title",
             "sort": "activity",
             "site": "stackoverflow"
         }
