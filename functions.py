@@ -2665,6 +2665,7 @@ async def on_message(message):
 
     if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id != variables.bot_owner:
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
+        return
 
     if message.content.startswith("=execute "):
         code = message.content.split("=execute ")[1]
