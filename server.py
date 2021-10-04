@@ -140,7 +140,7 @@ def toggle_raid_protection(token, server):
 def web_dashboard():
     ip_address = get_ip(flask.request)
     if ip_address not in user_tokens.keys():
-        new_token = str(random.randint(0, random.randint(2**63, 2**1023)))
+        new_token = str(random.randint(0, random.randint(2**63, 2**511)))
         user_tokens[ip_address] = new_token
         token = new_token
     else:
