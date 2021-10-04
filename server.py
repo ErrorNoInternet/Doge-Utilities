@@ -188,7 +188,7 @@ def web_dashboard():
                 bots += 1
             else:
                 users += 1
-        server_dashboard += f"<h2 style='margin-top: 10;' id='{guild.id}'>{guild.name}</h2>"
+        server_dashboard += f"<h2 style='margin-top: 10; margin-bottom: 4;' id='{guild.id}'>{guild.name}</h2>"
         server_dashboard += f"<p><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)"
         server_dashboard += f'<button id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_function}">Toggle Raid Protection</button>'
         server_dashboard += "<hr class='separator'>"
