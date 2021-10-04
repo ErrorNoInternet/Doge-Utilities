@@ -189,9 +189,14 @@ def web_dashboard():
                 bots += 1
             else:
                 users += 1
+        raid_protection = 0
+        try:
+            raid_protection = json.loads(functions.database[f"{guild.id}.raid-protection"])
+        except:
+            pass
         server_dashboard += f"<h2 class='serverTitle' id='{guild.id}'>{guild.name}</h2>"
         server_dashboard += f"<p style='margin-top: 0;'><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)"
-        server_dashboard += f'<button style="margin-top: 20;" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_function}">Toggle Raid Protection</button>'
+        server_dashboard += f'<button style="margin-top: 20;" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
         server_dashboard += "<hr class='separator'>"
 
     file = open("static/web_dashboard.html", "r")
