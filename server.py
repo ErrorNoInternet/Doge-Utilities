@@ -16,7 +16,7 @@ logger.setLevel(logging.ERROR)
 
 OAUTH_CLIENT_ID = os.environ['OAUTH_ID']
 OAUTH_CLIENT_SECRET = os.environ['OAUTH_SECRET']
-OAUTH_REDIRECT_URI = 'http://doge-utilities.herokuapp.com/web/callback'
+OAUTH_REDIRECT_URI = os.environ['OAUTH_REDIRECT']
 app.config['SECRET_KEY'] = OAUTH_CLIENT_SECRET
 
 BASE_URL = "https://discord.com/api"
