@@ -2644,7 +2644,7 @@ async def on_guild_join(guild):
         pass
 
 async def on_message_delete(message, *_):
-    if not message.guild or message.author.id == client.user.id:
+    if not message.guild or message.author.bot:
         return
 
     try:

@@ -23,6 +23,12 @@ abbreviations = {
     "w": "week",
     "mo": "month",
     "y": "year",
+    "byte": "byte",
+    "kb": "kilobyte",
+    "mb": "megabyte",
+    "gb": "gigabyte",
+    "tb": "terabyte",
+    "pb": "petabyte",
 }
 
 conversions = [
