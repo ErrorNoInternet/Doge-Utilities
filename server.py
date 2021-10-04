@@ -97,7 +97,7 @@ def request_handler():
 def web_authenticate():
     ip_address = get_ip(flask.request)
     if ip_address in user_cache.keys():
-        return flask.redirect(flask.url_for(".web_dashboard"))
+        return flask.redirect("/web")
 
     scope = flask.request.args.get('scope', "identify guilds")
     discord = make_session(scope=scope.split(' '))
@@ -115,7 +115,7 @@ def web_callback():
         client_secret=OAUTH_CLIENT_SECRET,
         authorization_response=flask.request.url)
     flask.session['oauth2_token'] = token
-    return flask.redirect(flask.url_for(".web_dashboard"))
+    return flask.redirect("/web")
 
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
