@@ -1,6 +1,6 @@
 function raidProtection(token, data) {
 	var request = new XMLHttpRequest()
-	request.open("GET", `http://doge-utilities.herokuapp.com/web/api/raid-protection/${token}/${data}`)
+	request.open("GET", `https://doge-utilities.herokuapp.com/web/api/raid-protection/${token}/${data}`)
 	request.send()
 	request.onreadystatechange = (e) => {
 		text = request.responseText

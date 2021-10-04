@@ -22,6 +22,7 @@ app.config['SECRET_KEY'] = OAUTH_CLIENT_SECRET
 BASE_URL = "https://discord.com/api"
 AUTHORIZATION_BASE_URL = BASE_URL + '/oauth2/authorize'
 TOKEN_URL = BASE_URL + '/oauth2/token'
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
 user_tokens = {}
 user_cache = {}
@@ -60,9 +61,6 @@ def get_ip(request):
     except:
         ip = request.remote_addr
     return ip
-
-if 'http://' in OAUTH_REDIRECT_URI:
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
 def token_updater(token):
     flask.session['oauth2_token'] = token
