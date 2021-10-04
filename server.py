@@ -84,6 +84,7 @@ def make_session(token=None, state=None, scope=None):
 
 @app.before_request
 def request_handler():
+    print(flask.request.url)
     if "http://" in flask.request.url:
         url = flask.request.url.replace('http://', 'https://', 1)
         return flask.redirect(url)
