@@ -1,11 +1,11 @@
+import core
 import string
 import disnake
 import variables
-import functions
 
 async def auto_count(channel_id):
 	digits = str(string.digits)
-	for guild in functions.client.guilds:
+	for guild in core.client.guilds:
 		for channel in guild.channels:
 			if channel.id == channel_id:
 				last_message = await channel.history(limit=1).flatten()
@@ -21,7 +21,7 @@ async def auto_count(channel_id):
 				await channel.send(number)
 
 async def post_announcement(message, title, text, mention=False):
-    for guild in functions.client.guilds:
+    for guild in core.client.guilds:
         if guild.id == 879662689708806154:
             for channel in guild.channels:
                 if channel.id == 879665441545519134:

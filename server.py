@@ -1,4 +1,5 @@
 import os
+import core
 import json
 import time
 import flask
@@ -6,7 +7,6 @@ import random
 import asyncio
 import logging
 import variables
-import functions
 import threading
 from requests_oauthlib import OAuth2Session
 
@@ -90,7 +90,7 @@ def request_handler():
         flask.abort(429, "You are being ratelimited!")
     ratelimits[ip_address] = counter + 1
 
-    if not functions.client.is_ready():
+    if not core.client.is_ready():
         flask.abort(503, "Doge Utilities is getting ready. Please try again later.")
 
 @app.route("/web/authenticate")
@@ -127,13 +127,13 @@ def toggle_raid_protection(token, server):
 
     value = 0
     try:
-        value = json.loads(functions.database[f"{server}.raid-protection"])
+        value = json.loads(core.database[f"{server}.raid-protection"])
     except:
         pass
     new_value = 0
     if value == 0:
         new_value = 1
-    functions.database[f"{server}.raid-protection"] = new_value
+    core.database[f"{server}.raid-protection"] = new_value
     return str(new_value)
 
 @app.route('/web')
@@ -157,13 +157,13 @@ def web_dashboard():
         user_cache[ip_address] = [user_data, user_guilds]
 
     target_user = None
-    for user in functions.client.users:
+    for user in core.client.users:
         if user.id == int(user_data['id']):
             target_user = user
 
     mutual_guilds = []
     for user_guild in user_guilds:
-        for guild in functions.client.guilds:
+        for guild in core.client.guilds:
             if int(user_guild['id']) == guild.id:
                 for member in guild.members:
                     if member.id == int(user_data["id"]):
@@ -189,7 +189,7 @@ def web_dashboard():
                 users += 1
         raid_protection = 0
         try:
-            raid_protection = json.loads(functions.database[f"{guild.id}.raid-protection"])
+            raid_protection = json.loads(core.database[f"{guild.id}.raid-protection"])
         except:
             pass
         server_dashboard += f"<h2 class='serverTitle' id='{guild.id}'>{guild.name}</h2>"
@@ -230,7 +230,7 @@ def handle_vote():
     if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
         vote_user_id = flask.request.json["user"]
         asyncio.run_coroutine_threadsafe(
-            functions.send_vote_message(vote_user_id), functions.client.loop,
+            core.send_vote_message(vote_user_id), core.client.loop,
         )
 
         response = flask.make_response("OK", 200)
@@ -264,7 +264,7 @@ def fetch_commands():
     file.close()
 
     text = "<div class='wrapper'>"
-    for command in functions.client.slash_commands:
+    for command in core.client.slash_commands:
         if command.name in variables.owner_commands:
             continue
         usages = []
@@ -294,7 +294,7 @@ def fetch_commands():
     text += "</div>"
     
     html = html.replace("(text)", text)
-    html = html.replace("(count)", str(len(functions.client.slash_commands) - len(variables.owner_commands)))
+    html = html.replace("(count)", str(len(core.client.slash_commands) - len(variables.owner_commands)))
     response = flask.make_response(html, 200)
     response.mimetype = "text/html"
     return response

@@ -22,7 +22,6 @@ import textwrap
 import converter
 import threading
 import variables
-import functions
 import traceback
 import simpleeval
 import contextlib
@@ -1037,7 +1036,7 @@ async def epoch_date_command(
         text: str = Param(name="timestamp", description="The unix timestamp"),
     ):
     try:
-        date = functions.epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color)
+        date = epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color)
         embed.add_field(name="Epoch", value="`" + text + "`"); embed.add_field(name="Date", value=date, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
@@ -1050,7 +1049,7 @@ async def date_epoch_command(
         text: str = Param(name="date", description="The date")
     ):
     try:
-        epoch = functions.date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color)
+        epoch = date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color)
         embed.add_field(name="Date", value=text); embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
@@ -1282,7 +1281,7 @@ async def color_command(
         interaction,
         color_code: str = Param(name="color", description="The color code you want to visualize"),
     ):
-    colors = functions.generate_color(color_code)
+    colors = generate_color(color_code)
     if colors == 1:
         await interaction.response.send_message("Invalid color code")
         return
@@ -1579,7 +1578,8 @@ async def unmute_command(
         try:
             await member.remove_roles(mute_role)
         except:
-            pass
+            await interaction.response.send_message(f"Unable to unmute **{member}**")
+            return
     await interaction.response.send_message(f"Successfully unmuted **{member}**")
 
 @client.slash_command(name="mute", description="Mute a specified member on your server")
