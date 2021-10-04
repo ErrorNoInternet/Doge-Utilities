@@ -104,18 +104,15 @@ def web_authenticate():
 
 @app.route("/web/callback")
 def web_callback():
-    try:
-        if flask.request.values.get('error'):
-            return flask.request.values['error']
-        discord = make_session(state=flask.session.get('oauth2_state'))
-        token = discord.fetch_token(
-            TOKEN_URL,
-            client_secret=OAUTH_CLIENT_SECRET,
-            authorization_response=flask.request.url)
-        flask.session['oauth2_token'] = token
-        return flask.redirect(flask.url_for(".web_dashboard"))
-    except:
-        return "403: Forbidden"
+    if flask.request.values.get('error'):
+        return flask.request.values['error']
+    discord = make_session(state=flask.session.get('oauth2_state'))
+    token = discord.fetch_token(
+        TOKEN_URL,
+        client_secret=OAUTH_CLIENT_SECRET,
+        authorization_response=flask.request.url)
+    flask.session['oauth2_token'] = token
+    return flask.redirect(flask.url_for(".web_dashboard"))
 
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
