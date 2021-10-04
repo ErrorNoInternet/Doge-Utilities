@@ -156,7 +156,13 @@ def web_dashboard():
         user_guilds = discord.get(BASE_URL + '/users/@me/guilds').json()
         user_cache[ip_address] = [user_data, user_guilds]
 
-    print(user_cache[ip_address])
+    try:
+        if user_data["message"] == "401: Unauthorized":
+            del user_cache[ip_address]
+            del user_tokens[ip_address]
+            return flask.redirect(flask.url_for("web_authenticate", _scheme="https", _external=True))
+    except:
+        pass
 
     target_user = None
     for user in core.client.users:
