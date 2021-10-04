@@ -55,7 +55,11 @@ def load_file(file_name, mimetype="text/html", binary=False):
     return response
 
 def get_ip(request):
-    return request.remote_addr
+    try:
+        ip = request.headers['X-Forwarded-For']
+    except:
+        ip = request.remote_addr
+    return ip
 
 if 'http://' in OAUTH_REDIRECT_URI:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
@@ -171,7 +175,8 @@ def web_dashboard():
 
     servers = ""
     for guild in mutual_guilds:
-        servers += f"<a href='#{guild.id}'><img class='guildIcon' src='{guild.icon}' alt='{guild.name}'></a>"
+        default_icon = "/doge"
+        servers += f"<a href='#{guild.id}'><img class='guildIcon' src='{guild.icon if guild.icon != None else default_icon}' alt='{guild.name}'></a>"
 
     server_dashboard = ""
     for guild in mutual_guilds:
