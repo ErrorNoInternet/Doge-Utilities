@@ -820,13 +820,13 @@ async def suggest_command(
 
         @disnake.ui.button(label="Accept", style=disnake.ButtonStyle.green)
         async def accept_button(self, _, button_interaction):
-            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **accepted** by **{button_interaction.author}**")
+            await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **accepted** by **{button_interaction.author}**")
             await button_interaction.response.send_message("Accepted successfully")
             self.stop()
 
         @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
         async def reject_button(self, _, button_interaction):
-            await interaction.author.send(f"The suggestion you sent ({suggestion[:20]}...) has been **rejected** by **{button_interaction.author}**")
+            await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **rejected** by **{button_interaction.author}**")
             await button_interaction.response.send_message("Rejected successfully")
             self.stop()
 
