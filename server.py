@@ -126,7 +126,7 @@ def toggle_raid_protection(token, server):
     except:
         flask.abort(403)
 
-    value = 1
+    value = 0
     try:
         value = json.loads(functions.database[f"{server}.raid-protection"])
     except:
