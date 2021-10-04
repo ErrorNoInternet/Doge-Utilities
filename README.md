@@ -10,7 +10,7 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 - Requirements:
   - Python 3.8+
   - a Discord developer application
-  - a Top.gg bot token
+  - a top.gg bot token
   - a Redis database server
 
 - Environment variables:
@@ -20,6 +20,8 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
   - `REDIS_PORT` - Redis database port
   - `REDIS_PASSWORD` - Redis database password
   - `WEB_SECRET` - Bot website secret
+  - `OAUTH_ID` - Oauth2 client ID
+  - `OAUTH_SECRET` - Oauth2 client secret
 
 ```sh
 git clone https://github.com/ErrorNoInternet/Doge-Utilities
