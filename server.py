@@ -84,6 +84,10 @@ def make_session(token=None, state=None, scope=None):
 
 @app.before_request
 def request_handler():
+    if not flask.request.is_secure:
+        url = flask.request.url.replace('http://', 'https://', 1)
+        return flask.redirect(url, code=301)
+
     ip_address = get_ip(flask.request)
     counter = 0
     if ip_address in ratelimits:
