@@ -113,7 +113,7 @@ def web_callback():
             client_secret=OAUTH_CLIENT_SECRET,
             authorization_response=flask.request.url)
         flask.session['oauth2_token'] = token
-        return flask.redirect(flask.url_for("web_dashboard"))
+        return flask.redirect(flask.url_for(".web_dashboard"))
     except:
         return "403: Forbidden"
 
