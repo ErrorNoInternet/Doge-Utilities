@@ -156,6 +156,8 @@ def web_dashboard():
         user_guilds = discord.get(BASE_URL + '/users/@me/guilds').json()
         user_cache[ip_address] = [user_data, user_guilds]
 
+    print(user_cache[ip_address])
+
     target_user = None
     for user in core.client.users:
         if user.id == int(user_data['id']):
