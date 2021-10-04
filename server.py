@@ -84,10 +84,6 @@ def make_session(token=None, state=None, scope=None):
 
 @app.before_request
 def request_handler():
-    if "http://" in flask.request.url:
-        url = flask.request.url.replace('http://', 'https://', 1)
-        return "<meta http-equiv=\"refresh\" content=\"0; url=" + url + "\">"
-
     ip_address = get_ip(flask.request)
     counter = 0
     if ip_address in ratelimits:
