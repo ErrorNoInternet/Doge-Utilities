@@ -86,7 +86,7 @@ def make_session(token=None, state=None, scope=None):
 def request_handler():
     if "http://" in flask.request.url:
         url = flask.request.url.replace('http://', 'https://', 1)
-        return flask.redirect(url, code=301)
+        return flask.redirect(url)
 
     ip_address = get_ip(flask.request)
     counter = 0
