@@ -23,12 +23,15 @@ abbreviations = {
     "w": "week",
     "mo": "month",
     "y": "year",
-    "byte": "byte",
+    "b": "byte",
     "kb": "kilobyte",
     "mb": "megabyte",
     "gb": "gigabyte",
     "tb": "terabyte",
     "pb": "petabyte",
+    "g": "gram",
+    "kg": "kilogram",
+    "t": "ton",
 }
 
 conversions = [
@@ -39,6 +42,9 @@ conversions = [
     Conversion("centimeter", "kilometer", "divide", 100000),
     Conversion("meter", "kilometer", "divide", 1000),
     Conversion("mile", "kilometer", "divide", 0.621371),
+
+    Conversion("ton", "kg", "multiply", 907.18474),
+    Conversion("kg", "g", "multiply", 1000),
 
     Conversion("byte", "kb", "divide", 1000),
     Conversion("byte", "mb", "divide", 1000000),
