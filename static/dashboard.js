@@ -6,9 +6,9 @@ function raidProtection(token, data) {
 	request.send()
 	request.onreadystatechange = (changeEvent) => {
 		text = request.responseText
-		var currentStatus = "Enabled"
-		if (text == "0") {
-			currentStatus = "Disabled"
+		var currentStatus = "Disabled"
+		if (text == "1") {
+			currentStatus = "Enabled"
 		}
 		var button = document.getElementById("raid-protection-button." + data)
 		button.innerHTML = "Raid Protection: " + currentStatus
@@ -22,9 +22,9 @@ function toggleFilter(token, name, data) {
 	request.send()
 	request.onreadystatechange = (changeEvent) => {
 		text = request.responseText
-		var currentStatus = "Enabled"
-		if (text == "0") {
-			currentStatus = "Disabled"
+		var currentStatus = "Disabled"
+		if (text == "1") {
+			currentStatus = "Enabled"
 		}
 		var filterName = "Unknown"
 		if (name == "insults") {
