@@ -42,8 +42,11 @@ class FakeResponse:
     def __init__(self, user):
         self.user = user
         self.sent_message = None
+
+    async def defer(self, ephemeral=None):
+        self.sent_message = await self.user.send("I am thinking...")
     
-    async def send_message(self, content=None, embed=None, view=None, *_):
+    async def send_message(self, content=None, embed=None, view=None, ephemeral=None):
         self.sent_message = await self.user.send(content=content, embed=embed, view=view)
 
     async def edit_message(self, content=None, embed=None, view=None):
@@ -1224,7 +1227,7 @@ async def spoiler_command(
     await interaction.response.send_message(clean(new_text))
     add_cooldown(interaction.author.id, "spoiler", 3)
 
-@text_command.sub_command(name="cringe", description="Make the text look CrIngY")
+@text_command.sub_command(name="cringe", description="Make the text look CrInGY")
 async def cringe_command(
         interaction,
         text: str = Param(description="The text you want to manipulate"),

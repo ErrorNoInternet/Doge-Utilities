@@ -29,6 +29,7 @@ AUTHORIZATION_BASE_URL = BASE_URL + '/oauth2/authorize'
 TOKEN_URL = BASE_URL + '/oauth2/token'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
+colors = ["#e74c3c", "#2ecc71"]
 user_tokens = {}
 user_cache = {}
 ratelimits = {}
@@ -58,6 +59,12 @@ def load_file(file_name, mimetype="text/html", binary=False, replace={}):
 
     for key in replace:
         html = html.replace(key, replace[key])
+    if mimetype == "text/html":
+        side_bar_file = open("static/side_bar.html", "r")
+        side_bar = side_bar_file.read()
+        side_bar_file.close()
+        html = html.replace("(side_bar)", side_bar)
+
     response = flask.make_response(html, 200)
     response.mimetype = mimetype
     return response
@@ -124,25 +131,6 @@ def web_callback():
     flask.session['oauth2_token'] = token
     return flask.redirect(flask.url_for("web_dashboard", _scheme=URL_SCHEME, _external=True))
 
-@app.route("/web/api/raid-protection/<token>/<server>")
-def toggle_raid_protection(token, server):
-    try:
-        if user_tokens[get_ip(flask.request)] != token:
-            flask.abort(403)
-    except:
-        flask.abort(403)
-
-    value = 0
-    try:
-        value = json.loads(core.database[f"{server}.raid-protection"])
-    except:
-        pass
-    new_value = 0
-    if value == 0:
-        new_value = 1
-    core.database[f"{server}.raid-protection"] = new_value
-    return str(new_value)
-
 @app.route('/web')
 def web_dashboard():
     ip_address = get_ip(flask.request)
@@ -194,7 +182,10 @@ def web_dashboard():
 
     server_dashboard = ""
     for guild in mutual_guilds:
-        toggle_function = f"raidProtection('{token}', '{guild.id}')"
+        toggle_raid_protection_function = f"raidProtection('{token}', '{guild.id}')"
+        toggle_insults_filter_function = f"toggleFilter('{token}', 'insults', '{guild.id}')"
+        toggle_spam_filter_function = f"toggleFilter('{token}', 'spam', '{guild.id}')"
+        toggle_links_filter_function = f"toggleFilter('{token}', 'links', '{guild.id}')"
         bots = 0
         users = 0
         for member in guild.members:
@@ -207,9 +198,29 @@ def web_dashboard():
             raid_protection = json.loads(core.database[f"{guild.id}.raid-protection"])
         except:
             pass
+        insults_filter = 0
+        try:
+            insults_filter = json.loads(core.database[f"insults.toggle.{guild.id}"])
+        except:
+            pass
+        spam_filter = 0
+        try:
+            spam_filter = json.loads(core.database[f"spamming.toggle.{guild.id}"])
+        except:
+            pass
+        links_filter = 0
+        try:
+            links_filter = json.loads(core.database[f"links.toggle.{guild.id}"])
+        except:
+            pass
         server_dashboard += f"<h2 class='serverTitle' id='{guild.id}'>{guild.name}</h2>"
         server_dashboard += f"<p style='margin-top: 0;'><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)"
-        server_dashboard += f'<button style="margin-top: 20;" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
+        server_dashboard += f'<button style="margin-top: 20; background-color: {colors[raid_protection]};" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_raid_protection_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
+
+        server_dashboard += f"<h4 class='subTitle' id='{guild.id}'>Filters</h4>"
+        server_dashboard += f'<button style="margin-top: 5;" id="insults-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_insults_filter_function}">Insults: {"Enabled" if insults_filter == 1 else "Disabled"}</button>'
+        server_dashboard += f'<button style="margin-top: 0;" id="spam-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_spam_filter_function}">Spam: {"Enabled" if spam_filter == 1 else "Disabled"}</button>'
+        server_dashboard += f'<button style="margin-top: 0;" id="links-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_links_filter_function}">Links: {"Enabled" if links_filter == 1 else "Disabled"}</button>'
         server_dashboard += "<hr class='separator'>"
 
     return load_file("web_dashboard.html", replace={"(profile)": profile, "(servers)": servers, "(server_dashboard)": server_dashboard})
@@ -297,6 +308,54 @@ def fetch_commands():
     text += "</div>"
    
     return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands) - len(variables.owner_commands))})
+
+@app.route("/web/api/raid-protection/<token>/<server>")
+def toggle_raid_protection(token, server):
+    try:
+        if user_tokens[get_ip(flask.request)] != token:
+            flask.abort(403)
+    except:
+        flask.abort(403)
+
+    value = 0
+    try:
+        value = json.loads(core.database[f"{server}.raid-protection"])
+    except:
+        pass
+    new_value = 0
+    if value == 0:
+        new_value = 1
+    core.database[f"{server}.raid-protection"] = new_value
+    return str(new_value)
+
+@app.route("/web/api/filter/<token>/<name>/<server>")
+def toggle_filter_settings(token, name, server):
+    try:
+        if user_tokens[get_ip(flask.request)] != token:
+            flask.abort(403)
+    except:
+        flask.abort(403)
+
+    filter_name = ""
+    if name == "insults":
+        filter_name = "insults"
+    elif name == "spam":
+        filter_name = "spamming"
+    elif name == "links":
+        filter_name = "links"
+    if filter_name == "":
+        flask.abort(404)
+
+    value = 0
+    try:
+        value = json.loads(core.database[f"{filter_name}.toggle.{server}"])
+    except:
+        pass
+    new_value = 0
+    if value == 0:
+        new_value = 1
+    core.database[f"{filter_name}.toggle.{server}"] = new_value
+    return str(new_value)
 
 def run():
     threading.Thread(target=manage_cache).start()
