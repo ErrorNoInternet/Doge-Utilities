@@ -101,7 +101,7 @@ def request_handler():
     counter = 0
     if ip_address in ratelimits:
         counter = ratelimits[ip_address]
-    if counter > 60:
+    if counter > 30:
         flask.abort(429, "You are being ratelimited!")
     ratelimits[ip_address] = counter + 1
 

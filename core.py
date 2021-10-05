@@ -2845,10 +2845,8 @@ async def on_slash_command_error(interaction, error):
                 interaction_data += f"{sub_option.name}:{sub_option.value} "
         formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
         formatted_error = formatted_error.replace("`", escaped_character)
-        formatted_error = formatted_error.replace("The above exception was the direct cause of the following exception:", "Caused:")
-        formatted_error = formatted_error.replace("During handling of the above exception, another exception occurred:", "Another:")
-        formatted_error = formatted_error.replace("Traceback (most recent call last):", "Traceback:")
-        formatted_error = formatted_error.replace("/python/lib/python3.9/site-packages/", "/.../site-packages/")
+        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n```\n{formatted_error}```"
+        segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
         for user_id in variables.message_managers:
             sent = False
             for guild in client.guilds:
@@ -2856,7 +2854,10 @@ async def on_slash_command_error(interaction, error):
                     if member.id == user_id:
                         try:
                             if not sent:
-                                await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n```\n{formatted_error}```")
+                                pager = Paginator(
+                                    color=variables.embed_color, title="Error Report", segments=segments,
+                                )
+                                await pager.start(FakeInteraction(member))
                                 sent = True
                         except Exception as new_error:
                             print(f"Unable to send error: {new_error}")
