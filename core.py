@@ -2090,6 +2090,8 @@ async def server_information_command(interaction):
     embed.add_field(name="Invites", value=f"{server_invites}")
     embed.add_field(name="Boosters", value=f"{len(interaction.guild.premium_subscribers)}")
     embed.add_field(name="Boost Level", value=f"{interaction.guild.premium_tier}")
+    if interaction.guild.description:
+        embed.add_field(name="Description", value=interaction.guild.description)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 3)
 
