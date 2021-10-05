@@ -1747,6 +1747,42 @@ async def mute_command(
             await interaction.response.send_message(f"Unable to mute **{member}**"); return
         await interaction.response.send_message(f"Successfully muted **{member}** for **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
 
+@client.user_command(name="Mute Member")
+async def user_mute_command(interaction):
+    mute_role = None; exists = False
+    for role in interaction.guild.roles:
+        if "mute" in role.name.lower():
+            mute_role = role; exists = True
+    if not exists:
+        await setup_muted_command(interaction)
+    mute_role = None; exists = False
+    for role in interaction.guild.roles:
+        if "mute" in role.name.lower():
+            mute_role = role; exists = True
+    if not exists:
+        await interaction.response.send_message("Unable to find mute role")
+        return
+    try:
+        await interaction.target.add_roles(mute_role)
+        await interaction.response.send_message(f"Successfully muted **{interaction.target}**")
+    except:
+        await interaction.response.send_message(f"Unable to mute **{interaction.target}**")
+
+@client.user_command(name="Unmute Member")
+async def user_unmute_command(interaction):
+    mute_role = None; exists = False
+    for role in interaction.guild.roles:
+        if "mute" in role.name.lower():
+            mute_role = role; exists = True
+    if exists:
+        try:
+            await interaction.target.remove_roles(mute_role)
+            await interaction.response.send_message(f"Successfully unmuted **{interaction.target}**")
+        except:
+            await interaction.response.send_message(f"Unable to unmute **{interaction.target}**")
+    else:
+        await interaction.response.send_message(f"Unable to unmute **{interaction.target}**")
+
 @client.slash_command(name="filter", description="Manage the auto-moderation filters")
 async def filter_command(_):
     pass
