@@ -2068,11 +2068,11 @@ async def server_information_command(interaction):
     if interaction.guild.icon != None:
         embed.set_thumbnail(url=interaction.guild.icon)
     if interaction.guild.banner != None:
-        embed.set_thumbnail(url=interaction.guild.banner)
+        embed.set_image(url=interaction.guild.banner)
     embed.add_field(name="Server ID", value=f"`{interaction.guild.id}`")
     embed.add_field(name="Server Region", value=f"`{interaction.guild.region}`")
     embed.add_field(name="Creation Time", value=f"<t:{parse_snowflake(interaction.guild.id)}:R>")
-    embed.add_field(name="Server Owner", value=f"<@{interaction.guild.owner.id}>")
+    embed.add_field(name="Server Owner", value=f"`{interaction.guild.owner.id}`")
     embed.add_field(name="Channels", value=f"{text_channels + voice_channels + categories}")
     embed.add_field(name="Roles", value=f"{len(interaction.guild.roles)}")
     embed.add_field(name="Categories", value=f"{categories}")
