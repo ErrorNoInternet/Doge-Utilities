@@ -16,8 +16,13 @@ logger.setLevel(logging.ERROR)
 
 OAUTH_CLIENT_ID = os.environ['OAUTH_ID']
 OAUTH_CLIENT_SECRET = os.environ['OAUTH_SECRET']
-OAUTH_REDIRECT_URI = os.environ['OAUTH_REDIRECT']
 app.config['SECRET_KEY'] = OAUTH_CLIENT_SECRET
+
+WEBSITE_URL = os.environ['WEBSITE_URL']
+OAUTH_REDIRECT_URI = WEBSITE_URL + "/web/callback"
+URL_SCHEME = "https"
+if "http://" in WEBSITE_URL:
+    URL_SCHEME = "http"
 
 BASE_URL = "https://discord.com/api"
 AUTHORIZATION_BASE_URL = BASE_URL + '/oauth2/authorize'
@@ -42,7 +47,7 @@ def manage_ratelimits():
         time.sleep(60)
         ratelimits = {}
 
-def load_file(file_name, mimetype="text/html", binary=False):
+def load_file(file_name, mimetype="text/html", binary=False, replace={}):
     html = "<p>Unable to load HTML</p>"
     try:
         file = open(f"static/{file_name}", "r" if not binary else "rb")
@@ -51,6 +56,8 @@ def load_file(file_name, mimetype="text/html", binary=False):
     except:
         pass
 
+    for key in replace:
+        html = html.replace(key, replace[key])
     response = flask.make_response(html, 200)
     response.mimetype = mimetype
     return response
@@ -97,7 +104,7 @@ def request_handler():
 def web_authenticate():
     ip_address = get_ip(flask.request)
     if ip_address in user_cache.keys():
-        return flask.redirect(flask.url_for("web_dashboard", _scheme="https", _external=True))
+        return flask.redirect(flask.url_for("web_dashboard", _scheme=URL_SCHEME, _external=True))
 
     scope = flask.request.args.get('scope', "identify guilds")
     discord = make_session(scope=scope.split(' '))
@@ -115,7 +122,7 @@ def web_callback():
         client_secret=OAUTH_CLIENT_SECRET,
         authorization_response=flask.request.url)
     flask.session['oauth2_token'] = token
-    return flask.redirect(flask.url_for("web_dashboard", _scheme="https", _external=True))
+    return flask.redirect(flask.url_for("web_dashboard", _scheme=URL_SCHEME, _external=True))
 
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
@@ -160,7 +167,7 @@ def web_dashboard():
         if user_data["message"] == "401: Unauthorized":
             del user_cache[ip_address]
             del user_tokens[ip_address]
-            return flask.redirect(flask.url_for("web_authenticate", _scheme="https", _external=True))
+            return flask.redirect(flask.url_for("web_authenticate", _scheme=URL_SCHEME, _external=True))
     except:
         pass
 
@@ -205,15 +212,7 @@ def web_dashboard():
         server_dashboard += f'<button style="margin-top: 20;" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
         server_dashboard += "<hr class='separator'>"
 
-    file = open("static/web_dashboard.html", "r")
-    html = file.read()
-    file.close()
-    html = html.replace("(profile)", profile)
-    html = html.replace("(servers)", servers)
-    html = html.replace("(server_dashboard)", server_dashboard)
-    response = flask.make_response(html, 200)
-    response.mimetype = "text/html"
-    return response
+    return load_file("web_dashboard.html", replace={"(profile)": profile, "(servers)": servers, "(server_dashboard)": server_dashboard})
 
 @app.route("/css")
 def fetch_css():
@@ -221,7 +220,7 @@ def fetch_css():
 
 @app.route("/web/javascript")
 def fetch_javascript():
-    return load_file("dashboard.js", mimetype="text/javascript")
+    return load_file("dashboard.js", mimetype="text/javascript", replace={"(website)": WEBSITE_URL})
 
 @app.route("/favicon.ico")
 def fetch_favicon():
@@ -267,10 +266,6 @@ def fetch_donations():
 
 @app.route("/commands")
 def fetch_commands():
-    file = open("static/commands.html", "r")
-    html = file.read()
-    file.close()
-
     text = "<div class='wrapper'>"
     for command in core.client.slash_commands:
         if command.name in variables.owner_commands:
@@ -300,12 +295,8 @@ def fetch_commands():
             text += f"<code>/{command.name}</code>"
         text += "</p>"
     text += "</div>"
-    
-    html = html.replace("(text)", text)
-    html = html.replace("(count)", str(len(core.client.slash_commands) - len(variables.owner_commands)))
-    response = flask.make_response(html, 200)
-    response.mimetype = "text/html"
-    return response
+   
+    return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands) - len(variables.owner_commands))})
 
 def run():
     threading.Thread(target=manage_cache).start()
