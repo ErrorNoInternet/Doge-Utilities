@@ -313,6 +313,9 @@ def manage_blacklist():
 
 start_time = time.time()
 last_command = time.time()
+blacklisted_users = []
+snipe_list = {}
+math_variables = {}
 required_intents = disnake.Intents.default()
 required_intents.members = True
 client = commands.AutoShardedBot(
@@ -321,8 +324,7 @@ client = commands.AutoShardedBot(
     intents=required_intents,
     test_guilds=variables.test_guilds,
 )
-client.max_messages = 1024
-snipe_list = {}; math_variables = {}; blacklisted_users = []
+client.max_messages = 2048
 threading.Thread(
     name="manage_muted_members",
     target=asyncio.run_coroutine_threadsafe,
@@ -2072,7 +2074,7 @@ async def server_information_command(interaction):
     if interaction.guild.banner != None:
         embed.set_image(url=interaction.guild.banner)
     embed.add_field(name="Server ID", value=f"`{interaction.guild.id}`")
-    embed.add_field(name="Server Region", value=f"`{interaction.guild.region}`")
+    embed.add_field(name="Server Region", value=f"{interaction.guild.region}")
     embed.add_field(name="Creation Time", value=f"<t:{parse_snowflake(interaction.guild.id)}:R>")
     embed.add_field(name="Server Owner", value=f"`{interaction.guild.owner.id}`")
     embed.add_field(name="Channels", value=f"{text_channels + voice_channels + categories:,}")
