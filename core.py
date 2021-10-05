@@ -2053,6 +2053,16 @@ async def server_information_command(interaction):
             voice_channels += 1
         elif type(channel) == disnake.channel.CategoryChannel:
             categories += 1
+    server_bans = "?"
+    try:
+        server_bans = len(await interaction.guild.bans())
+    except:
+        pass
+    server_invites = "?"
+    try:
+        server_invites = len(await interaction.guild.invites())
+    except:
+        pass
 
     embed = disnake.Embed(color=variables.embed_color)
     if interaction.guild.icon != None:
@@ -2074,10 +2084,10 @@ async def server_information_command(interaction):
     embed.add_field(name="Administrators", value=f"{administrators:,}")
     embed.add_field(name="Users", value=f"{users:,}")
     embed.add_field(name="Bots", value=f"{bots:,}")
-    embed.add_field(name="Bans", value=f"{len(await interaction.guild.bans())}")
+    embed.add_field(name="Bans", value=f"{server_bans}")
     embed.add_field(name="Members", value=f"{users + bots:,}")
     embed.add_field(name="Max Members", value=f"{interaction.guild.max_members:,}")
-    embed.add_field(name="Invites", value=f"{len(await interaction.guild.invites())}")
+    embed.add_field(name="Invites", value=f"{server_invites}")
     embed.add_field(name="Boosters", value=f"{len(interaction.guild.premium_subscribers)}")
     embed.add_field(name="Boost Level", value=f"{interaction.guild.premium_tier}")
     await interaction.response.send_message(embed=embed)
