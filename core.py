@@ -568,8 +568,10 @@ async def source_command(interaction):
 
 @links_command.sub_command(name="website", description="Get a link to the bot's website")
 async def website_command(interaction):
-    embed = disnake.Embed(title="Website Link", description="You can find Doge Utilities' website [here](https://doge-utilities.herokuapp.com/)", color=variables.embed_color)
-    await interaction.response.send_message(embed=embed)
+    view = disnake.ui.View()
+    view.add_item(disnake.ui.Button(label="Website", url=os.environ["WEBSITE_URL"]))
+    view.add_item(disnake.ui.Button(label="Dashboard", url=os.environ["WEBSITE_URL"] + "/web"))
+    await interaction.response.send_message("Here are the links to my website", view=view)
 
 @client.slash_command(name="get", description="Get information about the bot")
 async def get_command(_):
