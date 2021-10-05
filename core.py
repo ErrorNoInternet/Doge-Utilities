@@ -1191,7 +1191,7 @@ async def wide_command(
         text: str = Param(description="The text you want to manipulate"),
     ):
 
-    #new_text = ""
+    new_text = ""
     for letter in text:
         new_text += letter + " "
     await interaction.response.send_message(clean(new_text))
@@ -2855,7 +2855,7 @@ async def on_slash_command_error(interaction, error):
                         try:
                             if not sent:
                                 pager = Paginator(
-                                    color=variables.embed_color, title="Error Report", segments=segments,
+                                    color=disnake.Color.red(), title="Error Report", segments=segments,
                                 )
                                 await pager.start(FakeInteraction(member))
                                 sent = True
