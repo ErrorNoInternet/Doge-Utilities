@@ -544,8 +544,11 @@ async def invite_command(interaction):
 
 @links_command.sub_command(name="vote", description="Get links to vote for the bot")
 async def vote_command(interaction):
-    embed = disnake.Embed(title="Vote Link", description="You can upvote Doge Utilities on [top.gg](https://top.gg/bot/854965721805226005/vote), [discordbotlist](https://discordbotlist.com/bots/doge-utilities/upvote), or on [botsfordiscord](https://discords.com/bots/bot/854965721805226005/vote)", color=variables.embed_color)
-    await interaction.response.send_message(embed=embed)
+    vote_view = disnake.ui.View()
+    vote_view.add_item(disnake.ui.Button(label="top.gg", url="https://top.gg/bot/854965721805226005/vote"))
+    vote_view.add_item(disnake.ui.Button(label="discordbotlist", url="https://discordbotlist.com/bots/doge-utilities/upvote"))
+    vote_view.add_item(disnake.ui.Button(label="discords", url="https://discords.com/bots/bot/854965721805226005/vote"))
+    await interaction.response.send_message("You can vote for me on these sites", view=vote_view)
 
 @links_command.sub_command(name="source", description="Get the link to Doge's source code")
 async def source_command(interaction):
@@ -948,7 +951,7 @@ async def lookup_command(
         embed = disnake.Embed(color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
         embed.add_field(name="User ID", value=f"`{response['id']}`")
         embed.add_field(name="Tag", value=f"`{response['username']}#{response['discriminator']}`")
-        embed.add_field(name="Creation Time", value=f"<t:{round(((int(response['id']) >> 22) + 1420070400000) / 1000)}:R>")
+        embed.add_field(name="Creation Time", value=f"<t:{parse_snowflake(int(response['id']))}:R>")
         embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` {badges}")
         embed.add_field(name="Bot User", value=f"`{bot_value}`")
         embed.add_field(name="System User", value=f"`{system_value}`")
@@ -2005,9 +2008,14 @@ async def snipe_command(interaction):
     except:
         await interaction.response.send_message("There is nothing to snipe!")
 
-@client.slash_command(name="members", description="Count the members in this server")
-async def members_command(interaction):
-    users = 0; bots = 0
+@client.slash_command(name="server", description="View information about this server")
+async def server_command(_):
+    pass
+
+@server_command.sub_command(name="members", description="Count the members in this server")
+async def server_members_command(interaction):
+    users = 0
+    bots = 0
     for member in interaction.guild.members:
         if member.bot:
             bots += 1
@@ -2019,6 +2027,58 @@ async def members_command(interaction):
         color=variables.embed_color
     )
     await interaction.response.send_message(embed=embed)
+
+@server_command.sub_command(name="information", description="View information about this server")
+async def server_information_command(interaction):
+    users = 0
+    bots = 0
+    administrators = 0
+    for member in interaction.guild.members:
+        if member.guild_permissions.administrator:
+            administrators += 1
+        if member.bot:
+            bots += 1
+        else:
+            users += 1
+    text_channels = 0
+    voice_channels = 0
+    categories = 0
+    for channel in interaction.guild.channels:
+        if type(channel) == disnake.channel.TextChannel:
+            text_channels += 1
+        elif type(channel) == disnake.channel.VoiceChannel:
+            voice_channels += 1
+        elif type(channel) == disnake.channel.CategoryChannel:
+            categories += 1
+
+    embed = disnake.Embed(color=variables.embed_color)
+    if interaction.guild.icon != None:
+        embed.set_thumbnail(url=interaction.guild.icon)
+    if interaction.guild.banner != None:
+        embed.set_thumbnail(url=interaction.guild.banner)
+    embed.add_field(name="Server ID", value=f"`{interaction.guild.id}`")
+    embed.add_field(name="Server Region", value=f"`{interaction.guild.region}`")
+    embed.add_field(name="Creation Time", value=f"<t:{parse_snowflake(interaction.guild.id)}:R>")
+    embed.add_field(name="Server Owner", value=f"<@{interaction.guild.owner.id}>")
+    embed.add_field(name="Channels", value=f"{text_channels + voice_channels + categories}")
+    embed.add_field(name="Roles", value=f"{len(interaction.guild.roles)}")
+    embed.add_field(name="Categories", value=f"{categories}")
+    embed.add_field(name="Text Channels", value=f"{text_channels}")
+    embed.add_field(name="Voice Channels", value=f"{voice_channels}")
+    embed.add_field(name="Threads", value=f"{len(await interaction.guild.active_threads())}")
+    embed.add_field(name="Emojis", value=f"{len(interaction.guild.emojis)}")
+    embed.add_field(name="Stickers", value=f"{len(interaction.guild.stickers)}")
+    embed.add_field(name="Administrators", value=f"{administrators:,}")
+    embed.add_field(name="Users", value=f"{users:,}")
+    embed.add_field(name="Bots", value=f"{bots:,}")
+    embed.add_field(name="Bans", value=f"{len(await interaction.guild.bans())}")
+    embed.add_field(name="Members", value=f"{users + bots:,}")
+    embed.add_field(name="Max Members", value=f"{interaction.guild.max_members:,}")
+    embed.add_field(name="Invites", value=f"{len(await interaction.guild.invites())}")
+    embed.add_field(name="Boosters", value=f"{len(interaction.guild.premium_subscribers)}")
+    embed.add_field(name="Boost Level", value=f"{interaction.guild.premium_tier}")
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "server", 3)
 
 @client.slash_command(name="github", description="Fetch a repository on GitHub")
 async def github_command(
@@ -2467,11 +2527,10 @@ def build_permissions(member):
             permission_list += f":white_check_mark: `{permission[0]}`\n"
         else:
             permission_list += f":x: `{permission[0]}`\n"
-    if member.id == member.guild.owner.id:
-        permission_list += f":white_check_mark: `owner`\n"
-    else:
-        permission_list += f":x: `owner`\n"
     return permission_list
+
+def parse_snowflake(id):
+    return round(((id >> 22) + 1420070400000) / 1000)
 
 def evaluate_expression(expression):
     expression = expression.replace("^", "**")
@@ -2838,11 +2897,14 @@ async def on_slash_command_error(interaction, error):
         interaction_data = "/" + interaction.data.name + " "
         for option in interaction.data.options:
             interaction_data += option.name
-            if option.value != "":
+            if option.value != "" and option.value != None:
                 interaction_data += f":{option.value}"
             interaction_data += " "
             for sub_option in option.options:
-                interaction_data += f"{sub_option.name}:{sub_option.value} "
+                if sub_option.value != "" and sub_option.value != None:
+                    interaction_data += f"{sub_option.name}:{sub_option.value}"
+                else:
+                    interaction_data += f"{sub_option.name}"
         formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
         formatted_error = formatted_error.replace("`", escaped_character)
         output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n```\n{formatted_error}```"
