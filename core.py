@@ -566,11 +566,11 @@ async def source_command(interaction):
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "source", 10)
 
-@links_command.sub_command(name="website", description="Get a link to the bot's website")
+@links_command.sub_command(name="website", description="Get links to the bot's website")
 async def website_command(interaction):
     view = disnake.ui.View()
     view.add_item(disnake.ui.Button(label="Website", url=os.environ["WEBSITE_URL"]))
-    view.add_item(disnake.ui.Button(label="Dashboard", url=os.environ["WEBSITE_URL"] + "/web"))
+    view.add_item(disnake.ui.Button(label="Dashboard", url=os.environ["WEBSITE_URL"] + "/web/authenticate"))
     await interaction.response.send_message("Here are the links to my website", view=view)
 
 @client.slash_command(name="get", description="Get information about the bot")
