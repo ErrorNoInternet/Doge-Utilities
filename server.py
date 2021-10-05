@@ -217,7 +217,7 @@ def web_dashboard():
         except:
             pass
         server_dashboard += f"<h2 class='serverTitle' id='{guild.id}'>{guild.name}</h2>"
-        server_dashboard += f"<p style='margin-top: 0;'><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)"
+        server_dashboard += f"<p style='margin-top: 0;'><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)</p>"
         server_dashboard += f'<button style="margin-top: 20; background-color: {colors[raid_protection]};" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_raid_protection_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
 
         server_dashboard += f"<h4 class='subTitle' id='{guild.id}'>Filters</h4>"
