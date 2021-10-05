@@ -1191,7 +1191,7 @@ async def wide_command(
         text: str = Param(description="The text you want to manipulate"),
     ):
 
-    new_text = ""
+    #new_text = ""
     for letter in text:
         new_text += letter + " "
     await interaction.response.send_message(clean(new_text))
