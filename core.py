@@ -2467,7 +2467,7 @@ def build_permissions(member):
             permission_list += f":white_check_mark: `{permission[0]}`\n"
         else:
             permission_list += f":x: `{permission[0]}`\n"
-    if member == member.guild.owner:
+    if member.id == member.guild.owner.id:
         permission_list += f":white_check_mark: `owner`\n"
     else:
         permission_list += f":x: `owner`\n"
