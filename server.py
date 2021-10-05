@@ -30,6 +30,7 @@ TOKEN_URL = BASE_URL + '/oauth2/token'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
 colors = ["#e74c3c", "#2ecc71"]
+user_ids = {}
 user_tokens = {}
 user_cache = {}
 ratelimits = {}
@@ -134,13 +135,6 @@ def web_callback():
 @app.route('/web')
 def web_dashboard():
     ip_address = get_ip(flask.request)
-    if ip_address not in user_tokens.keys():
-        new_token = str(random.randint(0, random.randint(2**63, 2**511)))
-        user_tokens[ip_address] = new_token
-        token = new_token
-    else:
-        token = user_tokens[ip_address]
-
     if ip_address in user_cache.keys():
         cache = user_cache[ip_address]
         user_data = cache[0]
@@ -154,10 +148,19 @@ def web_dashboard():
     try:
         if user_data["message"] == "401: Unauthorized":
             del user_cache[ip_address]
-            del user_tokens[ip_address]
+            del user_tokens[user_ids[ip_address]]
             return flask.redirect(flask.url_for("web_authenticate", _scheme=URL_SCHEME, _external=True))
     except:
         pass
+
+    if ip_address not in user_ids.keys():
+        new_token = str(random.randint(0, random.randint(2**63, 2**511)))
+        user_ids[ip_address] = user_data["id"]
+        user_tokens[user_data["id"]] = new_token
+        token = new_token
+    else:
+        user_id = user_ids[ip_address]
+        token = user_tokens[user_id]
 
     target_user = None
     for user in core.client.users:
@@ -312,7 +315,17 @@ def fetch_commands():
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
     try:
-        if user_tokens[get_ip(flask.request)] != token:
+        user_id = user_ids[get_ip(flask.request)]
+        if user_tokens[user_id] != token:
+            flask.abort(403)
+        found = False
+        for guild in core.client.guilds:
+            if str(guild.id) == server:
+                for member in guild.members:
+                    if str(member.id) == user_id:
+                        if member.guild_permissions.administrator:
+                            found = True
+        if not found:
             flask.abort(403)
     except:
         flask.abort(403)
@@ -331,7 +344,17 @@ def toggle_raid_protection(token, server):
 @app.route("/web/api/filter/<token>/<name>/<server>")
 def toggle_filter_settings(token, name, server):
     try:
-        if user_tokens[get_ip(flask.request)] != token:
+        user_id = user_ids[get_ip(flask.request)]
+        if user_tokens[user_id] != token:
+            flask.abort(403)
+        found = False
+        for guild in core.client.guilds:
+            if str(guild.id) == server:
+                for member in guild.members:
+                    if str(member.id) == user_id:
+                        if member.guild_permissions.administrator:
+                            found = True
+        if not found:
             flask.abort(403)
     except:
         flask.abort(403)
