@@ -55,6 +55,9 @@ class FakeResponse:
 class FakeInteraction:
     def __init__(self, user):
         self.author = user
+        self.guild = None
+        if type(user) == disnake.Member:
+            self.guild = user.guild
         self.response = FakeResponse(user)
 
     async def edit_original_message(self, content=None, embed=None, view=None):
