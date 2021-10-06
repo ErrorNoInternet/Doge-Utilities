@@ -561,7 +561,7 @@ async def source_command(interaction):
     description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)"
     try:
         response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
-        description += f"\nOpen Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
+        description += f"\nActive Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
     except:
         pass
     embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
@@ -1655,7 +1655,7 @@ async def meme_command(interaction):
     embed = disnake.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embed_color)
     embed.set_image(url=response["url"])
     await interaction.edit_original_message(embed=embed)
-    add_cooldown(interaction.author.id, "meme", 3)
+    add_cooldown(interaction.author.id, "fetch", 3)
 
 @fetch_command.sub_command(name="joke", description="Fetch a random joke")
 async def joke_command(interaction):
