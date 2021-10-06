@@ -1468,41 +1468,53 @@ async def tictactoe_command(interaction):
             self.x = x
             self.y = y
 
-        async def callback(self, interaction: disnake.MessageInteraction):
+        async def callback(self, button_interaction: disnake.MessageInteraction):
             assert self.view is not None
             view: TicTacToe = self.view
             state = view.board[self.y][self.x]
             if state in (view.X, view.O):
                 return
 
+            if button_interaction.author.id not in players:
+                await button_interaction.response.send_message("You are not a part of that TicTacToe game!")
+                return
+
             if view.current_player == view.X:
+                if button_interaction.author.id != players[0]:
+                    await button_interaction.response.send_message("It is not your turn!", ephemeral=True)
+                    return
+
                 self.style = disnake.ButtonStyle.danger
                 self.label = 'X'
                 self.disabled = True
                 view.board[self.y][self.x] = view.X
                 view.current_player = view.O
-                content = "It is now O's turn"
+                content = f"It is now <@{players[1]}>'s (O) turn"
             else:
+                if button_interaction.author.id != players[1]:
+                    await button_interaction.response.send_message("It is not your turn!", ephemeral=True)
+                    return
+
                 self.style = disnake.ButtonStyle.success
                 self.label = 'O'
                 self.disabled = True
                 view.board[self.y][self.x] = view.O
                 view.current_player = view.X
-                content = "It is now X's turn"
+                content = f"It is now <@{players[0]}>'s (X) turn"
 
             winner = view.check_board_winner()
             if winner is not None:
                 if winner == view.X:
-                    content = 'X won!'
+                    content = f'X (<@{players[0]}>) won!'
                 elif winner == view.O:
-                    content = 'O won!'
+                    content = f'O (<@{players[1]}>) won!'
                 else:
                     content = "It's a tie!"
 
                 for child in view.children:
                     child.disabled = True
                 view.stop()
-            await interaction.response.edit_message(content=content, view=view)
+            await button_interaction.response.edit_message(content=content, view=view)
 
     class TicTacToe(disnake.ui.View):
         children: List[TicTacToeButton]
@@ -1554,7 +1566,47 @@ async def tictactoe_command(interaction):
                 return self.Tie
             return None
 
-    await interaction.response.send_message("Welcome to TicTacToe!", view=TicTacToe())
+    players = []
+    class GameChecker(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+            self.timeout = 300
+
+        @disnake.ui.button(label="Player 1", style=disnake.ButtonStyle.blurple)
+        async def player_one(self, button, button_interaction):
+            if button_interaction.author.id not in players:
+                players.append(button_interaction.author.id)
+                await button_interaction.response.send_message("Successfully joined the game!", ephemeral=True)
+            else:
+                await button_interaction.response.send_message("You have already joined the game!", ephemeral=True)
+                return
+            if len(players) == 2:
+                await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
+                self.stop()
+                return
+            
+            button.label = button_interaction.author.name
+            button.disabled = True
+            await interaction.edit_original_message(view=self)
+
+        @disnake.ui.button(label="Player 2", style=disnake.ButtonStyle.blurple)
+        async def player_two(self, button, button_interaction):
+            if button_interaction.author.id not in players:
+                players.append(button_interaction.author.id)
+                await button_interaction.response.send_message("Successfully joined the game!", ephemeral=True)
+            else:
+                await button_interaction.response.send_message("You have already joined the game!", ephemeral=True)
+                return
+            if len(players) == 2:
+                await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
+                self.stop()
+                return
+
+            button.label = button_interaction.author.name
+            button.disabled = True
+            await interaction.edit_original_message(view=self)
+
+    await interaction.response.send_message("Click to join the TicTacToe game", view=GameChecker())
     add_cooldown(interaction.author.id, "game", 3)
 
 @game_command.sub_command(name="trivia", description="Start a trivia game")
