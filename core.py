@@ -1639,7 +1639,7 @@ async def trivia_command(interaction):
         answer = random.choice(answers); answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_1(self, button, button_interaction):
-            if button_interaction.author != button_interaction.author:
+            if interaction.author != button_interaction.author:
                 await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                 return
 
@@ -1652,7 +1652,7 @@ async def trivia_command(interaction):
         answer = random.choice(answers); answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_2(self, button, button_interaction):
-            if button_interaction.author != button_interaction.author:
+            if interaction.author != button_interaction.author:
                 await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                 return
 
@@ -1665,7 +1665,7 @@ async def trivia_command(interaction):
         answer = random.choice(answers); answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_3(self, button, button_interaction):
-            if button_interaction.author != button_interaction.author:
+            if interaction.author != button_interaction.author:
                 await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                 return
 
@@ -1678,7 +1678,7 @@ async def trivia_command(interaction):
         answer = random.choice(answers); answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_4(self, button, button_interaction):
-            if button_interaction.author != button_interaction.author:
+            if interaction.author != button_interaction.author:
                 await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                 return
 
