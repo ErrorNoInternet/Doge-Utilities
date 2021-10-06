@@ -1476,7 +1476,7 @@ async def tictactoe_command(interaction):
                 return
 
             if button_interaction.author.id not in players:
-                await button_interaction.response.send_message("You are not a part of that TicTacToe game!", ephemeral=True)
+                await button_interaction.response.send_message("You did not join that TicTacToe game!", ephemeral=True)
                 return
 
             if view.current_player == view.X:
@@ -2599,8 +2599,14 @@ async def message_translate_command(interaction):
     try:
         text = interaction.target.content
         if text == "":
-            await interaction.edit_original_message(content="That message does not have any text!")
-            return
+            if len(interaction.target.embeds) > 0:
+                text = interaction.target.embeds[0].description
+                if type(text) == disnake.embeds._EmptyEmbed:
+                    await interaction.edit_original_message(content="That message does not have any text!")
+                    return
+            else:
+                await interaction.edit_original_message(content="That message does not have any text!")
+                return
         translator = googletrans.Translator()
         result = translator.translate(text, dest="en")
         embed = disnake.Embed(color=variables.embed_color)
