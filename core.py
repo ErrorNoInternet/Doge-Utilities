@@ -1476,7 +1476,7 @@ async def tictactoe_command(interaction):
                 return
 
             if button_interaction.author.id not in players:
-                await button_interaction.response.send_message("You are not a part of that TicTacToe game!")
+                await button_interaction.response.send_message("You are not a part of that TicTacToe game!", ephemeral=True)
                 return
 
             if view.current_player == view.X:
