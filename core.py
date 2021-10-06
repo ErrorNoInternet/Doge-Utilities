@@ -3064,7 +3064,10 @@ async def on_slash_command_error(interaction, error):
                     interaction_data += f"{sub_option.name}"
         formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
         formatted_error = formatted_error.replace("`", escaped_character)
-        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n```\n{formatted_error}```"
+        codeblock = "```\n"
+        if len(formatted_error) > 2000:
+            codeblock = ""
+        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n{codeblock}{formatted_error}{codeblock}"
         segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
         for user_id in variables.message_managers:
             sent = False
@@ -3074,7 +3077,7 @@ async def on_slash_command_error(interaction, error):
                         try:
                             if not sent:
                                 pager = Paginator(
-                                    color=disnake.Color.red(), title="Error Report", segments=segments,
+                                    color=disnake.Color.red(), title="Error Report", segments=segments, timeout=None,
                                 )
                                 await pager.start(FakeInteraction(member))
                                 sent = True
