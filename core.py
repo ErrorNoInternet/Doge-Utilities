@@ -1612,7 +1612,7 @@ async def tictactoe_command(interaction):
 @game_command.sub_command(name="trivia", description="Start a trivia game")
 async def trivia_command(interaction):
     await interaction.response.defer()
-    url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 33)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
+    url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 32)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
     response = requests.get(url).json()
     description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
     answers = response['results'][0]['incorrect_answers']
