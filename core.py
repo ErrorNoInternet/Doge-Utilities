@@ -1801,6 +1801,10 @@ async def mute_command(
 
 @client.user_command(name="Mute Member")
 async def user_mute_command(interaction):
+    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
+        pass
+    else:
+        await interaction.response.send_message(variables.no_permission_text); return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
         if "mute" in role.name.lower():
@@ -1822,6 +1826,10 @@ async def user_mute_command(interaction):
 
 @client.user_command(name="Unmute Member")
 async def user_unmute_command(interaction):
+    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
+        pass
+    else:
+        await interaction.response.send_message(variables.no_permission_text); return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
         if "mute" in role.name.lower():
