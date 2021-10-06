@@ -2998,7 +2998,7 @@ async def on_message(message):
             except:
                 pass
             try:
-                if "spam" not in message.channel.name:
+                if "spam" not in message.channel.name and "trash" not in message.channel.name:
                     if json.loads(database[f"spamming.toggle.{message.guild.id}"]):
                         try:
                             last_message_time = last_messages[message.author.id]
