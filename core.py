@@ -3136,7 +3136,7 @@ async def on_message(message):
             except:
                 pass
     last_messages[message.author.id] = time.time()
-   
+  
     afk_key = f"afk.{message.author.id}".encode("utf-8")
     if afk_key in database.keys():
         del database[afk_key]
@@ -3147,6 +3147,18 @@ async def on_message(message):
             user_name = "The user you mentioned"
             for user in client.users:
                 if user.id == mention.id:
+                    user_name = user.name
+            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{afk_status[1]}**")
+        except:
+            pass
+    if message.reference:
+        original_message = await message.channel.fetch_message(message.reference.message_id)
+        user_id = original_message.author.id
+        try:
+            afk_status = json.loads(database[f"afk.{user_id}"])
+            user_name = "The user you replied to"
+            for user in client.users:
+                if user.id == user_id:
                     user_name = user.name
             await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{afk_status[1]}**")
         except:
