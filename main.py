@@ -115,6 +115,11 @@ async def on_guild_join(guild):
     await core.on_guild_join(guild)
 
 @core.client.event
+async def on_error(event, _):
+    if event == "on_application_command":
+        return
+
+@core.client.event
 async def on_slash_command_error(interaction, error):
     await core.on_slash_command_error(interaction, error)
 

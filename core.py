@@ -161,7 +161,9 @@ class Paginator:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
-                self.current_page = 1
+                self.current_page = (self.current_page - 10) % len(self.embeds)
+                if self.current_page < 1:
+                    self.current_page = len(self.embeds)
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
             @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
@@ -192,7 +194,9 @@ class Paginator:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
-                self.current_page = len(self.embeds)
+                self.current_page = (self.current_page + 10) % (len(self.embeds)+1)
+                if self.current_page > len(self.embeds):
+                    self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
         self.view = PaginatorView
 
@@ -419,43 +423,48 @@ def generate_cooldown(command, cooldown_time):
 async def message_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
         await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
-        return
+        raise Exception("no permission")
 
     if not interaction.guild:
         await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
-        return
+        raise Exception("no permission")
 
 @client.before_user_command_invoke
 async def user_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
         await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
-        return
+        raise Exception("no permission")
 
     if not interaction.guild:
         await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
-        return
+        raise Exception("no permission")
 
 @client.before_slash_command_invoke
 async def slash_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
         await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
-        return
+        raise Exception("no permission")
 
     if not interaction.guild:
         await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
-        return
+        raise Exception("no permission")
 
     if interaction.data.name in variables.owner_commands and interaction.author.id not in variables.bot_owners:
         await interaction.response.send_message("You are not the owner of Doge Utilities!", ephemeral=True)
-        return
+        raise Exception("no permission")
 
     if get_cooldown(interaction.author.id, interaction.data.name) > 0:
         cooldown_string = generate_cooldown(interaction.data.name, get_cooldown(interaction.author.id, interaction.data.name))
         embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)
         await interaction.response.send_message(embed=embed, ephemeral=True)
-        return
+        raise Exception("no permission")
 
     variables.last_command = time.time()
+    if interaction.data.name != "afk":
+        afk_key = f"afk.{interaction.author.id}".encode("utf-8")
+        if afk_key in database.keys():
+            del database[afk_key]
+            await interaction.author.send("Your AFK has been removed!")
 
 @client.slash_command(name="help", description="Get started with Doge Utilities")
 async def help_command(interaction):
@@ -505,6 +514,27 @@ async def ping_command(interaction):
         color=variables.embed_color
     )
     await interaction.response.send_message(embed=embed)
+
+@client.slash_command(name="afk", description="Tell other users that you're currently AFK")
+async def afk_command(
+        interaction,
+        message: str = Param("Not specified", description="The reason why you are AFK")
+    ):
+    try:
+        current_status = database[f"afk.{interaction.author.id}"]
+    except:
+        current_status = None
+
+    if current_status:
+        await interaction.response.send_message("You are already AFK!", ephemeral=True)
+        return
+    else:
+        if len(message) > 1000:
+            await interaction.response.send_message("The specified message is too long!", ephemeral=True)
+            return
+
+        database[f"afk.{interaction.author.id}"] = json.dumps([round(time.time()), message])
+        await interaction.response.send_message(f"Your AFK has been set to **{message}**")
 
 @client.slash_command(name="links", description="Get links for Doge Utilities")
 async def links_command(_):
@@ -1387,7 +1417,7 @@ async def stackoverflow_command(
             embed = disnake.Embed(title="StackOverflow", description=f"No search results found for **{text}**", color=disnake.Color.red())
             await interaction.edit_original_message(embed=embed); return
         final_results = response["items"][:5]
-        embed = disnake.Embed(title="StackOverflow", description=f"Here are the top **{len(final_results)}** results for **{text}**", color=variables.embed_color)
+        embed = disnake.Embed(title="StackOverflow", description=f"Here are the **top {len(final_results)}** results for **{text}**", color=variables.embed_color)
         for result in final_results:
             tags = ""
             for tag in result['tags'][:4]:
@@ -1421,7 +1451,7 @@ async def blacklist_list_command(interaction):
     for user in raw_array:
         blacklisted_users.append(f"{user} (<@{user}>)")
     embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
-    await interaction.response.send_message(embed=embed)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 @blacklist_command.sub_command(name="add", description="Owner Command")    
 async def blacklist_add_command(
@@ -1505,9 +1535,9 @@ async def tictactoe_command(interaction):
             winner = view.check_board_winner()
             if winner is not None:
                 if winner == view.X:
-                    content = f'X (<@{players[0]}>) won!'
+                    content = f'<@{players[0]}> (X) won!'
                 elif winner == view.O:
-                    content = f'O (<@{players[1]}>) won!'
+                    content = f'<@{players[1]}> (O) won!'
                 else:
                     content = "It's a tie!"
 
@@ -1574,6 +1604,9 @@ async def tictactoe_command(interaction):
 
         @disnake.ui.button(label="Player 1", style=disnake.ButtonStyle.blurple)
         async def player_one(self, button, button_interaction):
+            button.label = button_interaction.author.name
+            button.disabled = True
+
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
                 await button_interaction.response.send_message("Successfully joined the game!", ephemeral=True)
@@ -1581,16 +1614,19 @@ async def tictactoe_command(interaction):
                 await button_interaction.response.send_message("You have already joined the game!", ephemeral=True)
                 return
             if len(players) == 2:
+                await interaction.edit_original_message(view=self, content="The game starts in **3 seconds**!")
+                await asyncio.sleep(3)
                 await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
                 self.stop()
                 return
-            
-            button.label = button_interaction.author.name
-            button.disabled = True
+
             await interaction.edit_original_message(view=self)
 
         @disnake.ui.button(label="Player 2", style=disnake.ButtonStyle.blurple)
         async def player_two(self, button, button_interaction):
+            button.label = button_interaction.author.name
+            button.disabled = True
+
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
                 await button_interaction.response.send_message("Successfully joined the game!", ephemeral=True)
@@ -1598,12 +1634,12 @@ async def tictactoe_command(interaction):
                 await button_interaction.response.send_message("You have already joined the game!", ephemeral=True)
                 return
             if len(players) == 2:
+                await interaction.edit_original_message(view=self, content="The game starts in **3 seconds**!")
+                await asyncio.sleep(3)
                 await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
                 self.stop()
                 return
 
-            button.label = button_interaction.author.name
-            button.disabled = True
             await interaction.edit_original_message(view=self)
 
     await interaction.response.send_message("Click to join the TicTacToe game", view=GameChecker())
@@ -2434,6 +2470,45 @@ async def discriminator_command(
     await pager.start(interaction)
     add_cooldown(interaction.author.id, "discriminator", 5)
 
+@client.slash_command(name="warn", description="Wan a member in your server")
+async def warn_command(
+        interaction,
+        member: disnake.Member = Param(description="The member you want to warn"),
+        warning: str = Param("Not specified", description="The warning you want to give the member (use 'reset' to reset the warnings)"),
+    ):
+    if interaction.author.guild_permissions.kick_members and interaction.author.guild_permissions.ban_members:
+        pass
+    elif interaction.author.id in variables.permission_override:
+        pass
+    else:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    
+    if warning.endswith("."):
+        warning = warning[:-1]
+    try:
+        warnings = json.loads(database[f"warnings.{member.id}"])
+    except:
+        warnings = {}
+    try:
+        guild_warnings = warnings[str(interaction.guild.id)]
+    except:
+        guild_warnings = 0
+    guild_warnings += 1
+    if warning.lower() == "reset":
+        guild_warnings = 0
+    warnings[str(interaction.guild.id)] = guild_warnings
+    database[f"warnings.{member.id}"] = json.dumps(warnings)
+    if warning.lower() == "reset":
+        await interaction.response.send_message(f"**{member}**'s warnings have been successfully reset", ephemeral=True)
+        return
+    try:
+        await member.send(f"You have been warned in **{interaction.guild.name}**: {warning}. You now have **{guild_warnings} {'warning' if guild_warnings == 1 else 'warnings'}** in this server.")
+        await interaction.response.send_message(embed=disnake.Embed(description=f":white_check_mark: Successfully warned **{member}** (**{guild_warnings}**)", color=variables.embed_color))
+    except:
+        await interaction.response.send_message(embed=disnake.Embed(description=f":x: Unable to warn **{member}**", color=variables.embed_color))
+    add_cooldown(interaction.author.id, "warn", 5)
+
 @client.slash_command(name="kick", description="Kick a member from your server")
 async def kick_command(
         interaction,
@@ -3024,6 +3099,21 @@ async def on_message(message):
             except:
                 pass
     last_messages[message.author.id] = time.time()
+   
+    afk_key = f"afk.{message.author.id}".encode("utf-8")
+    if afk_key in database.keys():
+        del database[afk_key]
+        await message.author.send("Your AFK has been removed!")
+    for mention in message.mentions:
+        try:
+            afk_status = json.loads(database[f"afk.{mention.id}"])
+            user_name = "The user you mentioned"
+            for user in client.users:
+                if user.id == mention.id:
+                    user_name = user.name
+            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{afk_status[1]}**")
+        except:
+            pass
     
     if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id not in variables.bot_owners:
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
