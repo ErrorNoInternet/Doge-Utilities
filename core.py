@@ -2505,11 +2505,11 @@ async def warn_command(
         if member.id == interaction.author.id:
             await interaction.response.send_message("You cannot warn yourself!", ephemeral=True)
             return
-        if member.guild_permissions.administrator:
-            await interaction.response.send_message("You cannot warn an administrator!", ephemeral=True)
-            return
         if member.bot:
             await interaction.response.send_message("You cannot warn a bot!", ephemeral=True)
+            return
+        if member.guild_permissions.administrator:
+            await interaction.response.send_message("You cannot warn an administrator!", ephemeral=True)
             return
     warnings[str(interaction.guild.id)] = guild_warnings
     database[f"warnings.{member.id}"] = json.dumps(warnings)
