@@ -2470,7 +2470,7 @@ async def discriminator_command(
     await pager.start(interaction)
     add_cooldown(interaction.author.id, "discriminator", 5)
 
-@client.slash_command(name="warn", description="Wan a member in your server")
+@client.slash_command(name="warn", description="Warn a member in your server")
 async def warn_command(
         interaction,
         member: disnake.Member = Param(description="The member you want to warn"),
