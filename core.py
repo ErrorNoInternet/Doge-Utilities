@@ -3151,18 +3151,6 @@ async def on_message(message):
             await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{afk_status[1]}**")
         except:
             pass
-    if message.reference:
-        original_message = await message.channel.fetch_message(message.reference.message_id)
-        user_id = original_message.author.id
-        try:
-            afk_status = json.loads(database[f"afk.{user_id}"])
-            user_name = "The user you replied to"
-            for user in client.users:
-                if user.id == user_id:
-                    user_name = user.name
-            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{afk_status[1]}**")
-        except:
-            pass
     
     if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id not in variables.bot_owners:
         await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
