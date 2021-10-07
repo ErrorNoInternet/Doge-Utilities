@@ -164,6 +164,8 @@ class Paginator:
                 self.current_page = (self.current_page - 10) % len(self.embeds)
                 if self.current_page < 1:
                     self.current_page = len(self.embeds)
+                if self.current_page == 0:
+                    self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
             @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
@@ -196,6 +198,8 @@ class Paginator:
 
                 self.current_page = (self.current_page + 10) % (len(self.embeds)+1)
                 if self.current_page > len(self.embeds):
+                    self.current_page = 1
+                if self.current_page == 0:
                     self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
         self.view = PaginatorView
