@@ -522,7 +522,7 @@ async def ping_command(interaction):
 @client.slash_command(name="afk", description="Tell other users that you're currently AFK")
 async def afk_command(
         interaction,
-        message: str = Param("Not specified", description="The reason why you are AFK")
+        message: str = Param("I am AFK", description="The reason why you are AFK")
     ):
     try:
         current_status = database[f"afk.{interaction.author.id}"]
