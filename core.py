@@ -196,7 +196,7 @@ class Paginator:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
-                self.current_page = (self.current_page + 10) % (len(self.embeds)+1)
+                self.current_page = (self.current_page + 10) % len(self.embeds)
                 if self.current_page > len(self.embeds):
                     self.current_page = 1
                 if self.current_page == 0:
