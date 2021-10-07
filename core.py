@@ -3095,7 +3095,7 @@ async def on_message(message):
                     for word in insults:
                         if word.lower() in message.content.lower():
                             await message.delete()
-                            await message.author.send(f"Please do not use that word (**{word.lower()}**)!")
+                            await message.author.send(f'Please do not use the word **"{word.lower}"** in this server!')
                             return
             except:
                 pass
