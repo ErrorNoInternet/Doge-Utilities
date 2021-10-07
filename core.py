@@ -697,7 +697,7 @@ async def version_command(interaction):
             pass
     embed = disnake.Embed(title="Bot Version", description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
-    add_cooldown(interaction.author.id, "version", 5)
+    add_cooldown(interaction.author.id, "get", 3)
 
 @get_command.sub_command(name="uptime", description="Get Doge Utilities' current uptime")
 async def uptime_command(interaction):
