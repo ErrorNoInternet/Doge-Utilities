@@ -2247,8 +2247,13 @@ async def snipe_command(interaction):
         channel_name = random_message[2]
         message_sent_time = random_message[3]
         message_data = random_message[4]
+        if message_data.startswith("URL."):
+            message_data = ""
         embed = disnake.Embed(description=message_data, color=variables.embed_color, timestamp=message_sent_time)
-        embed.set_author(name=message_author, icon_url=message_author_avatar); embed.set_footer(text=f"Sent in #{channel_name}")
+        embed.set_author(name=message_author, icon_url=message_author_avatar)
+        embed.set_footer(text=f"Sent in #{channel_name}")
+        if message_data.startswith("URL."):
+            embed.set_image(url=message_data[4:])
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("There is nothing to snipe!")
@@ -3036,15 +3041,18 @@ async def on_message_delete(message, *_):
     if message_data == "":
         if len(message.embeds) > 0:
             message_data = message.embeds[0].description
-    if message_data != "" or type(message_data) != disnake.Embed.Empty:
-        snipes.append([
-            f"{message.author.name}#{message.author.discriminator}",
-            message.author.avatar,
-            message.channel.name,
-            datetime.datetime.now(),
-            message_data,
-        ])
-        snipe_list[message.guild.id] = snipes
+            if type(message_data) == disnake.embeds._EmptyEmbed:
+                if len(message.attachments) > 0:
+                    message_data = "URL." + message.attachments[0].url
+
+    snipes.append([
+        f"{message.author.name}#{message.author.discriminator}",
+        message.author.avatar,
+        message.channel.name,
+        datetime.datetime.now(),
+        message_data,
+    ])
+    snipe_list[message.guild.id] = snipes
 
 async def on_message(message):
     if message.author.bot or not message.guild:
