@@ -2483,6 +2483,9 @@ async def warn_command(
     else:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
+    if member.guild_permissions.administrator:
+        await interaction.response.send_message("You cannot warn an administrator!", ephemeral=True)
+        return
     
     if warning.endswith("."):
         warning = warning[:-1]
