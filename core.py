@@ -2505,8 +2505,6 @@ async def warn_command(
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
     
-    if warning.endswith("."):
-        warning = warning[:-1]
     try:
         warnings = json.loads(database[f"warnings.{member.id}"])
     except:
