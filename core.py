@@ -2241,22 +2241,34 @@ async def welcome_status_command(interaction):
 @client.slash_command(name="snipe", description="Bring deleted messages back to life")
 async def snipe_command(interaction):
     try:
-        random_message = random.choice(snipe_list[interaction.guild.id])
-        message_author = random_message[0]
-        message_author_avatar = random_message[1]
-        channel_name = random_message[2]
-        message_sent_time = random_message[3]
-        message_data = random_message[4]
-        if message_data.startswith("URL."):
-            message_data = ""
-        embed = disnake.Embed(description=message_data, color=variables.embed_color, timestamp=message_sent_time)
-        embed.set_author(name=message_author, icon_url=message_author_avatar)
-        embed.set_footer(text=f"Sent in #{channel_name}")
-        if message_data.startswith("URL."):
-            embed.set_image(url=message_data[4:])
-        await interaction.response.send_message(embed=embed)
+        if snipe_list[interaction.guild.id] == []:
+            await interaction.response.send_message("There is nothing to snipe!")
+            return
     except:
         await interaction.response.send_message("There is nothing to snipe!")
+        return
+
+    random_message = random.choice(snipe_list[interaction.guild.id])
+    message_author = random_message[0]
+    message_author_avatar = random_message[1]
+    channel_name = random_message[2]
+    message_sent_time = random_message[3]
+    message_data = random_message[4]
+    image = False
+    if message_data.startswith("https://"):
+        safe = False
+        extensions = ["jpg", "jpeg", "png", "gif", "webp"]
+        for extension in extensions:
+            if message_data.endswith("." + extension):
+                safe = True
+        if safe:
+            image = True
+    embed = disnake.Embed(description=message_data if not image else '', color=variables.embed_color, timestamp=message_sent_time)
+    embed.set_author(name=message_author, icon_url=message_author_avatar)
+    embed.set_footer(text=f"Sent in #{channel_name}")
+    if image:
+        embed.set_image(url=message_data)
+    await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="server", description="View information about this server")
 async def server_command(_):
@@ -2522,10 +2534,12 @@ async def warn_command(
         await interaction.response.send_message(f"**{member}**'s warnings have been successfully reset", ephemeral=True)
         return
     try:
-        await member.send(f"You have been warned in **{interaction.guild.name}**: {warning}. You now have **{guild_warnings} {'warning' if guild_warnings == 1 else 'warnings'}** in this server.")
-        await interaction.response.send_message(embed=disnake.Embed(description=f":white_check_mark: Successfully warned **{member}** (**{guild_warnings}**)", color=variables.embed_color))
+        warning_embed = disnake.Embed(title="Warning", description=warning, color=disnake.Color.yellow())
+        warning_embed.set_footer(text=f"You now have {guild_warnings} {'warning' if guild_warnings == 1 else 'warnings'} in {interaction.guild.name}")
+        await member.send(embed=warning_embed)
+        await interaction.response.send_message(embed=disnake.Embed(description=f"Successfully warned **{member}** (**{guild_warnings}**)", color=disnake.Color.green()))
     except:
-        await interaction.response.send_message(embed=disnake.Embed(description=f":x: Unable to warn **{member}**", color=variables.embed_color))
+        await interaction.response.send_message(embed=disnake.Embed(description=f"Unable to warn **{member}**", color=disnake.Color.red()))
     add_cooldown(interaction.author.id, "warn", 5)
 
 @client.slash_command(name="kick", description="Kick a member from your server")
@@ -2539,15 +2553,15 @@ async def kick_command(
             await member.kick(reason=reason)
             await interaction.response.send_message(
                 embed=disnake.Embed(
-                    color=variables.embed_color,
-                    description=f":white_check_mark: **{member}** has been **successfully kicked**",
+                    color=disnake.Color.green(),
+                    description=f"**{member}** has been **successfully kicked**",
                 )
             )
         except:
             await interaction.response.send_message(
                 embed=disnake.Embed(
-                    color=variables.embed_color,
-                    description=f":x: Unable to kick **{member}**",
+                    color=disnake.Color.red(),
+                    description=f"Unable to kick **{member}**",
                 )
             )
     else:
@@ -2579,15 +2593,15 @@ async def ban_command(
                 await member.ban(reason=reason, delete_message_days=0)
                 await interaction.response.send_message(
                     embed=disnake.Embed(
-                        color=variables.embed_color,
-                        description=f":white_check_mark: **{member}** has been **successfully banned**",
+                        color=disnake.Color.green(),
+                        description=f"**{member}** has been **successfully banned**",
                     )
                 )
             except:
                 await interaction.response.send_message(
                     embed=disnake.Embed(
-                        color=variables.embed_color,
-                        description=f":x: Unable to ban **{member}**",
+                        color=disnake.Color.red(),
+                        description=f"Unable to ban **{member}**",
                     )
                 )
     if not found:
@@ -2600,15 +2614,15 @@ async def ban_command(
             await interaction.guild.ban(user, reason=reason, delete_message_days=0)
             await interaction.response.send_message(
                 embed=disnake.Embed(
-                    color=variables.embed_color,
-                    description=f":white_check_mark: **{user}** has been **successfully banned**",
+                    color=disnake.Color.green(),
+                    description=f"**{user}** has been **successfully banned**",
                 )
             )
         except:
             await interaction.response.send_message(
                 embed=disnake.Embed(
-                    color=variables.embed_color,
-                    description=f":x: Unable to ban **{user}**",
+                    color=disnake.Color.red(),
+                    description=f"Unable to ban **{user}**",
                 )
             )
 
@@ -2633,15 +2647,15 @@ async def unban_command(
         await interaction.guild.unban(user)
         await interaction.response.send_message(
             embed=disnake.Embed(
-                color=variables.embed_color,
-                description=f":white_check_mark: **{user}** has been **successfully unbanned**",
+                color=disnake.Color.green(),
+                description=f"**{user}** has been **successfully unbanned**",
             )
         )
     except:
         await interaction.response.send_message(
             embed=disnake.Embed(
-                color=variables.embed_color,
-                description=f":x: Unable to unban **{user}**",
+                color=disnake.Color.red(),
+                description=f"Unable to unban **{user}**",
             )
         )
 
@@ -3041,18 +3055,19 @@ async def on_message_delete(message, *_):
     if message_data == "":
         if len(message.embeds) > 0:
             message_data = message.embeds[0].description
-            if type(message_data) == disnake.embeds._EmptyEmbed:
-                if len(message.attachments) > 0:
-                    message_data = "URL." + message.attachments[0].url
+    if message_data == "" or message_data == disnake.embeds._EmptyEmbed:
+        if len(message.attachments) > 0:
+            message_data = message.attachments[0].url
 
-    snipes.append([
-        f"{message.author.name}#{message.author.discriminator}",
-        message.author.avatar,
-        message.channel.name,
-        datetime.datetime.now(),
-        message_data,
-    ])
-    snipe_list[message.guild.id] = snipes
+    if message_data != "" and message_data != disnake.embeds._EmptyEmbed:
+        snipes.append([
+            f"{message.author.name}#{message.author.discriminator}",
+            message.author.avatar,
+            message.channel.name,
+            datetime.datetime.now(),
+            message_data,
+        ])
+        snipe_list[message.guild.id] = snipes
 
 async def on_message(message):
     if message.author.bot or not message.guild:
