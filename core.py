@@ -200,7 +200,7 @@ class Paginator:
                 if self.current_page > len(self.embeds):
                     self.current_page = 1
                 if self.current_page == 0:
-                    self.current_page = 1
+                    self.current_page = len(self.embeds)
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
         self.view = PaginatorView
 
