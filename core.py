@@ -1224,7 +1224,7 @@ async def clear_command(
         await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**")
     else:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
-    add_cooldown(interaction.author.id, "clear", 10)
+    add_cooldown(interaction.author.id, "clear", 5)
 
 @client.slash_command(name="text", description="Change what text looks like")
 async def text_command(_):
