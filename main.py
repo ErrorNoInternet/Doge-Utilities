@@ -118,6 +118,8 @@ async def on_guild_join(guild):
 async def on_error(event, _):
     if event == "on_application_command":
         return
+    else:
+        print(f"Uncaught exception in {event}")
 
 @core.client.event
 async def on_slash_command_error(interaction, error):

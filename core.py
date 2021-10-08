@@ -45,7 +45,7 @@ class FakeResponse:
         self.sent_message = None
 
     async def defer(self, ephemeral=None):
-        self.sent_message = await self.user.send("I am thinking...")
+        self.sent_message = await self.user.send("Doge Utilities is thinking...")
     
     async def send_message(self, content=None, embed=None, view=None, ephemeral=None):
         self.sent_message = await self.user.send(content=content, embed=embed, view=view)
@@ -1605,7 +1605,7 @@ async def tictactoe_command(interaction):
             return None
 
     players = []
-    class GameChecker(disnake.ui.View):
+    class GameLauncher(disnake.ui.View):
         def __init__(self):
             super().__init__()
             self.timeout = 300
@@ -1650,7 +1650,7 @@ async def tictactoe_command(interaction):
 
             await interaction.edit_original_message(view=self)
 
-    await interaction.response.send_message("Click to join the TicTacToe game", view=GameChecker())
+    await interaction.response.send_message("Click to join the TicTacToe game", view=GameLauncher())
     add_cooldown(interaction.author.id, "game", 3)
 
 @game_command.sub_command(name="trivia", description="Start a trivia game")
