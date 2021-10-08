@@ -486,7 +486,7 @@ async def qr_command(
     ):
     await interaction.response.defer()
     if border > 32:
-        await interaction.edit_original_message(content="The border size must be smaller than or equal to 32")
+        await interaction.edit_original_message(content="The border size must be smaller than 32!")
         return
     try:
         qr_code = qrcode.QRCode(border=border)
