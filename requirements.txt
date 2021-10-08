@@ -2,6 +2,7 @@ pytz
 redis
 flask
 psutil
+qrcode
 pillow
 topggpy
 disnake
@@ -10,3 +11,4 @@ simpleeval
 python-dateutil
 googletrans==4.0.0rc1
 requests-oauthlib==0.5.0
+

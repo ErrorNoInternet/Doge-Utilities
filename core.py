@@ -8,6 +8,7 @@ import time
 import math
 import redis
 import extra
+import qrcode
 import server
 import base64
 import string
@@ -474,6 +475,27 @@ async def slash_command_handler(interaction):
 async def help_command(interaction):
     await help_paginator.start(interaction)
     add_cooldown(interaction.author.id, "help", 60)
+
+@client.slash_command(name="qr", description="Generate a QR code with custom data")
+async def qr_command(
+        interaction,
+        data: str = Param(description="The data you want to encode"),
+        border: int = Param(4, description="The size of the QR code's border"),
+        foreground: str = Param("black", description="The foreground color of the QR code"),
+        background: str = Param("white", description="The background color of the QR code"),
+    ):
+    try:
+        qr_code = qrcode.QRCode(border=border)
+        qr_code.add_data(data)
+        image = qr_code.make_image(fill_color=foreground, back_color=background)
+        image.save("images/qr.png")
+
+        embed = disnake.Embed(title="QR Code", color=variables.embed_color)
+        embed.set_image(url="attachment://qr.png")
+        await interaction.response.send_message(embed=embed, file=disnake.File("images/qr.png"))
+        add_cooldown(interaction.author.id, "qr", 10)
+    except:
+        await interaction.response.send_message("Unable to create a QR code")
 
 @client.slash_command(name="currency", description="Convert currencies")
 async def currency_command(_):
