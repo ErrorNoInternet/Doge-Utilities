@@ -2994,6 +2994,32 @@ def generate_color(color_code):
     else:
         return 1
 
+async def mute_member(member, duration):
+    mute_role = None; exists = False
+    for role in member.guild.roles:
+        if "mute" in role.name.lower():
+            mute_role = role; exists = True
+    if not exists:
+        return
+
+    if duration == 0:
+        try:
+            await member.add_roles(mute_role)
+        except:
+            pass
+    else:
+        try:
+            moderation_data = json.loads(database["mute." + str(member.guild.id)])
+        except:
+            database["mute." + str(member.guild.id)] = json.dumps([])
+            moderation_data = json.loads(database["mute." + str(member.guild.id)])
+        try:
+            await member.add_roles(mute_role)
+            moderation_data.append([member.id, time.time(), duration])
+            database["mute." + str(member.guild.id)] = json.dumps(moderation_data)
+        except:
+            pass
+
 async def send_user_message(user_id, message):
     for guild in client.guilds:
         try:
@@ -3182,6 +3208,7 @@ async def on_message(message):
                             if strikes >= strike_limit:
                                 await message.delete()
                                 await message.author.send("Stop spamming!")
+                                await mute_member(message.author, 0.16)
                                 return
             except:
                 pass
@@ -3196,6 +3223,7 @@ async def on_message(message):
                     if mentions > limit:
                         await message.delete()
                         await message.author.send("Please do not spam mentions in your message!")
+                        await mute_member(message.author, 0.16)
                         return
             except:
                 pass
