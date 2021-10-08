@@ -189,6 +189,7 @@ def web_dashboard():
         toggle_insults_filter_function = f"toggleFilter('{token}', 'insults', '{guild.id}')"
         toggle_spam_filter_function = f"toggleFilter('{token}', 'spam', '{guild.id}')"
         toggle_links_filter_function = f"toggleFilter('{token}', 'links', '{guild.id}')"
+        toggle_mention_filter_function = f"toggleFilter('{token}', 'mention', '{guild.id}')"
         bots = 0
         users = 0
         for member in guild.members:
@@ -216,6 +217,11 @@ def web_dashboard():
             links_filter = json.loads(core.database[f"links.toggle.{guild.id}"])
         except:
             pass
+        mention_filter = 0
+        try:
+            mention_filter = json.loads(core.database[f"mention.toggle.{guild.id}"])
+        except:
+            pass
         server_dashboard += f"<h2 class='serverTitle' id='{guild.id}'>{guild.name}</h2>"
         server_dashboard += f"<p style='margin-top: 0;'><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)</p>"
         server_dashboard += f'<button style="margin-top: 20; background-color: {colors[raid_protection]};" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_raid_protection_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
@@ -224,6 +230,7 @@ def web_dashboard():
         server_dashboard += f'<button style="margin-top: 5;" id="insults-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_insults_filter_function}">Insults: {"Enabled" if insults_filter == 1 else "Disabled"}</button>'
         server_dashboard += f'<button style="margin-top: 0;" id="spam-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_spam_filter_function}">Spam: {"Enabled" if spam_filter == 1 else "Disabled"}</button>'
         server_dashboard += f'<button style="margin-top: 0;" id="links-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_links_filter_function}">Links: {"Enabled" if links_filter == 1 else "Disabled"}</button>'
+        server_dashboard += f'<button style="margin-top: 0;" id="mention-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_mention_filter_function}">Mention: {"Enabled" if mention_filter == 1 else "Disabled"}</button>'
         server_dashboard += "<hr class='separator'>"
 
     return load_file("web_dashboard.html", replace={"(profile)": profile, "(servers)": servers, "(server_dashboard)": server_dashboard})
@@ -366,6 +373,8 @@ def toggle_filter_settings(token, name, server):
         filter_name = "spamming"
     elif name == "links":
         filter_name = "links"
+    elif name == "mention":
+        filter_name = "mention"
     if filter_name == "":
         flask.abort(404)
 

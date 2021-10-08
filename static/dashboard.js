@@ -33,6 +33,8 @@ function toggleFilter(token, name, data) {
 			filterName = "Spam"
 		} else if (name == "links") {
 			filterName = "Links"
+		} else if (name == "mention") {
+			filterName = "Mention"
 		}
 		var button = document.getElementById(`${name}-filter-button.${data}`)
 		button.innerHTML = `${filterName}: ${currentStatus}`

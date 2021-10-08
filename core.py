@@ -1030,7 +1030,7 @@ async def permissions_command(
     if member == 0:
         member = interaction.author
     
-    permission_list = build_permissions(interaction.author)
+    permission_list = build_permissions(member)
     embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{member.name}#{member.discriminator}**\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
@@ -1217,11 +1217,11 @@ async def clear_command(
     if interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         await interaction.response.defer(ephemeral=True)
         try:
-            await interaction.channel.purge(limit=count)
+            messages = len(await interaction.channel.purge(limit=count))
         except:
             await interaction.edit_original_message(content="Unable to clear messages")
             return
-        await interaction.edit_original_message(content=f"Successfully deleted **{count} {'message' if count == 1 else 'messages'}**")
+        await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**")
     else:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
     add_cooldown(interaction.author.id, "clear", 10)
@@ -1388,14 +1388,18 @@ async def nickname_command(
         nickname: str = Param(description="The new nickname"),
         member: disnake.Member = Param(0, description="The target member"),
     ):
-    if member != 0:
+    if member == 0:
+        member = interaction.author
+    if member.id != interaction.author.id:
         if not interaction.author.guild_permissions.manage_nicknames and interaction.author.id not in variables.permission_override:
             await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
             return
-    else:
-        member = interaction.author
 
-    try:        
+    try:
+        if member.id == interaction.author.id:
+            if not member.guild_permissions.change_nickname:
+                await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+                return
         await member.edit(nick=nickname)
         await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
         add_cooldown(interaction.author.id, "nickname", 5)
@@ -1470,7 +1474,7 @@ async def blacklist_add_command(
     current_users = json.loads(database["blacklist"])
     current_users.append(user_id)
     database["blacklist"] = json.dumps(current_users)
-    await interaction.response.send_message("Successfully added user to blacklist")
+    await interaction.response.send_message("Successfully added user to blacklist", ephemeral=True)
 
 @blacklist_command.sub_command(name="remove", description="Owner Command")
 async def blacklist_remove_command(
@@ -1488,7 +1492,7 @@ async def blacklist_remove_command(
     except:
         pass
     database["blacklist"] = json.dumps(current_users)
-    await interaction.response.send_message("Successfully removed user from blacklist")
+    await interaction.response.send_message("Successfully removed user from blacklist", ephemeral=True)
 
 @client.slash_command(name="game", description="Start a fun game")
 async def game_command(_):
@@ -2001,6 +2005,54 @@ async def links_filter_status_command(interaction):
     except:
         pass
     await interaction.response.send_message(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
+
+@filter_command.sub_command_group(name="mention", description="Manage the mention spam filter")
+async def mention_command(_):
+    pass
+
+@mention_command.sub_command(name="enable", description="Enable the mention spam filter")
+async def mention_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    database[f"mention.toggle.{interaction.guild.id}"] = 1
+    await interaction.response.send_message("The mention filter has been successfully **enabled**")
+
+@mention_command.sub_command(name="disable", description="Disable the mention spam filter")
+async def mention_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    database[f"mention.toggle.{interaction.guild.id}"] = 0
+    await interaction.response.send_message("The mention filter has been successfully **disabled**")
+
+@mention_command.sub_command(name="set", description="Set the limit for the mention spam filter")
+async def mention_set_command(
+        interaction,
+        limit: int = Param(description="The limit you want to set"),
+    ):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    database[f"mention.limit.{interaction.guild.id}"] = limit
+    await interaction.response.send_message(f"The mention filter limit has been set to **{limit} {'mention' if limit == 1 else 'mentions'}** per message")
+
+@mention_command.sub_command(name="status", description="See the current status for the mention spam filter")
+async def mention_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    value = 0
+    try:
+        value = json.loads(database[f"mention.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    limit = 10
+    try:
+        limit = json.loads(database[f"mention.limit.{interaction.guild.id}"])
+    except:
+        pass
+    await interaction.response.send_message(f"The mention spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
 
 @filter_command.sub_command_group(name="spam", description="Manage the spam filter")
 async def spam_command(_):
@@ -3108,7 +3160,7 @@ async def on_message(message):
             except:
                 pass
             try:
-                if "spam" not in message.channel.name and "trash" not in message.channel.name:
+                if "spam" not in message.channel.name.lower() and "trash" not in message.channel.name.lower():
                     if json.loads(database[f"spamming.toggle.{message.guild.id}"]):
                         try:
                             last_message_time = last_messages[message.author.id]
@@ -3131,6 +3183,20 @@ async def on_message(message):
                                 await message.delete()
                                 await message.author.send("Stop spamming!")
                                 return
+            except:
+                pass
+            try:
+                if json.loads(database[f"mention.toggle.{message.guild.id}"]):
+                    limit = 10
+                    try:
+                        limit = json.loads(database[f"mention.limit.{message.guild.id}"])
+                    except:
+                        pass
+                    mentions = len(message.raw_mentions)
+                    if mentions > limit:
+                        await message.delete()
+                        await message.author.send("Please do not spam mentions in your message!")
+                        return
             except:
                 pass
     last_messages[message.author.id] = time.time()
