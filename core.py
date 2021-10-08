@@ -480,7 +480,7 @@ async def help_command(interaction):
 async def qr_command(
         interaction,
         data: str = Param(description="The data you want to encode"),
-        border: int = Param(4, description="The size of the QR code's border"),
+        border: int = Param(3, description="The size of the QR code's border"),
         foreground: str = Param("black", description="The foreground color of the QR code"),
         background: str = Param("white", description="The background color of the QR code"),
     ):
