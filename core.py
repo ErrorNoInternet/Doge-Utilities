@@ -2449,6 +2449,21 @@ async def server_information_command(interaction):
 async def logging_command(_):
     pass
 
+@logging_command.sub_command(name="status", description="See the current status of this server's log")
+async def logging_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    channel = None
+    try:
+        channel = database[f"logging.{interaction.guild.id}"]
+    except:
+        pass
+    if channel == None:
+        await interaction.response.send_message("This server does not have logging configured")
+    else:
+        await interaction.response.send_message(f"This server's log channel is set to <#{channel}>")
+
 @logging_command.sub_command(name="set", description="Set the logging channel for your server")
 async def logging_set_command(
         interaction,
