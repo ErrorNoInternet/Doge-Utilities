@@ -166,6 +166,8 @@ def web_dashboard():
     for user in core.client.users:
         if user.id == int(user_data['id']):
             target_user = user
+    if target_user == None:
+        return load_file("no_servers.html", replace={"(invite)": variables.bot_invite_link})
 
     mutual_guilds = []
     for user_guild in user_guilds:
@@ -175,6 +177,8 @@ def web_dashboard():
                     if member.id == int(user_data["id"]):
                         if member.guild_permissions.administrator:
                             mutual_guilds.append(guild)
+    if mutual_guilds == []:
+        return load_file("no_servers.html", replace={"(invite)": variables.bot_invite_link})
 
     profile = f"<img class='userIcon' src='{target_user.avatar}'><p>{target_user}</p>"
 
