@@ -160,7 +160,11 @@ def web_dashboard():
         token = new_token
     else:
         user_id = user_ids[ip_address]
-        token = user_tokens[user_id]
+        try:
+            token = user_tokens[user_id]
+        except:
+            del user_ids[ip_address]
+            return flask.redirect(flask.url_for("web_authenticate", _scheme=URL_SCHEME, _external=True))
 
     target_user = None
     for user in core.client.users:
