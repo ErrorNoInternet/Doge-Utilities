@@ -2456,7 +2456,7 @@ async def logging_status_command(interaction):
         return
     channel = None
     try:
-        channel = database[f"logging.{interaction.guild.id}"]
+        channel = json.loads(database[f"logging.{interaction.guild.id}"])
     except:
         pass
     if channel == None:
@@ -3027,7 +3027,7 @@ def evaluate_expression(expression):
 
 async def log_message(guild, message):
     try:
-        log_channel = database[f"logging.{guild.id}"]
+        log_channel = json.loads(database[f"logging.{guild.id}"])
         for channel in guild.channels:
             if channel.id == log_channel:
                 await channel.send(message)
