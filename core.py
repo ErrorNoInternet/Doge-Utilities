@@ -2445,6 +2445,32 @@ async def server_information_command(interaction):
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 3)
 
+@client.slash_command(name="logging", description="Manage the log channel for your server")
+async def logging_command(_):
+    pass
+
+@logging_command.sub_command(name="set", description="Set the logging channel for your server")
+async def logging_set_command(
+        interaction,
+        channel: disnake.channel.TextChannel = Param(description="The channel you want the bot to log messages to"),
+    ):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    database[f"logging.{interaction.guild.id}"] = channel.id
+    await interaction.response.send_message(f"This server's log channel has been set to <#{channel.id}>")
+
+@logging_command.sub_command(name="disable", description="Disable logging for your server")
+async def logging_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    try:
+        del database[f"logging.{interaction.guild.id}"]
+    except:
+        pass
+    await interaction.response.send_message("Logging has been successfully disabled for this server")
+
 @client.slash_command(name="github", description="Fetch a repository on GitHub")
 async def github_command(
         interaction,
@@ -2984,6 +3010,15 @@ def evaluate_expression(expression):
         answer = "Unknown Answer"
     return answer
 
+async def log_message(guild, message):
+    try:
+        log_channel = database[f"logging.{guild.id}"]
+        for channel in guild.channels:
+            if channel.id == log_channel:
+                await channel.send(message)
+    except:
+        pass
+
 def rgb_to_hex(rgb_color):
     for value in rgb_color:
         if value >= 0 and value <= 255:
@@ -3211,6 +3246,7 @@ async def on_message(message):
                         if word.lower() in message.content.lower():
                             await message.delete()
                             await message.author.send(f'Please do not use the word **"{word.lower}"** in this server!')
+                            await log_message(message.guild, f'**{message.author}** used the word **"{word.lower}"** in <#{message.channel.id}>')
                             return
             except:
                 pass
@@ -3221,6 +3257,7 @@ async def on_message(message):
                         if regex in message.content.lower().replace(" ", ""):
                             await message.delete()
                             await message.author.send("Please do not put links in your message!")
+                            await log_message(message.guild, f'**{message.author}** sent a link in <#{message.channel.id}>')
                             return
             except:
                 pass
@@ -3248,6 +3285,7 @@ async def on_message(message):
                                 await message.delete()
                                 await message.author.send("Stop spamming!")
                                 await mute_member(message.author, 0.16)
+                                await log_message(message.guild, f'**{message.author}** is spamming (**{strikes}**) in <#{message.channel.id}>')
                                 return
             except:
                 pass
@@ -3263,6 +3301,7 @@ async def on_message(message):
                         await message.delete()
                         await message.author.send("Please do not spam mentions in your message!")
                         await mute_member(message.author, 0.16)
+                        await log_message(message.guild, f'**{message.author}** is spamming mentions (**{mentions}**) in <#{message.channel.id}>')
                         return
             except:
                 pass
