@@ -16,23 +16,23 @@ This is a simple Discord bot that has a ton of useful tools, such as raid protec
 
 ### Auto Moderation
 - Insults
-  - Filter certain words in your server! Enable the filter with `=insults enable` and add/remove words with `=insults <add/remove>`.
+  - Filter certain words in your server! Enable the filter with `/filter insults enable` and add/remove words with `/filter insults <add/remove>`.
 
 - Spamming
-  - Stop spammers from sending large amounts of messages at once! Enable the filter with `=spam enable` and set the limit with `=spam set <limit>`.
+  - Stop spammers from sending large amounts of messages at once! Enable the filter with `/filter spam enable` and set the limit with `/filter spam set <limit>`.
 
 - Links
-  - Stop members from sending links and advertisements! Enable this filter with `=links enable`.
+  - Stop members from sending links and advertisements! Enable this filter with `/filter links enable`.
 
 ### Moderation Tools
 - Mute 
-  - Mute specific members for a specified amount of time with `=mute <user> <duration>`. The duration will be in minutes.
+  - Mute specific members for a specified amount of time with `/mute <user> <minutes>`. The duration will be in minutes.
 
 - Clear
-  - Clear the specified amount of messages in your server with `=clear <amount>`
+  - Clear the specified amount of messages in your server with `/clear <amount>`
 
 - Disconnect-Members
-  - Disconnect all the members in your server who are in a voice channel with `=disconnect-members`
+  - Disconnect all the members in your server who are in a voice channel with `/disconnect-members`
 
 ### Other
 - Lookup
