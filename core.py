@@ -2352,6 +2352,19 @@ async def snipe_command(interaction):
 async def server_command(_):
     pass
 
+@server_command.sub_command(name="suggest", description="Send a suggestion to the server owners")
+async def server_suggest_command(
+        interaction,
+        suggestion: str = Param(description="The suggestion you want to send")
+    ):
+    await interaction.response.send_message("Sending your suggestion...", ephemeral=True)
+    try:
+        await interaction.guild.owner.send(f"**{interaction.author.name}#{interaction.author.discriminator}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}")
+        await interaction.edit_original_message(content="Your suggestion has been successfully sent")
+    except:
+        await interaction.edit_original_message(content="Unable to send your suggestion")
+    add_cooldown(interaction.author.id, "server", 300)
+
 @server_command.sub_command(name="members", description="Count the members in this server")
 async def server_members_command(interaction):
     users = 0
