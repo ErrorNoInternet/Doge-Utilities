@@ -3261,6 +3261,7 @@ async def on_message(message):
                         if word.lower() in message.content.lower():
                             await message.delete()
                             await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
+                            await mute_member(message.author, 0.16)
                             await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>')
                             return
             except:
@@ -3272,6 +3273,7 @@ async def on_message(message):
                         if regex in message.content.lower().replace(" ", ""):
                             await message.delete()
                             await message.author.send("Please do not put links in your message!")
+                            await mute_member(message.author, 0.16)
                             await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>')
                             return
             except:
