@@ -3259,8 +3259,14 @@ async def on_message(message):
                     insults = json.loads(database[f"insults.list.{message.guild.id}"])
                     for word in insults:
                         if word.lower() in message.content.lower():
-                            await message.delete()
-                            await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
+                            try:
+                                await message.delete()
+                            except:
+                                pass
+                            try:
+                                await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
+                            except:
+                                pass
                             await mute_member(message.author, 0.16)
                             await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>')
                             return
@@ -3271,8 +3277,14 @@ async def on_message(message):
                     link_regexes = ["http://", "https://", "www.", "discord.gg/"]
                     for regex in link_regexes:
                         if regex in message.content.lower().replace(" ", ""):
-                            await message.delete()
-                            await message.author.send("Please do not put links in your message!")
+                            try:
+                                await message.delete()
+                            except:
+                                pass
+                            try:
+                                await message.author.send("Please do not put links in your message!")
+                            except:
+                                pass
                             await mute_member(message.author, 0.16)
                             await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>')
                             return
@@ -3299,8 +3311,14 @@ async def on_message(message):
                             if strike_limit > 20:
                                 strike_limit = 20
                             if strikes >= strike_limit:
-                                await message.delete()
-                                await message.author.send("Stop spamming!")
+                                try:
+                                    await message.delete()
+                                except:
+                                    pass
+                                try:
+                                    await message.author.send("Stop spamming!")
+                                except:
+                                    pass
                                 await mute_member(message.author, 0.16)
                                 await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>')
                                 return
@@ -3315,8 +3333,14 @@ async def on_message(message):
                         pass
                     mentions = len(message.raw_mentions)
                     if mentions > limit:
-                        await message.delete()
-                        await message.author.send("Please do not spam mentions in your message!")
+                        try:
+                            await message.delete()
+                        except:
+                            pass
+                        try:
+                            await message.author.send("Please do not spam mentions in your message!")
+                        except:
+                            pass
                         await mute_member(message.author, 0.16)
                         await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>')
                         return
