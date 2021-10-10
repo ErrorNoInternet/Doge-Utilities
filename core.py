@@ -705,7 +705,7 @@ async def status_command(interaction):
     embed.add_field(name="Active Shards", value="```" + str(client.shards[0].shard_count) + "```")
     embed.add_field(name="Member Count", value="```" + str(member_count) + "```")
     embed.add_field(name="Channel Count", value="```" + str(channel_count) + "```")
-    embed.add_field(name="Command Count", value="```" + str(len(client.slash_commands)) + "```")
+    embed.add_field(name="Command Count", value="```" + str(len(client.slash_commands)-len(variables.owner_commands)) + "```")
     embed.add_field(name="Disnake Version", value="```" + disnake.__version__ + "```")
     embed.add_field(name="Bot Version", value="```" + f"{variables.version_number}.{variables.build_number}" + "```")
     embed.add_field(name="Bot Uptime", value="```" + uptime + "```")
