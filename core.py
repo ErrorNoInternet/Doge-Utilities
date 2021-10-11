@@ -3179,7 +3179,6 @@ async def on_member_join(member):
                     welcome_message = welcome_message.replace("{user}", member.name)
                     welcome_message = welcome_message.replace("{user_id}", str(member.id))
                     welcome_message = welcome_message.replace("{user.id}", str(member.id))
-                    welcome_message = welcome_message.replace("{user_id}", str(member.id))
                     welcome_message = welcome_message.replace("{discriminator}", member.discriminator)
                     welcome_message = welcome_message.replace("{members}", str(member.guild.member_count))
                     welcome_message = welcome_message.replace("{server}", member.guild.name)
@@ -3197,7 +3196,6 @@ async def on_member_remove(member):
                     leave_message = leave_message.replace("{user}", member.name)
                     leave_message = leave_message.replace("{user_id}", str(member.id))
                     leave_message = leave_message.replace("{user.id}", str(member.id))
-                    leave_message = leave_message.replace("{user_id}", str(member.id))
                     leave_message = leave_message.replace("{discriminator}", member.discriminator)
                     leave_message = leave_message.replace("{members}", str(member.guild.member_count))
                     leave_message = leave_message.replace("{server}", member.guild.name)
@@ -3388,7 +3386,6 @@ async def on_message(message):
         if len(message.content) >= length:
             code = message.content[length:]
         else:
-            await message.channel.send("No code specified")
             return
         output_language = ""
         codeblock = "```"
