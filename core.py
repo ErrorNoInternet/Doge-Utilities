@@ -1508,6 +1508,9 @@ async def blacklist_add_command(
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
     current_users = json.loads(database["blacklist"])
+    if user_id in current_users:
+        await interaction.response.send_message("That user is already in the blacklist!", ephemeral=True)
+        return
     current_users.append(user_id)
     database["blacklist"] = json.dumps(current_users)
     await interaction.response.send_message(f"Successfully added `{user_id}` to the blacklist", ephemeral=True)
@@ -1523,10 +1526,10 @@ async def blacklist_remove_command(
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
     current_users = json.loads(database["blacklist"])
-    try:
-        current_users.remove(user_id)
-    except:
-        pass
+    if user_id not in current_users:
+        await interaction.response.send_message("That user is not in the blacklist!", ephemeral=True)
+        return
+    current_users.remove(user_id)
     database["blacklist"] = json.dumps(current_users)
     await interaction.response.send_message(f"Successfully removed `{user_id}` from the blacklist", ephemeral=True)
 
