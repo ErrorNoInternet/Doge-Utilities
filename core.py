@@ -564,13 +564,13 @@ async def afk_command(
             return
 
         database[f"afk.{interaction.author.id}"] = json.dumps([round(time.time()), message])
-        await interaction.response.send_message(f"Your AFK has been set to **{message}**")
+        await interaction.response.send_message(f'Your AFK has been set to **"{message}"**')
 
 @client.slash_command(name="links", description="Get links for Doge Utilities")
 async def links_command(_):
     pass
 
-@links_command.sub_command(name="support", description="Display the official Discord server for Doge")
+@links_command.sub_command(name="support", description="Display the official support server for Doge")
 async def support_command(interaction):
     await interaction.response.send_message(f"Doge Utilities support server: {variables.support_server_invite}")
 
