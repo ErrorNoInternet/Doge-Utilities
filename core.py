@@ -324,6 +324,7 @@ def manage_blacklist():
 start_time = time.time()
 last_command = time.time()
 blacklisted_users = []
+user_cache = {}
 snipe_list = {}
 math_variables = {}
 required_intents = disnake.Intents.default()
@@ -1483,7 +1484,16 @@ async def blacklist_list_command(interaction):
     blacklisted_users = []
     raw_array = json.loads(database["blacklist"])
     for user in raw_array:
-        blacklisted_users.append(f"{user} (<@{user}>)")
+        user_tag = "unknown"
+        try:
+            user_tag = user_cache[user]
+        except:
+            try:
+                user_tag = str(await client.fetch_user(user))
+                user_cache[user] = user_tag
+            except:
+                pass
+        blacklisted_users.append(f"{user} (**{user_tag}**)")
     embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -1500,7 +1510,7 @@ async def blacklist_add_command(
     current_users = json.loads(database["blacklist"])
     current_users.append(user_id)
     database["blacklist"] = json.dumps(current_users)
-    await interaction.response.send_message("Successfully added user to blacklist", ephemeral=True)
+    await interaction.response.send_message(f"Successfully added `{user_id}` to the blacklist", ephemeral=True)
 
 @blacklist_command.sub_command(name="remove", description="Owner Command")
 async def blacklist_remove_command(
@@ -1518,7 +1528,7 @@ async def blacklist_remove_command(
     except:
         pass
     database["blacklist"] = json.dumps(current_users)
-    await interaction.response.send_message("Successfully removed user from blacklist", ephemeral=True)
+    await interaction.response.send_message(f"Successfully removed `{user_id}` from the blacklist", ephemeral=True)
 
 @client.slash_command(name="game", description="Start a fun game")
 async def game_command(_):
