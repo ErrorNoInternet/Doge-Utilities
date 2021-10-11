@@ -3193,7 +3193,7 @@ async def send_vote_message(user_id):
                         self.timeout = None
 
                     @disnake.ui.button(label="Add a reminder", style=disnake.ButtonStyle.green)
-                    async def add_reminder(self, _, interaction):
+                    async def add_reminder(self, button, interaction):
                         duration = 43200
                         text = "Don't forget to vote for me!"
                         try:
@@ -3210,7 +3210,9 @@ async def send_vote_message(user_id):
                         current_reminders.append([time.time(), duration, text])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
                         await interaction.response.send_message("A **12 hour reminder** has been successfully added!")
-                        await message.edit(view=None)
+
+                        button.disabled = True
+                        await message.edit(view=self)
                         self.stop()
                 message = await member.send(variables.vote_message, view=CommandView())
                 return
