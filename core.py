@@ -1978,7 +1978,7 @@ async def insults_add_command(
         return
     insults_data.append(word)
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
-    await interaction.response.send_message(f"Successfully added **{word}** to your insults list")
+    await interaction.response.send_message(f'Successfully added **"{word}"** to your insults list')
 
 @insults_command.sub_command(name="remove", description="Remove a word from the insults filter")
 async def insults_remove_command(
