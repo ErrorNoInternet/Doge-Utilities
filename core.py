@@ -1049,22 +1049,36 @@ async def lookup_command(
 async def user_lookup_command(interaction):
     await lookup_command(interaction, str(interaction.target.id))
 
-@client.slash_command(name="permissions", description="Check the permissions of a specified member")
-async def permissions_command(
+@client.slash_command(name="permissions", description="Check the permissions of a member or role")
+async def permissions_command(_):
+    pass
+
+@permissions_command.sub_command(name="member", description="Check the permissions of a member")
+async def permissions_member_command(
         interaction,
-        member: disnake.Member = Param(0, name="member", description="The member you want to check permissions for"),
+        member: disnake.Member = Param(0, description="The member you want to check permissions for"),
     ):
     if member == 0:
         member = interaction.author
     
-    permission_list = build_permissions(member)
+    permission_list = build_member_permissions(member)
     embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{member.name}#{member.discriminator}**\n\n" + permission_list, color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "permissions", 3)
+
+@permissions_command.sub_command(name="role", description="Check the permissions of a role")
+async def permissions_role_command(
+        interaction,
+        role: disnake.Role = Param(description="The role you want to check permissions for"),
+    ):
+    permission_list = build_role_permissions(role)
+    embed = disnake.Embed(title="Role Permissions", description=f"Permissions for <@&{role.id}>\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
 
 @client.user_command(name="View Permissions")
 async def user_permissions_command(interaction):
-    permission_list = build_permissions(interaction.target)
+    permission_list = build_member_permissions(interaction.target)
     embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{interaction.target.name}#{interaction.target.discriminator}**\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
@@ -2994,9 +3008,18 @@ def set_variable(name, value):
     math_variables[name] = value
     return 0
 
-def build_permissions(member):
+def build_member_permissions(member):
     permission_list = ""
     for permission in member.guild_permissions:
+        if permission[1] == True:
+            permission_list += f":white_check_mark: `{permission[0]}`\n"
+        else:
+            permission_list += f":x: `{permission[0]}`\n"
+    return permission_list
+
+def build_role_permissions(role):
+    permission_list = ""
+    for permission in role.permissions:
         if permission[1] == True:
             permission_list += f":white_check_mark: `{permission[0]}`\n"
         else:
