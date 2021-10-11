@@ -1095,7 +1095,7 @@ async def permissions_role_command(
 @client.user_command(name="View Permissions")
 async def user_permissions_command(interaction):
     permission_list = build_member_permissions(interaction.target)
-    embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{interaction.target.name}#{interaction.target.discriminator}**\n\n" + permission_list, color=variables.embed_color)
+    embed = disnake.Embed(title="User Permissions", description=f"Permissions for <@{interaction.target.id}>\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="raid-protection", description="Change the raid protection settings")
