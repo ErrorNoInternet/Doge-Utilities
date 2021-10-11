@@ -33,7 +33,6 @@ from dateutil import parser
 from disnake.ext import commands
 from disnake.ext.commands import Param
 
-user_cooldowns = {}; message_strikes = {}; last_messages = {}
 database = redis.Redis(
     host=os.environ["REDIS_HOST"],
     port=int(os.environ["REDIS_PORT"]),
@@ -327,6 +326,10 @@ blacklisted_users = []
 user_cache = {}
 snipe_list = {}
 math_variables = {}
+user_cooldowns = {}
+message_strikes = {}
+last_messages = {}
+used_commands = []
 required_intents = disnake.Intents.default()
 required_intents.members = True
 client = commands.AutoShardedBot(
@@ -447,6 +450,19 @@ async def user_command_handler(interaction):
 
 @client.before_slash_command_invoke
 async def slash_command_handler(interaction):
+    interaction_data = "/" + interaction.data.name + " "
+    for option in interaction.data.options:
+        interaction_data += option.name
+        if option.value != "" and option.value != None:
+            interaction_data += f":{option.value}"
+        interaction_data += " "
+        for sub_option in option.options:
+            if sub_option.value != "" and sub_option.value != None:
+                interaction_data += f"{sub_option.name}:{sub_option.value}"
+            else:
+                interaction_data += f"{sub_option.name}"
+    used_commands.append(interaction_data)
+
     if interaction.author.id in blacklisted_users:
         await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
         raise Exception("no permission")
@@ -1062,7 +1078,7 @@ async def permissions_member_command(
         member = interaction.author
     
     permission_list = build_member_permissions(member)
-    embed = disnake.Embed(title="User Permissions", description=f"Permissions for **{member.name}#{member.discriminator}**\n\n" + permission_list, color=variables.embed_color)
+    embed = disnake.Embed(title="User Permissions", description=f"Permissions for <@{member.id}>\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
 
@@ -2637,7 +2653,6 @@ async def discriminator_command(
         if member.discriminator == discriminator:
             if str(member) not in members:
                 members.append(str(member))
-    new_line = "\n"
     if members == []:
         await interaction.response.send_message("There are no other users with the same discriminator")
         return

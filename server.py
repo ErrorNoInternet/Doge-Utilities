@@ -40,7 +40,7 @@ vote_counter = 0
 def manage_cache():
     global user_cache
     while True:
-        time.sleep(3600)
+        time.sleep(1800)
         user_cache = {}
 
 def manage_ratelimits():
@@ -92,7 +92,7 @@ def make_session(token=None, state=None, scope=None):
             'client_secret': OAUTH_CLIENT_SECRET,
         },
         auto_refresh_url=TOKEN_URL,
-        token_updater=token_updater
+        token_updater=token_updater,
     )
 
 @app.before_request
@@ -147,8 +147,18 @@ def web_dashboard():
 
     try:
         if user_data["message"] == "401: Unauthorized":
-            del user_cache[ip_address]
-            del user_tokens[user_ids[ip_address]]
+            try:
+                del user_ids[ip_address]
+            except:
+                pass
+            try:
+                del user_cache[ip_address]
+            except:
+                pass
+            try:
+                del user_tokens[user_ids[ip_address]]
+            except:
+                pass
             return flask.redirect(flask.url_for("web_authenticate", _scheme=URL_SCHEME, _external=True))
     except:
         pass
@@ -184,7 +194,10 @@ def web_dashboard():
     if mutual_guilds == []:
         return load_file("no_servers.html", replace={"(invite)": variables.bot_invite_link})
 
-    profile = f"<img class='userIcon' src='{target_user.avatar}'><p>{target_user}</p>"
+    avatar_url = target_user.avatar
+    if avatar_url == None:
+        avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(target_user.discriminator) % 5}.png"
+    profile = f"<img class='userIcon' src='{avatar_url}'><p>{target_user}</p>"
 
     servers = ""
     for guild in mutual_guilds:
