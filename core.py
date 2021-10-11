@@ -3140,7 +3140,6 @@ async def send_vote_message(user_id):
                                 exists = True
                         if exists:
                             await interaction.response.send_message("A reminder already exists!")
-                            self.stop()
                             return
                         current_reminders.append([time.time(), duration, text])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
@@ -3224,10 +3223,14 @@ async def on_message_delete(message, *_):
         if len(message.attachments) > 0:
             message_data = message.attachments[0].url
 
+    avatar_url = message.author.avatar
+    if avatar_url == None:
+        avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(message.author.discriminator) % 5}.png"
+
     if message_data != "" and message_data != disnake.embeds._EmptyEmbed:
         snipes.append([
             f"{message.author.name}#{message.author.discriminator}",
-            message.author.avatar,
+            avatar_url,
             message.channel.name,
             datetime.datetime.now(),
             message_data,
