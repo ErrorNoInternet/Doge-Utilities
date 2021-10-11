@@ -450,18 +450,12 @@ async def user_command_handler(interaction):
 
 @client.before_slash_command_invoke
 async def slash_command_handler(interaction):
-    interaction_data = "/" + interaction.data.name + " "
-    for option in interaction.data.options:
-        interaction_data += option.name
-        if option.value != "" and option.value != None:
-            interaction_data += f":{option.value}"
-        interaction_data += " "
-        for sub_option in option.options:
-            if sub_option.value != "" and sub_option.value != None:
-                interaction_data += f"{sub_option.name}:{sub_option.value}"
-            else:
-                interaction_data += f"{sub_option.name}"
-    used_commands.append(interaction_data)
+    interaction_data = parse_interaction(interaction)
+    if used_commands == []:
+        used_commands.append(parse_interaction(interaction))
+    else:
+        if used_commands[len(used_commands)-1] != interaction_data:
+            used_commands.append(parse_interaction(interaction))
 
     if interaction.author.id in blacklisted_users:
         await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
@@ -2041,7 +2035,7 @@ async def insults_remove_command(
     except:
         await interaction.response.send_message("That word does not exist in the insults filter"); return
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
-    await interaction.response.send_message(f"Successfully removed **{word}** from the insults list")
+    await interaction.response.send_message(f'Successfully removed **"{word}"** from the insults list')
 
 @filter_command.sub_command_group(name="links", description="Manage the links filter")
 async def links_filter_command(_):
@@ -3023,6 +3017,27 @@ def set_variable(name, value):
     math_variables[name] = value
     return 0
 
+def parse_interaction(interaction):
+    interaction_data = "/" + interaction.data.name + " "
+    for option in interaction.data.options:
+        interaction_data += option.name
+        if option.value != "" and option.value != None:
+            interaction_data += f":{option.value}"
+        interaction_data += " "
+        for sub_option_group in option.options:
+            if sub_option_group.value != "" and sub_option_group.value != None:
+                interaction_data += f"{sub_option_group.name}:{sub_option_group.value}"
+            else:
+                interaction_data += f"{sub_option_group.name}"
+            if sub_option_group.options != []:
+                interaction_data += " "
+                for sub_option in sub_option_group.options:
+                    if sub_option.value != "" and sub_option.value != None:
+                        interaction_data += f"{sub_option.name}:{sub_option.value}"
+                    else:
+                        interaction_data += f"{sub_option.name}"
+    return interaction_data.strip()
+
 def build_member_permissions(member):
     permission_list = ""
     for permission in member.guild_permissions:
@@ -3506,17 +3521,7 @@ async def on_slash_command_error(interaction, error):
         for user in interaction.guild.members:
             if user.id == client.user.id:
                 permissions = user.guild_permissions.value
-        interaction_data = "/" + interaction.data.name + " "
-        for option in interaction.data.options:
-            interaction_data += option.name
-            if option.value != "" and option.value != None:
-                interaction_data += f":{option.value}"
-            interaction_data += " "
-            for sub_option in option.options:
-                if sub_option.value != "" and sub_option.value != None:
-                    interaction_data += f"{sub_option.name}:{sub_option.value}"
-                else:
-                    interaction_data += f"{sub_option.name}"
+        interaction_data = parse_interaction(interaction)
         formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
         formatted_error = formatted_error.replace("`", escaped_character)
         codeblock = "```\n"
