@@ -3210,8 +3210,9 @@ async def send_vote_message(user_id):
                         current_reminders.append([time.time(), duration, text])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
                         await interaction.response.send_message("A **12 hour reminder** has been successfully added!")
+                        await message.edit(view=None)
                         self.stop()
-                await member.send(variables.vote_message, view=CommandView())
+                message = await member.send(variables.vote_message, view=CommandView())
                 return
 
 async def on_member_join(member):
