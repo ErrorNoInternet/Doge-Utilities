@@ -480,7 +480,10 @@ async def slash_command_handler(interaction):
         afk_key = f"afk.{interaction.author.id}".encode("utf-8")
         if afk_key in database.keys():
             del database[afk_key]
-            await interaction.author.send("Your AFK has been removed!")
+            try:
+                await interaction.author.send("Your AFK has been removed!")
+            except:
+                pass
 
 @client.slash_command(name="help", description="Get started with Doge Utilities")
 async def help_command(interaction):
@@ -2097,6 +2100,10 @@ async def mention_set_command(
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
+    if limit < 1:
+        limit = 1
+    if limit > 500:
+        limit = 500
     database[f"mention.limit.{interaction.guild.id}"] = limit
     await interaction.response.send_message(f"The mention filter limit has been set to **{limit} {'mention' if limit == 1 else 'mentions'}** per message")
 
@@ -2145,6 +2152,10 @@ async def spam_set_command(
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
+    if limit < 1:
+        limit = 1
+    if limit > 25:
+        limit = 25
     database[f"spamming.limit.{interaction.guild.id}"] = limit
     await interaction.response.send_message(f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**")
 
@@ -2704,6 +2715,7 @@ async def warn_command(
         warning_embed.set_footer(text=f"You now have {guild_warnings} {'warning' if guild_warnings == 1 else 'warnings'} in {interaction.guild.name}")
         await member.send(embed=warning_embed)
         await interaction.response.send_message(embed=disnake.Embed(description=f"Successfully warned **{member}** (**{guild_warnings}**)", color=disnake.Color.green()))
+        await log_message(interaction.guild, f"**{member}** has been warned by **{interaction.author}** (**{guild_warnings}**): {warning}")
     except:
         await interaction.response.send_message(embed=disnake.Embed(description=f"Unable to warn **{member}**", color=disnake.Color.red()))
     add_cooldown(interaction.author.id, "warn", 5)
@@ -2723,6 +2735,7 @@ async def kick_command(
                     description=f"**{member}** has been **successfully kicked**",
                 )
             )
+            await log_message(interaction.guild, f"**{member}** has been kicked by **{interaction.author}**: {reason}")
         except:
             await interaction.response.send_message(
                 embed=disnake.Embed(
@@ -2763,6 +2776,7 @@ async def ban_command(
                         description=f"**{member}** has been **successfully banned**",
                     )
                 )
+                await log_message(interaction.guild, f"**{member}** has been banned by **{interaction.author}**: {reason}")
             except:
                 await interaction.response.send_message(
                     embed=disnake.Embed(
@@ -2784,6 +2798,7 @@ async def ban_command(
                     description=f"**{user}** has been **successfully banned**",
                 )
             )
+            await log_message(interaction.guild, f"**{user}** has been banned by **{interaction.author}**: {reason}")
         except:
             await interaction.response.send_message(
                 embed=disnake.Embed(
@@ -2817,6 +2832,7 @@ async def unban_command(
                 description=f"**{user}** has been **successfully unbanned**",
             )
         )
+        await log_message(interaction.guild, f"**{user}** has been banned by **{interaction.author}**")
     except:
         await interaction.response.send_message(
             embed=disnake.Embed(
@@ -3029,13 +3045,14 @@ def parse_interaction(interaction):
                 interaction_data += f"{sub_option_group.name}:{sub_option_group.value}"
             else:
                 interaction_data += f"{sub_option_group.name}"
+            interaction_data += " "
             if sub_option_group.options != []:
-                interaction_data += " "
                 for sub_option in sub_option_group.options:
                     if sub_option.value != "" and sub_option.value != None:
                         interaction_data += f"{sub_option.name}:{sub_option.value}"
                     else:
                         interaction_data += f"{sub_option.name}"
+                    interaction_data += " "
     return interaction_data.strip()
 
 def build_member_permissions(member):
@@ -3378,8 +3395,6 @@ async def on_message(message):
                                 strike_limit = json.loads(database[f"spamming.limit.{message.guild.id}"])
                             except:
                                 pass
-                            if strike_limit > 20:
-                                strike_limit = 20
                             if strikes >= strike_limit:
                                 try:
                                     await message.delete()
@@ -3421,7 +3436,10 @@ async def on_message(message):
     afk_key = f"afk.{message.author.id}".encode("utf-8")
     if afk_key in database.keys():
         del database[afk_key]
-        await message.author.send("Your AFK has been removed!")
+        try:
+            await message.author.send("Your AFK has been removed!")
+        except:
+            pass
     for mention in message.mentions:
         try:
             afk_status = json.loads(database[f"afk.{mention.id}"])

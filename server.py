@@ -340,6 +340,10 @@ def fetch_commands():
    
     return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands) - len(variables.owner_commands))})
 
+@app.route("/api/version")
+def fetch_version():
+    return str(variables.version_number)
+
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
     try:

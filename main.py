@@ -54,10 +54,11 @@ async def on_guild_channel_delete(channel):
             if type(channel) == disnake.TextChannel:
                 new_channel = await channel.guild.create_text_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, slowmode_delay=cached_channel.slowmode_delay, topic=cached_channel.topic)
                 await new_channel.edit(is_nsfw=cached_channel.is_nsfw())
+                server_channels[channel.guild.id].append(new_channel)
             elif type(channel) == disnake.CategoryChannel:
-                await channel.guild.create_category(name=cached_channel.name, position=cached_channel.position)
+                server_channels[channel.guild.id].append(await channel.guild.create_category(name=cached_channel.name, position=cached_channel.position))
             else:
-                await channel.guild.create_voice_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, user_limit=cached_channel.user_limit, bitrate=cached_channel.bitrate)
+                server_channels[channel.guild.id].append(await channel.guild.create_voice_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, user_limit=cached_channel.user_limit, bitrate=cached_channel.bitrate))
 
 @core.client.event
 async def on_guild_role_delete(role):
@@ -76,6 +77,7 @@ async def on_guild_role_delete(role):
         if role.id == cached_role.id:
             new_role = await role.guild.create_role(name=cached_role.name, color=cached_role.color, permissions=cached_role.permissions)
             await new_role.edit(position=cached_role.position)
+            server_roles[role.guild.id].append(new_role)
 
 @core.client.event
 async def on_ready():
