@@ -343,7 +343,7 @@ def fetch_commands():
 
 @app.route("/api/version", endpoint="api")
 def fetch_version():
-    return str(variables.version_number)
+    return f"{variables.version_number}.{variables.build_number}"
 
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
