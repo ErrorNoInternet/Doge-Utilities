@@ -6,6 +6,10 @@ function raidProtection(token, data) {
 	request.send()
 	request.onreadystatechange = (changeEvent) => {
 		text = request.responseText
+		if (text.includes("ratelimit")) {
+			alert("You are being ratelimited!")
+			return
+		}
 		var currentStatus = "Disabled"
 		if (text == "1") {
 			currentStatus = "Enabled"
@@ -22,6 +26,10 @@ function toggleFilter(token, name, data) {
 	request.send()
 	request.onreadystatechange = (changeEvent) => {
 		text = request.responseText
+		if (text.includes("ratelimit")) {
+			alert("You are being ratelimited!")
+			return
+		}
 		var currentStatus = "Disabled"
 		if (text == "1") {
 			currentStatus = "Enabled"
