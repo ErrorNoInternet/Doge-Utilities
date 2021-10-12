@@ -2833,7 +2833,7 @@ async def unban_command(
                 description=f"**{user}** has been **successfully unbanned**",
             )
         )
-        await log_message(interaction.guild, f"**{user}** has been banned by **{interaction.author}**")
+        await log_message(interaction.guild, f"**{user}** has been unbanned by **{interaction.author}**")
     except:
         await interaction.response.send_message(
             embed=disnake.Embed(
