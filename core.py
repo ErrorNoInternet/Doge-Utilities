@@ -2709,6 +2709,7 @@ async def warn_command(
     database[f"warnings.{member.id}"] = json.dumps(warnings)
     if warning.lower() == "reset":
         await interaction.response.send_message(f"**{member}**'s warnings have been successfully reset", ephemeral=True)
+        await log_message(interaction.guild, f"**{member}**'s warnings have been reset by **{interaction.author}**")
         return
     try:
         warning_embed = disnake.Embed(title="Warning", description=warning, color=disnake.Color.yellow())
