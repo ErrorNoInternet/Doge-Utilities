@@ -105,8 +105,9 @@ def request_handler():
         flask.abort(429, "You are being ratelimited!")
     ratelimits[ip_address] = counter + 1
 
-    if not core.client.is_ready():
-        flask.abort(503, "Doge Utilities is getting ready. Please try again later.")
+    if flask.request.endpoint != "api":
+        if not core.client.is_ready():
+            flask.abort(503, "Doge Utilities is getting ready. Please try again later.")
 
 @app.route("/web/authenticate")
 def web_authenticate():
@@ -340,7 +341,7 @@ def fetch_commands():
    
     return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands) - len(variables.owner_commands))})
 
-@app.route("/api/version")
+@app.route("/api/version", endpoint="api")
 def fetch_version():
     return str(variables.version_number)
 
