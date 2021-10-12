@@ -2400,7 +2400,7 @@ async def snipe_command(interaction):
 async def server_command(_):
     pass
 
-@server_command.sub_command(name="suggest", description="Send a suggestion to the server owners")
+@server_command.sub_command(name="suggest", description="Send a suggestion to the server owner")
 async def server_suggest_command(
         interaction,
         suggestion: str = Param(description="The suggestion you want to send")
