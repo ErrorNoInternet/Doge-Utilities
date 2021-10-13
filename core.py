@@ -379,7 +379,7 @@ def clean(text):
     text = text.replace("@here", "here")
     return text
 
-def remove_mention(user):
+def remove_mentions(user):
     user = user.replace("<", "")
     user = user.replace("@", "")
     user = user.replace("!", "")
@@ -578,7 +578,7 @@ async def afk_command(
             return
 
         database[f"afk.{interaction.author.id}"] = json.dumps([round(time.time()), message])
-        await interaction.response.send_message(f'Your AFK has been set to **"{message}"**')
+        await interaction.response.send_message(f'Your AFK message has been set to **"{remove_mentions(message)}"**')
 
 @client.slash_command(name="links", description="Get links for Doge Utilities")
 async def links_command(_):
@@ -1010,7 +1010,7 @@ async def lookup_command(
     ):
     if user == 0:
         user = str(interaction.author.id)
-    user = remove_mention(user)
+    user = remove_mentions(user)
     headers = {"Authorization": "Bot " + os.environ["TOKEN"]}
     url = "https://discord.com/api/users/" + user
     response = requests.get(url, headers=headers).json()
@@ -1538,7 +1538,7 @@ async def blacklist_add_command(
         user: str = Param(description="Owner Command"),
     ):
     try:
-        user_id = int(remove_mention(user))
+        user_id = int(remove_mentions(user))
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
@@ -1556,7 +1556,7 @@ async def blacklist_remove_command(
         user: str = Param(description="Owner Command"),
     ):
     try:
-        user_id = int(remove_mention(user))
+        user_id = int(remove_mentions(user))
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
@@ -2768,7 +2768,7 @@ async def ban_command(
         return
 
     try:
-        user_id = int(remove_mention(member))
+        user_id = int(remove_mentions(member))
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
@@ -2828,7 +2828,7 @@ async def unban_command(
         return
 
     try:
-        user_id = int(remove_mention(member))
+        user_id = int(remove_mentions(member))
         user = await client.fetch_user(user_id)
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
@@ -3456,7 +3456,7 @@ async def on_message(message):
             for user in client.users:
                 if user.id == mention.id:
                     user_name = user.name
-            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{afk_status[1]}**")
+            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{remove_mentions(afk_status[1])}**")
         except:
             pass
     
