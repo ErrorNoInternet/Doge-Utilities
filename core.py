@@ -2609,7 +2609,7 @@ async def pypi_command(
         interaction,
         project: str = Param(description="The PyPi project that you want to search"),
     ):
-    response = requests.get(f"https://pypi.org/pypi/{project}/json/")
+    response = requests.get(f"https://pypi.org/pypi/{project.strip()}/json/")
     if response.status_code == 404:
         await interaction.response.send_message("That package was not found")
         return
