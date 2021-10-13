@@ -3432,7 +3432,7 @@ async def on_message(message):
                         except:
                             pass
                         try:
-                            await message.author.send("Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
+                            await message.author.send(f"Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
                         except:
                             pass
                         await mute_member(message.author, 0.16)
