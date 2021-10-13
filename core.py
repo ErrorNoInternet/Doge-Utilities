@@ -1510,11 +1510,11 @@ async def stackoverflow_command(
         await interaction.edit_original_message(content="Unable to search for item"); return
     add_cooldown(interaction.author.id, "stackoverflow", 10)
 
-@client.slash_command(name="blacklist", description="Owner Command")
+@client.slash_command(name="blacklist", description="Owner command")
 async def blacklist_command(_):
     pass
 
-@blacklist_command.sub_command(name="list", description="Owner Command")
+@blacklist_command.sub_command(name="list", description="Owner command")
 async def blacklist_list_command(interaction):
     blacklisted_users = []
     raw_array = json.loads(database["blacklist"])
@@ -1532,10 +1532,10 @@ async def blacklist_list_command(interaction):
     embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-@blacklist_command.sub_command(name="add", description="Owner Command")    
+@blacklist_command.sub_command(name="add", description="Owner command")    
 async def blacklist_add_command(
         interaction,
-        user: str = Param(description="Owner Command"),
+        user: str = Param(description="Owner command"),
     ):
     try:
         user_id = int(remove_mentions(user))
@@ -1550,10 +1550,10 @@ async def blacklist_add_command(
     database["blacklist"] = json.dumps(current_users)
     await interaction.response.send_message(f"Successfully added `{user_id}` to the blacklist", ephemeral=True)
 
-@blacklist_command.sub_command(name="remove", description="Owner Command")
+@blacklist_command.sub_command(name="remove", description="Owner command")
 async def blacklist_remove_command(
         interaction,
-        user: str = Param(description="Owner Command"),
+        user: str = Param(description="Owner command"),
     ):
     try:
         user_id = int(remove_mentions(user))
@@ -1813,7 +1813,7 @@ async def trivia_command(interaction):
     await interaction.edit_original_message(embed=embed, view=CommandView())
     add_cooldown(interaction.author.id, "game", 3)
 
-@client.slash_command(name="fetch", description="Fetch something fun")
+@client.slash_command(name="fetch", description="Fetch something from the internet")
 async def fetch_command(_):
     pass
 
@@ -2110,8 +2110,8 @@ async def mention_set_command(
         return
     if limit < 1:
         limit = 1
-    if limit > 500:
-        limit = 500
+    if limit > 200:
+        limit = 200
     database[f"mention.limit.{interaction.guild.id}"] = limit
     await interaction.response.send_message(f"The mention filter limit has been set to **{limit} {'mention' if limit == 1 else 'mentions'}** per message")
 
@@ -3432,7 +3432,7 @@ async def on_message(message):
                         except:
                             pass
                         try:
-                            await message.author.send("Please do not spam mentions in your message!")
+                            await message.author.send("Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
                         except:
                             pass
                         await mute_member(message.author, 0.16)
