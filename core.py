@@ -1278,18 +1278,20 @@ async def clear_command(
         member: disnake.Member = Param(0, description="The member you want to delete messages for")
     ):
     if interaction.author.guild_permissions.manage_messages or interaction.author.id in variables.permission_override:
+        user_text = ""
         await interaction.response.defer(ephemeral=True)
         try:
             if member == 0:
                 messages = len(await interaction.channel.purge(limit=count))
             else:
+                user_text = f" from **{member}**"
                 def check(target_message):
                     return target_message.author.id == member.id
                 messages = len(await interaction.channel.purge(limit=count, check=check))
         except:
             await interaction.edit_original_message(content="Unable to clear messages")
             return
-        await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**")
+        await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**{user_text}")
     else:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
     add_cooldown(interaction.author.id, "clear", 5)
