@@ -1277,7 +1277,7 @@ async def clear_command(
         count: int = Param(description="The amount of messages you want to delete"),
         member: disnake.Member = Param(0, description="The member you want to delete messages for")
     ):
-    if interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
+    if interaction.author.guild_permissions.manage_messages or interaction.author.id in variables.permission_override:
         await interaction.response.defer(ephemeral=True)
         try:
             if member == 0:
