@@ -1471,7 +1471,7 @@ async def nickname_command(
 @client.slash_command(name="stackoverflow", description="Look for something on StackOverflow")
 async def stackoverflow_command(
         interaction,
-        text: str = Param(description="The search query"),
+        text: str = Param(name="query", description="The search query"),
     ):
     await interaction.response.defer()
     try:
