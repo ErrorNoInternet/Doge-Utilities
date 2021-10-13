@@ -1275,11 +1275,17 @@ async def calculate_command(
 async def clear_command(
         interaction,
         count: int = Param(description="The amount of messages you want to delete"),
+        member: disnake.Member = Param(0, description="The member you want to delete messages for")
     ):
     if interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         await interaction.response.defer(ephemeral=True)
         try:
-            messages = len(await interaction.channel.purge(limit=count))
+            if member == 0:
+                messages = len(await interaction.channel.purge(limit=count))
+            else:
+                def check(target_message):
+                    return target_message.author.id == member.id
+                messages = len(await interaction.channel.purge(limit=count, check=check))
         except:
             await interaction.edit_original_message(content="Unable to clear messages")
             return
