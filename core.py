@@ -907,13 +907,21 @@ async def suggest_command(
 
         @disnake.ui.button(label="Accept", style=disnake.ButtonStyle.green)
         async def accept_button(self, _, button_interaction):
-            await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **accepted** by **{button_interaction.author}**")
+            try:
+                await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **accepted** by **{button_interaction.author}**")
+            except:
+                await button_interaction.response.send_message("Unable to accept")
+                return
             await button_interaction.response.send_message("Accepted successfully")
             self.stop()
 
         @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
         async def reject_button(self, _, button_interaction):
-            await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **rejected** by **{button_interaction.author}**")
+            try:
+                await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **rejected** by **{button_interaction.author}**")
+            except:
+                await button_interaction.response.send_message("Unable to reject")
+                return
             await button_interaction.response.send_message("Rejected successfully")
             self.stop()
 
@@ -3402,7 +3410,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 try:
-                                    await message.author.send("Stop spamming!")
+                                    await message.author.send(f"Stop spamming! You are sending more than **{strikes} {'message' if strikes == 1 else 'messages'}** in **15 seconds**!")
                                 except:
                                     pass
                                 await mute_member(message.author, 0.16)
@@ -3526,7 +3534,10 @@ async def on_slash_command_error(interaction, error):
         return
 
     if type(error) == disnake.errors.Forbidden:
-        await interaction.author.send("I do not have the required permissions!")
+        try:
+            await interaction.author.send("I do not have the required permissions!")
+        except:
+            return
     else:
         if "50035" in str(error):
             try:
