@@ -3372,7 +3372,7 @@ async def on_message(message):
                             except:
                                 pass
                             await mute_member(message.author, 0.16)
-                            await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>')
+                            await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{message.content[:500]}')
                             return
             except:
                 pass
