@@ -1430,7 +1430,11 @@ async def color_command(
     add_cooldown(interaction.author.id, "color", 3)
 
 async def autocomplete_timezones(_, string: str) -> List[str]:
-    return list(filter(lambda timezone: string in timezone.lower(), pytz.all_timezones))[:20]
+    timezones = []
+    for timezone in pytz.all_timezones:
+        timezone = timezone.replace("_", " ")
+        timezones.append(timezone)
+    return list(filter(lambda timezone: string in timezone.lower(), timezones))[:20]
 
 @client.slash_command(name="time", description="Get the time information about a specific region")
 async def time_command(
