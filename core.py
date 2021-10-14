@@ -2060,10 +2060,17 @@ async def insults_add_command(
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
     await interaction.response.send_message(f'Successfully added **"{word}"** to your insults list')
 
+async def insults_remove_autocomplete(interaction, string: str) -> List[str]:
+    try:
+        words = json.loads(database[f"insults.list.{interaction.guild.id}"])
+    except:
+        words = []
+    return list(filter(lambda word: string in word.lower(), words))[:20]
+
 @insults_command.sub_command(name="remove", description="Remove a word from the insults filter")
 async def insults_remove_command(
         interaction,
-        word: str = Param(description="The word you want to remove")
+        word: str = Param(description="The word you want to remove", autocomplete=insults_remove_autocomplete)
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
@@ -2076,7 +2083,8 @@ async def insults_remove_command(
     try:
         insults_data.remove(word)
     except:
-        await interaction.response.send_message("That word does not exist in the insults filter"); return
+        await interaction.response.send_message("That word does not exist in the insults filter")
+        return
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
     await interaction.response.send_message(f'Successfully removed **"{word}"** from the insults list')
 
@@ -2993,6 +3001,76 @@ async def definition_command(
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "definition", 5)
 
+@client.slash_command(name="todo", description="Manage your to-do list")
+async def todo_command(_):
+    pass
+
+@todo_command.sub_command(name="list", description="Show your to-do list")
+async def todo_list_command(interaction):
+    try:
+        todo_list = json.loads(database[f"todo.{interaction.author.id}"])
+    except:
+        todo_list = []
+    text = ""
+    counter = 0
+    for todo in todo_list:
+        counter += 1
+        text += f"**{counter}.** {todo}\n"
+    if text == "":
+        text = "Your to-do list is empty"
+    embed = disnake.Embed(title="To-do List", description=text, color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "todo", 3)
+
+@todo_command.sub_command(name="add", description="Add an item to your to-do list")
+async def todo_add_command(
+        interaction,
+        item: str = Param(description="The item you want to add to your to-do list"),
+    ):
+    item = item.strip()
+    try:
+        todo_list = json.loads(database[f"todo.{interaction.author.id}"])
+    except:
+        todo_list = []
+    if len(todo_list) >= 20:
+        await interaction.response.send_message("You can only add up to **20 items**!")
+        return
+    if len(item) > 50:
+        await interaction.response.send_message("The specified item is too long!")
+        return
+    if item not in todo_list: 
+        todo_list.append(item)
+    else:
+        await interaction.response.send_message("That item is already in your to-do list!")
+        return
+    database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
+    await interaction.response.send_message(f'Successfully added **"{item}"** to your to-do list')
+
+async def todo_remove_autocomplete(interaction, string: str) -> List[str]:
+    try:
+        items = json.loads(database[f"todo.{interaction.author.id}"])
+    except:
+        items = []
+    return list(filter(lambda item: string in item.lower(), items))[:20]
+
+@todo_command.sub_command(name="remove", description="Remove an item from your to-do list")
+async def todo_remove_command(
+        interaction,
+        item: str = Param(description="The item you want to add to your to-do list", autocomplete=todo_remove_autocomplete),
+    ):
+    item = item.strip()
+    try:
+        todo_list = json.loads(database[f"todo.{interaction.author.id}"])
+    except:
+        todo_list = []
+    if item in todo_list:
+        todo_list.remove(item)
+    else:
+        await interaction.response.send_message("That item is not in your to-do list!")
+        return
+    database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
+    await interaction.response.send_message(f'Successfully removed **"{item}"** from your to-do list')
+
 @client.slash_command(name="remind", description="Remind yourself about something")
 async def remind_command(_):
     pass
@@ -3011,7 +3089,7 @@ async def remind_list_command(interaction):
         text = "You have no reminders"
     embed = disnake.Embed(title="Reminders", description=text, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
-    add_cooldown(interaction.author.id, "remind", 10)
+    add_cooldown(interaction.author.id, "remind", 3)
 
 @remind_command.sub_command(name="add", description="Add a new reminder")
 async def remind_add_command(
