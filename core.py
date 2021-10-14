@@ -2907,7 +2907,7 @@ async def convert_command(
 
 async def autocomplete_languages(_, string):
     languages = []
-    for language in googletrans.LANGUAGES:
+    for language in googletrans.LANGUAGES.values():
         languages.append(language.title())
     return list(filter(lambda language: string.lower() in language.lower(), languages))[:20]
 
