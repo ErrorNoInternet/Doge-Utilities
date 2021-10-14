@@ -1300,6 +1300,23 @@ async def clear_command(
 async def text_command(_):
     pass
 
+@text_command.sub_command(name="scramble", description="Scramble the letters in a sentence")
+async def scramble_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+
+    letters = []
+    for letter in text:
+        letters.append(letter)
+    output = ""
+    for i in range(len(letters)):
+        letter = random.choice(letters)
+        output += letter
+        letters.remove(letter)
+    await interaction.response.send_message(clean(output))
+    add_cooldown(interaction.author.id, "text", 3)
+
 @text_command.sub_command(name="wide", description="Make text appear to be wider")
 async def wide_command(
         interaction,
@@ -1310,7 +1327,7 @@ async def wide_command(
     for letter in text:
         new_text += letter + " "
     await interaction.response.send_message(clean(new_text))
-    add_cooldown(interaction.author.id, "wide", 3)
+    add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="unwide", description="Un-wide the specified text")
 async def unwide_command(
@@ -1329,7 +1346,7 @@ async def unwide_command(
             space_character = False
             new_text += letter
     await interaction.response.send_message(clean(new_text))
-    add_cooldown(interaction.author.id, "unwide", 3)
+    add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="spoiler", description="Add spoilers to every single character")
 async def spoiler_command(
@@ -1340,7 +1357,7 @@ async def spoiler_command(
     for letter in text:
         new_text += "||" + letter + "||"
     await interaction.response.send_message(clean(new_text))
-    add_cooldown(interaction.author.id, "spoiler", 3)
+    add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="cringe", description="Make the text look CrInGY")
 async def cringe_command(
@@ -1361,7 +1378,7 @@ async def cringe_command(
             else:
                 new_text += letter.lower()
     await interaction.response.send_message(clean(new_text))
-    add_cooldown(interaction.author.id, "cringe", 3)
+    add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="reverse", description="Reverse the specified text")
 async def reverse_command(
@@ -1370,7 +1387,7 @@ async def reverse_command(
     ):
     new_text = text[::-1]
     await interaction.response.send_message(clean(new_text))
-    add_cooldown(interaction.author.id, "reverse", 3)
+    add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="corrupt", description="Make the text appear to be corrupted")
 async def corrupt_command(
@@ -1392,7 +1409,7 @@ async def corrupt_command(
                 if punctuation:
                     new_text += string.punctuation[random.randint(0, len(string.punctuation) - 1)]
     await interaction.response.send_message(clean(new_text))
-    add_cooldown(interaction.author.id, "corrupt", 3)
+    add_cooldown(interaction.author.id, "text", 3)
 
 @client.slash_command(name="color", description="Visualize a color code")
 async def color_command(
