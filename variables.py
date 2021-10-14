@@ -1,6 +1,6 @@
 import os
 
-bot_owners = [531392146767347712, 599186408925560833, 890264136477462618]
+bot_owners = [531392146767347712, 599186408925560833]
 permission_override = bot_owners
 message_managers = bot_owners
 

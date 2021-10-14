@@ -1428,12 +1428,12 @@ async def color_command(
     await interaction.response.send_message(embed=embed, file=disnake.File("images/color.png"))
     add_cooldown(interaction.author.id, "color", 3)
 
-async def autocomplete_timezones(_, string: str) -> List[str]:
+async def autocomplete_timezones(_, string):
     timezones = []
     for timezone in pytz.all_timezones:
         timezone = timezone.replace("_", " ")
         timezones.append(timezone)
-    return list(filter(lambda timezone: string in timezone.lower(), timezones))[:20]
+    return list(filter(lambda timezone: string.lower() in timezone.lower(), timezones))[:20]
 
 @client.slash_command(name="time", description="Get the time information about a specific region")
 async def time_command(
@@ -2053,12 +2053,12 @@ async def insults_add_command(
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
     await interaction.response.send_message(f'Successfully added **"{word}"** to your insults list')
 
-async def insults_remove_autocomplete(interaction, string: str) -> List[str]:
+async def insults_remove_autocomplete(interaction, string):
     try:
         words = json.loads(database[f"insults.list.{interaction.guild.id}"])
     except:
         words = []
-    return list(filter(lambda word: string in word.lower(), words))[:20]
+    return list(filter(lambda word: string.lower() in word.lower(), words))[:20]
 
 @insults_command.sub_command(name="remove", description="Remove a word from the insults filter")
 async def insults_remove_command(
@@ -2076,7 +2076,7 @@ async def insults_remove_command(
     try:
         insults_data.remove(word)
     except:
-        await interaction.response.send_message("That word does not exist in the insults filter")
+        await interaction.response.send_message("That word does not exist in the insults filter!", ephemeral=True)
         return
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
     await interaction.response.send_message(f'Successfully removed **"{word}"** from the insults list')
@@ -3039,12 +3039,12 @@ async def todo_add_command(
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(f'Successfully added **"{item}"** to your to-do list')
 
-async def todo_remove_autocomplete(interaction, string: str) -> List[str]:
+async def todo_remove_autocomplete(interaction, string):
     try:
         items = json.loads(database[f"todo.{interaction.author.id}"])
     except:
         items = []
-    return list(filter(lambda item: string in item.lower(), items))[:20]
+    return list(filter(lambda item: string.lower() in item.lower(), items))[:20]
 
 @todo_command.sub_command(name="remove", description="Remove an item from your to-do list")
 async def todo_remove_command(
@@ -3083,6 +3083,36 @@ async def remind_list_command(interaction):
     embed = disnake.Embed(title="Reminders", description=text, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "remind", 3)
+
+async def remind_remove_autocomplete(interaction, string):
+    try:
+        reminders = json.loads(database[f"reminders.{interaction.author.id}"])
+    except:
+        reminders = []
+    text = []
+    for reminder in reminders:
+        text.append(reminder[2])
+    return list(filter(lambda reminder: string.lower() in reminder.lower(), text))[:20]
+
+@remind_command.sub_command(name="remove", description="Remove a reminder")
+async def remind_remove_command(
+        interaction,
+        text: str = Param(description="The name of the reminder", autocomplete=remind_remove_autocomplete),
+    ):
+    try:
+        current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
+    except:
+        current_reminders = []
+    key = None
+    for reminder in current_reminders:
+        if reminder[2] == text:
+            key = reminder
+    if key == None:
+        await interaction.response.send_message("That reminder does not exist!", ephemeral=True)
+        return
+    current_reminders.remove(key)
+    database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
+    await interaction.response.send_message("That reminder has been successfully removed")
 
 @remind_command.sub_command(name="add", description="Add a new reminder")
 async def remind_add_command(
@@ -3600,6 +3630,8 @@ async def on_message(message):
         if "#raw" in code:
             output_language = ""
             codeblock = ""
+        if code.startswith("`") and code.endswith("`"):
+            code = code[1:-1]
 
         stdout = io.StringIO()
         try:
