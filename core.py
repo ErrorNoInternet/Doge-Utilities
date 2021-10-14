@@ -1429,10 +1429,13 @@ async def color_command(
     await interaction.response.send_message(embed=embed, file=disnake.File("images/color.png"))
     add_cooldown(interaction.author.id, "color", 3)
 
+async def autocomplete_timezones(_, string: str) -> List[str]:
+    return list(filter(lambda timezone: string in timezone.lower(), pytz.all_timezones))[:20]
+
 @client.slash_command(name="time", description="Get the time information about a specific region")
 async def time_command(
         interaction,
-        region: str = Param(description="The target region")
+        region: str = Param(description="The region you want to check the time for", autocomplete=autocomplete_timezones)
     ):
     region = region.strip()
     try:
