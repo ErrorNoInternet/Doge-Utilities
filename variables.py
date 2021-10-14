@@ -3,7 +3,6 @@ import os
 bot_owners = [531392146767347712, 599186408925560833, 890264136477462618]
 permission_override = bot_owners
 message_managers = bot_owners
-message_managers.remove(890264136477462618)
 
 prefix = "="
 shard_count = 2
