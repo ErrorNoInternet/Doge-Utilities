@@ -24,17 +24,20 @@ def update_objects():
         time.sleep(8)
 
 async def random_status():
-    idle = False; cycles = 120
+    idle = False
+    cycles = 120
     while True:
         cycles += 1
         try:
             if time.time() - variables.last_command > 180:
                 if not idle:
-                    await core.client.change_presence(status=disnake.Status.idle); idle = True
+                    await core.client.change_presence(status=disnake.Status.idle)
+                    idle = True
             else:
                 if idle or cycles > 120:
                     await core.select_status()
-                    cycles = 0; idle = False
+                    cycles = 0
+                    idle = False
         except Exception as error:
             print("Error: " + str(error))
         await asyncio.sleep(1)
