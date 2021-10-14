@@ -2905,10 +2905,16 @@ async def convert_command(
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "convert", 3)
 
+async def autocomplete_languages(_, string):
+    languages = []
+    for language in googletrans.LANGUAGES:
+        languages.append(language.title())
+    return list(filter(lambda language: string.lower() in language.lower(), languages))[:20]
+
 @client.slash_command(name="translate", description="Translate text to different languages")
 async def translate_command(
         interaction,
-        language: str = Param(description="The language you want to translate to"),
+        language: str = Param(description="The language you want to translate to", autocomplete=autocomplete_languages),
         text: str = Param(description="The text you want to translate"),
     ):
     await interaction.response.defer()
