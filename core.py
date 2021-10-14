@@ -323,7 +323,6 @@ def manage_blacklist():
 start_time = time.time()
 last_command = time.time()
 blacklisted_users = []
-user_cache = {}
 snipe_list = {}
 math_variables = {}
 user_cooldowns = {}
@@ -1551,15 +1550,9 @@ async def blacklist_list_command(interaction):
     blacklisted_users = []
     raw_array = json.loads(database["blacklist"])
     for user in raw_array:
-        user_tag = "unknown"
-        try:
-            user_tag = user_cache[user]
-        except:
-            try:
-                user_tag = str(await client.fetch_user(user))
-                user_cache[user] = user_tag
-            except:
-                pass
+        user_tag = await client.getch_user(user)
+        if user_tag == None:
+            user_tag = "unknown"
         blacklisted_users.append(f"{user} (**{user_tag}**)")
     embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
     await interaction.response.send_message(embed=embed, ephemeral=True)
