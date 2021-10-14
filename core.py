@@ -3033,15 +3033,15 @@ async def todo_add_command(
     except:
         todo_list = []
     if len(todo_list) >= 20:
-        await interaction.response.send_message("You can only add up to **20 items**!")
+        await interaction.response.send_message("You can only add up to **20 items**!", ephemeral=True)
         return
     if len(item) > 50:
-        await interaction.response.send_message("The specified item is too long!")
+        await interaction.response.send_message("The specified item is too long!", ephemeral=True)
         return
     if item not in todo_list: 
         todo_list.append(item)
     else:
-        await interaction.response.send_message("That item is already in your to-do list!")
+        await interaction.response.send_message("That item is already in your to-do list!", ephemeral=True)
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(f'Successfully added **"{item}"** to your to-do list')
@@ -3066,7 +3066,7 @@ async def todo_remove_command(
     if item in todo_list:
         todo_list.remove(item)
     else:
-        await interaction.response.send_message("That item is not in your to-do list!")
+        await interaction.response.send_message("That item is not in your to-do list!", ephemeral=True)
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(f'Successfully removed **"{item}"** from your to-do list')
@@ -3146,11 +3146,11 @@ def get_variable(name):
     try:
         return math_variables[name]
     except:
-        return 0
+        return None
 
 def set_variable(name, value):
     math_variables[name] = value
-    return 0
+    return value
 
 def parse_interaction(interaction):
     interaction_data = "/" + interaction.data.name + " "
@@ -3204,6 +3204,8 @@ def evaluate_expression(expression):
         "boo": "Boo!",
         "pi": math.pi,
         "π": math.pi,
+        "time": time.time(),
+        "round": lambda x: round(x),
         "len": lambda x: len(x),
         "sqrt": lambda x: math.sqrt(x),
         "cbrt": lambda x: x ** (1. / 3),
