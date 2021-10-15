@@ -770,7 +770,8 @@ async def setup_banned_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True); return
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
 
     roles = interaction.guild.roles
     for role in roles:
@@ -805,7 +806,8 @@ async def setup_muted_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True); return
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
 
     roles = interaction.guild.roles
     for role in roles:
@@ -1468,11 +1470,13 @@ async def time_command(
                 if region.replace(" ", "_").lower() == city.lower():
                     user_timezone = pytz.timezone(timezone); now = datetime.datetime.now(user_timezone)
                     embed = disnake.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
-                    await interaction.response.send_message(embed=embed); return
+                    await interaction.response.send_message(embed=embed)
+                    return
             except:
                 pass
         embed = disnake.Embed(title="Time", description=f"That timezone was not found", color=variables.embed_color)
-        await interaction.response.send_message(embed=embed); return
+        await interaction.response.send_message(embed=embed)
+        return
     add_cooldown(interaction.author.id, "time", 3)
 
 @client.slash_command(name="nickname", description="Change a member's nickname")
@@ -1497,7 +1501,8 @@ async def nickname_command(
         await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
         add_cooldown(interaction.author.id, "nickname", 5)
     except:
-        await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname"); return
+        await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname")
+        return
 
 @client.slash_command(name="stackoverflow", description="Look for something on StackOverflow")
 async def stackoverflow_command(
@@ -1516,7 +1521,8 @@ async def stackoverflow_command(
         response = requests.get(url="https://api.stackexchange.com/2.2/search/advanced", params=parameters).json()
         if not response["items"]:
             embed = disnake.Embed(title="StackOverflow", description=f"No search results found for **{text}**", color=disnake.Color.red())
-            await interaction.edit_original_message(embed=embed); return
+            await interaction.edit_original_message(embed=embed)
+            return
         final_results = response["items"][:5]
         embed = disnake.Embed(title="StackOverflow", description=f"Here are the **top {len(final_results)}** results for **{text}**", color=variables.embed_color)
         for result in final_results:
@@ -1536,9 +1542,11 @@ async def stackoverflow_command(
             )
         await interaction.edit_original_message(embed=embed)
     except disnake.HTTPException:
-        await interaction.edit_original_message(content="The search result is too long!"); return
+        await interaction.edit_original_message(content="The search result is too long!", ephemeral=True)
+        return
     except:
-        await interaction.edit_original_message(content="Unable to search for item"); return
+        await interaction.edit_original_message(content="Unable to search for item", ephemeral=True)
+        return
     add_cooldown(interaction.author.id, "stackoverflow", 10)
 
 @client.slash_command(name="blacklist", description="Owner command")
@@ -1750,7 +1758,7 @@ async def tictactoe_command(interaction):
             await interaction.edit_original_message(view=self)
 
     await interaction.response.send_message("Click to join the TicTacToe game", view=GameLauncher())
-    add_cooldown(interaction.author.id, "game", 3)
+    add_cooldown(interaction.author.id, "game", 20)
 
 @game_command.sub_command(name="trivia", description="Start a trivia game")
 async def trivia_command(interaction):
@@ -1878,7 +1886,8 @@ async def unmute_command(
     if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True); return
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
 
     mute_role = None; exists = False
     for role in interaction.guild.roles:
@@ -1922,13 +1931,16 @@ async def mute_command(
         try:
             await member.add_roles(mute_role)
         except:
-            await interaction.response.send_message(f"Unable to mute **{member}**"); return
+            await interaction.response.send_message(f"Unable to mute **{member}**")
+            return
         await interaction.response.send_message(f"Successfully muted **{member}** permanently")
     else:
         if duration > 43200:
-            await interaction.response.send_message("The specified duration is too long!"); return
+            await interaction.response.send_message("The specified duration is too long!", ephemeral=True)
+            return
         if duration < 0:
-            await interaction.response.send_message("No negative numbers please!"); return
+            await interaction.response.send_message("No negative numbers please!", ephemeral=True)
+            return
         try:
             moderation_data = json.loads(database["mute." + str(interaction.guild.id)])
         except:
@@ -1939,7 +1951,8 @@ async def mute_command(
             moderation_data.append([member.id, time.time(), duration])
             database["mute." + str(interaction.guild.id)] = json.dumps(moderation_data)
         except:
-            await interaction.response.send_message(f"Unable to mute **{member}**"); return
+            await interaction.response.send_message(f"Unable to mute **{member}**")
+            return
         await interaction.response.send_message(f"Successfully muted **{member}** for **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
 
 @client.user_command(name="Mute Member")
@@ -1947,7 +1960,8 @@ async def user_mute_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True); return
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
         if "mute" in role.name.lower():
@@ -1972,7 +1986,8 @@ async def user_unmute_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True); return
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
         if "mute" in role.name.lower():
@@ -2233,7 +2248,7 @@ async def leave_enable_command(interaction):
     try:
         database[f"leave.text.{interaction.guild.id}"]
     except:
-        await interaction.response.send_message(f"Please set a leave message first")
+        await interaction.response.send_message(f"Please set a leave message first", ephemeral=True)
         return
     try:
         channel_id = json.loads(database[f"leave.channel.{interaction.guild.id}"])
@@ -2244,7 +2259,8 @@ async def leave_enable_command(interaction):
         if not found:
             raise Exception("unable to find channel")
     except:
-        await interaction.response.send_message(f"Please set a leave channel first"); return
+        await interaction.response.send_message(f"Please set a leave channel first", ephemeral=True)
+        return
 
     database[f"leave.toggle.{interaction.guild.id}"] = 1
     await interaction.response.send_message("Leave messages have been successfully **enabled**")
@@ -2325,7 +2341,7 @@ async def welcome_enable_command(interaction):
     try:
         database[f"welcome.text.{interaction.guild.id}"]
     except:
-        await interaction.response.send_message(f"Please set a welcome message first")
+        await interaction.response.send_message(f"Please set a welcome message first", ephemeral=True)
         return
     try:
         channel_id = json.loads(database[f"welcome.channel.{interaction.guild.id}"])
@@ -2336,7 +2352,8 @@ async def welcome_enable_command(interaction):
         if not found:
             raise Exception("unable to find channel")
     except:
-        await interaction.response.send_message(f"Please set a welcome channel first"); return
+        await interaction.response.send_message(f"Please set a welcome channel first", ephemeral=True)
+        return
 
     database[f"welcome.toggle.{interaction.guild.id}"] = 1
     await interaction.response.send_message("Welcome messages have been successfully **enabled**")
@@ -2583,7 +2600,8 @@ async def github_command(
     response = requests.get(f"https://api.github.com/repos/{repository.strip()}").json()
     try:
         if response["message"] == "Not Found":
-            await interaction.response.send_message("That GitHub repository was not found"); return
+            await interaction.response.send_message("That GitHub repository was not found")
+            return
     except:
         pass
     embed = disnake.Embed(color=variables.embed_color)
@@ -3127,20 +3145,20 @@ async def remind_add_command(
         text: str = Param(description="The name of the reminder"),
     ):
     if len(text) > 200:
-        await interaction.response.send_message("The specified text is too long!")
+        await interaction.response.send_message("The specified text is too long!", ephemeral=True)
         return
     if duration > 10080:
-        await interaction.response.send_message("The specified duration is too long!")
+        await interaction.response.send_message("The specified duration is too long!", ephemeral=True)
         return
     if duration < 0:
-        await interaction.response.send_message("No negative numbers please!")
+        await interaction.response.send_message("No negative numbers please!", ephemeral=True)
         return
     try:
         current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
     except:
         current_reminders = []
     if len(current_reminders) >= 5:
-        await interaction.response.send_message("You already have **5 reminders**!")
+        await interaction.response.send_message("You already have **5 reminders**!", ephemeral=True)
         return
     current_reminders.append([time.time(), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
@@ -3310,7 +3328,8 @@ def generate_color(color_code):
             color_code = color_code.replace("(", ""); color_code = color_code.replace(")", "")
             color_code = color_code.replace(", ", ","); rgb_color = tuple(map(int, color_code.split(',')))
             color_code = rgb_to_hex(rgb_color); image = Image.new("RGB", (image_width, image_height), color_code)
-            image.save("images/color.png"); return (color_code, rgb_color)
+            image.save("images/color.png")
+            return (color_code, rgb_color)
         except:
             return 1
     else:
@@ -3346,7 +3365,8 @@ async def send_user_message(user_id, message):
     for guild in client.guilds:
         try:
             member = await guild.fetch_member(int(user_id))
-            await member.send(message); return
+            await member.send(message)
+            return
         except:
             continue
 
