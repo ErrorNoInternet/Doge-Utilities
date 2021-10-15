@@ -1292,6 +1292,7 @@ async def clear_command(
             return contains.lower() in target_message.content.lower()
         def member_check(target_message):
             return target_message.author.id == member.id
+        contains = contains.strip()
         user_text = ""
         contains_text = ""
         try:
