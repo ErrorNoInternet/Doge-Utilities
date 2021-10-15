@@ -1285,6 +1285,9 @@ async def clear_command(
         if count > 1000:
             await interaction.edit_original_message(content="You can only clear up to **1000 messages**!")
             return
+        elif count < 0:
+            await interaction.edit_original_message(content="No negative numbers please!")
+            return
         def contains_check(target_message):
             return contains.lower() in target_message.content.lower()
         def member_check(target_message):
@@ -1293,7 +1296,7 @@ async def clear_command(
         contains_text = ""
         try:
             if contains != "":
-                contains_text = f' that contain **"{contains}"**'
+                contains_text = f' that contained **"{contains}"**'
             if member == 0:
                 messages = len(await interaction.channel.purge(limit=count, check=contains_check))
             else:
