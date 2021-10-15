@@ -1276,23 +1276,38 @@ async def calculate_command(
 async def clear_command(
         interaction,
         count: int = Param(description="The amount of messages you want to delete"),
-        member: disnake.Member = Param(0, description="The member you want to delete messages for")
+        member: disnake.Member = Param(0, description="The member you want to delete messages for"),
+        contains: str = Param("", description="Only clear the messages that contain this"),
     ):
     if interaction.author.guild_permissions.manage_messages or interaction.author.id in variables.permission_override:
-        user_text = ""
         await interaction.response.defer(ephemeral=True)
+
+        if count > 1000:
+            await interaction.edit_original_message(content="You can only clear up to **1000 messages**!")
+            return
+        def contains_check(target_message):
+            return contains.lower() in target_message.content.lower()
+        def member_check(target_message):
+            return target_message.author.id == member.id
+        user_text = ""
+        contains_text = ""
         try:
+            if contains != "":
+                contains_text = f' that contain **"{contains}"**'
             if member == 0:
-                messages = len(await interaction.channel.purge(limit=count))
+                messages = len(await interaction.channel.purge(limit=count, check=contains_check))
             else:
                 user_text = f" from **{member}**"
                 def check(target_message):
-                    return target_message.author.id == member.id
+                    if contains_check(target_message) and member_check(target_message):
+                        return True
+                    else:
+                        return False
                 messages = len(await interaction.channel.purge(limit=count, check=check))
         except:
             await interaction.edit_original_message(content="Unable to clear messages")
             return
-        await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**{user_text}")
+        await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**{user_text}{contains_text}")
     else:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
     add_cooldown(interaction.author.id, "clear", 5)
