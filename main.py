@@ -1,4 +1,5 @@
 import os
+import sys
 import core
 import json
 import time
@@ -20,14 +21,10 @@ if not os.path.exists("images"):
 def update_objects():
     global server_channels
     global server_roles
-    global edited_channels
-    global edited_roles
     while True:
         for guild in core.client.guilds:
             server_channels[guild.id] = guild.channels
             server_roles[guild.id] = guild.roles
-        edited_channels = []
-        edited_roles = []
         time.sleep(5)
 
 async def random_status():
@@ -167,7 +164,7 @@ async def on_error(event, *_):
     if event == "on_application_command":
         return
     else:
-        print(f"Uncaught exception in {event}")
+        print(f"Uncaught exception in {event}: {sys.exc_info()}")
 
 @core.client.event
 async def on_slash_command_error(interaction, error):
