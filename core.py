@@ -2442,16 +2442,27 @@ async def welcome_status_command(interaction):
     await interaction.response.send_message(f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
 
 @client.slash_command(name="snipe", description="Bring deleted messages back to life")
-async def snipe_command(interaction):
-    try:
-        if snipe_list[interaction.guild.id] == []:
+async def snipe_command(
+        interaction,
+        member: disnake.Member = Param(0, description="The person you want to see the sniped messages for"),
+    ):
+    if member == 0:
+        try:
+            random_message = random.choice(snipe_list[interaction.guild.id])
+        except:
             await interaction.response.send_message("There is nothing to snipe!")
             return
-    except:
-        await interaction.response.send_message("There is nothing to snipe!")
-        return
+    else:
+        try:
+            messages = []
+            for message in snipe_list[interaction.guild.id]:
+                if str(message[0]) == str(member):
+                    messages.append(message)
+            random_message = random.choice(messages)
+        except:
+            await interaction.response.send_message(f"There is nothing to snipe from **{member}**!")
+            return
 
-    random_message = random.choice(snipe_list[interaction.guild.id])
     message_author = random_message[0]
     message_author_avatar = random_message[1]
     channel_name = random_message[2]
@@ -3524,7 +3535,7 @@ async def on_message_delete(message, *_):
     except:
         snipes = []
         snipe_list[message.guild.id] = []
-    while len(snipes) >= 10:
+    while len(snipes) >= 5:
         random_snipe = random.choice(snipes)
         snipes.remove(random_snipe)
 
