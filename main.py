@@ -164,7 +164,7 @@ async def on_error(event, *_):
     if event == "on_application_command":
         return
     else:
-        print(f"Uncaught exception in {event}: {sys.exc_info()}")
+        print(f"Uncaught exception in {event}: {sys.exc_info()[1]}")
 
 @core.client.event
 async def on_slash_command_error(interaction, error):
