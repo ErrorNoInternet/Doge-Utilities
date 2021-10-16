@@ -2477,6 +2477,39 @@ async def snipe_command(interaction):
 async def server_command(_):
     pass
 
+@server_command.sub_command_group(name="snipe", description="Enable or disable snipe for this server")
+async def server_snipe_command(_):
+    pass
+
+@server_snipe_command.sub_command(name="status", description="See if snipe is currently enabled in this server")
+async def server_snipe_status_command(interaction):
+    toggle = 0
+    try:
+        toggle = json.loads(database[f"snipe.{interaction.guild.id}"])
+    except:
+        pass
+    await interaction.response.send_message(f"Snipe is currently **{'enabled' if toggle else 'disabled'}** in this server")
+
+@server_snipe_command.sub_command(name="enable", description="Enable snipe for this server")
+async def server_snipe_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    database[f"snipe.{interaction.guild.id}"] = 1
+    await interaction.response.send_message("Snipe has been successfully **enabled** for this server")
+
+@server_snipe_command.sub_command(name="disable", description="Disable snipe for this server")
+async def server_snipe_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    database[f"snipe.{interaction.guild.id}"] = 0
+    if interaction.guild.id in snipe_list:
+        del snipe_list[interaction.guild.id]
+    await interaction.response.send_message("Snipe has been successfully **disabled** for this server")
+
 @server_command.sub_command(name="suggest", description="Send a suggestion to the server owner")
 async def server_suggest_command(
         interaction,
@@ -3477,6 +3510,13 @@ async def on_guild_join(guild):
 
 async def on_message_delete(message, *_):
     if not message.guild or message.author.bot:
+        return
+    toggle = 0
+    try:
+        toggle = json.loads(database[f"snipe.{message.guild.id}"])
+    except:
+        pass
+    if not toggle:
         return
 
     try:

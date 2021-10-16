@@ -12,16 +12,17 @@ initialize_time = time.time()
 first_run = False
 server_roles = {}
 server_channels = {}
+edited_channels = []
+edited_roles = []
 if not os.path.exists("images"):
     os.mkdir("images")
 
 def update_objects():
-    time.sleep(2)
     while True:
         for guild in core.client.guilds:
             server_channels[guild.id] = guild.channels
             server_roles[guild.id] = guild.roles
-        time.sleep(8)
+        time.sleep(5)
 
 async def random_status():
     idle = False
@@ -43,6 +44,24 @@ async def random_status():
         await asyncio.sleep(1)
 
 @core.client.event
+async def on_guild_channel_update(before, after):
+    try:
+        current_setting = json.loads(core.database[f"{before.guild.id}.raid-protection"])
+        if not current_setting:
+            return
+    except:
+        return
+
+    if after.id in edited_channels:
+        edited_channels.remove(after.id)
+        return
+    edited_channels.append(after.id)
+    if type(after) == disnake.TextChannel:
+        await after.edit(name=before.name, topic=before.topic, category=before.category, slowmode_delay=before.slowmode_delay)
+    elif type(after) == disnake.VoiceChannel:
+        await after.edit(name=before.name, category=before.category)
+
+@core.client.event
 async def on_guild_channel_delete(channel):
     try:
         current_setting = json.loads(core.database[f"{channel.guild.id}.raid-protection"])
@@ -62,6 +81,24 @@ async def on_guild_channel_delete(channel):
                 server_channels[channel.guild.id].append(await channel.guild.create_category(name=cached_channel.name, position=cached_channel.position))
             else:
                 server_channels[channel.guild.id].append(await channel.guild.create_voice_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, user_limit=cached_channel.user_limit, bitrate=cached_channel.bitrate))
+
+@core.client.event
+async def on_guild_role_update(before, after):
+    try:
+        current_setting = json.loads(core.database[f"{before.guild.id}.raid-protection"])
+        if not current_setting:
+            return
+    except:
+        return
+
+    if before.managed:
+        return
+
+    if after.id in edited_roles:
+        edited_roles.remove(after.id)
+        return
+    edited_roles.append(after.id)
+    await after.edit(name=before.name, color=before.color, permissions=before.permissions)
 
 @core.client.event
 async def on_guild_role_delete(role):
