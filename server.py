@@ -208,6 +208,7 @@ def web_dashboard():
     server_dashboard = ""
     for guild in mutual_guilds:
         toggle_raid_protection_function = f"raidProtection('{token}', '{guild.id}')"
+        toggle_snipe_function = f"toggleSnipe('{token}', '{guild.id}')"
         toggle_insults_filter_function = f"toggleFilter('{token}', 'insults', '{guild.id}')"
         toggle_spam_filter_function = f"toggleFilter('{token}', 'spam', '{guild.id}')"
         toggle_links_filter_function = f"toggleFilter('{token}', 'links', '{guild.id}')"
@@ -222,6 +223,11 @@ def web_dashboard():
         raid_protection = 0
         try:
             raid_protection = json.loads(core.database[f"{guild.id}.raid-protection"])
+        except:
+            pass
+        snipe = 0
+        try:
+            snipe = json.loads(core.database[f"snipe.{guild.id}"])
         except:
             pass
         insults_filter = 0
@@ -247,6 +253,7 @@ def web_dashboard():
         server_dashboard += f"<h2 class='serverTitle' id='{guild.id}'>{guild.name}</h2>"
         server_dashboard += f"<p style='margin-top: 0;'><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)</p>"
         server_dashboard += f'<button style="margin-top: 20; background-color: {colors[raid_protection]};" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_raid_protection_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
+        server_dashboard += f'<button style="background-color: {colors[snipe]};" id="snipe-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_snipe_function}">Message Snipe: {"Enabled" if snipe == 1 else "Disabled"}</button>'
 
         server_dashboard += f"<h4 class='subTitle' id='{guild.id}'>Filters</h4>"
         server_dashboard += f'<button style="margin-top: 5;" id="insults-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_insults_filter_function}">Insults: {"Enabled" if insults_filter == 1 else "Disabled"}</button>'
@@ -344,6 +351,35 @@ def fetch_commands():
 @app.route("/api/version", endpoint="api")
 def fetch_version():
     return f"{variables.version_number}.{variables.build_number}"
+
+@app.route("/web/api/snipe/<token>/<server>")
+def toggle_snipe(token, server):
+    try:
+        user_id = user_ids[get_ip(flask.request)]
+        if user_tokens[user_id] != token:
+            flask.abort(403)
+        found = False
+        for guild in core.client.guilds:
+            if str(guild.id) == server:
+                for member in guild.members:
+                    if str(member.id) == user_id:
+                        if member.guild_permissions.administrator:
+                            found = True
+        if not found:
+            flask.abort(403)
+    except:
+        flask.abort(403)
+
+    value = 0
+    try:
+        value = json.loads(core.database[f"snipe.{server}"])
+    except:
+        pass
+    new_value = 0
+    if value == 0:
+        new_value = 1
+    core.database[f"snipe.{server}"] = new_value
+    return str(new_value)
 
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
