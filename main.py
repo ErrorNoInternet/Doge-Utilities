@@ -63,6 +63,8 @@ async def on_guild_channel_update(before, after):
         await after.edit(name=before.name, topic=before.topic, category=before.category, slowmode_delay=before.slowmode_delay)
     elif type(after) == disnake.VoiceChannel:
         await after.edit(name=before.name, category=before.category)
+    elif type(after) == disnake.CategoryChannel:
+        await after.edit(name=before.name)
 
 @core.client.event
 async def on_guild_channel_delete(channel):
