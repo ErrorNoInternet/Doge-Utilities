@@ -26,8 +26,8 @@ def update_objects():
         for guild in core.client.guilds:
             server_channels[guild.id] = guild.channels
             server_roles[guild.id] = guild.roles
-        edited_channels = {}
-        edited_roles = {}
+        edited_channels = []
+        edited_roles = []
         time.sleep(5)
 
 async def random_status():
@@ -163,7 +163,7 @@ async def on_guild_join(guild):
     await core.on_guild_join(guild)
 
 @core.client.event
-async def on_error(event, _):
+async def on_error(event, *_):
     if event == "on_application_command":
         return
     else:
