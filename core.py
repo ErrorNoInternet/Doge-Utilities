@@ -2488,6 +2488,47 @@ async def snipe_command(
 async def server_command(_):
     pass
 
+@server_command.sub_command_group(name="logging", description="Manage the log channel for your server")
+async def logging_command(_):
+    pass
+
+@logging_command.sub_command(name="status", description="See the current log channel")
+async def logging_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    channel = None
+    try:
+        channel = json.loads(database[f"logging.{interaction.guild.id}"])
+    except:
+        pass
+    if channel == None:
+        await interaction.response.send_message("This server does not have logging configured")
+    else:
+        await interaction.response.send_message(f"This server's log channel is set to <#{channel}>")
+
+@logging_command.sub_command(name="set", description="Set the logging channel for your server")
+async def logging_set_command(
+        interaction,
+        channel: disnake.channel.TextChannel = Param(description="The channel you want the bot to log messages to"),
+    ):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    database[f"logging.{interaction.guild.id}"] = channel.id
+    await interaction.response.send_message(f"This server's log channel has been set to <#{channel.id}>")
+
+@logging_command.sub_command(name="disable", description="Disable logging for your server")
+async def logging_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    try:
+        del database[f"logging.{interaction.guild.id}"]
+    except:
+        pass
+    await interaction.response.send_message("Logging has been successfully disabled for this server")
+
 @server_command.sub_command_group(name="snipe", description="Enable or disable snipe for this server")
 async def server_snipe_command(_):
     pass
@@ -2613,47 +2654,6 @@ async def server_information_command(interaction):
         embed.add_field(name="Description", value=interaction.guild.description)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 3)
-
-@client.slash_command(name="logging", description="Manage the log channel for your server")
-async def logging_command(_):
-    pass
-
-@logging_command.sub_command(name="status", description="See the current log channel")
-async def logging_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
-        return
-    channel = None
-    try:
-        channel = json.loads(database[f"logging.{interaction.guild.id}"])
-    except:
-        pass
-    if channel == None:
-        await interaction.response.send_message("This server does not have logging configured")
-    else:
-        await interaction.response.send_message(f"This server's log channel is set to <#{channel}>")
-
-@logging_command.sub_command(name="set", description="Set the logging channel for your server")
-async def logging_set_command(
-        interaction,
-        channel: disnake.channel.TextChannel = Param(description="The channel you want the bot to log messages to"),
-    ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
-        return
-    database[f"logging.{interaction.guild.id}"] = channel.id
-    await interaction.response.send_message(f"This server's log channel has been set to <#{channel.id}>")
-
-@logging_command.sub_command(name="disable", description="Disable logging for your server")
-async def logging_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
-        return
-    try:
-        del database[f"logging.{interaction.guild.id}"]
-    except:
-        pass
-    await interaction.response.send_message("Logging has been successfully disabled for this server")
 
 @client.slash_command(name="github", description="Fetch a repository on GitHub")
 async def github_command(

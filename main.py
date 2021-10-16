@@ -18,10 +18,16 @@ if not os.path.exists("images"):
     os.mkdir("images")
 
 def update_objects():
+    global server_channels
+    global server_roles
+    global edited_channels
+    global edited_roles
     while True:
         for guild in core.client.guilds:
             server_channels[guild.id] = guild.channels
             server_roles[guild.id] = guild.roles
+        edited_channels = {}
+        edited_roles = {}
         time.sleep(5)
 
 async def random_status():
