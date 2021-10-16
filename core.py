@@ -2481,14 +2481,14 @@ async def server_command(_):
 async def server_snipe_command(_):
     pass
 
-@server_snipe_command.sub_command(name="status", description="See if snipe is currently enabled in this server")
+@server_snipe_command.sub_command(name="status", description="See if snipe is currently enabled for this server")
 async def server_snipe_status_command(interaction):
     toggle = 0
     try:
         toggle = json.loads(database[f"snipe.{interaction.guild.id}"])
     except:
         pass
-    await interaction.response.send_message(f"Snipe is currently **{'enabled' if toggle else 'disabled'}** in this server")
+    await interaction.response.send_message(f"Snipe is currently **{'enabled' if toggle else 'disabled'}** for this server")
 
 @server_snipe_command.sub_command(name="enable", description="Enable snipe for this server")
 async def server_snipe_enable_command(interaction):
