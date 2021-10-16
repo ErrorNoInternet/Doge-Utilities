@@ -871,7 +871,10 @@ async def random_command(
                 new_view = disnake.ui.View()
                 new_view.add_item(disnake.ui.Button(label=button_text, style=disnake.ButtonStyle.gray, disabled=True))
                 await interaction.edit_original_message(view=new_view)
-                await button_interaction.response.send_message("You have generated **5 numbers** already. Please re-run the command to continue.", ephemeral=True)
+                await button_interaction.response.send_message(
+                    "You have generated **5 numbers** already. Please re-run the command to continue.",
+                    ephemeral=True,
+                )
                 self.stop()
     await interaction.response.send_message(f"Your random number is **{random_number}**", view=CommandView())
     add_cooldown(interaction.author.id, "random", 10)
@@ -891,7 +894,7 @@ async def disconnect_members_command(interaction):
                     except:
                         failed += 1
         await interaction.edit_original_message(content=f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
-        add_cooldown(interaction.author.id, "disconnect-members", 30)
+        add_cooldown(interaction.author.id, "disconnect-members", 20)
     else:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
 
@@ -1181,7 +1184,7 @@ async def hash_command(
         embed.add_field(name="Text", value=text)
         embed.add_field(name=f"Hash ({hash_type})", value="`" + output_hash + "`", inline=False)
         await interaction.response.send_message(embed=embed)
-        add_cooldown(interaction.author.id, "hash", 5)
+        add_cooldown(interaction.author.id, "hash", 3)
     except:
         await interaction.response.send_message("Invalid hash type")
         return
@@ -1202,7 +1205,7 @@ async def base64_encode_command(
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Unable to encode the specified text")
-    add_cooldown(interaction.author.id, "base64", 5)
+    add_cooldown(interaction.author.id, "base64", 3)
 
 @base64_command.sub_command(name="decode", description="Decode text from base64")
 async def base64_decode_command(
@@ -1216,7 +1219,7 @@ async def base64_decode_command(
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Unable to decode the specified text")
-    add_cooldown(interaction.author.id, "base64", 5)
+    add_cooldown(interaction.author.id, "base64", 3)
 
 @client.slash_command(name="binary", description="Encode and decode binary")
 async def binary_command(_):
@@ -1236,7 +1239,7 @@ async def binary_encode_command(
     except:
         await interaction.response.send_message("Unable to encode the specified text")
         return
-    add_cooldown(interaction.author.id, "binary", 5)
+    add_cooldown(interaction.author.id, "binary", 3)
 
 @binary_command.sub_command(name="decode", description="Decode text from binary")
 async def binary_decode_command(
@@ -1255,7 +1258,7 @@ async def binary_decode_command(
     except:
         await interaction.response.send_message("Unable to decode the specified text")
         return
-    add_cooldown(interaction.author.id, "binary", 5)
+    add_cooldown(interaction.author.id, "binary", 3)
 
 @client.slash_command(name="calculate", description="Evaluate a math expression")
 async def calculate_command(
@@ -1518,7 +1521,7 @@ async def nickname_command(
                 return
         await member.edit(nick=nickname)
         await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
-        add_cooldown(interaction.author.id, "nickname", 5)
+        add_cooldown(interaction.author.id, "nickname", 3)
     except:
         await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname")
         return
