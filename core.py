@@ -161,10 +161,13 @@ class Paginator:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
-                self.current_page = (self.current_page - 10) % len(self.embeds)
-                if self.current_page < 1:
-                    self.current_page = len(self.embeds)
-                if self.current_page == 0:
+                if len(self.embeds) >= 15:
+                    self.current_page = (self.current_page - 10) % len(self.embeds)
+                    if self.current_page < 1:
+                        self.current_page = len(self.embeds)
+                    if self.current_page == 0:
+                        self.current_page = 1
+                else:
                     self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
@@ -196,10 +199,13 @@ class Paginator:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
                     return
 
-                self.current_page = (self.current_page + 10) % len(self.embeds)
-                if self.current_page > len(self.embeds):
-                    self.current_page = 1
-                if self.current_page == 0:
+                if len(self.embeds) >= 15:
+                    self.current_page = (self.current_page + 10) % len(self.embeds)
+                    if self.current_page > len(self.embeds):
+                        self.current_page = 1
+                    if self.current_page == 0:
+                        self.current_page = len(self.embeds)
+                else:
                     self.current_page = len(self.embeds)
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
         self.view = PaginatorView
