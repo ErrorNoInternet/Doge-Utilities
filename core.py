@@ -561,7 +561,7 @@ async def ping_command(interaction):
     embed = disnake.Embed(
         title="Pong :ping_pong:",
         description=f"Latency: **{round(client.latency * 1000, 1)} ms**",
-        color=variables.embed_color
+        color=variables.embed_color,
     )
     await interaction.response.send_message(embed=embed)
 
@@ -1130,7 +1130,7 @@ async def raid_protection_status_command(interaction):
             counter = 0
             if interaction.guild.id in variables.protected_guilds:
                 counter = variables.protected_guilds[interaction.guild.id]
-            await interaction.response.send_message(f"This server's raid protection is turned **on**\nRaid Protection has protected **{counter} {'channel' if counter == 1 else 'channels'}** so far")
+            await interaction.response.send_message(f"This server's raid protection is turned **on**\nRaid Protection has saved **{counter} {'channel' if counter == 1 else 'channels'}** so far")
         else:
             await interaction.response.send_message("This server's raid protection is turned **off**")
     except:
@@ -2667,7 +2667,7 @@ async def server_members_command(interaction):
     embed = disnake.Embed(
         title="Guild Members",
         description=f"User accounts: **{users}**\nBot accounts: **{bots}**\nTotal members: **{users + bots}**",
-        color=variables.embed_color
+        color=variables.embed_color,
     )
     await interaction.response.send_message(embed=embed)
 
