@@ -1577,6 +1577,7 @@ async def autocomplete_youtube(_, string):
     search_results = []
     for result in raw_results:
         result = result.replace('\\"', "\"")
+        result = result.replace("\u0026", "&")
         if len(result) > 100:
             result = result[:97] + "..."
         search_results.append(result)
