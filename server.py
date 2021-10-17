@@ -379,6 +379,12 @@ def toggle_snipe(token, server):
     if value == 0:
         new_value = 1
     core.database[f"snipe.{server}"] = new_value
+    try:
+        if new_value == 0:
+            if int(server) in core.snipe_list:
+                del core.snipe_list[int(server)]
+    except:
+        pass
     return str(new_value)
 
 @app.route("/web/api/raid-protection/<token>/<server>")
