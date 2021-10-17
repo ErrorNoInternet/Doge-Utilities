@@ -7,6 +7,7 @@ message_managers = bot_owners
 prefix = "="
 shard_count = 2
 last_command = 0
+protected_guilds = {}
 owner_commands = ["blacklist"]
 test_guilds = None
 #embed_color = 0x20c2f6

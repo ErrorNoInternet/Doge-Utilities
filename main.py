@@ -46,6 +46,12 @@ async def random_status():
             print("Error: " + str(error))
         await asyncio.sleep(1)
 
+def update_counter(guild_id):
+    if guild_id not in variables.protected_guilds:
+        variables.protected_guilds[guild_id] = 1
+    else:
+        variables.protected_guilds[guild_id] += 1
+
 @core.client.event
 async def on_guild_channel_update(before, after):
     try:
@@ -65,6 +71,7 @@ async def on_guild_channel_update(before, after):
         await after.edit(name=before.name, category=before.category)
     elif type(after) == disnake.CategoryChannel:
         await after.edit(name=before.name)
+    update_counter(before.guild.id)
 
 @core.client.event
 async def on_guild_channel_delete(channel):
@@ -86,6 +93,7 @@ async def on_guild_channel_delete(channel):
                 server_channels[channel.guild.id].append(await channel.guild.create_category(name=cached_channel.name, position=cached_channel.position))
             else:
                 server_channels[channel.guild.id].append(await channel.guild.create_voice_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, user_limit=cached_channel.user_limit, bitrate=cached_channel.bitrate))
+    update_counter(channel.guild.id)
 
 @core.client.event
 async def on_guild_role_update(before, after):
@@ -104,6 +112,7 @@ async def on_guild_role_update(before, after):
         return
     edited_roles.append(after.id)
     await after.edit(name=before.name, color=before.color, permissions=before.permissions)
+    update_counter(before.guild.id)
 
 @core.client.event
 async def on_guild_role_delete(role):
@@ -123,6 +132,7 @@ async def on_guild_role_delete(role):
             new_role = await role.guild.create_role(name=cached_role.name, color=cached_role.color, permissions=cached_role.permissions)
             await new_role.edit(position=cached_role.position)
             server_roles[role.guild.id].append(new_role)
+    update_counter(role.guild.id)
 
 @core.client.event
 async def on_ready():

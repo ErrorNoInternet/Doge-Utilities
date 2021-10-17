@@ -1127,7 +1127,10 @@ async def raid_protection_status_command(interaction):
     try:
         current_setting = json.loads(database[f"{interaction.guild.id}.raid-protection"])
         if current_setting:
-            await interaction.response.send_message("This server's raid protection is turned **on**")
+            counter = 0
+            if interaction.guild.id in variables.protected_guilds:
+                counter = variables.protected_guilds[interaction.guild.id]
+            await interaction.response.send_message(f"This server's raid protection is turned **on**\nRaid Protection has protected **{counter} {'channel' if counter == 1 else 'channels'}** so far")
         else:
             await interaction.response.send_message("This server's raid protection is turned **off**")
     except:
@@ -1577,7 +1580,6 @@ async def autocomplete_youtube(_, string):
     search_results = []
     for result in raw_results:
         result = result.replace('\\"', "\"")
-        result = result.replace("\u0026", "&")
         if len(result) > 100:
             result = result[:97] + "..."
         search_results.append(result)
