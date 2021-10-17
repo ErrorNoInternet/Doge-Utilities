@@ -1,5 +1,6 @@
 import os
 import io
+import re
 import sys
 import json
 import html
@@ -1532,7 +1533,34 @@ async def nickname_command(
         await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname")
         return
 
-@client.slash_command(name="stackoverflow", description="Look for something on StackOverflow")
+@client.slash_command(name="search", description="Search for something on the internet")
+async def search_command(_):
+    pass
+
+async def autocomplete_youtube(_, string):
+    response = requests.get(f"https://youtube.com/results?search_query={string}")
+    search_results = re.findall(r'""title":{"runs":[{"text":"(.*)"}]}', response.text)
+    return search_results[:20]
+
+@search_command.sub_command(name="youtube", description="Look for a video on YouTube")
+async def youtube_command(
+        interaction,
+        query: str = Param(description="The search query", autocomplete=autocomplete_youtube),
+    ):
+    await interaction.response.defer()
+    response = requests.get(f"https://youtube.com/results?search_query={query}")
+    try:
+        search_results = re.findall(r'/watch\?v=(.{11})', response.text)
+    except:
+        await interaction.edit_original_message(content="I couldn't find that video on YouTube")
+        return
+    if search_results == None:
+        await interaction.edit_original_message(content="I couldn't find that video on YouTube")
+        return
+    await interaction.edit_original_message(content=f"Here's the video I found: https://youtube.com/watch?v={search_results[0]}")
+    add_cooldown(interaction.author.id, "search", 10)
+
+@search_command.sub_command(name="stackoverflow", description="Look for something on StackOverflow")
 async def stackoverflow_command(
         interaction,
         text: str = Param(name="query", description="The search query"),
@@ -1575,7 +1603,7 @@ async def stackoverflow_command(
     except:
         await interaction.edit_original_message(content="Unable to search for item", ephemeral=True)
         return
-    add_cooldown(interaction.author.id, "stackoverflow", 10)
+    add_cooldown(interaction.author.id, "search", 10)
 
 @client.slash_command(name="blacklist", description="Owner command")
 async def blacklist_command(_):
@@ -3216,7 +3244,7 @@ async def remind_add_command(
         duration: float = Param(name="minutes", description="The duration of the reminder"),
         text: str = Param(description="The name of the reminder"),
     ):
-    if len(text) > 200:
+    if len(text) > 100:
         await interaction.response.send_message("The specified text is too long!", ephemeral=True)
         return
     if duration > 10080:
