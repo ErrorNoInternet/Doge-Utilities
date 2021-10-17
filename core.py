@@ -1539,7 +1539,16 @@ async def search_command(_):
 
 async def autocomplete_youtube(_, string):
     response = requests.get(f"https://youtube.com/results?search_query={string}")
-    search_results = re.findall(r'""title":{"runs":[{"text":"(.*)"}]}', response.text)
+    raw_results = []
+    items = response.text.split(",")
+    for item in items:
+        if item.startswith('"title":{"runs":[{"text":') and item.endswith('"}]'):
+            raw_results.append(item.split('"title":{"runs":[{"text":"')[1].split('"}]')[0])
+    search_results = []
+    for result in raw_results:
+        if len(result) > 100:
+            result = result[:97] + "..."
+        search_results.append(result)
     return search_results[:20]
 
 @search_command.sub_command(name="youtube", description="Look for a video on YouTube")
