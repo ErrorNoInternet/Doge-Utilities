@@ -1533,6 +1533,36 @@ async def nickname_command(
         await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname")
         return
 
+@client.slash_command(name="channel", description="Manage the current channel")
+async def channel_command(_):
+    pass
+
+@channel_command.sub_command(name="lock", description="Lock the current channel")
+async def channel_lock_command(interaction):
+    if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    try:
+        await interaction.channel.set_permissions(interaction.guild.default_role, send_messages=False)
+    except:
+        await interaction.response.send_message(f"I was unable to lock {interaction.channel.mention}", ephemeral=True)
+        return
+    await interaction.response.send_message(f"{interaction.channel.mention} has been successfully locked")
+
+@channel_command.sub_command(name="unlock", description="Unlock the current channel")
+async def channel_unlock_command(interaction):
+    if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    try:
+        await interaction.channel.set_permissions(interaction.guild.default_role, send_messages=True)
+    except:
+        await interaction.response.send_message(f"I was unable to unlock {interaction.channel.mention}", ephemeral=True)
+        return
+    await interaction.response.send_message(f"{interaction.channel.mention} has been successfully unlocked")
+
 @client.slash_command(name="search", description="Search for something on the internet")
 async def search_command(_):
     pass
@@ -1540,12 +1570,13 @@ async def search_command(_):
 async def autocomplete_youtube(_, string):
     response = requests.get(f"https://youtube.com/results?search_query={string}")
     raw_results = []
-    items = response.text.split(",")
+    items = response.text.encode("utf-8").decode("utf-8").split(",")
     for item in items:
         if item.startswith('"title":{"runs":[{"text":') and item.endswith('"}]'):
             raw_results.append(item.split('"title":{"runs":[{"text":"')[1].split('"}]')[0])
     search_results = []
     for result in raw_results:
+        result = result.replace('\\"', "\"")
         if len(result) > 100:
             result = result[:97] + "..."
         search_results.append(result)
