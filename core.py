@@ -1577,7 +1577,6 @@ async def autocomplete_youtube(_, string):
     search_results = []
     for result in raw_results:
         result = result.replace('\\"', "\"")
-        result = result.encode("utf-8").decode("utf-8")
         if len(result) > 100:
             result = result[:97] + "..."
         search_results.append(result)
@@ -2159,7 +2158,7 @@ async def insults_add_command(
         insults_data = []
         database[f"insults.list.{interaction.guild.id}"] = json.dumps([])
     if len(insults_data) >= 20:
-        await interaction.response.send_message("You can only add up to **20 words**!")
+        await interaction.response.send_message("You can only add up to **20 words**!", ephemeral=True)
         return
     insults_data.append(word)
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
