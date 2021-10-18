@@ -3044,18 +3044,28 @@ async def unban_command(
             )
         )
 
+def autocomplete_units(_, string):
+    results = []
+    for conversion in converter.conversions:
+        if conversion.input not in results:
+            results.append(conversion.input)
+    return list(filter(lambda unit: string.lower() in unit.lower(), results))[:20]
+
 @client.slash_command(name="convert", description="Convert amounts to different units")
 async def convert_command(
         interaction,
         amount: float = Param(description="The amount (for the input unit)"),
-        input_unit: str = Param(name="input-unit", description="The input unit"),
-        output_unit: str = Param(name="output-unit", description="The output unit"),
+        input_unit: str = Param(name="input-unit", description="The input unit", autocomplete=autocomplete_units),
+        output_unit: str = Param(name="output-unit", description="The output unit", autocomplete=autocomplete_units),
     ):
     input_unit = input_unit.strip()
     output_unit = output_unit.strip()
     data = converter.convert(amount, input_unit, output_unit)
     if data["error"] == 404:
-        await interaction.response.send_message("That input/output pair is not supported")
+        await interaction.response.send_message("That input/output pair is not supported", ephemeral=True)
+        return
+    elif data["error"] == 403:
+        await interaction.response.send_message("The input and output unit is the same!", ephemeral=True)
         return
     description = f"**{round(amount, 6):,} {data['input_abbreviation']}** = **{round(data['result'], 6):,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
     embed = disnake.Embed(

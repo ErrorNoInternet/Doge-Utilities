@@ -32,6 +32,13 @@ abbreviations = {
     "g": "gram",
     "kg": "kilogram",
     "t": "ton",
+    "ft": "foot",
+    "in": "inch",
+}
+
+replacers = {
+    "feet": "foot",
+    "inches": "inch",
 }
 
 conversions = [
@@ -42,6 +49,12 @@ conversions = [
     Conversion("centimeter", "kilometer", "divide", 100000),
     Conversion("meter", "kilometer", "divide", 1000),
     Conversion("mile", "kilometer", "divide", 0.621371),
+
+    Conversion("meter", "foot", "multiply", 3.2808399),
+    Conversion("inch", "meter", "multiply", 0.0254),
+    Conversion("foot", "inch", "multiply", 12),
+    Conversion("foot", "centimeter", "multiply", 30.48),
+    Conversion("inch", "centimeter", "multiply", 2.54),
 
     Conversion("ton", "kilogram", "multiply", 907.18474),
     Conversion("kilogram", "gram", "multiply", 1000),
@@ -106,6 +119,18 @@ for conversion in conversions:
 [conversions.append(conversion) for conversion in reversed_conversions]
 
 def convert(amount, input, output):
+    if input.lower() == output.lower():
+        return {"error": 403}
+    if input.lower() in replacers:
+        input = replacers[input.lower()]
+    else:
+        if input.lower()[:-1] in replacers:
+            input = replacers[input.lower()[:-1]]
+    if output.lower() in replacers:
+        output = replacers[output.lower()]
+    else:
+        if output.lower()[:-1] in replacers:
+            output = replacers[output.lower()[:-1]]
     for conversion in conversions:
         input_unit = input.lower()
         output_unit = output.lower()
