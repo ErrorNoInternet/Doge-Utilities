@@ -17,13 +17,11 @@ logger.setLevel(logging.ERROR)
 OAUTH_CLIENT_ID = os.environ['OAUTH_ID']
 OAUTH_CLIENT_SECRET = os.environ['OAUTH_SECRET']
 app.config['SECRET_KEY'] = OAUTH_CLIENT_SECRET
-
 WEBSITE_URL = os.environ['WEBSITE_URL']
 OAUTH_REDIRECT_URI = WEBSITE_URL + "/web/callback"
 URL_SCHEME = "https"
 if "http://" in WEBSITE_URL:
     URL_SCHEME = "http"
-
 BASE_URL = "https://discord.com/api"
 AUTHORIZATION_BASE_URL = BASE_URL + '/oauth2/authorize'
 TOKEN_URL = BASE_URL + '/oauth2/token'
