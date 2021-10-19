@@ -538,7 +538,10 @@ async def reaction_create_command(
     await interaction.response.send_message("A new reaction role has been successfully created!", ephemeral=True)
 
 def autocomplete_reaction_roles(interaction, string):
-    reaction_roles = json.loads(database["reaction-roles"])
+    try:
+        reaction_roles = json.loads(database["reaction-roles"])
+    except:
+        reaction_roles = []
     roles = []
     for reaction_role in reaction_roles:
         if reaction_role["guild"] == interaction.guild.id:
@@ -558,7 +561,10 @@ async def reaction_delete_command(
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
 
-    reaction_roles = json.loads(database["reaction-roles"])
+    try:
+        reaction_roles = json.loads(database["reaction-roles"])
+    except:
+        reaction_roles = []
     exists = False
     for reaction_role in reaction_roles:
         if str(reaction_role["message"]) == message_id:
@@ -580,7 +586,10 @@ async def reaction_list_command(interaction):
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
 
-    reaction_roles = json.loads(database["reaction-roles"])
+    try:
+        reaction_roles = json.loads(database["reaction-roles"])
+    except:
+        reaction_roles = []
     roles = []
     for reaction_role in reaction_roles:
         if reaction_role["guild"] == interaction.guild.id:
