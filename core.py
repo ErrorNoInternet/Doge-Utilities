@@ -339,6 +339,7 @@ used_commands = []
 required_intents = disnake.Intents.default()
 required_intents.members = True
 client = commands.AutoShardedBot(
+    variables.prefix,
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
