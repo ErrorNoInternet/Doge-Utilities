@@ -339,7 +339,6 @@ used_commands = []
 required_intents = disnake.Intents.default()
 required_intents.members = True
 client = commands.AutoShardedBot(
-    variables.prefix,
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
@@ -495,6 +494,101 @@ async def slash_command_handler(interaction):
 async def help_command(interaction):
     await help_paginator.start(interaction)
     add_cooldown(interaction.author.id, "help", 60)
+
+@client.slash_command(name="reaction", description="Manage the reaction roles")
+async def reaction_command(_):
+    pass
+
+@reaction_command.sub_command(name="create", description="Create a new reaction role")
+async def reaction_create_command(
+        interaction,
+        message_id: str = Param(name="message-id", description="The ID of the message you want to add reaction roles to"),
+        emoji: str = Param(description="The emoji you want to add to the message"),
+        role: disnake.Role = Param(description="The role you want to add to users when they add a reaction"),
+    ):
+    if not interaction.author.guild_permissions.manage_roles:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    try:
+        message = await interaction.channel.fetch_message(int(message_id))
+    except:
+        await interaction.response.send_message("Please enter a valid message ID (that exists in this channel)", ephemeral=True)
+        return
+    try:
+        await message.add_reaction(emoji)
+    except:
+        await interaction.response.send_message("Please use a valid Discord emoji!", ephemeral=True)
+        return
+    try:
+        reaction_roles = json.loads(database["reaction-roles"])
+    except:
+        reaction_roles = []
+        database["reaction-roles"] = json.dumps([])
+    counter = 0
+    for reaction_role in reaction_roles:
+        if reaction_role["guild"] == interaction.guild.id:
+            counter += 1
+    if counter > 20:
+        await interaction.response.send_message("You can only add up to **20 roles** in 1 server!", ephemeral=True)
+        return
+    reaction_roles.append({"message": message_id, "emoji": emoji, "guild": interaction.guild.id, "role": role.id, "channel": interaction.channel.id})
+    database["reaction-roles"] = json.dumps(reaction_roles)
+    await interaction.response.send_message("A new reaction role has been successfully created!", ephemeral=True)
+
+def autocomplete_reaction_roles(interaction, string):
+    reaction_roles = json.loads(database["reaction-roles"])
+    roles = []
+    for reaction_role in reaction_roles:
+        if reaction_role["guild"] == interaction.guild.id:
+            roles.append(str(reaction_role["message"]))
+    return list(filter(lambda id: string in id, roles))[:20]
+
+@reaction_command.sub_command(name="remove", description="Remove a reaction role from this server")
+async def reaction_delete_command(
+        interaction,
+        message_id: str = Param(
+            name="message-id",
+            description="The ID of the message you want to remove reaction roles for",
+            autocomplete=autocomplete_reaction_roles
+        ),
+    ):
+    if not interaction.author.guild_permissions.manage_roles:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    reaction_roles = json.loads(database["reaction-roles"])
+    exists = False
+    for reaction_role in reaction_roles:
+        if str(reaction_role["message"]) == message_id:
+            if reaction_role["guild"] == interaction.guild.id:
+                exists = True
+                reaction_roles.remove(reaction_role)
+                database["reaction-roles"] = json.dumps(reaction_roles)
+                break
+    if not exists:
+        await interaction.response.send_message("That reaction role wasn't found!", ephemeral=True)
+        return
+    else:
+        await interaction.response.send_message("That reaction role has been successfully deleted", ephemeral=True)
+        return
+
+@reaction_command.sub_command(name="list", description="List all the reaction roles in this server")
+async def reaction_list_command(interaction):
+    if not interaction.author.guild_permissions.manage_roles:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    reaction_roles = json.loads(database["reaction-roles"])
+    roles = []
+    for reaction_role in reaction_roles:
+        if reaction_role["guild"] == interaction.guild.id:
+            roles.append(reaction_role)
+    description = ""
+    for role in roles:
+        description += f"ID: {role['message']} ([link](https://discord.com/channels/{role['guild']}/{role['channel']}/{role['message']}))\n"
+    embed = disnake.Embed(title="Reaction Roles", description=description if description != '' else 'There are no reaction roles in this server', color=variables.embed_color)
+    await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="qr", description="Generate a QR code with custom data")
 async def qr_command(
@@ -3651,6 +3745,86 @@ async def on_message_delete(message, *_):
         ])
         snipe_list[message.guild.id] = snipes
 
+async def on_reaction_add(payload):
+    if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
+        return
+    try:
+        reaction_roles = json.loads(database["reaction-roles"])
+    except:
+        return
+
+    for reaction_role in reaction_roles:
+        if int(reaction_role["message"]) == payload.message_id:
+            if reaction_role["channel"] == payload.channel_id:
+                unicode_emoji = payload.emoji.is_unicode_emoji()
+                if unicode_emoji and reaction_role["emoji"] == str(payload.emoji):
+                    target_guild = None
+                    role = None
+                    for guild in client.guilds:
+                        for guild_role in guild.roles:
+                            if guild_role.id == reaction_role["role"]:
+                                target_guild = guild
+                                role = guild_role
+                    if role:
+                        try:
+                            await payload.member.add_roles(role)
+                            try:
+                                await payload.member.send(f"You have been given the **{role.name}** role in **{target_guild.name}**")
+                            except:
+                                pass
+                        except:
+                            try:
+                                await payload.member.send(f"I was unable to give you the **{role.name}** role in **{target_guild.name}**")
+                            except:
+                                await log_message(target_guild, f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)")
+                    else:
+                        reaction_roles.remove(reaction_role)
+                        database["reaction-roles"] = json.dumps(reaction_roles)
+                    return
+
+async def on_reaction_remove(payload):
+    if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
+        return
+    try:
+        reaction_roles = json.loads(database["reaction-roles"])
+    except:
+        return
+
+    for reaction_role in reaction_roles:
+        if int(reaction_role["message"]) == payload.message_id:
+            if reaction_role["channel"] == payload.channel_id:
+                unicode_emoji = payload.emoji.is_unicode_emoji()
+                if unicode_emoji and reaction_role["emoji"] == str(payload.emoji):
+                    target_guild = None
+                    role = None
+                    for guild in client.guilds:
+                        for guild_role in guild.roles:
+                            if guild_role.id == reaction_role["role"]:
+                                target_guild = guild
+                                role = guild_role
+                    if role:
+                        member = None
+                        for guild in client.guilds:
+                            if guild.id == reaction_role["guild"]:
+                                for user in guild.members:
+                                    if user.id == payload.user_id:
+                                        member = user
+                        try:
+                            await member.remove_roles(role)
+                            try:
+                                await member.send(f"Your **{role.name}** role has been removed in **{target_guild.name}**")
+                            except:
+                                pass
+                        except:
+                            try:
+                                await member.send(f"I was unable to remove your **{role.name}** role in **{target_guild.name}**")
+                            except:
+                                await log_message(target_guild, f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)")
+                    else:
+                        reaction_roles.remove(reaction_role)
+                        database["reaction-roles"] = json.dumps(reaction_roles)
+                    return
+
 async def on_message(message):
     if message.author.bot or not message.guild:
         return
@@ -3862,9 +4036,9 @@ async def on_slash_command_error(interaction, error):
         except:
             return
     else:
-        if "50035" in str(error):
+        if "50035" in error_text:
             try:
-                await interaction.response.send_message("Message too long to be sent!")
+                await interaction.response.send_message("Message too long to be sent!", ephemeral=True)
             except:
                 try:
                     await interaction.edit_original_message(content="Message too long to be sent!")
@@ -3873,17 +4047,13 @@ async def on_slash_command_error(interaction, error):
             return
 
         escaped_character = '\`'
-        permissions = 0
-        for user in interaction.guild.members:
-            if user.id == client.user.id:
-                permissions = user.guild_permissions.value
         interaction_data = parse_interaction(interaction)
         formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
         formatted_error = formatted_error.replace("`", escaped_character)
         codeblock = "```\n"
         if len(formatted_error) > 2000:
             codeblock = ""
-        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Permissions:**\n```\n{permissions}```**Error:**\n{codeblock}{formatted_error}{codeblock}"
+        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Error:**\n{codeblock}{formatted_error}{codeblock}"
         segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
         for user_id in variables.message_managers:
             sent = False

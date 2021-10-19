@@ -145,6 +145,14 @@ async def on_ready():
         await random_status()
 
 @core.client.event
+async def on_raw_reaction_add(payload):
+    await core.on_reaction_add(payload)
+
+@core.client.event
+async def on_raw_reaction_remove(payload):
+    await core.on_reaction_remove(payload)
+
+@core.client.event
 async def on_member_join(member):
     await core.on_member_join(member)
 
