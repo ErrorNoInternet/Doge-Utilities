@@ -2094,10 +2094,14 @@ async def fetch_weather_command(
         precipitation = f"Rain: {response['rain']['1h']} mm"
     elif "snow" in response.keys():
         precipitation = f"Snow: {response['snow']['1h']} mm"
+    try:
+        country = f" ({response['sys']['country']})"
+    except:
+        country = ""
 
     embed = disnake.Embed(color=variables.embed_color)
     embed.set_thumbnail(url=f"https://openweathermap.org/img/wn/{response['weather'][0]['icon']}@2x.png")
-    embed.add_field(name=f"Location ({response['sys']['country']})", value=response['name'])
+    embed.add_field(name=f"Location{country}", value=response['name'])
     embed.add_field(name="Current Weather", value=response['weather'][0]['main'])
     embed.add_field(name="Description", value=response['weather'][0]['description'].title())
     embed.add_field(name="Temperature", value=str(response['main']['temp'])+"°C")
