@@ -2080,7 +2080,7 @@ async def fetch_weather_command(
         await interaction.edit_original_message(content=f'I was unable to fetch the weather for **"{region}"**')
         return
     try:
-        if response['cod'] == 404:
+        if response['cod'] == '404':
             await interaction.edit_original_message(content="The region you specified wasn't found!")
             return
     except:
