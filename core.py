@@ -534,7 +534,7 @@ async def reaction_create_command(
     try:
         await message.add_reaction(emoji)
     except:
-        await interaction.response.send_message("Please use a valid Discord emoji!", ephemeral=True)
+        await interaction.response.send_message("I can't add that emoji to the message!", ephemeral=True)
         return
     try:
         reaction_roles = json.loads(database["reaction-roles"])
@@ -3866,8 +3866,7 @@ async def on_reaction_add(payload):
     for reaction_role in reaction_roles:
         if int(reaction_role["message"]) == payload.message_id:
             if reaction_role["channel"] == payload.channel_id:
-                unicode_emoji = payload.emoji.is_unicode_emoji()
-                if unicode_emoji and reaction_role["emoji"] == str(payload.emoji):
+                if reaction_role["emoji"] == str(payload.emoji):
                     target_guild = None
                     role = None
                     for guild in client.guilds:
@@ -3903,8 +3902,7 @@ async def on_reaction_remove(payload):
     for reaction_role in reaction_roles:
         if int(reaction_role["message"]) == payload.message_id:
             if reaction_role["channel"] == payload.channel_id:
-                unicode_emoji = payload.emoji.is_unicode_emoji()
-                if unicode_emoji and reaction_role["emoji"] == str(payload.emoji):
+                if reaction_role["emoji"] == str(payload.emoji):
                     target_guild = None
                     role = None
                     for guild in client.guilds:
