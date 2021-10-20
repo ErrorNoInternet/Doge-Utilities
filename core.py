@@ -2081,7 +2081,7 @@ async def fetch_weather_command(
         return
     try:
         if response['cod'] == '404':
-            await interaction.edit_original_message(content="The region you specified wasn't found!")
+            await interaction.edit_original_message(content="The specified region wasn't found!")
             return
     except:
         pass
@@ -4146,7 +4146,7 @@ async def on_slash_command_error(interaction, error):
         except:
             return
     else:
-        if "50035" in error_text:
+        if "or fewer in length" in error_text:
             try:
                 await interaction.response.send_message("Message too long to be sent!", ephemeral=True)
             except:
