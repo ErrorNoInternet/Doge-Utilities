@@ -496,6 +496,21 @@ async def help_command(interaction):
     await help_paginator.start(interaction)
     add_cooldown(interaction.author.id, "help", 60)
 
+@client.slash_command(name="embedify", description="Create a custom embed")
+async def embedify_command(
+        interaction,
+        title: str = Param(description="The title of the embed"),
+        description: str = Param(description="The description of the embed"),
+        color: str = Param("#" + str(hex(variables.embed_color))[2:], description="The color of the embed"),
+    ):
+    embed_color = variables.embed_color
+    colors = generate_color(color, generate_image=False)
+    if colors != 1:
+        embed_color = int(colors[0][1:], 16)
+    embed = disnake.Embed(title=title, description=description, color=embed_color)
+    await interaction.channel.send(embed=embed)
+    await interaction.response.send_message("Your custom embed has been successfully generated", ephemeral=True)
+
 @client.slash_command(name="reaction", description="Manage the reaction roles")
 async def reaction_command(_):
     pass
@@ -596,7 +611,7 @@ async def reaction_list_command(interaction):
             roles.append(reaction_role)
     description = ""
     for role in roles:
-        description += f"ID: {role['message']} ([message](https://discord.com/channels/{role['guild']}/{role['channel']}/{role['message']}))\n"
+        description += f"{role['emoji']}: {role['message']} ([message](https://discord.com/channels/{role['guild']}/{role['channel']}/{role['message']}))\n"
     embed = disnake.Embed(title="Reaction Roles", description=description if description != '' else 'There are no reaction roles in this server', color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
@@ -2053,10 +2068,38 @@ async def trivia_command(interaction):
 async def fetch_command(_):
     pass
 
+@fetch_command.sub_command(name="astronauts", description="Fetch the people that are currently in space")
+async def fetch_astronauts_command(interaction):
+    await interaction.response.defer()
+    try:
+        response = requests.get("http://api.open-notify.org/astros.json").json()
+    except:
+        await interaction.edit_original_message(content="I was unable to fetch the people in space")
+        return
+    embed = disnake.Embed(color=variables.embed_color)
+    stations = []
+    for person in response["people"]:
+        if person["craft"] not in stations:
+            stations.append(person["craft"])
+    for station in stations:
+        value = ""
+        for person in response["people"]:
+            if person["craft"] == station:
+                value += f"\n{person['name']}"
+        embed.add_field(name=station, value=value)
+    number = response['number']
+    embed.set_footer(text=f"There {'is' if number == 1 else 'are'} currently {number} {'person' if number == 1 else 'people'} in space")
+    await interaction.edit_original_message(embed=embed)
+    add_cooldown(interaction.author.id, "fetch", 3)
+
 @fetch_command.sub_command(name="meme", description="Fetch a random meme from Reddit")
 async def meme_command(interaction):
     await interaction.response.defer()
-    response = requests.get("https://meme-api.herokuapp.com/gimme").json()
+    try:
+        response = requests.get("https://meme-api.herokuapp.com/gimme").json()
+    except:
+        await interaction.edit_original_message(content="I was unable to fetch a meme from Reddit")
+        return
     description = f"Posted by **{response['author']}** in **{response['subreddit']}** (**{response['ups']}** upvotes)"
     embed = disnake.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embed_color)
     embed.set_image(url=response["url"])
@@ -2965,7 +3008,7 @@ async def discriminator_command(
             if str(member) not in members:
                 members.append(str(member))
     if members == []:
-        await interaction.response.send_message("There are no other users with the same discriminator")
+        await interaction.response.send_message("There are no other users with the same discriminator", ephemeral=True)
         return
 
     output = "\n".join(members)
@@ -3550,7 +3593,7 @@ def rgb_to_hex(rgb_color):
             raise Exception("invalid RGB color code")
     return '#%02x%02x%02x' % rgb_color
 
-def generate_color(color_code):
+def generate_color(color_code, generate_image=True):
     image_width = 180; image_height = 80
     if color_code.lower().startswith("rgb"):
         color_code = color_code[3:]
@@ -3574,8 +3617,11 @@ def generate_color(color_code):
 
     if color_code.startswith("#") and len(color_code) == 7:
         try:
-            image = Image.new("RGB", (image_width, image_height), color_code)
-            image.save("images/color.png"); value = color_code.lstrip('#'); length = len(value)
+            if generate_image:
+                image = Image.new("RGB", (image_width, image_height), color_code)
+                image.save("images/color.png")
+
+            value = color_code.lstrip('#'); length = len(value)
             rgb_color = tuple(int(value[i:i+length//3], 16) for i in range(0, length, length//3))
             return (color_code, rgb_color)
         except:
@@ -3584,8 +3630,11 @@ def generate_color(color_code):
         try:
             color_code = color_code.replace("(", ""); color_code = color_code.replace(")", "")
             color_code = color_code.replace(", ", ","); rgb_color = tuple(map(int, color_code.split(',')))
-            color_code = rgb_to_hex(rgb_color); image = Image.new("RGB", (image_width, image_height), color_code)
-            image.save("images/color.png")
+            color_code = rgb_to_hex(rgb_color)
+            if generate_image:
+                image = Image.new("RGB", (image_width, image_height), color_code)
+                image.save("images/color.png")
+
             return (color_code, rgb_color)
         except:
             return 1
