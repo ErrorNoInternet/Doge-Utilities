@@ -23,6 +23,7 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
   - `OAUTH_ID` - Oauth2 client ID
   - `OAUTH_SECRET` - Oauth2 client secret
   - `WEBSITE_URL` - Server host URL
+  - `WEATHER_KEY` - OpenWeatherMap API key
 
 ```sh
 git clone https://github.com/ErrorNoInternet/Doge-Utilities

@@ -2068,6 +2068,53 @@ async def trivia_command(interaction):
 async def fetch_command(_):
     pass
 
+@fetch_command.sub_command(name="weather", description="Fetch the weather in a region")
+async def fetch_weather_command(
+        interaction,
+        region: str = Param(description="The region you want to check the weather for"),
+    ):
+    await interaction.response.defer()
+    try:
+        response = requests.get(f"http://api.openweathermap.org/data/2.5/weather?q={region}&appid={os.environ['WEATHER_KEY']}&units=metric").json()
+    except:
+        await interaction.edit_original_message(content=f'I was unable to fetch the weather for **"{region}"**')
+        return
+    try:
+        if response['cod'] == 404:
+            await interaction.edit_original_message(content="The region you specified wasn't found!")
+            return
+    except:
+        pass
+    time_offset = datetime.timedelta(0, response['timezone'])
+    current_time = str(datetime.datetime.now() + time_offset).split(" ")[1].split(".")[0]
+    sunrise_time = str(datetime.datetime.fromtimestamp(response['sys']['sunrise']) + time_offset).split(" ")[1].split(".")[0]
+    sunset_time = str(datetime.datetime.fromtimestamp(response['sys']['sunset']) + time_offset).split(" ")[1].split(".")[0]
+    precipitation = "None"
+    if "rain" in response.keys():
+        precipitation = f"Rain: {response['rain']['1h']} mm"
+    elif "snow" in response.keys():
+        precipitation = f"Snow: {response['snow']['1h']} mm"
+
+    embed = disnake.Embed(color=variables.embed_color)
+    embed.set_thumbnail(url=f"https://openweathermap.org/img/wn/{response['weather'][0]['icon']}@2x.png")
+    embed.add_field(name=f"Location ({response['sys']['country']})", value=response['name'])
+    embed.add_field(name="Current Weather", value=response['weather'][0]['main'])
+    embed.add_field(name="Description", value=response['weather'][0]['description'].title())
+    embed.add_field(name="Temperature", value=str(response['main']['temp'])+"°C")
+    embed.add_field(name="Coldest", value=str(response['main']['temp_min'])+"°C")
+    embed.add_field(name="Hottest", value=str(response['main']['temp_max'])+"°C")
+    embed.add_field(name="Feels Like", value=str(response['main']['feels_like'])+"°C")
+    embed.add_field(name="Pressure", value=str(response['main']['pressure'])+" hPa")
+    embed.add_field(name="Humidity", value=str(response['main']['humidity'])+"%")
+    embed.add_field(name="Precipitation (1h)", value=precipitation)
+    embed.add_field(name="Cloudiness", value=str(response['clouds']['all'])+"%")
+    embed.add_field(name="Wind Speed", value=str(response['wind']['speed'])+" m/s")
+    embed.add_field(name="Current Time", value=current_time)
+    embed.add_field(name="Sunrise Time", value=sunrise_time)
+    embed.add_field(name="Sunset Time", value=sunset_time)
+    await interaction.edit_original_message(embed=embed)
+    add_cooldown(interaction.author.id, "fetch", 3)
+
 @fetch_command.sub_command(name="astronauts", description="Fetch the people that are currently in space")
 async def fetch_astronauts_command(interaction):
     await interaction.response.defer()
