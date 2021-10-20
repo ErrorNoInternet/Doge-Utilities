@@ -3454,7 +3454,7 @@ async def remind_list_command(interaction):
         end_time = reminder[0] + reminder[1]
         text += f"**Time:** <t:{round(end_time)}:R>\n**Text:** {reminder[2]}\n\n"
     if text == "":
-        text = "You have no reminders"
+        text = "You have no active reminders"
     embed = disnake.Embed(title="Reminders", description=text, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "remind", 3)
