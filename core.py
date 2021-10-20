@@ -1249,7 +1249,7 @@ async def raid_protection_status_command(interaction):
             counter = 0
             if interaction.guild.id in variables.protected_guilds:
                 counter = variables.protected_guilds[interaction.guild.id]
-            await interaction.response.send_message(f"This server's raid protection is turned **on**\nRaid Protection has saved **{counter} {'channel' if counter == 1 else 'channels'}** so far")
+            await interaction.response.send_message(f"This server's raid protection is turned **on**\nRaid Protection has saved **{counter} {'object' if counter == 1 else 'objects'}** so far")
         else:
             await interaction.response.send_message("This server's raid protection is turned **off**")
     except:
