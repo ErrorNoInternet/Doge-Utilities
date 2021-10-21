@@ -2425,6 +2425,58 @@ async def links_filter_status_command(interaction):
         pass
     await interaction.response.send_message(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
 
+@filter_command.sub_command_group(name="newline", description="Manage the newline filter")
+async def newline_command(_):
+    pass
+
+@newline_command.sub_command(name="enable", description="Enable the newline filter")
+async def newline_enable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    database[f"newline.toggle.{interaction.guild.id}"] = 1
+    await interaction.response.send_message("The newline filter has been successfully **enabled**")
+
+@newline_command.sub_command(name="disable", description="Disable the newline filter")
+async def newline_disable_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    database[f"newline.toggle.{interaction.guild.id}"] = 0
+    await interaction.response.send_message("The newline filter has been successfully **disabled**")
+
+@newline_command.sub_command(name="set", description="Set the limit for the newline filter")
+async def newline_set_command(
+        interaction,
+        limit: int = Param(description="The limit you want to set"),
+    ):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    if limit < 1:
+        limit = 1
+    if limit > 800:
+        limit = 800
+    database[f"newline.limit.{interaction.guild.id}"] = limit
+    await interaction.response.send_message(f"The newline filter limit has been set to **{limit} {'newline' if limit == 1 else 'newlines'}** per message")
+
+@newline_command.sub_command(name="status", description="See the current status for the newline filter")
+async def newline_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+    value = 0
+    try:
+        value = json.loads(database[f"newline.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    limit = 10
+    try:
+        limit = json.loads(database[f"newline.limit.{interaction.guild.id}"])
+    except:
+        pass
+    await interaction.response.send_message(f"The newline filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
+
 @filter_command.sub_command_group(name="mention", description="Manage the mention spam filter")
 async def mention_command(_):
     pass
@@ -4040,6 +4092,28 @@ async def on_message(message):
                             pass
                         await mute_member(message.author, 0.16)
                         await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{remove_mentions(message.content[:500])}')
+                        return
+            except:
+                pass
+            try:
+                if json.loads(database[f"newline.toggle.{message.guild.id}"]):
+                    limit = 10
+                    try:
+                        limit = json.loads(database[f"newline.limit.{message.guild.id}"])
+                    except:
+                        pass
+                    newlines = message.content.count("\n")
+                    if newlines > limit:
+                        try:
+                            await message.delete()
+                        except:
+                            pass
+                        try:
+                            await message.author.send(f"Please do not spam newlines in your message! You just sent **{newlines} {'newline' if newlines == 1 else 'newlines'}** in **1 message**!")
+                        except:
+                            pass
+                        await mute_member(message.author, 0.16)
+                        await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{remove_mentions(message.content[:500])}')
                         return
             except:
                 pass

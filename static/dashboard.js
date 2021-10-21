@@ -63,6 +63,8 @@ function toggleFilter(token, name, data) {
 			filterName = "Links"
 		} else if (name == "mention") {
 			filterName = "Mention"
+		} else if (name == "newline") {
+			filterName = "Newline"
 		}
 		var button = document.getElementById(`${name}-filter-button.${data}`)
 		button.innerHTML = `${filterName}: ${currentStatus}`
