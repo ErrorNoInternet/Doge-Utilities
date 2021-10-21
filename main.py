@@ -19,6 +19,8 @@ if not os.path.exists("images"):
     os.mkdir("images")
 
 def update_objects():
+    time.sleep(10)
+
     global server_channels
     global server_roles
     while True:
@@ -141,7 +143,6 @@ async def on_ready():
     global first_run
     if not first_run:
         first_run = True
-        threading.Thread(name="raid-protection", target=update_objects).start()
         await random_status()
 
 @core.client.event
@@ -190,6 +191,7 @@ async def on_error(event, *_):
 async def on_slash_command_error(interaction, error):
     await core.on_slash_command_error(interaction, error)
 
+threading.Thread(name="raid-protection", target=update_objects).start()
 core.client.topggpy = topgg.DBLClient(
     core.client,
     os.environ["TOPGG_TOKEN"],
