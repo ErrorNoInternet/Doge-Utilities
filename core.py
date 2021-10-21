@@ -525,6 +525,9 @@ async def reaction_create_command(
     if not interaction.author.guild_permissions.manage_roles:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
+    if role.position >= interaction.author.top_role.position:
+        await interaction.response.send_message("You do not have permission to manage this role!", ephemeral=True)
+        return
 
     try:
         message = await interaction.channel.fetch_message(int(message_id))
@@ -540,7 +543,6 @@ async def reaction_create_command(
         reaction_roles = json.loads(database["reaction-roles"])
     except:
         reaction_roles = []
-        database["reaction-roles"] = json.dumps([])
     counter = 0
     for reaction_role in reaction_roles:
         if reaction_role["guild"] == interaction.guild.id:
