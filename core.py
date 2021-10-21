@@ -3972,18 +3972,19 @@ async def on_reaction_remove(payload):
                                 for user in guild.members:
                                     if user.id == payload.user_id:
                                         member = user
-                        try:
-                            await member.remove_roles(role)
+                        if member:
                             try:
-                                await member.send(f"Your **{role.name}** role has been removed in **{target_guild.name}**")
+                                await member.remove_roles(role)
+                                try:
+                                    await member.send(f"Your **{role.name}** role has been removed in **{target_guild.name}**")
+                                except:
+                                    pass
                             except:
-                                pass
-                        except:
-                            try:
-                                await member.send(f"I was unable to remove your **{role.name}** role in **{target_guild.name}**")
-                            except:
-                                pass
-                            await log_message(target_guild, f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)")
+                                try:
+                                    await member.send(f"I was unable to remove your **{role.name}** role in **{target_guild.name}**")
+                                except:
+                                    pass
+                                await log_message(target_guild, f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)")
                     else:
                         reaction_roles.remove(reaction_role)
                         database["reaction-roles"] = json.dumps(reaction_roles)
