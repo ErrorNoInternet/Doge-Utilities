@@ -3929,18 +3929,19 @@ async def on_reaction_add(payload):
                                 target_guild = guild
                                 role = guild_role
                     if role:
-                        try:
-                            await payload.member.add_roles(role)
+                        if payload.member:
                             try:
-                                await payload.member.send(f"You have been given the **{role.name}** role in **{target_guild.name}**")
+                                await payload.member.add_roles(role)
+                                try:
+                                    await payload.member.send(f"You have been given the **{role.name}** role in **{target_guild.name}**")
+                                except:
+                                    pass
                             except:
-                                pass
-                        except:
-                            try:
-                                await payload.member.send(f"I was unable to give you the **{role.name}** role in **{target_guild.name}**")
-                            except:
-                                pass
-                            await log_message(target_guild, f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)")
+                                try:
+                                    await payload.member.send(f"I was unable to give you the **{role.name}** role in **{target_guild.name}**")
+                                except:
+                                    pass
+                                await log_message(target_guild, f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)")
                     else:
                         reaction_roles.remove(reaction_role)
                         database["reaction-roles"] = json.dumps(reaction_roles)
