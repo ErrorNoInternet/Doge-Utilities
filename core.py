@@ -569,7 +569,7 @@ async def reaction_delete_command(
         message_id: str = Param(
             name="message-id",
             description="The ID of the message you want to remove reaction roles for",
-            autocomplete=autocomplete_reaction_roles
+            autocomplete=autocomplete_reaction_roles,
         ),
     ):
     if not interaction.author.guild_permissions.manage_roles:
