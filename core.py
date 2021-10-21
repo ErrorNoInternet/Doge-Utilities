@@ -3937,7 +3937,8 @@ async def on_reaction_add(payload):
                             try:
                                 await payload.member.send(f"I was unable to give you the **{role.name}** role in **{target_guild.name}**")
                             except:
-                                await log_message(target_guild, f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)")
+                                pass
+                            await log_message(target_guild, f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)")
                     else:
                         reaction_roles.remove(reaction_role)
                         database["reaction-roles"] = json.dumps(reaction_roles)
@@ -3979,7 +3980,8 @@ async def on_reaction_remove(payload):
                             try:
                                 await member.send(f"I was unable to remove your **{role.name}** role in **{target_guild.name}**")
                             except:
-                                await log_message(target_guild, f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)")
+                                pass
+                            await log_message(target_guild, f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)")
                     else:
                         reaction_roles.remove(reaction_role)
                         database["reaction-roles"] = json.dumps(reaction_roles)
