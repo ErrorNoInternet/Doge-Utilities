@@ -4113,7 +4113,7 @@ async def on_message(message):
                         except:
                             pass
                         await mute_member(message.author, 0.16)
-                        await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{remove_mentions(message.content[:500])}')
+                        await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{message.content[:500].replace("\n\n\n\n\n\n\n\n", "\n...\n")}')
                         return
             except:
                 pass
