@@ -169,14 +169,6 @@ async def on_message(message):
         print("Uncaught exception: " + str(error))
 
 @core.client.event
-async def on_message_delete(message):
-    await core.on_message_delete(message)
-
-@core.client.event
-async def on_message_edit(message, new_message):
-    await core.on_message_delete(message, new_message)
-
-@core.client.event
 async def on_guild_join(guild):
     await core.on_guild_join(guild)
 

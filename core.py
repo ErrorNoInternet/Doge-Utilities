@@ -330,7 +330,6 @@ def manage_blacklist():
 start_time = time.time()
 last_command = time.time()
 blacklisted_users = []
-snipe_list = {}
 math_variables = {}
 user_cooldowns = {}
 message_strikes = {}
@@ -2363,7 +2362,11 @@ async def insults_add_command(
     if len(insults_data) >= 20:
         await interaction.response.send_message("You can only add up to **20 words**!", ephemeral=True)
         return
-    insults_data.append(word)
+    if len(word) <= 50:
+        insults_data.append(word)
+    else:
+        await interaction.response.send_message("The specified word is too long!", ephemeral=True)
+        return
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
     await interaction.response.send_message(f'Successfully added **"{word}"** to your insults list')
 
@@ -2773,49 +2776,6 @@ async def welcome_status_command(interaction):
         pass
     await interaction.response.send_message(f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
 
-@client.slash_command(name="snipe", description="Bring deleted messages back to life")
-async def snipe_command(
-        interaction,
-        member: disnake.Member = Param(0, description="The person you want to see the sniped messages for"),
-    ):
-    if member == 0:
-        try:
-            random_message = random.choice(snipe_list[interaction.guild.id])
-        except:
-            await interaction.response.send_message("There is nothing to snipe!")
-            return
-    else:
-        try:
-            messages = []
-            for message in snipe_list[interaction.guild.id]:
-                if str(message[0]) == str(member):
-                    messages.append(message)
-            random_message = random.choice(messages)
-        except:
-            await interaction.response.send_message(f"There is nothing to snipe from **{member}**!")
-            return
-
-    message_author = random_message[0]
-    message_author_avatar = random_message[1]
-    channel_name = random_message[2]
-    message_sent_time = random_message[3]
-    message_data = random_message[4]
-    image = False
-    if message_data.startswith("https://"):
-        safe = False
-        extensions = ["jpg", "jpeg", "png", "gif", "webp"]
-        for extension in extensions:
-            if message_data.endswith("." + extension):
-                safe = True
-        if safe:
-            image = True
-    embed = disnake.Embed(description=message_data if not image else '', color=variables.embed_color, timestamp=message_sent_time)
-    embed.set_author(name=message_author, icon_url=message_author_avatar)
-    embed.set_footer(text=f"Sent in #{channel_name}")
-    if image:
-        embed.set_image(url=message_data)
-    await interaction.response.send_message(embed=embed)
-
 @client.slash_command(name="server", description="View information about this server")
 async def server_command(_):
     pass
@@ -2860,39 +2820,6 @@ async def logging_disable_command(interaction):
     except:
         pass
     await interaction.response.send_message("Logging has been successfully disabled for this server")
-
-@server_command.sub_command_group(name="snipe", description="Enable or disable snipe for this server")
-async def server_snipe_command(_):
-    pass
-
-@server_snipe_command.sub_command(name="status", description="See if snipe is currently enabled for this server")
-async def server_snipe_status_command(interaction):
-    toggle = 0
-    try:
-        toggle = json.loads(database[f"snipe.{interaction.guild.id}"])
-    except:
-        pass
-    await interaction.response.send_message(f"Snipe is currently **{'enabled' if toggle else 'disabled'}** for this server")
-
-@server_snipe_command.sub_command(name="enable", description="Enable snipe for this server")
-async def server_snipe_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
-        return
-
-    database[f"snipe.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("Snipe has been successfully **enabled** for this server")
-
-@server_snipe_command.sub_command(name="disable", description="Disable snipe for this server")
-async def server_snipe_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
-        return
-
-    database[f"snipe.{interaction.guild.id}"] = 0
-    if interaction.guild.id in snipe_list:
-        del snipe_list[interaction.guild.id]
-    await interaction.response.send_message("Snipe has been successfully **disabled** for this server")
 
 @server_command.sub_command(name="suggest", description="Send a suggestion to the server owner")
 async def server_suggest_command(
@@ -3867,48 +3794,6 @@ async def on_guild_join(guild):
     except:
         pass
 
-async def on_message_delete(message, *_):
-    if not message.guild or message.author.bot:
-        return
-    toggle = 0
-    try:
-        toggle = json.loads(database[f"snipe.{message.guild.id}"])
-    except:
-        pass
-    if not toggle:
-        return
-
-    try:
-        snipes = snipe_list[message.guild.id]
-    except:
-        snipes = []
-        snipe_list[message.guild.id] = []
-    while len(snipes) >= 5:
-        random_snipe = random.choice(snipes)
-        snipes.remove(random_snipe)
-
-    message_data = message.content
-    if message_data == "":
-        if len(message.embeds) > 0:
-            message_data = message.embeds[0].description
-    if message_data == "" or message_data == disnake.embeds._EmptyEmbed:
-        if len(message.attachments) > 0:
-            message_data = message.attachments[0].url
-
-    avatar_url = message.author.avatar
-    if avatar_url == None:
-        avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(message.author.discriminator) % 5}.png"
-
-    if message_data != "" and message_data != disnake.embeds._EmptyEmbed:
-        snipes.append([
-            f"{message.author.name}#{message.author.discriminator}",
-            avatar_url,
-            message.channel.name,
-            datetime.datetime.now(),
-            message_data,
-        ])
-        snipe_list[message.guild.id] = snipes
-
 async def on_reaction_add(payload):
     if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
         return
@@ -4109,7 +3994,7 @@ async def on_message(message):
                     except:
                         pass
                     newlines = message.content.count("\n")
-                    if newlines > limit:
+                    if "\n"*limit in message.content:
                         try:
                             await message.delete()
                         except:
