@@ -838,7 +838,7 @@ async def status_command(interaction):
     embed = disnake.Embed(color=variables.embed_color)
     embed.add_field(name="Bot Latency", value="```" + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```")
     embed.add_field(name="CPU Usage", value="```" + f"{psutil.cpu_percent()}%" + "```")
-    embed.add_field(name="RAM Usage", value="```" + f"{round(memory_usage, 1)} MB" + "```")
+    embed.add_field(name="RAM Usage", value="```" + f"{round(memory_usage, 2)} MB" + "```")
     embed.add_field(name="Thread Count", value="```" + str(threading.active_count()) + "```")
     embed.add_field(name="Joined Guilds", value="```" + str(len(client.guilds)) + "```")
     embed.add_field(name="Active Shards", value="```" + str(client.shards[0].shard_count) + "```")
@@ -849,7 +849,7 @@ async def status_command(interaction):
     embed.add_field(name="Bot Version", value=f"```{variables.version_number}.{variables.build_number}```")
     embed.add_field(name="Bot Uptime", value="```" + uptime.strip() + "```")
     await interaction.response.send_message(embed=embed)
-    add_cooldown(interaction.author.id, "status", 3)
+    add_cooldown(interaction.author.id, "get", 3)
 
 @get_command.sub_command(name="version", description="Display the bot's current version")
 async def version_command(interaction):
@@ -884,7 +884,7 @@ async def uptime_command(interaction):
         uptime += str(math.floor(seconds_time)) + "s "
     if uptime == "":
         uptime = "Unknown"
-    embed = disnake.Embed(title="Bot Uptime", description=f"Doge has been running for **{uptime}**", color=variables.embed_color)
+    embed = disnake.Embed(title="Bot Uptime", description=f"Doge Utilities has been running for **{uptime}**", color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="setup", description="Setup mute and ban roles in your server")
@@ -1322,7 +1322,7 @@ async def date_epoch_command(
         return
 
 async def autocomplete_algorithms(_, string):
-    return list(filter(lambda algorithm: string.lower() in algorithm.lower(), list(hashlib.algorithms_guaranteed)))[:20]
+    return list(filter(lambda algorithm: string.lower() in algorithm.lower(), list(hashlib.algorithms_available)))[:20]
 
 @client.slash_command(name="hash", description="Hash text using different algorithms")
 async def hash_command(
