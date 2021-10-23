@@ -141,7 +141,12 @@ async def on_ready():
     global first_run
     if not first_run:
         first_run = True
-        await random_status()
+        threading.Thread(
+            name="random_status",
+            target=asyncio.run_coroutine_threadsafe,
+            args=(random_status(), core.client.loop, ),
+        ).start()
+        core.client.add_view(core.VoteView())
 
 @core.client.event
 async def on_raw_reaction_add(payload):
