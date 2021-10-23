@@ -157,8 +157,8 @@ class Paginator:
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
         self.view = PaginatorView
 
-    async def start(self, interaction):
-        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=self.view(interaction))
+    async def start(self, interaction, ephemeral=False):
+        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=self.view(interaction), ephemeral=ephemeral)
 
 def reset_strikes():
     global message_strikes
@@ -281,12 +281,14 @@ user_cooldowns = {}
 message_strikes = {}
 last_messages = {}
 used_commands = []
+ToggleOption = commands.option_enum(["enable", "disable"])
 required_intents = disnake.Intents.default()
 required_intents.members = True
 client = commands.AutoShardedBot(
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
+    sync_permissions=True,
 )
 threading.Thread(
     name="manage_muted_members",
@@ -1770,11 +1772,65 @@ async def stackoverflow_command(
         return
     add_cooldown(interaction.author.id, "search", 10)
 
-@client.slash_command(name="blacklist", description="Owner command")
+@commands.guild_permissions(879662689708806154, user_ids=variables.owner_permissions)
+@commands.guild_permissions(828241152896663552, user_ids=variables.owner_permissions)
+@client.slash_command(name="execute", description="Execute code on Doge Utilities")
+async def execute_command(
+        interaction,
+        code: str = Param(description="The code you want to execute"),
+        codeblock: ToggleOption = Param("enable", description="Whether or not you want a codeblock"),
+        ephemeral: ToggleOption = Param("disable", description="Whether or not you want the output to be ephemeral")
+    ):
+    if code.startswith("`") and code.endswith("`"):
+        code = code[1:-1]
+    if codeblock == "enable":
+        codeblock = "```"
+    else:
+        codeblock = ""
+    if ephemeral == "enable":
+        ephemeral = True
+    else:
+        ephemeral = False
+    await interaction.response.defer(ephemeral=ephemeral)
+
+    stdout = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(stdout):
+            if "#globals" in code:
+                exec(f"async def run_code():\n{textwrap.indent(code, '   ')}", globals())
+                await globals()["run_code"]()
+            else:
+                dictionary = dict(locals(), **globals())
+                exec(f"async def run_code():\n{textwrap.indent(code, '   ')}", dictionary, dictionary)
+                await dictionary["run_code"]()
+            output = stdout.getvalue()
+    except Exception as error:
+        output = "`" + str(error) + "`"
+    
+    output = output.replace(os.getenv("TOKEN"), "<token>")
+    if len(output) > 2000:
+        output = output.replace("`", "\`")
+        segments = [output[i: i + 2000] for i in range(0, len(output), 2000)]
+        pager = Paginator(
+            prefix=f"{codeblock}\n", 
+            suffix=codeblock, 
+            color=variables.embed_color, 
+            title=f"Code Output", 
+            segments=segments,
+        )
+        await interaction.edit_original_message(view=pager.view(interaction), embed=pager.embeds[0])
+    elif len(output.strip()) == 0:
+        await interaction.edit_original_message(content=":white_check_mark:")
+    else:
+        await interaction.edit_original_message(content=output)
+
+@commands.guild_permissions(879662689708806154, user_ids=variables.owner_permissions)
+@commands.guild_permissions(828241152896663552, user_ids=variables.owner_permissions)
+@client.slash_command(name="blacklist", description="Manage Doge Utilities' blacklist", default_permission=False)
 async def blacklist_command(_):
     pass
 
-@blacklist_command.sub_command(name="list", description="Owner command")
+@blacklist_command.sub_command(name="list", description="List all the blacklisted users")
 async def blacklist_list_command(interaction):
     blacklisted_users = []
     raw_array = json.loads(database["blacklist"])
@@ -1786,10 +1842,10 @@ async def blacklist_list_command(interaction):
     embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-@blacklist_command.sub_command(name="add", description="Owner command")    
+@blacklist_command.sub_command(name="add", description="Add a user to the blacklist")    
 async def blacklist_add_command(
         interaction,
-        user: str = Param(description="Owner command"),
+        user: str = Param(description="The user you want to add to the blacklist"),
     ):
     try:
         user_id = int(remove_mentions(user))
@@ -1804,10 +1860,10 @@ async def blacklist_add_command(
     database["blacklist"] = json.dumps(current_users)
     await interaction.response.send_message(f"Successfully added `{user_id}` to the blacklist", ephemeral=True)
 
-@blacklist_command.sub_command(name="remove", description="Owner command")
+@blacklist_command.sub_command(name="remove", description="Remove a user from the blacklist")
 async def blacklist_remove_command(
         interaction,
-        user: str = Param(description="Owner command"),
+        user: str = Param(description="The user you want to remove from the blacklist"),
     ):
     try:
         user_id = int(remove_mentions(user))
@@ -2988,14 +3044,14 @@ async def choose_command(
     if item10 != "":
         items.append(item10)
     random_item = random.choice(items)
-    await interaction.response.send_message(f"I choose **{random_item}**")
+    await interaction.response.send_message(f'I choose **"{random_item}"**')
 
 @client.slash_command(name="pypi", description="Fetch a project on PyPi")
 async def pypi_command(
         interaction,
         project: str = Param(description="The PyPi project that you want to search"),
     ):
-    response = requests.get(f"https://pypi.org/pypi/{project.strip()}/json/")
+    response = requests.get(f"https://pypi.org/pypi/{project.strip()}/json")
     if response.status_code == 404:
         await interaction.response.send_message("That package was not found")
         return
