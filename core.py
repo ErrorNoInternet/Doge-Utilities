@@ -1044,6 +1044,9 @@ async def suggest_command(
                 await button_interaction.response.send_message("Unable to accept")
                 return
             await button_interaction.response.send_message("Accepted successfully")
+            for button in self.children:
+                button.disabled = True
+            await button_interaction.edit(view=self)
             self.stop()
 
         @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
@@ -1054,6 +1057,9 @@ async def suggest_command(
                 await button_interaction.response.send_message("Unable to reject")
                 return
             await button_interaction.response.send_message("Rejected successfully")
+            for button in self.children:
+                button.disabled = True
+            await button_interaction.edit(view=self)
             self.stop()
 
     for user_id in variables.message_managers:
@@ -1649,6 +1655,9 @@ async def nickname_command(
             if not member.guild_permissions.change_nickname:
                 await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
                 return
+        if member.top_role.position >= interaction.author.top_role.position:
+            await interaction.response.send_message(f"You do not have permission to edit **{member}**'s nickname!", ephemeral=True)
+            return
         await member.edit(nick=nickname)
         await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
         add_cooldown(interaction.author.id, "nickname", 3)
@@ -2210,6 +2219,9 @@ async def mute_command(
     else:
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
+    if member.top_role.position >= interaction.author.top_role.position:
+        await interaction.response.send_message(f"You do not have permission to mute **{member}**!", ephemeral=True)
+        return
 
     mute_role = None; exists = False
     for role in interaction.guild.roles:
@@ -2246,7 +2258,7 @@ async def mute_command(
             moderation_data = json.loads(database["mute." + str(interaction.guild.id)])
         try:
             await member.add_roles(mute_role)
-            moderation_data.append([member.id, time.time(), duration])
+            moderation_data.append([member.id, round(time.time()), duration])
             database["mute." + str(interaction.guild.id)] = json.dumps(moderation_data)
         except:
             await interaction.response.send_message(f"Unable to mute **{member}**")
@@ -3065,6 +3077,9 @@ async def warn_command(
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
     
+    if member.top_role.position >= interaction.author.top_role.position:
+        await interaction.response.send_message(f"You do not have permission to warn **{member}**!", ephemeral=True)
+        return
     try:
         warnings = json.loads(database[f"warnings.{member.id}"])
     except:
@@ -3109,6 +3124,9 @@ async def kick_command(
         reason: str = Param("Not specified", description="The reason for kicking the member"),
     ):
     if interaction.author.guild_permissions.kick_members or interaction.author.id in variables.permission_override:
+        if member.top_role.position >= interaction.author.top_role.position:
+            await interaction.response.send_message(f"You do not have permission to kick **{member}**!", ephemeral=True)
+            return
         try:
             await member.kick(reason=reason)
             await interaction.response.send_message(
@@ -3149,6 +3167,9 @@ async def ban_command(
     found = False
     for member in interaction.guild.members:
         if member.id == user_id:
+            if member.top_role.position >= interaction.author.top_role.position:
+                await interaction.response.send_message(f"You do not have permission to ban **{member}**!", ephemeral=True)
+                return
             found = True
             try:
                 await member.ban(reason=reason, delete_message_days=0)
@@ -3492,7 +3513,7 @@ async def remind_add_command(
     if len(current_reminders) >= 5:
         await interaction.response.send_message("You already have **5 reminders**!", ephemeral=True)
         return
-    current_reminders.append([time.time(), duration*60, text])
+    current_reminders.append([round(time.time()), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
     await interaction.response.send_message(f"You will be reminded in **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
 
@@ -3694,7 +3715,7 @@ async def mute_member(member, duration):
             moderation_data = json.loads(database["mute." + str(member.guild.id)])
         try:
             await member.add_roles(mute_role)
-            moderation_data.append([member.id, time.time(), duration])
+            moderation_data.append([member.id, round(time.time()), duration])
             database["mute." + str(member.guild.id)] = json.dumps(moderation_data)
         except:
             pass
@@ -3732,7 +3753,7 @@ async def send_vote_message(user_id):
                         if exists:
                             await interaction.response.send_message("A reminder already exists!")
                             return
-                        current_reminders.append([time.time(), duration, text])
+                        current_reminders.append([round(time.time()), duration, text])
                         database[f"reminders.{user_id}"] = json.dumps(current_reminders)
                         await interaction.response.send_message("A **12 hour reminder** has been successfully added!")
 
