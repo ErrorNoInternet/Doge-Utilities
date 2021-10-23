@@ -527,6 +527,11 @@ async def reaction_create_command(
         await interaction.response.send_message("You do not have permission to manage this role!", ephemeral=True)
         return
 
+    if message_id.endswith("/"):
+        message_id = message_id[:-1]
+    if "discord.com/channels" in message_id:
+        segments = message_id.split("/")
+        message_id = segments[len(segments)-1]
     try:
         message = await interaction.channel.fetch_message(int(message_id))
     except:
@@ -1295,32 +1300,6 @@ async def raid_protection_disable_command(interaction):
     database[f"{interaction.guild.id}.raid-protection"] = 0
     await interaction.response.send_message("This server's raid protection has been turned **off**")
 
-@client.slash_command(name="epoch-date", description="Convert unix timestamps to dates")
-async def epoch_date_command(
-        interaction,
-        text: str = Param(name="timestamp", description="The unix timestamp"),
-    ):
-    try:
-        date = epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color)
-        embed.add_field(name="Epoch", value="`" + text + "`"); embed.add_field(name="Date", value=date, inline=False)
-        await interaction.response.send_message(embed=embed)
-    except:
-        await interaction.response.send_message("Invalid unix timestamp")
-        return
-        
-@client.slash_command(name="date-epoch", description="Convert dates to unix timestamps")
-async def date_epoch_command(
-        interaction,
-        text: str = Param(name="date", description="The date")
-    ):
-    try:
-        epoch = date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color)
-        embed.add_field(name="Date", value=text); embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
-        await interaction.response.send_message(embed=embed)
-    except:
-        await interaction.response.send_message("Invalid date")
-        return
-
 async def autocomplete_algorithms(_, string):
     return list(filter(lambda algorithm: string.lower() in algorithm.lower(), list(hashlib.algorithms_available)))[:20]
 
@@ -1614,8 +1593,38 @@ async def autocomplete_timezones(_, string):
         timezones.append(timezone)
     return list(filter(lambda timezone: string.lower() in timezone.lower(), timezones))[:20]
 
-@client.slash_command(name="time", description="Get the time information about a specific region")
-async def time_command(
+@client.slash_command(name="time", description="Convert unit timestamps and get time information")
+async def time_command(_):
+    pass
+
+@time_command.sub_command(name="epoch-date", description="Convert unix timestamps to dates")
+async def epoch_date_command(
+        interaction,
+        text: str = Param(name="timestamp", description="The unix timestamp"),
+    ):
+    try:
+        date = epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color)
+        embed.add_field(name="Epoch", value="`" + text + "`"); embed.add_field(name="Date", value=date, inline=False)
+        await interaction.response.send_message(embed=embed)
+    except:
+        await interaction.response.send_message("Invalid unix timestamp")
+        return
+        
+@time_command.sub_command(name="date-epoch", description="Convert dates to unix timestamps")
+async def date_epoch_command(
+        interaction,
+        text: str = Param(name="date", description="The date")
+    ):
+    try:
+        epoch = date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color)
+        embed.add_field(name="Date", value=text); embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
+        await interaction.response.send_message(embed=embed)
+    except:
+        await interaction.response.send_message("Invalid date")
+        return
+
+@time_command.sub_command(name="get", description="Get the time information about a specific regioni")
+async def time_get_command(
         interaction,
         region: str = Param(description="The region you want to check the time for", autocomplete=autocomplete_timezones)
     ):
