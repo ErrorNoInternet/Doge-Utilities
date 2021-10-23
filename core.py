@@ -1691,7 +1691,7 @@ async def nickname_command(
         await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
         add_cooldown(interaction.author.id, "nickname", 3)
     except:
-        await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname")
+        await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname", ephemeral=True)
         return
 
 @client.slash_command(name="channel", description="Manage the current channel")
