@@ -1969,6 +1969,12 @@ async def tictactoe_command(interaction):
                 for y in range(3):
                     self.add_item(TicTacToeButton(x, y))
 
+        async def on_timeout(self):
+            for button in self.children:
+                button.disabled = True
+            await interaction.edit_original_message(view=self)
+            return await super().on_timeout()
+
         def check_board_winner(self):
             for across in self.board:
                 value = sum(across)
