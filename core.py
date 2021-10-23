@@ -1623,7 +1623,7 @@ async def date_epoch_command(
         await interaction.response.send_message("Invalid date")
         return
 
-@time_command.sub_command(name="get", description="Get the time information about a specific regioni")
+@time_command.sub_command(name="get", description="Get the time information about a specific region")
 async def time_get_command(
         interaction,
         region: str = Param(description="The region you want to check the time for", autocomplete=autocomplete_timezones)
