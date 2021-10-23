@@ -1046,7 +1046,8 @@ async def suggest_command(
             await button_interaction.response.send_message("Accepted successfully")
             for button in self.children:
                 button.disabled = True
-            await original_message.edit(view=self)
+            for original_message in original_messages:
+                await original_message.edit(view=self)
             self.stop()
 
         @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
@@ -1059,9 +1060,11 @@ async def suggest_command(
             await button_interaction.response.send_message("Rejected successfully")
             for button in self.children:
                 button.disabled = True
-            await original_message.edit(view=self)
+            for original_message in original_messages:
+                await original_message.edit(view=self)
             self.stop()
 
+    original_messages = []
     for user_id in variables.message_managers:
         sent = False
         for guild in client.guilds:
@@ -1070,7 +1073,7 @@ async def suggest_command(
                     if member.id == user_id:
                         sent = True
                         try:
-                            original_message = await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}", view=SuggestionView())
+                            original_messages.append(await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}", view=SuggestionView()))
                         except:
                             pass
     await interaction.edit_original_message(content="Your suggestion has been successfully sent")
