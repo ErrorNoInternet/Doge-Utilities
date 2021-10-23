@@ -1341,7 +1341,7 @@ async def hash_command(
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "hash", 3)
     except:
-        await interaction.response.send_message("Invalid hash algorithm", ephemeral=True)
+        await interaction.response.send_message("Invalid hash algorithm (or no length specified)", ephemeral=True)
         return
 
 @client.slash_command(name="base64", description="Encode and decode base64")
@@ -1579,7 +1579,7 @@ async def corrupt_command(
             new_text += text[random.randint(0, len(text) - 1)]
         else:
             number = random.randint(0, 100)
-            if number > 80:
+            if number > 90:
                 new_text += random.choice(["0", "1"])
             else:
                 new_text += letter
@@ -4130,7 +4130,6 @@ async def on_message(message):
                     dictionary = dict(locals(), **globals())
                     exec(f"async def run_code():\n{textwrap.indent(code, '   ')}", dictionary, dictionary)
                     await dictionary["run_code"]()
-
                 output = stdout.getvalue()
         except Exception as error:
             output = "`" + str(error) + "`"
@@ -4195,7 +4194,7 @@ async def on_slash_command_error(interaction, error):
                                 await pager.start(FakeInteraction(member))
                                 sent = True
                         except Exception as new_error:
-                            print(f"Unable to send error: {new_error}")
+                            print(f"Unable to send error to {member}: {new_error}")
 
         embed = disnake.Embed(title="Bot Error", description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.now())
         embed.set_footer(text="Doge Utilities error report")
