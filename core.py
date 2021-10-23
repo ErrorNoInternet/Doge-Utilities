@@ -129,7 +129,7 @@ class MessagePaginator:
         old_message = await message.channel.send(embed=self.embeds[0], view=PaginatorView())
 
 class Paginator:
-    def __init__(self, title, segments, color=0x000000, prefix="", suffix="", target_page=1, timeout=180):
+    def __init__(self, title, segments, color=0x000000, prefix="", suffix="", target_page=1, timeout=300):
         self.embeds = []
         self.current_page = target_page
         self.timeout = timeout
@@ -153,10 +153,10 @@ class Paginator:
                 this.timeout = self.timeout
                 this.interaction = interaction
                 this.add_item(
-                    disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
+                    disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True),
                 )
 
-            @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def first_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -172,7 +172,7 @@ class Paginator:
                     self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
-            @disnake.ui.button(emoji="◀️", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="◀️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def previous_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -183,7 +183,7 @@ class Paginator:
                     self.current_page = len(self.embeds)
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
-            @disnake.ui.button(emoji="▶️", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="▶️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def next_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -194,7 +194,7 @@ class Paginator:
                     self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
-            @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def last_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -1057,6 +1057,15 @@ async def suggest_command(
                 await button_interaction.response.send_message("Unable to reject")
                 return
             await button_interaction.response.send_message("Rejected successfully")
+            for button in self.children:
+                button.disabled = True
+            for original_message in original_messages:
+                await original_message.edit(view=self)
+            self.stop()
+
+        @disnake.ui.button(label="Ignore", style=disnake.ButtonStyle.gray)
+        async def reject_button(self, _, button_interaction):
+            await button_interaction.response.send_message("Ignored successfully")
             for button in self.children:
                 button.disabled = True
             for original_message in original_messages:
