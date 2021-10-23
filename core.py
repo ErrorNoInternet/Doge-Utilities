@@ -1064,7 +1064,7 @@ async def suggest_command(
             self.stop()
 
         @disnake.ui.button(label="Ignore", style=disnake.ButtonStyle.gray)
-        async def reject_button(self, _, button_interaction):
+        async def ignore_button(self, _, button_interaction):
             await button_interaction.response.send_message("Ignored successfully")
             for button in self.children:
                 button.disabled = True
@@ -1321,10 +1321,13 @@ async def date_epoch_command(
         await interaction.response.send_message("Invalid date")
         return
 
+async def autocomplete_algorithms(_, string):
+    return list(filter(lambda algorithm: string.lower() in algorithm.lower(), list(hashlib.algorithms_guaranteed)))[:20]
+
 @client.slash_command(name="hash", description="Hash text using different algorithms")
 async def hash_command(
         interaction,
-        hash_type: str = Param(name="algorithm", description="The type of the output hash (md5, sha256, etc)"),
+        hash_type: str = Param(name="algorithm", description="The type of the output hash (md5, sha256, etc)", autocomplete=autocomplete_algorithms),
         text: str = Param(description="The text you want to hash"),
     ):
     try:
