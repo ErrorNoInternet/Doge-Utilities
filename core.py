@@ -1682,6 +1682,7 @@ async def channel_slowmode_command(
         await interaction.response.send_message("Please enter a valid slowmode between **0** (no slowmode) and **21600** (6 hours)", ephemeral=True)
         return
     try:
+        variables.edited_channels.append(interaction.channel.id)
         await interaction.channel.edit(slowmode=seconds)
         await interaction.response.send_message(f"This channel's slowmode has been set to **{seconds} {'second' if seconds == 1 else 'seconds'}**")
     except:

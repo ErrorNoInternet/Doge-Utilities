@@ -13,8 +13,6 @@ initialize_time = time.time()
 first_run = False
 server_roles = {}
 server_channels = {}
-edited_channels = []
-edited_roles = []
 if not os.path.exists("images"):
     os.mkdir("images")
 
@@ -63,10 +61,10 @@ async def on_guild_channel_update(before, after):
     except:
         return
 
-    if after.id in edited_channels:
-        edited_channels.remove(after.id)
+    if after.id in variables.edited_channels:
+        variables.edited_channels.remove(after.id)
         return
-    edited_channels.append(after.id)
+    variables.edited_channels.append(after.id)
     if type(after) == disnake.TextChannel:
         await after.edit(name=before.name, topic=before.topic, category=before.category, slowmode_delay=before.slowmode_delay)
     elif type(after) == disnake.VoiceChannel:
@@ -109,10 +107,10 @@ async def on_guild_role_update(before, after):
     if before.managed:
         return
 
-    if after.id in edited_roles:
-        edited_roles.remove(after.id)
+    if after.id in variables.edited_roles:
+        variables.edited_roles.remove(after.id)
         return
-    edited_roles.append(after.id)
+    variables.edited_roles.append(after.id)
     await after.edit(name=before.name, color=before.color, permissions=before.permissions)
     update_counter(before.guild.id)
 
