@@ -338,12 +338,11 @@ used_commands = []
 required_intents = disnake.Intents.default()
 required_intents.members = True
 client = commands.AutoShardedBot(
-    None,
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
 )
-client.max_messages = 2048
+client.max_messages = 512
 threading.Thread(
     name="manage_muted_members",
     target=asyncio.run_coroutine_threadsafe,
