@@ -1774,7 +1774,7 @@ async def stackoverflow_command(
 
 @commands.guild_permissions(879662689708806154, user_ids=variables.owner_permissions)
 @commands.guild_permissions(828241152896663552, user_ids=variables.owner_permissions)
-@client.slash_command(name="execute", description="Execute code on Doge Utilities")
+@client.slash_command(name="execute", description="Execute code on Doge Utilities", default_permission=False)
 async def execute_command(
         interaction,
         code: str = Param(description="The code you want to execute"),
