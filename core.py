@@ -4101,7 +4101,7 @@ async def on_message(message):
                 title=f"Code Output", 
                 segments=segments,
             )
-            await pager.start(FakeChannelInteraction(message))
+            await pager.start(FakeMessageInteraction(message))
         elif len(output.strip()) == 0:
             await message.add_reaction("✅")
         else:
