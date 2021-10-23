@@ -1683,9 +1683,10 @@ async def nickname_command(
             if not member.guild_permissions.change_nickname:
                 await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
                 return
-        if member.top_role.position >= interaction.author.top_role.position:
-            await interaction.response.send_message(f"You do not have permission to edit **{member}**'s nickname!", ephemeral=True)
-            return
+        else:
+            if member.top_role.position >= interaction.author.top_role.position:
+                await interaction.response.send_message(f"You do not have permission to edit **{member}**'s nickname!", ephemeral=True)
+                return
         await member.edit(nick=nickname)
         await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
         add_cooldown(interaction.author.id, "nickname", 3)
