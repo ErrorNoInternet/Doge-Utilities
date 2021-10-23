@@ -288,7 +288,6 @@ client = commands.AutoShardedBot(
     intents=required_intents,
     test_guilds=variables.test_guilds,
 )
-client.max_messages = 512
 threading.Thread(
     name="manage_muted_members",
     target=asyncio.run_coroutine_threadsafe,
@@ -309,25 +308,25 @@ help_paginator = Paginator(
     segments=[variables.help_text[i: i + 1000] for i in range(0, len(variables.help_text), 1000)],
 )
 
+def parse_status_variables(text):
+    text = text.replace("[users]", str(len(list(client.get_all_members()))))
+    text = text.replace("[servers]", str(len(client.guilds)))
+    return text
+
 async def select_status():
     client_status = disnake.Status.online; status_type = random.choice(variables.status_types)
     if status_type == "Playing":
-        status_text = random.choice(variables.status1).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
+        status_text = parse_status_variables(random.choice(variables.status1))
         await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.playing, name=status_text))
     elif status_type == "Watching":
-        status_text = random.choice(variables.status2).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
+        status_text = parse_status_variables(random.choice(variables.status2))
         await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.watching, name=status_text))
     elif status_type == "Listening":
-        status_text = random.choice(variables.status3).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
+        status_text = parse_status_variables(random.choice(variables.status3))
         await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.listening, name=status_text))
     elif status_type == "Competing":
-        status_text = random.choice(variables.status4).replace("[users]", str(len(list(client.get_all_members())))).replace("[servers]", str(len(client.guilds)))
+        status_text = parse_status_variables(random.choice(variables.status4))
         await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.competing, name=status_text))
-
-def clean(text):
-    text = text.replace("@everyone", "everyone")
-    text = text.replace("@here", "here")
-    return text
 
 def remove_mentions(user):
     user = user.replace("<", "")
@@ -789,10 +788,10 @@ async def status_command(interaction):
     embed = disnake.Embed(color=variables.embed_color)
     embed.add_field(name="Bot Latency", value="```" + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```")
     embed.add_field(name="CPU Usage", value="```" + f"{psutil.cpu_percent()}%" + "```")
-    embed.add_field(name="RAM Usage", value="```" + f"{round(memory_usage, 2)} MB" + "```")
+    embed.add_field(name="RAM Usage", value="```" + f"{round(memory_usage, 1)} MB" + "```")
     embed.add_field(name="Thread Count", value="```" + str(threading.active_count()) + "```")
     embed.add_field(name="Joined Guilds", value="```" + str(len(client.guilds)) + "```")
-    embed.add_field(name="Active Shards", value="```" + str(client.shards[0].shard_count) + "```")
+    embed.add_field(name="Active Shards", value="```" + str(len(client.shards)) + "```")
     embed.add_field(name="Member Count", value="```" + str(member_count) + "```")
     embed.add_field(name="Channel Count", value="```" + str(channel_count) + "```")
     embed.add_field(name="Command Count", value="```" + str(len(client.slash_commands)-len(variables.owner_commands)) + "```")
@@ -1417,7 +1416,7 @@ async def scramble_command(
         letter = random.choice(letters)
         output += letter
         letters.remove(letter)
-    await interaction.response.send_message(clean(output))
+    await interaction.response.send_message(remove_mentions(output))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="wide", description="Make text appear to be wider")
@@ -1429,7 +1428,7 @@ async def wide_command(
     new_text = ""
     for letter in text:
         new_text += letter + " "
-    await interaction.response.send_message(clean(new_text))
+    await interaction.response.send_message(remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="unwide", description="Un-wide the specified text")
@@ -1448,7 +1447,7 @@ async def unwide_command(
         else:
             space_character = False
             new_text += letter
-    await interaction.response.send_message(clean(new_text))
+    await interaction.response.send_message(remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="spoiler", description="Add spoilers to every single character")
@@ -1459,7 +1458,7 @@ async def spoiler_command(
     new_text = ""
     for letter in text:
         new_text += "||" + letter + "||"
-    await interaction.response.send_message(clean(new_text))
+    await interaction.response.send_message(remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="cringe", description="Make the text look CrInGY")
@@ -1480,7 +1479,7 @@ async def cringe_command(
                 new_text += letter.upper()
             else:
                 new_text += letter.lower()
-    await interaction.response.send_message(clean(new_text))
+    await interaction.response.send_message(remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="reverse", description="Reverse the specified text")
@@ -1489,7 +1488,7 @@ async def reverse_command(
         text: str = Param(description="The text you want to manipulate"),
     ):
     new_text = text[::-1]
-    await interaction.response.send_message(clean(new_text))
+    await interaction.response.send_message(remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="corrupt", description="Make the text appear to be corrupted")
@@ -1511,7 +1510,7 @@ async def corrupt_command(
                 punctuation = random.choice([True, False, False, False, False])
                 if punctuation:
                     new_text += string.punctuation[random.randint(0, len(string.punctuation) - 1)]
-    await interaction.response.send_message(clean(new_text))
+    await interaction.response.send_message(remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @client.slash_command(name="color", description="Visualize a color code")
@@ -1669,6 +1668,24 @@ async def channel_unlock_command(interaction):
         await interaction.response.send_message(f"I was unable to unlock {interaction.channel.mention}", ephemeral=True)
         return
     await interaction.response.send_message(f"{interaction.channel.mention} has been successfully unlocked")
+
+@channel_command.sub_command(name="slowmode", description="Change this channel's slowmode")
+async def channel_slowmode_command(
+        interaction,
+        seconds: int = Param(description="The new slowmode of this channel"),
+    ):
+    if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        return
+
+    if seconds > 21600 or seconds < 0:
+        await interaction.response.send_message("Please enter a valid slowmode between **0** (no slowmode) and **21600** (6 hours)", ephemeral=True)
+        return
+    try:
+        await interaction.channel.edit(slowmode=seconds)
+        await interaction.response.send_message(f"This channel's slowmode has been set to **{seconds} {'second' if seconds == 1 else 'seconds'}**")
+    except:
+        await interaction.response.send_message("I was unable to change this channel's slowmode", ephemeral=True)
 
 @client.slash_command(name="search", description="Search for something on the internet")
 async def search_command(_):
