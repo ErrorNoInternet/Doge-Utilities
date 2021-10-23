@@ -3623,6 +3623,9 @@ def evaluate_expression(expression):
         "set": lambda name, value: set_variable(name, value),
         "bin": lambda value: bin(value),
         "hex": lambda value: hex(value),
+        "log": lambda value: math.log(value),
+        "sin": lambda value: math.sin(value),
+        "cos": lambda value: math.cos(value),
     }
 
     try:
