@@ -1683,7 +1683,7 @@ async def channel_slowmode_command(
         return
     try:
         variables.edited_channels.append(interaction.channel.id)
-        await interaction.channel.edit(slowmode=seconds)
+        await interaction.channel.edit(slowmode_delay=seconds)
         await interaction.response.send_message(f"This channel's slowmode has been set to **{seconds} {'second' if seconds == 1 else 'seconds'}**")
     except:
         await interaction.response.send_message("I was unable to change this channel's slowmode", ephemeral=True)
