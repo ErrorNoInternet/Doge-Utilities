@@ -1329,18 +1329,19 @@ async def hash_command(
         interaction,
         hash_type: str = Param(name="algorithm", description="The type of the output hash (md5, sha256, etc)", autocomplete=autocomplete_algorithms),
         text: str = Param(description="The text you want to hash"),
+        length: int = Param(None, description="The length of the output hash (for shake_128, shake_256, etc)")
     ):
     try:
         hash_type = hash_type.strip()
         text = text.strip()
-        output_hash = hash_text(hash_type, text)
+        output_hash = hash_text(hash_type, text, length=length)
         embed = disnake.Embed(color=variables.embed_color)
         embed.add_field(name="Text", value=text)
         embed.add_field(name=f"Hash ({hash_type})", value="`" + output_hash + "`", inline=False)
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "hash", 3)
     except:
-        await interaction.response.send_message("Invalid hash type")
+        await interaction.response.send_message("Invalid hash algorithm", ephemeral=True)
         return
 
 @client.slash_command(name="base64", description="Encode and decode base64")
@@ -3555,10 +3556,19 @@ def date_to_epoch(timestamp):
     epoch = datetime.datetime(year, month, day, hour, minute, second).timestamp()
     return int(epoch)
 
-def hash_text(hash_type, input_text):
+def hash_text(hash_type, input_text, length=None):
     hasher = hashlib.new(hash_type)
     hasher.update(input_text.encode("utf-8"))
-    return hasher.hexdigest()
+    output_hash = None
+    try:
+        output_hash = hasher.hexdigest()
+    except:
+        if length != None:
+            output_hash = hasher.hexdigest(length)
+    if output_hash != None:
+        return output_hash
+    else:
+        raise Exception("unable to hash text")
 
 def get_variable(name):
     try:
