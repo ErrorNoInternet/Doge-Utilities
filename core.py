@@ -156,7 +156,7 @@ class Paginator:
                     disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
                 )
 
-            @disnake.ui.button(label=variables.first_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
             async def first_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -172,7 +172,7 @@ class Paginator:
                     self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
-            @disnake.ui.button(label=variables.previous_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="◀️", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
             async def previous_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -183,7 +183,7 @@ class Paginator:
                     self.current_page = len(self.embeds)
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
-            @disnake.ui.button(label=variables.next_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="▶️", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
             async def next_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -194,7 +194,7 @@ class Paginator:
                     self.current_page = 1
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
 
-            @disnake.ui.button(label=variables.last_button_text, style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.blurple, disabled=True if len(self.embeds) == 1 else False)
             async def last_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
@@ -338,7 +338,7 @@ used_commands = []
 required_intents = disnake.Intents.default()
 required_intents.members = True
 client = commands.AutoShardedBot(
-    variables.prefix,
+    None,
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
