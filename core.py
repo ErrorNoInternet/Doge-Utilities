@@ -1151,8 +1151,12 @@ async def lookup_command(
         user = str(interaction.author.id)
     user = remove_mentions(user)
     headers = {"Authorization": "Bot " + os.environ["TOKEN"]}
-    url = "https://discord.com/api/users/" + user
-    response = requests.get(url, headers=headers).json()
+    try:
+        url = "https://discord.com/api/users/" + str(int(user))
+        response = requests.get(url, headers=headers).json()
+    except:
+        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
+        return
     if "10013" not in str(response):
         try:
             response["public_flags"]
@@ -3626,6 +3630,7 @@ def evaluate_expression(expression):
         "log": lambda value: math.log(value),
         "sin": lambda value: math.sin(value),
         "cos": lambda value: math.cos(value),
+        "tan": lambda value: math.tan(value),
     }
 
     try:
