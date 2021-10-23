@@ -102,6 +102,12 @@ class Paginator:
                     disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True),
                 )
 
+            async def on_timeout(this):
+                for button in this.children:
+                    button.disabled = True
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
+                return await super().on_timeout()
+
             @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def first_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
@@ -934,6 +940,12 @@ async def random_command(
         def __init__(self):
             super().__init__()
             self.uses = 0
+
+        async def on_timeout(self):
+            for button in self.children:
+                button.disabled = True
+            await interaction.edit_original_message(view=self)
+            return await super().on_timeout()
 
         @disnake.ui.button(label=button_text, style=disnake.ButtonStyle.gray)
         async def generate_number(self, _, button_interaction):
@@ -1994,6 +2006,12 @@ async def tictactoe_command(interaction):
             super().__init__()
             self.timeout = 300
 
+        async def on_timeout(self):
+            for button in self.children:
+                button.disabled = True
+            await interaction.edit_original_message(view=self)
+            return await super().on_timeout()
+
         @disnake.ui.button(label="Player 1", style=disnake.ButtonStyle.blurple)
         async def player_one(self, button, button_interaction):
             button.label = button_interaction.author.name
@@ -2050,6 +2068,12 @@ async def trivia_command(interaction):
     class CommandView(disnake.ui.View):
         def __init__(self):
             super().__init__()
+
+        async def on_timeout(self):
+            for button in self.children:
+                button.disabled = True
+            await interaction.edit_original_message(view=self)
+            return await super().on_timeout()
 
         async def close(self, chosen_answer):
             new_view = disnake.ui.View()
