@@ -1046,7 +1046,7 @@ async def suggest_command(
             await button_interaction.response.send_message("Accepted successfully")
             for button in self.children:
                 button.disabled = True
-            await button_interaction.edit(view=self)
+            await original_message.edit(view=self)
             self.stop()
 
         @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
@@ -1059,7 +1059,7 @@ async def suggest_command(
             await button_interaction.response.send_message("Rejected successfully")
             for button in self.children:
                 button.disabled = True
-            await button_interaction.edit(view=self)
+            await original_message.edit(view=self)
             self.stop()
 
     for user_id in variables.message_managers:
@@ -1070,7 +1070,7 @@ async def suggest_command(
                     if member.id == user_id:
                         sent = True
                         try:
-                            await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}", view=SuggestionView())
+                            original_message = await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}", view=SuggestionView())
                         except:
                             pass
     await interaction.edit_original_message(content="Your suggestion has been successfully sent")
@@ -3077,9 +3077,6 @@ async def warn_command(
         await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
         return
     
-    if member.top_role.position >= interaction.author.top_role.position:
-        await interaction.response.send_message(f"You do not have permission to warn **{member}**!", ephemeral=True)
-        return
     try:
         warnings = json.loads(database[f"warnings.{member.id}"])
     except:
@@ -3100,6 +3097,9 @@ async def warn_command(
             return
         if member.guild_permissions.administrator:
             await interaction.response.send_message("You cannot warn an administrator!", ephemeral=True)
+            return
+        if member.top_role.position >= interaction.author.top_role.position:
+            await interaction.response.send_message(f"You do not have permission to warn **{member}**!", ephemeral=True)
             return
     warnings[str(interaction.guild.id)] = guild_warnings
     database[f"warnings.{member.id}"] = json.dumps(warnings)
