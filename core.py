@@ -1041,7 +1041,7 @@ async def random_command(
         high_number = low_number
         low_number = 0
     random_number = round(random.uniform(low_number, high_number), 2)
-    button_text = "Generate Number"
+    button_text = functions.get_text(interaction.author.id, "generate_number")
 
     class CommandView(disnake.ui.View):
         def __init__(self):
@@ -1063,7 +1063,7 @@ async def random_command(
             if self.uses < 5:
                 self.uses += 1
                 random_number = round(random.uniform(low_number, high_number), 2)
-                await interaction.edit_original_message(content=f"Your random number is **{random_number}**")
+                await interaction.edit_original_message(content=f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**")
             else:
                 new_view = disnake.ui.View()
                 new_view.add_item(disnake.ui.Button(label=button_text, style=disnake.ButtonStyle.gray, disabled=True))
@@ -1073,7 +1073,7 @@ async def random_command(
                     ephemeral=True,
                 )
                 self.stop()
-    await interaction.response.send_message(f"Your random number is **{random_number}**", view=CommandView())
+    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**", view=CommandView())
     add_cooldown(interaction.author.id, "random", 10)
 
 @client.slash_command(name="disconnect-members", description="Disconnect all members from all voice channels")

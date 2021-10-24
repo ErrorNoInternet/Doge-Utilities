@@ -14,6 +14,8 @@ data = {
         "vote_again": "Don't forget to vote for me!",
         "todo_list": "To-do List",
         "todo_empty": "Your to-do list is empty",
+        "generate_number": "Generate Number",
+        "number_prompt": "Your random number is",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -30,6 +32,8 @@ data = {
         "vote_again": "不要忘记给我投票!",
         "todo_list": "待办事项列表",
         "todo_empty": "你的待办事列表是空的",
+        "generate_number": "生成数字",
+        "number_prompt": "你的随机数字是",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
