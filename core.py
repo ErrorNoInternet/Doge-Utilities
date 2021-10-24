@@ -776,7 +776,7 @@ async def links_command(_):
 
 @links_command.sub_command(name="support", description="Display the official support server for Doge")
 async def support_command(interaction):
-    await interaction.response.send_message(f"{functions.get_text(interaction.author.id), 'support_server'}: {variables.support_server_invite}")
+    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'support_server')}: {variables.support_server_invite}")
 
 @links_command.sub_command(name="invite", description="Invite this bot to another server")
 async def invite_command(interaction):
