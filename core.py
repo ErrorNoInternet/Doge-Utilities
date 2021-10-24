@@ -205,8 +205,11 @@ class Paginator:
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
         self.view = PaginatorView
 
-    async def start(self, interaction, ephemeral=False):
-        await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=self.view(interaction), ephemeral=ephemeral)
+    async def start(self, interaction, ephemeral=False, deferred=False):
+        if not deferred:
+            await interaction.response.send_message(embed=self.embeds[self.current_page-1], view=self.view(interaction), ephemeral=ephemeral)
+        else:
+            await interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(interaction))
 
 def reset_strikes():
     global message_strikes
@@ -3228,9 +3231,10 @@ async def discriminator_command(
         interaction,
         discriminator: str = Param(0, description="The discriminator to look for"),
     ):
+    await interaction.response.defer()
+
     if discriminator == 0:
         discriminator = interaction.author.discriminator
-
     members = []
     discriminator = discriminator.replace("#", "")
     try:
@@ -3238,7 +3242,7 @@ async def discriminator_command(
         if len(discriminator) != 4:
             raise Exception("invalid discriminator")
     except:
-        await interaction.response.send_message("That is not a valid discriminator!", ephemeral=True)
+        await interaction.edit_original_message(content="That is not a valid discriminator!")
         return
 
     for member in client.get_all_members():
@@ -3246,7 +3250,7 @@ async def discriminator_command(
             if str(member) not in members:
                 members.append(str(member))
     if members == []:
-        await interaction.response.send_message("There are no other users with the same discriminator", ephemeral=True)
+        await interaction.edit_original_message(content="There are no other users with the same discriminator")
         return
 
     output = "\n".join(members)
@@ -3254,7 +3258,7 @@ async def discriminator_command(
     pager = Paginator(
         prefix=f"```\n", suffix="```", color=variables.embed_color, title="Discriminator", segments=segments,
     )
-    await pager.start(interaction)
+    await pager.start(interaction, deferred=True)
     add_cooldown(interaction.author.id, "discriminator", 5)
 
 @client.slash_command(name="warn", description="Warn a member in your server")
