@@ -864,7 +864,7 @@ async def shards_command(interaction):
         try:
             pages[current_item] += temporary_text
         except:
-            pages[current_item] = f"Shard Count: `{len(client.shards)}`, Current Shard: `{interaction.guild.shard_id}`\n\n"
+            pages[current_item] = f"{functions.get_text(interaction.author.id, 'shard_count')}: `{len(client.shards)}`, {functions.get_text(interaction.author.id, 'current_shard')}: `{interaction.guild.shard_id}`\n\n"
             pages[current_item] += temporary_text
         index += 1
     pager = Paginator(

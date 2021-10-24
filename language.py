@@ -32,6 +32,8 @@ data = {
         "members_lower": "members",
         "guilds_lower": "guilds",
         "i_choose": "I choose",
+        "shard_count": "Shard Count",
+        "current_shard": "Current Shard",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -65,7 +67,9 @@ data = {
         "shard": "碎片",
         "members_lower": "用户",
         "guilds_lower": "服务器",
-        "i_choose": "我选择"
+        "i_choose": "我选择",
+        "shard_count": "碎片数",
+        "current_shard": "当前碎片",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -91,6 +95,10 @@ data = {
         "bot_version": "Bot Version",
         "bot_uptime": "Bot online seit",
         "i_choose": "Ich wähle",
+        "members_lower": "mitglieder",
+        "guilds_lower": "servers",
+        "current_shard": "Aktueller Shard",
+        "shard_count": "Shards",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
