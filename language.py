@@ -132,6 +132,13 @@ data = {
         "reminder_added": "Du wirst erinnert in:",
         "minute": "Minute",
         "minutes": "Minuten",
+        "support_server": "Doge Utilities support server",
+        "user_accounts": "Nutzer accounts",
+        "bot_accounts": "Bot accounts",
+        "total_members": "Alle Mitglieder",
+        "guild_members": "Server Mitglieder",
+        "todo_added": '**"{}"** wurde erfolgreich zur To-do Liste hinzugefügt',
+        "todo_removed": '**"{}"** wurde erfolgreich aus der To-do Liste entfernt',
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
