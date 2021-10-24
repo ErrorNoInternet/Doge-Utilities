@@ -68,7 +68,7 @@ data = {
         "thread_count": "机器人程序数",
         "joined_guilds": "机器人服务器",
         "active_shards": "机器人碎片",
-        "member_count": "人数",
+        "member_count": "用户数",
         "channel_count": "频道数",
         "command_count": "指令数",
         "disnake_version": "Disnake版本",
