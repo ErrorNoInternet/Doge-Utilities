@@ -3766,7 +3766,7 @@ async def remind_add_command(
         return
     current_reminders.append([round(time.time()), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
-    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'reminder_added')} **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
+    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'reminder_added')} **{duration if round(duration) != 1 else round(duration)} {functions.get_text(interaction.author.id, 'minute') if round(duration) == 1 else functions.get_text(interaction.author.id, 'minutes')}**")
 
 def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))

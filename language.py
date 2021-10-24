@@ -36,6 +36,8 @@ data = {
         "current_shard": "Current Shard",
         "reminder_removed": "That reminder has been successfully removed",
         "reminder_added": "You will be reminded in",
+        "minute": "minute",
+        "minutes": "minutes",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -74,6 +76,8 @@ data = {
         "current_shard": "当前碎片",
         "reminder_removed": "那个提醒已被成功移除",
         "reminder_added": "你会在这段时间后被提醒:",
+        "minute": "分钟",
+        "minutes": "分钟",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -112,6 +116,8 @@ data = {
         "number_prompt": "Deine generierte Nummer ist",
         "reminder_removed": "Diese Erinnerung wurde erfolgreich entfernt",
         "reminder_added": "Du wirst erinnert in:",
+        "minute": "minute",
+        "minutes": "minuten",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
