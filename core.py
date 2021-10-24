@@ -1237,7 +1237,7 @@ async def lookup_command(
         embed = disnake.Embed(color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
         embed.add_field(name="User ID", value=f"`{response['id']}`")
         embed.add_field(name="Tag", value=f"`{response['username']}#{response['discriminator']}`")
-        embed.add_field(name="Creation Time", value=f"<t:{parse_snowflake(int(response['id']))}:R>")
+        embed.add_field(name="Creation Time", value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>")
         embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` {badges}")
         embed.add_field(name="Bot User", value=f"`{bot_value}`")
         embed.add_field(name="System User", value=f"`{system_value}`")
@@ -3073,7 +3073,7 @@ async def server_information_command(interaction):
         embed.set_image(url=interaction.guild.banner)
     embed.add_field(name="Server ID", value=f"`{interaction.guild.id}`")
     embed.add_field(name="Server Region", value=f"{interaction.guild.region}")
-    embed.add_field(name="Creation Time", value=f"<t:{parse_snowflake(interaction.guild.id)}:R>")
+    embed.add_field(name="Creation Time", value=f"<t:{functions.parse_snowflake(interaction.guild.id)}:R>")
     embed.add_field(name="Server Owner", value=f"`{interaction.guild.owner.id}`")
     embed.add_field(name="Channels", value=f"{text_channels + voice_channels + categories:,}")
     embed.add_field(name="Roles", value=f"{len(interaction.guild.roles):,}")
@@ -3771,9 +3771,6 @@ def build_role_permissions(role):
         else:
             permission_list += f":x: `{permission[0]}`\n"
     return permission_list
-
-def parse_snowflake(id):
-    return round(((id >> 22) + 1420070400000) / 1000)
 
 def evaluate_expression(expression):
     expression = expression.replace("^", "**")

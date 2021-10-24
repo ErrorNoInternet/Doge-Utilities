@@ -20,3 +20,6 @@ def remove_mentions(user):
     user = user.replace(">", "")
     return user
 
+def parse_snowflake(id):
+    return round(((id >> 22) + 1420070400000) / 1000)
+
