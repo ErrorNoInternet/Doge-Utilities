@@ -28,6 +28,7 @@ data = {
         "disnake_version": "Disnake Version",
         "bot_version": "Bot Version",
         "bot_uptime": "Bot Uptime",
+        "latency": "Latency",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -58,6 +59,7 @@ data = {
         "disnake_version": "Disnake版本",
         "bot_version": "机器人版本",
         "bot_uptime": "机器人运行时间",
+        "latency": "延迟",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",

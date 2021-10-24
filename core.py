@@ -744,7 +744,7 @@ async def currency_list_command(interaction):
 async def ping_command(interaction):
     embed = disnake.Embed(
         title="Pong :ping_pong:",
-        description=f"Latency: **{round(client.latency * 1000, 1)} ms**",
+        description=f"{functions.get_text(interaction.author.id, 'latency')}: **{round(client.latency * 1000, 1)} ms**",
         color=variables.embed_color,
     )
     await interaction.response.send_message(embed=embed)
