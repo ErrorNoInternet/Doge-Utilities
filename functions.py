@@ -28,6 +28,9 @@ def get_text(user_id, key):
         else:
             settings = get_settings(user_id)
             settings_cache[user_id] = [time.time(), settings]
+    else:
+        settings = get_settings(user_id)
+        settings_cache[user_id] = [time.time(), settings]
     return language.get(settings['language'], key)
 
 def remove_mentions(user):
