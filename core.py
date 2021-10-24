@@ -3568,7 +3568,10 @@ async def message_translate_command(interaction):
         await interaction.edit_original_message(embed=embed)
         add_cooldown(interaction.author.id, "translate", 5)
     except Exception as error:
-        await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
+        if "or fewer in length" in str(error):
+            await interaction.edit_original_message(content="The output translation is too long!")
+        else:
+            await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
 
 @client.slash_command(name="definition", description="Find the definition of a word")
 async def definition_command(
