@@ -178,6 +178,7 @@ data = {
         "minute": "минута",
         "minutes": "минуты",
         "latency": "Задержка",
+        "joined_guilds": "гильдии",
     },
 }
 data["zh-tw"] = data["zh-cn"]
