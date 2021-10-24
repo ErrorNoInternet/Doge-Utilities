@@ -34,6 +34,8 @@ data = {
         "i_choose": "I choose",
         "shard_count": "Shard Count",
         "current_shard": "Current Shard",
+        "reminder_removed": "That reminder has been successfully removed",
+        "reminder_added": "You will be reminded in",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -70,6 +72,8 @@ data = {
         "i_choose": "我选择",
         "shard_count": "碎片数",
         "current_shard": "当前碎片",
+        "reminder_removed": "那个提醒已被成功移除",
+        "reminder_added": "你会在这段时间后被提醒:",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -106,6 +110,8 @@ data = {
         "todo_empty": "Deine To-do Liste ist leer",
         "generate_number": "Generiere eine Nummer",
         "number_prompt": "Deine generierte Nummer ist",
+        "reminder_removed": "Diese Erinnerung wurde erfolgreich entfernt",
+        "reminder_added": "Du wirst erinnert in:",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
