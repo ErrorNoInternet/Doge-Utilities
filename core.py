@@ -3653,7 +3653,7 @@ async def remind_list_command(interaction):
     text = ""
     for reminder in current_reminders:
         end_time = reminder[0] + reminder[1]
-        text += f"**{language.get(functions.get_settings(interaction.author.id)['language'], 'time')}:** <t:{round(end_time)}:R>\n**Text:** {reminder[2]}\n\n"
+        text += f"**{language.get(functions.get_settings(interaction.author.id)['language'], 'time')}:** <t:{round(end_time)}:R>\n**{language.get(functions.get_settings(interaction.author.id)['language'], 'time')}:** {reminder[2]}\n\n"
     if text == "":
         text = language.get(functions.get_settings(interaction.author.id)["language"], "no_reminders")
     embed = disnake.Embed(

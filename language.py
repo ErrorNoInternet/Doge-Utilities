@@ -8,7 +8,8 @@ data = {
         "use_in_server": "Please use Doge Utilities in a server for the best experience!",
         "no_reminders": "You have no active reminders",
         "reminders": "Reminders",
-        "time": "Time"
+        "time": "Time",
+        "text": "Text",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -20,6 +21,7 @@ data = {
         "no_reminders": "你没有提醒",
         "reminders": "提醒",
         "time": "时间",
+        "text": "文字",
     },
 }
 data["zh-tw"] = data["zh-cn"]
