@@ -3100,7 +3100,7 @@ async def server_members_command(interaction):
             users += 1
     embed = disnake.Embed(
         title=functions.get_text(interaction.author.id, "guild_members"),
-        description=f"{functions.get_text(interaction.author.id, 'user_accounts')}: **{users}**\nBot accounts: **{functions.get_text(interaction.author.id, 'bot_accounts')}**\n{functions.get_text(interaction.author.id, 'total_members')}: **{users + bots}**",
+        description=f"{functions.get_text(interaction.author.id, 'user_accounts')}: **{users}**\n{functions.get_text(interaction.author.id, 'bot_accounts')}: **{bots}**\n{functions.get_text(interaction.author.id, 'total_members')}: **{users + bots}**",
         color=variables.embed_color,
     )
     await interaction.response.send_message(embed=embed)
