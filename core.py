@@ -21,6 +21,7 @@ import hashlib
 import requests
 import datetime
 import textwrap
+import functions
 import converter
 import threading
 import variables
@@ -76,6 +77,11 @@ class FakeChannelResponse:
         self.sent_message = await self.channel.send(content=content, embed=embed, view=view)
 
     async def edit_message(self, content=None, embed=None, view=None):
+        if content == None:
+            content = self.sent_message.content
+        if embed == None:
+            if len(self.sent_message.embeds) > 0:
+                embed = self.sent_message.embeds[0]
         await self.sent_message.edit(content=content, embed=embed, view=view)
 
 class FakeUserInteraction:
@@ -122,15 +128,18 @@ class Paginator:
                 
                 this.timeout = self.timeout
                 this.interaction = interaction
-                this.add_item(
-                    disnake.ui.Button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True),
-                )
 
             async def on_timeout(this):
                 for button in this.children:
                     button.disabled = True
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
                 return await super().on_timeout()
+
+            def update_page(this):
+                for button in this.children:
+                    if button.label:
+                        if button.label.startswith("Page"):
+                            button.label = f"Page {self.current_page}/{len(self.embeds)}"
 
             @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def first_button(this, _, button_interaction):
@@ -146,7 +155,8 @@ class Paginator:
                         self.current_page = 1
                 else:
                     self.current_page = 1
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
+                this.update_page()
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
 
             @disnake.ui.button(emoji="◀️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def previous_button(this, _, button_interaction):
@@ -157,7 +167,12 @@ class Paginator:
                 self.current_page -= 1
                 if self.current_page < 1:
                     self.current_page = len(self.embeds)
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
+                this.update_page()
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
+
+            @disnake.ui.button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
+            async def page_button(*_):
+                pass
 
             @disnake.ui.button(emoji="▶️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def next_button(this, _, button_interaction):
@@ -168,7 +183,8 @@ class Paginator:
                 self.current_page += 1
                 if self.current_page > len(self.embeds):
                     self.current_page = 1
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
+                this.update_page()
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
 
             @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def last_button(this, _, button_interaction):
@@ -184,7 +200,8 @@ class Paginator:
                         self.current_page = len(self.embeds)
                 else:
                     self.current_page = len(self.embeds)
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=self.view(this.interaction))
+                this.update_page()
+                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
         self.view = PaginatorView
 
     async def start(self, interaction, ephemeral=False):
@@ -359,13 +376,6 @@ async def select_status():
     elif status_type == "Competing":
         status_text = parse_status_variables(random.choice(variables.status4))
         await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.competing, name=status_text))
-
-def remove_mentions(user):
-    user = user.replace("<", "")
-    user = user.replace("@", "")
-    user = user.replace("!", "")
-    user = user.replace(">", "")
-    return user
 
 def get_cooldown(id, command):
     try:
@@ -685,7 +695,7 @@ async def afk_command(
             return
 
         database[f"afk.{interaction.author.id}"] = json.dumps([round(time.time()), message])
-        await interaction.response.send_message(f'Your AFK message has been set to **"{remove_mentions(message)}"**')
+        await interaction.response.send_message(f'Your AFK message has been set to **"{functions.remove_mentions(message)}"**')
 
 @client.slash_command(name="links", description="Get links for Doge Utilities")
 async def links_command(_):
@@ -1146,7 +1156,7 @@ async def lookup_command(
     ):
     if user == 0:
         user = str(interaction.author.id)
-    user = remove_mentions(user)
+    user = functions.remove_mentions(user)
     headers = {"Authorization": "Bot " + os.environ["TOKEN"]}
     try:
         url = "https://discord.com/api/users/" + str(int(user))
@@ -1454,7 +1464,7 @@ async def scramble_command(
         letter = random.choice(letters)
         output += letter
         letters.remove(letter)
-    await interaction.response.send_message(remove_mentions(output))
+    await interaction.response.send_message(functions.remove_mentions(output))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="wide", description="Make text appear to be wider")
@@ -1466,7 +1476,7 @@ async def wide_command(
     new_text = ""
     for letter in text:
         new_text += letter + " "
-    await interaction.response.send_message(remove_mentions(new_text))
+    await interaction.response.send_message(functions.remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="unwide", description="Un-wide the specified text")
@@ -1485,7 +1495,7 @@ async def unwide_command(
         else:
             space_character = False
             new_text += letter
-    await interaction.response.send_message(remove_mentions(new_text))
+    await interaction.response.send_message(functions.remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="spoiler", description="Add spoilers to every single character")
@@ -1496,7 +1506,7 @@ async def spoiler_command(
     new_text = ""
     for letter in text:
         new_text += "||" + letter + "||"
-    await interaction.response.send_message(remove_mentions(new_text))
+    await interaction.response.send_message(functions.remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="cringe", description="Make the text look CrInGY")
@@ -1517,7 +1527,7 @@ async def cringe_command(
                 new_text += letter.upper()
             else:
                 new_text += letter.lower()
-    await interaction.response.send_message(remove_mentions(new_text))
+    await interaction.response.send_message(functions.remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="reverse", description="Reverse the specified text")
@@ -1526,7 +1536,7 @@ async def reverse_command(
         text: str = Param(description="The text you want to manipulate"),
     ):
     new_text = text[::-1]
-    await interaction.response.send_message(remove_mentions(new_text))
+    await interaction.response.send_message(functions.remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="corrupt", description="Make the text appear to be corrupted")
@@ -1548,7 +1558,7 @@ async def corrupt_command(
                 punctuation = random.choice([True, False, False, False, False])
                 if punctuation:
                     new_text += string.punctuation[random.randint(0, len(string.punctuation) - 1)]
-    await interaction.response.send_message(remove_mentions(new_text))
+    await interaction.response.send_message(functions.remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
 @client.slash_command(name="color", description="Visualize a color code")
@@ -1896,7 +1906,7 @@ async def blacklist_add_command(
         user: str = Param(description="The user you want to add to the blacklist"),
     ):
     try:
-        user_id = int(remove_mentions(user))
+        user_id = int(functions.remove_mentions(user))
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
@@ -1914,7 +1924,7 @@ async def blacklist_remove_command(
         user: str = Param(description="The user you want to remove from the blacklist"),
     ):
     try:
-        user_id = int(remove_mentions(user))
+        user_id = int(functions.remove_mentions(user))
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
@@ -3275,7 +3285,7 @@ async def ban_command(
         return
 
     try:
-        user_id = int(remove_mentions(member))
+        user_id = int(functions.remove_mentions(member))
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
         return
@@ -3338,7 +3348,7 @@ async def unban_command(
         return
 
     try:
-        user_id = int(remove_mentions(member))
+        user_id = int(functions.remove_mentions(member))
         user = await client.fetch_user(user_id)
     except:
         await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
@@ -4106,7 +4116,7 @@ async def on_message(message):
                         except:
                             pass
                         await mute_member(message.author, 0.16)
-                        await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{remove_mentions(message.content[:500])}')
+                        await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(message.content[:500])}')
                         return
             except:
                 pass
@@ -4149,7 +4159,7 @@ async def on_message(message):
             for user in client.users:
                 if user.id == mention.id:
                     user_name = user.name
-            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{remove_mentions(afk_status[1])}**")
+            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{functions.remove_mentions(afk_status[1])}**")
         except:
             pass
     
