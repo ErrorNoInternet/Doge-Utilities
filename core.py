@@ -3068,12 +3068,12 @@ async def server_status_command(interaction):
         newline_filter = json.loads(database[f"newline.toggle.{interaction.guild.id}"])
     except:
         pass
-    embed.add_field(name="Anti-Raid", value=":white_check_mark:" if raid_protection else ":x:")
-    embed.add_field(name="Insults Filter", value=":white_check_mark:" if insults_filter else ":x:")
-    embed.add_field(name="Spam Filter", value=":white_check_mark:" if spam_filter else ":x:")
-    embed.add_field(name="Links Filter", value=":white_check_mark:" if links_filter else ":x:")
-    embed.add_field(name="Mention Filter", value=":white_check_mark:" if mention_filter else ":x:")
-    embed.add_field(name="Newline Filter", value=":white_check_mark:" if newline_filter else ":x:")
+    embed.add_field(name="Raid Protection", value=":white_check_mark: Enabled" if raid_protection else ":x: Disabled")
+    embed.add_field(name="Newline Filter", value=":white_check_mark: Enabled" if newline_filter else ":x: Disabled")
+    embed.add_field(name="Insults Filter", value=":white_check_mark: Enabled" if insults_filter else ":x: Disabled")
+    embed.add_field(name="Spam Filter", value=":white_check_mark: Enabled" if spam_filter else ":x: Disabled")
+    embed.add_field(name="Links Filter", value=":white_check_mark: Enabled" if links_filter else ":x: Disabled")
+    embed.add_field(name="Mention Filter", value=":white_check_mark: Enabled" if mention_filter else ":x: Disabled")
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 5)
 
