@@ -118,7 +118,7 @@ data = {
         "bot_uptime": "Bot online seit",
         "i_choose": "Ich wähle",
         "members_lower": "Mitglieder",
-        "guilds_lower": "Servers",
+        "guilds_lower": "Server",
         "current_shard": "Aktueller Shard",
         "shard_count": "Shards",
         "use_in_server": "Bitte nutze Doge Utilities in einem Server für das bestmögliche Ergebnis!",
