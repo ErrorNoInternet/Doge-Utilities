@@ -20,6 +20,7 @@ def set_settings(settings, user_id):
     core.database[f"settings.{user_id}"] = json.dumps(settings)
 
 def get_text(user_id, key):
+    user_id = str(user_id)
     settings = None
     if user_id in settings_cache:
         data = settings_cache[user_id]

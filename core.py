@@ -516,7 +516,7 @@ async def settings_language_set_command(
     ):
     language = language.lower()
     if language not in googletrans.LANGUAGES.keys() and language not in googletrans.LANGUAGES.values():
-        await interaction.response.send_message("The language you specified was not found!", ephemeral=True)
+        await interaction.response.send_message("The specified language wasn't found!", ephemeral=True)
         return
     language_name = ""
     language_code = ""
@@ -966,7 +966,7 @@ async def version_command(interaction):
             file_size += len(file.read()); file.close()
         except:
             pass
-    embed = disnake.Embed(title="Bot Version", description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"), description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 
@@ -990,7 +990,11 @@ async def uptime_command(interaction):
         uptime += str(math.floor(seconds_time)) + "s "
     if uptime == "":
         uptime = "Unknown"
-    embed = disnake.Embed(title="Bot Uptime", description=f"Doge Utilities has been running for **{uptime}**", color=variables.embed_color)
+    embed = disnake.Embed(
+        title=functions.get_text(interaction.author.id, "bot_uptime"),
+        description=f"Doge Utilities has been running for **{uptime}**",
+        color=variables.embed_color,
+    )
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="setup", description="Setup mute and ban roles in your server")
