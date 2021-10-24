@@ -25,10 +25,15 @@ data = {
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
-        "not_command_sender": "Вы не являетесь отправителем этой команды!",
+        "not_command_sender": "Вы не являетесь отправителем данной команды!",
         "vote_message": "Спасибо за то, что вы проголосовали за меня!",
         "banned_message": "Вам запретили использовать Doge Utilities!",
         "error_message": "Упс... Doge Utilities столкнулся с ошибкой...",
+        "use_in_server": "Пожалуйста, используйте Doge Utilities на сервере для лучшего опыта!",
+        "no_reminders": "У вас нет активных напоминаний",
+        "reminders": "Напоминания",
+        "time": "Время",
+        "text": "Текст",
     },
 }
 data["zh-tw"] = data["zh-cn"]
@@ -40,7 +45,8 @@ def get(language, key):
         language = "en"
     language_data = data[language]
     if key not in language_data:
-        return language_data["error_message"]
+        language_data = data["en"]
+        return language_data[key]
     else:
         return language_data[key]
 
