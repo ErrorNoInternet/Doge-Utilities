@@ -75,7 +75,7 @@ data = {
         "text": "Text",
         "reminder": "Errinerung",
         "reminders": "Errinnerungen",
-    }
+    },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
         "not_command_sender": "Вы не являетесь отправителем данной команды!",
