@@ -21,6 +21,7 @@ import hashlib
 import requests
 import datetime
 import textwrap
+import language
 import functions
 import converter
 import threading
@@ -144,7 +145,7 @@ class Paginator:
             @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def first_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    await button_interaction.response.send_message(language.get(functions.get_settings(button_interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                     return
 
                 if len(self.embeds) >= 15:
@@ -161,7 +162,7 @@ class Paginator:
             @disnake.ui.button(emoji="◀️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def previous_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    await button_interaction.response.send_message(language.get(functions.get_settings(button_interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                     return
 
                 self.current_page -= 1
@@ -177,7 +178,7 @@ class Paginator:
             @disnake.ui.button(emoji="▶️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def next_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    await button_interaction.response.send_message(language.get(functions.get_settings(button_interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                     return
 
                 self.current_page += 1
@@ -189,7 +190,7 @@ class Paginator:
             @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def last_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
-                    await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                    await button_interaction.response.send_message(language.get(functions.get_settings(button_interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                     return
 
                 if len(self.embeds) >= 15:
@@ -422,7 +423,7 @@ def generate_cooldown(command, cooldown_time):
 @client.before_message_command_invoke
 async def message_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
-        await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "banned_message"), ephemeral=True)
         raise Exception("no permission")
 
     if not interaction.guild:
@@ -432,7 +433,7 @@ async def message_command_handler(interaction):
 @client.before_user_command_invoke
 async def user_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
-        await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "banned_message"), ephemeral=True)
         raise Exception("no permission")
 
     if not interaction.guild:
@@ -449,7 +450,7 @@ async def slash_command_handler(interaction):
             used_commands.append(parse_interaction(interaction))
 
     if interaction.author.id in blacklisted_users:
-        await interaction.response.send_message("You are banned from using Doge Utilities!", ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "banned_message"), ephemeral=True)
         raise Exception("no permission")
 
     if not interaction.guild:
@@ -481,6 +482,51 @@ async def help_command(interaction):
     await help_paginator.start(interaction)
     add_cooldown(interaction.author.id, "help", 60)
 
+@client.slash_command(name="settings", description="Manage")
+async def settings_command(_):
+    pass
+
+@settings_command.sub_command_group(name="language", description="Set your preferred language (translate, definition, etc)")
+async def settings_language_command(_):
+    pass
+
+@settings_language_command.sub_command(name="get", description="Get your preferred language")
+async def settings_language_get_command(interaction):
+    settings = functions.get_settings(interaction.author.id)
+    language = settings["language"]
+    if language in googletrans.LANGUAGES:
+        language = googletrans.LANGUAGES[language]
+    await interaction.response.send_message(f"Your preferred language is set to **{language.title()}**")
+
+async def autocomplete_languages(_, string):
+    languages = []
+    for language in googletrans.LANGUAGES.values():
+        languages.append(language.title())
+    return list(filter(lambda language: string.lower() in language.lower(), languages))[:20]
+
+@settings_language_command.sub_command(name="set", description="Set your preferred language")
+async def settings_language_set_command(
+        interaction,
+        language: str = Param(description="Your new preferred language", autocomplete=autocomplete_languages),
+    ):
+    language = language.lower()
+    if language not in googletrans.LANGUAGES.keys() and language not in googletrans.LANGUAGES.values():
+        await interaction.response.send_message("The language you specified is not valid!", ephemeral=True)
+        return
+    language_name = ""
+    language_code = ""
+    if language in googletrans.LANGUAGES.keys():
+        language_name = googletrans.LANGUAGES[language]
+        language_code = language
+    else:
+        language_name = language
+        language_code = googletrans.LANGCODES[language]
+    settings = functions.get_settings(interaction.author.id)
+    settings["language"] = language_code
+    functions.set_settings(settings, interaction.author.id)
+    await interaction.response.send_message(f"Your preferred language has been set to **{language_name.title()}**")
+    return
+
 @client.slash_command(name="embedify", description="Create a custom embed")
 async def embedify_command(
         interaction,
@@ -496,7 +542,7 @@ async def embedify_command(
     await interaction.channel.send(embed=embed)
     await interaction.response.send_message("Your custom embed has been successfully generated", ephemeral=True)
 
-@client.slash_command(name="reaction", description="Manage the reaction roles")
+@client.slash_command(name="reaction-roles", description="Manage the reaction roles")
 async def reaction_command(_):
     pass
 
@@ -508,7 +554,7 @@ async def reaction_create_command(
         role: disnake.Role = Param(description="The role you want to add to users when they add a reaction"),
     ):
     if not interaction.author.guild_permissions.manage_roles:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     if role.position >= interaction.author.top_role.position:
         await interaction.response.send_message("You do not have permission to manage this role!", ephemeral=True)
@@ -565,7 +611,7 @@ async def reaction_delete_command(
         ),
     ):
     if not interaction.author.guild_permissions.manage_roles:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -590,7 +636,7 @@ async def reaction_delete_command(
 @reaction_command.sub_command(name="list", description="List all the reaction roles in this server")
 async def reaction_list_command(interaction):
     if not interaction.author.guild_permissions.manage_roles:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -736,7 +782,7 @@ async def invite_command(interaction):
                         ephemeral=True,
                     )
             else:
-                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                await button_interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
     await interaction.response.send_message("Here is Doge Utilities' invite link", view=CommandView())
 
 @links_command.sub_command(name="vote", description="Get links to vote for the bot")
@@ -888,7 +934,7 @@ async def setup_banned_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     roles = interaction.guild.roles
@@ -924,7 +970,7 @@ async def setup_muted_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     roles = interaction.guild.roles
@@ -984,7 +1030,7 @@ async def random_command(
         @disnake.ui.button(label=button_text, style=disnake.ButtonStyle.gray)
         async def generate_number(self, _, button_interaction):
             if button_interaction.author != interaction.author:
-                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                await button_interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                 return
 
             if self.uses < 5:
@@ -1020,7 +1066,7 @@ async def disconnect_members_command(interaction):
         await interaction.edit_original_message(content=f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
         add_cooldown(interaction.author.id, "disconnect-members", 20)
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
 
 @client.slash_command(name="suggest", description="Send a suggestion to the bot creators")
 async def suggest_command(
@@ -1092,7 +1138,7 @@ async def autorole_command(_):
 @autorole_command.sub_command(name="disable", description="Disable autorole in your server")
 async def disable_autorole_command(interaction):
     if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     del database[f"autorole.{interaction.guild.id}"]
@@ -1101,7 +1147,7 @@ async def disable_autorole_command(interaction):
 @autorole_command.sub_command(name="list", description="List all the automatically assigned roles")
 async def list_autorole_command(interaction):
     if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -1123,7 +1169,7 @@ async def set_autorole_command(
         role5: disnake.Role = Param(0, description="A role you want to automatically assign"),
     ):
     if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     
     role_list = []
@@ -1260,7 +1306,7 @@ async def raid_protection_command(_):
 @raid_protection_command.sub_command(name="status", description="See the current setting for raid protection")
 async def raid_protection_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -1278,7 +1324,7 @@ async def raid_protection_status_command(interaction):
 @raid_protection_command.sub_command(name="enable", description="Enable raid protection for this server")
 async def raid_protection_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     database[f"{interaction.guild.id}.raid-protection"] = 1
@@ -1287,7 +1333,7 @@ async def raid_protection_enable_command(interaction):
 @raid_protection_command.sub_command(name="disable", description="Disable raid protection for this server")
 async def raid_protection_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     database[f"{interaction.guild.id}.raid-protection"] = 0
@@ -1443,7 +1489,7 @@ async def clear_command(
             return
         await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**{user_text}{contains_text}")
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
     add_cooldown(interaction.author.id, "clear", 5)
 
 @client.slash_command(name="text", description="Change what text looks like")
@@ -1668,13 +1714,13 @@ async def nickname_command(
         member = interaction.author
     if member.id != interaction.author.id:
         if not interaction.author.guild_permissions.manage_nicknames and interaction.author.id not in variables.permission_override:
-            await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+            await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
             return
 
     try:
         if member.id == interaction.author.id:
             if not member.guild_permissions.change_nickname:
-                await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+                await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
                 return
         else:
             if member.top_role.position >= interaction.author.top_role.position:
@@ -1694,7 +1740,7 @@ async def channel_command(_):
 @channel_command.sub_command(name="lock", description="Lock the current channel")
 async def channel_lock_command(interaction):
     if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -1707,7 +1753,7 @@ async def channel_lock_command(interaction):
 @channel_command.sub_command(name="unlock", description="Unlock the current channel")
 async def channel_unlock_command(interaction):
     if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -1723,7 +1769,7 @@ async def channel_slowmode_command(
         seconds: int = Param(description="The new slowmode of this channel"),
     ):
     if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     if seconds > 21600 or seconds < 0:
@@ -2144,7 +2190,7 @@ async def trivia_command(interaction):
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_1(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                await button_interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                 return
 
             if button.label == correct_answer:
@@ -2157,7 +2203,7 @@ async def trivia_command(interaction):
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_2(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                await button_interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                 return
 
             if button.label == correct_answer:
@@ -2170,7 +2216,7 @@ async def trivia_command(interaction):
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_3(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                await button_interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                 return
 
             if button.label == correct_answer:
@@ -2183,7 +2229,7 @@ async def trivia_command(interaction):
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_4(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                await button_interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "not_command_sender"), ephemeral=True)
                 return
 
             if button.label == correct_answer:
@@ -2318,7 +2364,7 @@ async def unmute_command(
     if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     mute_role = None; exists = False
@@ -2342,7 +2388,7 @@ async def mute_command(
     if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     if member.top_role.position >= interaction.author.top_role.position:
         await interaction.response.send_message(f"You do not have permission to mute **{member}**!", ephemeral=True)
@@ -2395,7 +2441,7 @@ async def user_mute_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
@@ -2421,7 +2467,7 @@ async def user_unmute_command(interaction):
     if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
@@ -2447,7 +2493,7 @@ async def insults_command(_):
 @insults_command.sub_command(name="list", description="List all the words in the insults filter")
 async def insults_list_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     try:
         insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
@@ -2459,7 +2505,7 @@ async def insults_list_command(interaction):
 @insults_command.sub_command(name="status", description="See the current status of the insults filter")
 async def insults_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     try:
         current_status = json.loads(database[f"insults.toggle.{interaction.guild.id}"])
@@ -2470,7 +2516,7 @@ async def insults_status_command(interaction):
 @insults_command.sub_command(name="enable", description="Enable the insults filter")
 async def insults_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"insults.toggle.{interaction.guild.id}"] = 1
     await interaction.response.send_message("The insults filter has been successfully **enabled**")
@@ -2478,7 +2524,7 @@ async def insults_enable_command(interaction):
 @insults_command.sub_command(name="disable", description="Disable the insults filter")
 async def insults_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"insults.toggle.{interaction.guild.id}"] = 0
     await interaction.response.send_message("The insults filter has been successfully **disabled**")
@@ -2489,7 +2535,7 @@ async def insults_add_command(
         word: str = Param(description="The word you want to add"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     try:
         insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
@@ -2520,7 +2566,7 @@ async def insults_remove_command(
         word: str = Param(description="The word you want to remove", autocomplete=insults_remove_autocomplete)
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     try:
         insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
@@ -2542,7 +2588,7 @@ async def links_filter_command(_):
 @links_filter_command.sub_command(name="enable", description="Enable the links filter")
 async def links_filter_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"links.toggle.{interaction.guild.id}"] = 1
     await interaction.response.send_message("The links filter has been successfully **enabled**")
@@ -2550,7 +2596,7 @@ async def links_filter_enable_command(interaction):
 @links_filter_command.sub_command(name="disable", description="Disable the links filter")
 async def links_filter_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"links.toggle.{interaction.guild.id}"] = 0
     await interaction.response.send_message("The links filter has been successfully **disabled**")
@@ -2558,7 +2604,7 @@ async def links_filter_disable_command(interaction):
 @links_filter_command.sub_command(name="status", description="See the current status of the links filter")
 async def links_filter_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     value = False
     try:
@@ -2574,7 +2620,7 @@ async def newline_command(_):
 @newline_command.sub_command(name="enable", description="Enable the newline filter")
 async def newline_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"newline.toggle.{interaction.guild.id}"] = 1
     await interaction.response.send_message("The newline filter has been successfully **enabled**")
@@ -2582,7 +2628,7 @@ async def newline_enable_command(interaction):
 @newline_command.sub_command(name="disable", description="Disable the newline filter")
 async def newline_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"newline.toggle.{interaction.guild.id}"] = 0
     await interaction.response.send_message("The newline filter has been successfully **disabled**")
@@ -2593,7 +2639,7 @@ async def newline_set_command(
         limit: int = Param(description="The limit you want to set"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     if limit < 1:
         limit = 1
@@ -2605,7 +2651,7 @@ async def newline_set_command(
 @newline_command.sub_command(name="status", description="See the current status for the newline filter")
 async def newline_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     value = 0
     try:
@@ -2626,7 +2672,7 @@ async def mention_command(_):
 @mention_command.sub_command(name="enable", description="Enable the mention spam filter")
 async def mention_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"mention.toggle.{interaction.guild.id}"] = 1
     await interaction.response.send_message("The mention filter has been successfully **enabled**")
@@ -2634,7 +2680,7 @@ async def mention_enable_command(interaction):
 @mention_command.sub_command(name="disable", description="Disable the mention spam filter")
 async def mention_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"mention.toggle.{interaction.guild.id}"] = 0
     await interaction.response.send_message("The mention filter has been successfully **disabled**")
@@ -2645,7 +2691,7 @@ async def mention_set_command(
         limit: int = Param(description="The limit you want to set"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     if limit < 1:
         limit = 1
@@ -2657,7 +2703,7 @@ async def mention_set_command(
 @mention_command.sub_command(name="status", description="See the current status for the mention spam filter")
 async def mention_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     value = 0
     try:
@@ -2678,7 +2724,7 @@ async def spam_command(_):
 @spam_command.sub_command(name="enable", description="Enable the spam filter")
 async def spam_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"spamming.toggle.{interaction.guild.id}"] = 1
     await interaction.response.send_message("The spam filter has been successfully **enabled**")
@@ -2686,7 +2732,7 @@ async def spam_enable_command(interaction):
 @spam_command.sub_command(name="disable", description="Disable the spam filter")
 async def spam_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"spamming.toggle.{interaction.guild.id}"] = 0
     await interaction.response.send_message("The spam filter has been successfully **disabled**")
@@ -2697,7 +2743,7 @@ async def spam_set_command(
         limit: int = Param(description="The limit you want to set"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     if limit < 1:
         limit = 1
@@ -2709,7 +2755,7 @@ async def spam_set_command(
 @spam_command.sub_command(name="status", description="See the current status for the spam filter")
 async def spam_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     value = 0
     try:
@@ -2734,7 +2780,7 @@ async def leave_command(_):
 @leave_command.sub_command(name="enable", description="Enable leave messages")
 async def leave_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     try:
         database[f"leave.text.{interaction.guild.id}"]
@@ -2759,7 +2805,7 @@ async def leave_enable_command(interaction):
 @leave_command.sub_command(name="disable", description="Disable leave messages")
 async def leave_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"leave.toggle.{interaction.guild.id}"] = 0
     await interaction.response.send_message("Leave messages have been successfully **disabled**")
@@ -2770,7 +2816,7 @@ async def leave_text_command(
         text: str = Param(description="The leave message text"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"leave.text.{interaction.guild.id}"] = text
     await interaction.response.send_message(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
@@ -2787,7 +2833,7 @@ async def leave_channel_command(
         channel: disnake.channel.TextChannel = Param(description="The leave channel"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"leave.channel.{interaction.guild.id}"] = channel.id
     await interaction.response.send_message(f"The leave channel for this server has been set to <#{channel.id}>")
@@ -2801,7 +2847,7 @@ async def leave_channel_command(
 @leave_command.sub_command(name="status", description="See the current status of the leave message")
 async def leave_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     value = False
     try:
@@ -2827,7 +2873,7 @@ async def welcome_command(_):
 @welcome_command.sub_command(name="enable", description="Enable welcome messages")
 async def welcome_enable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     try:
         database[f"welcome.text.{interaction.guild.id}"]
@@ -2852,7 +2898,7 @@ async def welcome_enable_command(interaction):
 @welcome_command.sub_command(name="disable", description="Disable welcome messages")
 async def welcome_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"welcome.toggle.{interaction.guild.id}"] = 0
     await interaction.response.send_message("Welcome messages have been successfully **disabled**")
@@ -2863,7 +2909,7 @@ async def welcome_text_command(
         text: str = Param(description="The welcome message text"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"welcome.text.{interaction.guild.id}"] = text
     await interaction.response.send_message(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
@@ -2880,7 +2926,7 @@ async def welcome_channel_command(
         channel: disnake.channel.TextChannel = Param(description="The welcome channel"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"welcome.channel.{interaction.guild.id}"] = channel.id
     await interaction.response.send_message(f"The welcome channel for this server has been set to <#{channel.id}>")
@@ -2894,7 +2940,7 @@ async def welcome_channel_command(
 @welcome_command.sub_command(name="status", description="See the current status of the welcome message")
 async def welcome_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     value = False
     try:
@@ -2924,7 +2970,7 @@ async def logging_command(_):
 @logging_command.sub_command(name="status", description="See the current log channel")
 async def logging_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     channel = None
     try:
@@ -2942,7 +2988,7 @@ async def logging_set_command(
         channel: disnake.channel.TextChannel = Param(description="The channel you want the bot to log messages to"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     database[f"logging.{interaction.guild.id}"] = channel.id
     await interaction.response.send_message(f"This server's log channel has been set to <#{channel.id}>")
@@ -2950,7 +2996,7 @@ async def logging_set_command(
 @logging_command.sub_command(name="disable", description="Disable logging for your server")
 async def logging_disable_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     try:
         del database[f"logging.{interaction.guild.id}"]
@@ -3200,7 +3246,7 @@ async def warn_command(
     elif interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
     
     try:
@@ -3270,7 +3316,7 @@ async def kick_command(
                 )
             )
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
 
 @client.slash_command(name="ban", description="Ban a specified member from your server")
 async def ban_command(
@@ -3281,7 +3327,7 @@ async def ban_command(
     if interaction.author.guild_permissions.ban_members or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -3344,7 +3390,7 @@ async def unban_command(
     if interaction.author.guild_permissions.ban_members or interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(variables.no_permission_text, ephemeral=True)
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "no_permission"), ephemeral=True)
         return
 
     try:
@@ -3402,12 +3448,6 @@ async def convert_command(
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "convert", 3)
 
-async def autocomplete_languages(_, string):
-    languages = []
-    for language in googletrans.LANGUAGES.values():
-        languages.append(language.title())
-    return list(filter(lambda language: string.lower() in language.lower(), languages))[:20]
-
 @client.slash_command(name="translate", description="Translate text to different languages")
 async def translate_command(
         interaction,
@@ -3428,7 +3468,7 @@ async def translate_command(
     except Exception as error:
         await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
 
-@client.message_command(name="Translate (English)")
+@client.message_command(name="Translate")
 async def message_translate_command(interaction):
     await interaction.response.defer(ephemeral=True) 
     try:
@@ -3443,7 +3483,7 @@ async def message_translate_command(interaction):
                 await interaction.edit_original_message(content="That message does not have any text!")
                 return
         translator = googletrans.Translator()
-        result = translator.translate(text, dest="en")
+        result = translator.translate(text, dest=functions.get_settings(interaction.author.id)["language"])
         embed = disnake.Embed(color=variables.embed_color)
         source_language = googletrans.LANGUAGES[result.src.lower()].title().replace("(", "").replace(")", "")
         destination_language = googletrans.LANGUAGES[result.dest.lower()].title().replace("(", "").replace(")", "")
@@ -3458,10 +3498,15 @@ async def message_translate_command(interaction):
 async def definition_command(
         interaction,
         word: str = Param(description="The word you want to find the definition of"),
-        language: str = Param("en", description="The word's language"),
+        language: str = Param(None, description="The word's language"),
     ):
     await interaction.response.defer()
-    language = language.strip().lower()
+
+    if language == None:
+        settings = functions.get_settings(interaction.author.id)
+        language = settings["language"]
+    else:
+        language = language.strip().lower()
     reversed_languages = {value: key for key, value in googletrans.LANGUAGES.items()}
     if language in reversed_languages.keys():
         language = reversed_languages[language]
@@ -3873,7 +3918,7 @@ async def send_vote_message(user_id):
         for member in guild.members:
             if str(member.id) == user_id:
                 interaction = FakeUserInteraction(member)
-                await interaction.response.send_message(variables.vote_message, view=VoteView())
+                await interaction.response.send_message(language.get(functions.get_settings(user_id)["language"], "vote_message"), view=VoteView())
                 return
 
 async def on_member_join(member):
