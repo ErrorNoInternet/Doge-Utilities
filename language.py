@@ -29,6 +29,9 @@ data = {
         "bot_uptime": "Bot Uptime",
         "latency": "Latency",
         "shard": "Shard",
+        "members_lower": "members",
+        "guilds_lower": "guilds",
+        "i_choose": "I choose",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -60,6 +63,9 @@ data = {
         "bot_uptime": "机器人运行时间",
         "latency": "延迟",
         "shard": "碎片",
+        "members_lower": "用户",
+        "guilds_lower": "服务器",
+        "i_choose": "我选择"
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -73,6 +79,18 @@ data = {
         "text": "Text",
         "reminder": "Erinnerung",
         "reminders": "Erinnerungen",
+        "cpu_usage": "CPU Auslastung",
+        "ram_usage": "RAM Auslastung",
+        "thread_count": "Anzahl der Threads",
+        "joined_guilds": "Servern beigetreten",
+        "active_shards": "Aktive Shards",
+        "member_count": "Anzahl der Mitglieder",
+        "channel_count": "Anzahl der Kanäle",
+        "command_count": "Anzahl der Commands",
+        "disnake_version": "Disnake Version",
+        "bot_version": "Bot Version",
+        "bot_uptime": "Bot online seit",
+        "i_choose": "Ich wähle",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",

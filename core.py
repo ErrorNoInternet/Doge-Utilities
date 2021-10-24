@@ -857,7 +857,7 @@ async def shards_command(interaction):
                 shard_members += len(guild.members)
                 if guild.id == interaction.guild.id:
                     current_server = "**"
-        temporary_text = f"{current_server}{functions.get_text(interaction.author.id, 'shard')} `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
+        temporary_text = f"{current_server}{functions.get_text(interaction.author.id, 'shard')} `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` {functions.get_text(interaction.author.id, 'guilds_lower')}, `{shard_members}` {functions.get_text(interaction.author.id, 'members_lower')}){current_server}\n"
         if index > page_limit:
             index = 0
             current_item += 1
@@ -3238,7 +3238,7 @@ async def choose_command(
     if item10 != "":
         items.append(item10)
     random_item = random.choice(items)
-    await interaction.response.send_message(f'I choose **"{random_item}"**')
+    await interaction.response.send_message(f'{functions.get_text(interaction.author.id, "i_choose")} **"{random_item}"**')
 
 @client.slash_command(name="pypi", description="Fetch a project on PyPi")
 async def pypi_command(
