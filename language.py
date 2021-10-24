@@ -12,7 +12,7 @@ data = {
         "vote_message": "谢谢你给我投票!",
         "banned_message": "你已被禁止使用Doge Utilities!",
         "error_message": "很抱歉，Doge Utilities出错了。。。",
-    }
+    },
 }
 data["zh-tw"] = data["zh-cn"]
 
