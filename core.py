@@ -857,7 +857,7 @@ async def shards_command(interaction):
                 shard_members += len(guild.members)
                 if guild.id == interaction.guild.id:
                     current_server = "**"
-        temporary_text = f"{current_server}{functions.get(interaction.author.id, 'shard')} `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
+        temporary_text = f"{current_server}{functions.get_text(interaction.author.id, 'shard')} `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
         if index > page_limit:
             index = 0
             current_item += 1
@@ -907,7 +907,7 @@ async def status_command(interaction):
     
     embed = disnake.Embed(color=variables.embed_color)
     embed.add_field(
-        name=functions.get_text(interaction.author.id, "bot_latency"),
+        name=functions.get_text(interaction.author.id, "latency"),
         value="```" + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```",
     )
     embed.add_field(
