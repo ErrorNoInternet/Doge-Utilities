@@ -3936,7 +3936,7 @@ async def send_vote_message(user_id):
     if functions.get_settings(user_id)["vote_messages"]:
         for guild in client.guilds:
             for member in guild.members:
-                if str(member.id) == user_id:
+                if str(member.id) == str(user_id):
                     interaction = FakeUserInteraction(member)
                     await interaction.response.send_message(language.get(functions.get_settings(user_id)["language"], "vote_message"), view=VoteView())
                     return
