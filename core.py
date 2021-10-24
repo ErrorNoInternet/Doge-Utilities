@@ -64,6 +64,8 @@ class VoteView(disnake.ui.View):
             return
         current_reminders.append([round(time.time()), duration, text])
         database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
+        button.disabled = True
+        await interaction.message.edit(view=self)
         await interaction.response.send_message("A **12 hour reminder** has been successfully added!")
 
 class FakeChannelResponse:
