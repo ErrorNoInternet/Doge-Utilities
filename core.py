@@ -3035,6 +3035,48 @@ async def welcome_status_command(interaction):
 async def server_command(_):
     pass
 
+@server_command.sub_command(name="status", description="See information about this server's filters")
+async def server_status_command(interaction):
+    embed = disnake.Embed(color=variables.embed_color)
+    raid_protection = 0
+    try:
+        raid_protection = json.loads(database[f"{interaction.guild.id}.raid-protection"])
+    except:
+        pass
+    insults_filter = 0
+    try:
+        insults_filter = json.loads(database[f"insults.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    spam_filter = 0
+    try:
+        spam_filter = json.loads(database[f"spamming.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    links_filter = 0
+    try:
+        links_filter = json.loads(database[f"links.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    mention_filter = 0
+    try:
+        mention_filter = json.loads(database[f"mention.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    newline_filter = 0
+    try:
+        newline_filter = json.loads(database[f"newline.toggle.{interaction.guild.id}"])
+    except:
+        pass
+    embed.add_field(name="Anti-Raid", value=":white_check_mark:" if raid_protection else ":x:")
+    embed.add_field(name="Insults Filter", value=":white_check_mark:" if insults_filter else ":x:")
+    embed.add_field(name="Spam Filter", value=":white_check_mark:" if spam_filter else ":x:")
+    embed.add_field(name="Links Filter", value=":white_check_mark:" if links_filter else ":x:")
+    embed.add_field(name="Mention Filter", value=":white_check_mark:" if mention_filter else ":x:")
+    embed.add_field(name="Newline Filter", value=":white_check_mark:" if newline_filter else ":x:")
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "server", 5)
+
 @server_command.sub_command_group(name="logging", description="Manage the log channel for your server")
 async def logging_command(_):
     pass
