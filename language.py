@@ -177,6 +177,7 @@ data = {
         "reminder_added": "Вам напомнят в",
         "minute": "минута",
         "minutes": "минуты",
+        "latency": "Задержка",
     },
 }
 data["zh-tw"] = data["zh-cn"]
