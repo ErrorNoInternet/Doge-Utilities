@@ -18,7 +18,7 @@ def set_settings(settings, user_id):
     core.database[f"settings.{user_id}"] = json.dumps(settings)
 
 def get_text(user_id, key):
-    return language.get(get_settings(user_id)['language'], 'key)
+    return language.get(get_settings(user_id)['language'], key)
 
 def remove_mentions(user):
     user = user.replace("<", "")
