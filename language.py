@@ -45,6 +45,7 @@ data = {
         "guild_members": "Guild Members",
         "todo_added": 'Successfully added **"{}"** to your to-do list',
         "todo_removed": 'Successfully removed **"{}"** from your to-do list',
+        "uptime_description": "Doge Utilities has been running for",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -92,6 +93,7 @@ data = {
         "guild_members": "服务器成员",
         "todo_added": '我成功的把 **"{}"** 加到了你的待办事列表',
         "todo_removed": '我成功的把你待办事列表里的 **"{}"** 移除了',
+        "uptime_description": "我已经运行了",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -139,6 +141,7 @@ data = {
         "guild_members": "Server Mitglieder",
         "todo_added": '**"{}"** wurde erfolgreich zur To-do Liste hinzugefügt',
         "todo_removed": '**"{}"** wurde erfolgreich aus der To-do Liste entfernt',
+        "uptime_description": "Doge Utilities ist online seit",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",

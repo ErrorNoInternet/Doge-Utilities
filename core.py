@@ -992,7 +992,7 @@ async def uptime_command(interaction):
         uptime = "Unknown"
     embed = disnake.Embed(
         title=functions.get_text(interaction.author.id, "bot_uptime"),
-        description=f"Doge Utilities has been running for **{uptime}**",
+        description=f"{functions.get_text(interaction.author.id, 'uptime_description')} **{uptime}**",
         color=variables.embed_color,
     )
     await interaction.response.send_message(embed=embed)
