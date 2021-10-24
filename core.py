@@ -1779,11 +1779,15 @@ async def stackoverflow_command(
         parameters = stackoverflow_parameters
         response = requests.get(url="https://api.stackexchange.com/2.2/search/advanced", params=parameters).json()
         if not response["items"]:
-            embed = disnake.Embed(title="StackOverflow", description=f"No search results found for **{text}**", color=disnake.Color.red())
+            embed = disnake.Embed(title="StackOverflow", description=f'No search results found for **"{text}"**', color=disnake.Color.red())
             await interaction.edit_original_message(embed=embed)
             return
         final_results = response["items"][:5]
-        embed = disnake.Embed(title="StackOverflow", description=f"Here are the **top {len(final_results)}** results for **{text}**", color=variables.embed_color)
+        embed = disnake.Embed(
+            title="StackOverflow",
+            description=f'Here are the **top {len(final_results)}** results for **"{text}"**',
+            color=variables.embed_color,
+        )
         for result in final_results:
             tags = ""
             for tag in result['tags'][:4]:
@@ -1817,6 +1821,14 @@ async def execute_command(
         codeblock: ToggleOption = Param("enable", description="Whether or not you want a codeblock"),
         ephemeral: ToggleOption = Param("disable", description="Whether or not you want the output to be ephemeral")
     ):
+    if code.startswith("```python"):
+        code = code[9:]
+    if code.startswith("```py"):
+        code = code[5:]
+    if code.startswith("```"):
+        code = code[3:]
+    if code.endswith("```"):
+        code = code[:-3]
     if code.startswith("`") and code.endswith("`"):
         code = code[1:-1]
     if codeblock == "enable":
@@ -3105,9 +3117,10 @@ async def pypi_command(
         interaction,
         project: str = Param(description="The PyPi project that you want to search"),
     ):
+    await interaction.response.defer()
     response = requests.get(f"https://pypi.org/pypi/{project.strip()}/json")
     if response.status_code == 404:
-        await interaction.response.send_message("That package was not found")
+        await interaction.edit_original_message(content="That PyPi package was not found")
         return
     response = response.json()
     size_unit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
@@ -3129,7 +3142,7 @@ async def pypi_command(
     embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
     embed.add_field(name="Summary", value=response["info"]["summary"])
     embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
-    await interaction.response.send_message(embed=embed)
+    await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "pypi", 5)
 
 @client.slash_command(name="discriminator", description="Find users with the same discriminator")
