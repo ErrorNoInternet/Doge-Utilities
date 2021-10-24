@@ -50,7 +50,7 @@ class VoteView(disnake.ui.View):
     @disnake.ui.button(label="Add a reminder", style=disnake.ButtonStyle.green, custom_id="vote-reminder-button")
     async def add_reminder(self, button, interaction):
         duration = 43200
-        text = "Don't forget to vote for me!"
+        text = functions.get_text(interaction.author.id, "vote_again")
         try:
             current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
         except:
@@ -299,7 +299,7 @@ async def manage_reminders():
                                         if member.id == user_id:
                                             if not sent:
                                                 sent = True
-                                                await member.send(f"**Reminder:** {text}")
+                                                await member.send(f"**{functions.get_text(member.id, 'reminder')}:** {text}")
                                 reminder_data = json.loads(database[key])
                                 reminder_data.remove(value)
                                 database[key] = json.dumps(reminder_data)
@@ -3586,8 +3586,8 @@ async def todo_list_command(interaction):
         counter += 1
         text += f"**{counter}.** {todo}\n"
     if text == "":
-        text = "Your to-do list is empty"
-    embed = disnake.Embed(title="To-do List", description=text, color=variables.embed_color)
+        text = functions.get_text(interaction.author.id, "todo_empty")
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "todo_list"), description=text, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "todo", 3)
 

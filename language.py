@@ -8,8 +8,12 @@ data = {
         "use_in_server": "Please use Doge Utilities in a server for the best experience!",
         "no_reminders": "You have no active reminders",
         "reminders": "Reminders",
+        "reminder": "Reminder",
         "time": "Time",
         "text": "Text",
+        "vote_again": "Don't forget to vote for me!",
+        "todo_list": "To-do List",
+        "todo_empty": "Your to-do list is empty",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -20,8 +24,12 @@ data = {
         "use_in_server": "请你在服务器里用Doge Utilities!",
         "no_reminders": "你没有提醒",
         "reminders": "提醒",
+        "reminder": "提醒",
         "time": "时间",
         "text": "文字",
+        "vote_again": "不要忘记给我投票!",
+        "todo_list": "待办事项列表",
+        "todo_empty": "你的待办事列表是空的",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
@@ -34,6 +42,7 @@ data = {
         "reminders": "Напоминания",
         "time": "Время",
         "text": "Текст",
+        "todo_list": "Список дел",
     },
 }
 data["zh-tw"] = data["zh-cn"]
