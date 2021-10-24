@@ -432,7 +432,7 @@ async def message_command_handler(interaction):
         raise Exception("no permission")
 
     if not interaction.guild:
-        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "use_in_server"))
         raise Exception("no permission")
 
 @client.before_user_command_invoke
@@ -442,7 +442,7 @@ async def user_command_handler(interaction):
         raise Exception("no permission")
 
     if not interaction.guild:
-        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "use_in_server"))
         raise Exception("no permission")
 
 @client.before_slash_command_invoke
@@ -459,7 +459,7 @@ async def slash_command_handler(interaction):
         raise Exception("no permission")
 
     if not interaction.guild:
-        await interaction.response.send_message("Please use Doge Utilities in a server for the best experience!")
+        await interaction.response.send_message(language.get(functions.get_settings(interaction.author.id)["language"], "use_in_server"))
         raise Exception("no permission")
 
     if interaction.data.name in variables.owner_commands and interaction.author.id not in variables.bot_owners:
@@ -3653,10 +3653,14 @@ async def remind_list_command(interaction):
     text = ""
     for reminder in current_reminders:
         end_time = reminder[0] + reminder[1]
-        text += f"**Time:** <t:{round(end_time)}:R>\n**Text:** {reminder[2]}\n\n"
+        text += f"**{language.get(functions.get_settings(interaction.author.id)['language'], 'time')}:** <t:{round(end_time)}:R>\n**Text:** {reminder[2]}\n\n"
     if text == "":
-        text = "You have no active reminders"
-    embed = disnake.Embed(title="Reminders", description=text, color=variables.embed_color)
+        text = language.get(functions.get_settings(interaction.author.id)["language"], "no_reminders")
+    embed = disnake.Embed(
+        title=language.get(functions.get_settings(interaction.author.id)["language"], "reminders"),
+        description=text, 
+        color=variables.embed_color,
+    )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "remind", 3)
 
