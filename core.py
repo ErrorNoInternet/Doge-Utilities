@@ -867,7 +867,12 @@ async def shards_command(interaction):
             pages[current_item] = f"Shard Count: `{len(client.shards)}`, Current Shard: `{interaction.guild.shard_id}`\n\n"
             pages[current_item] += temporary_text
         index += 1
-    pager = Paginator(title="Doge Shards", segments=pages.values(), target_page=current_page, color=variables.embed_color)
+    pager = Paginator(
+        title=functions.get_text(interaction.author.id, "active_shards"),
+        segments=pages.values(),
+        target_page=current_page,
+        color=variables.embed_color,
+    )
     await pager.start(interaction)
     add_cooldown(interaction.author.id, "shards", 3)
 
@@ -901,18 +906,54 @@ async def status_command(interaction):
         uptime = " ".join(uptime[:3])
     
     embed = disnake.Embed(color=variables.embed_color)
-    embed.add_field(name="Bot Latency", value="```" + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```")
-    embed.add_field(name="CPU Usage", value="```" + f"{psutil.cpu_percent()}%" + "```")
-    embed.add_field(name="RAM Usage", value="```" + f"{round(memory_usage, 1)} MB" + "```")
-    embed.add_field(name="Thread Count", value="```" + str(threading.active_count()) + "```")
-    embed.add_field(name="Joined Guilds", value="```" + str(len(client.guilds)) + "```")
-    embed.add_field(name="Active Shards", value="```" + str(len(client.shards)) + "```")
-    embed.add_field(name="Member Count", value="```" + str(member_count) + "```")
-    embed.add_field(name="Channel Count", value="```" + str(channel_count) + "```")
-    embed.add_field(name="Command Count", value="```" + str(len(client.slash_commands)-len(variables.owner_commands)) + "```")
-    embed.add_field(name="Disnake Version", value="```" + disnake.__version__ + "```")
-    embed.add_field(name="Bot Version", value=f"```{variables.version_number}.{variables.build_number}```")
-    embed.add_field(name="Bot Uptime", value="```" + uptime.strip() + "```")
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "bot_latency"),
+        value="```" + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "cpu_usage"),
+        value="```" + f"{psutil.cpu_percent()}%" + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "ram_usage"),
+        value="```" + f"{round(memory_usage, 1)} MB" + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "thread_count"),
+        value="```" + str(threading.active_count()) + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "joined_guilds"),
+        value="```" + str(len(client.guilds)) + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "active_shards"),
+        value="```" + str(len(client.shards)) + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "member_count"),
+        value="```" + str(member_count) + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "channel_count"),
+        value="```" + str(channel_count) + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "command_count"),
+        value="```" + str(len(client.slash_commands)-len(variables.owner_commands)) + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "disnake_version"),
+        value="```" + disnake.__version__ + "```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "bot_version"),
+        value=f"```{variables.version_number}.{variables.build_number}```",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "bot_uptime"),
+        value="```" + uptime.strip() + "```",
+    )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 

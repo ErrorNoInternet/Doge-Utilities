@@ -1,8 +1,10 @@
-import core
+import time
 import json
+import core
 import language
 
 default_settings = {"language": "en", "vote_messages": True}
+settings_cache = {}
 
 def get_settings(user_id):
     try:
@@ -18,7 +20,15 @@ def set_settings(settings, user_id):
     core.database[f"settings.{user_id}"] = json.dumps(settings)
 
 def get_text(user_id, key):
-    return language.get(get_settings(user_id)['language'], key)
+    settings = None
+    if user_id in settings_cache:
+        data = settings_cache[user_id]
+        if time.time() - data[0] < 10:
+            settings = data[1]
+        else:
+            settings = get_settings(user_id)
+            settings_cache[user_id] = [time.time(), settings]
+    return language.get(settings['language'], key)
 
 def remove_mentions(user):
     user = user.replace("<", "")
