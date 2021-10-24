@@ -99,6 +99,13 @@ data = {
         "guilds_lower": "servers",
         "current_shard": "Aktueller Shard",
         "shard_count": "Shards",
+        "use_in_server": "Bitte nutze Doge Utilities in einem Server für das bestmögliche Ergebnis!",
+        "no_reminders": "Du hast keine aktiven Erinnerungen",
+        "vote_again": "Vergiss nicht für mich zu voten!",
+        "todo_list": "To-do Liste",
+        "todo_empty": "Deine To-do Liste ist leer",
+        "generate_number": "Generiere eine Nummer",
+        "number_prompt": "Deine generierte Nummer ist",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
