@@ -827,7 +827,7 @@ async def shards_command(interaction):
         for guild in client.guilds:
             if guild.shard_id == shard:
                 shard_guilds += 1
-                shard_members += guild.member_count
+                shard_members += len(guild.members)
                 if guild.id == interaction.guild.id:
                     current_server = "**"
         temporary_text = f"{current_server}Shard `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
@@ -848,7 +848,7 @@ async def shards_command(interaction):
 async def status_command(interaction):
     member_count = 0; channel_count = 0; uptime = ""
     for guild in client.guilds:
-        member_count += guild.member_count
+        member_count += len(guild.members)
         channel_count += len(guild.channels)
     process = psutil.Process(os.getpid())
     memory_usage = process.memory_info().rss / 1000000
