@@ -511,7 +511,7 @@ async def settings_language_set_command(
     ):
     language = language.lower()
     if language not in googletrans.LANGUAGES.keys() and language not in googletrans.LANGUAGES.values():
-        await interaction.response.send_message("The language you specified is not valid!", ephemeral=True)
+        await interaction.response.send_message("The language you specified was not found!", ephemeral=True)
         return
     language_name = ""
     language_code = ""
