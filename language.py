@@ -29,6 +29,7 @@ data = {
         "bot_version": "Bot Version",
         "bot_uptime": "Bot Uptime",
         "latency": "Latency",
+        "shard": "Shard",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -60,7 +61,21 @@ data = {
         "bot_version": "机器人版本",
         "bot_uptime": "机器人运行时间",
         "latency": "延迟",
+        "shard": "碎片",
     },
+    "de": {
+        "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
+        "not_command_sender": "Du hast den Befehl nicht benutzt!",
+        "vote_message": "Danke dass du Doge Utilities Bewertet hast!",
+        "banned_message": "Du bist von Doge Utilities gesperrt",
+        "error_message": "Ups! Doge Utilities hatte einen Fehler...",
+        "shard": "Shard",
+        "latency": "Latenz",
+        "time": "Zeit",
+        "text": "Text",
+        "reminder": "Errinerung",
+        "reminders": "Errinnerungen",
+    }
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
         "not_command_sender": "Вы не являетесь отправителем данной команды!",

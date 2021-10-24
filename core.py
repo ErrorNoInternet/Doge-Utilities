@@ -857,7 +857,7 @@ async def shards_command(interaction):
                 shard_members += len(guild.members)
                 if guild.id == interaction.guild.id:
                     current_server = "**"
-        temporary_text = f"{current_server}Shard `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
+        temporary_text = f"{current_server}{functions.get(interaction.author.id, 'shard')} `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` guilds, `{shard_members}` members){current_server}\n"
         if index > page_limit:
             index = 0
             current_item += 1
@@ -3539,7 +3539,10 @@ async def translate_command(
         await interaction.edit_original_message(embed=embed)
         add_cooldown(interaction.author.id, "translate", 5)
     except Exception as error:
-        await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
+        if "or fewer in length" in str(error):
+            await interaction.edit_original_message(content="The output translation is too long!")
+        else:
+            await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
 
 @client.message_command(name="Translate")
 async def message_translate_command(interaction):
