@@ -1758,15 +1758,16 @@ async def time_get_command(
         else:
             user_timezone = pytz.timezone(region.replace(" ", "_"))
             now = datetime.datetime.now(user_timezone)
-            embed = disnake.Embed(title="Time", description=f"Information for **{region.replace(' ', '_')}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
+            embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{region.replace('_', ' ')}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color)
             await interaction.response.send_message(embed=embed)
     except KeyError:
         for timezone in pytz.all_timezones:
             try:
                 city = timezone.split("/")[1]
                 if region.replace(" ", "_").lower() == city.lower():
-                    user_timezone = pytz.timezone(timezone); now = datetime.datetime.now(user_timezone)
-                    embed = disnake.Embed(title="Time", description=f"Information for **{timezone}**\n\nTime: **{str(now.time()).split('.')[0]}**\nDate: **{now.date()}**\nWeekday: **{variables.weekdays[now.weekday() + 1]}**", color=variables.embed_color)
+                    user_timezone = pytz.timezone(timezone)
+                    now = datetime.datetime.now(user_timezone)
+                    embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{timezone}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color)
                     await interaction.response.send_message(embed=embed)
                     return
             except:
