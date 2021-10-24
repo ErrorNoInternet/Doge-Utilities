@@ -1,13 +1,16 @@
 import core
 import json
 
+default_settings = {"language": "en", "vote_messages": True}
+
 def get_settings(user_id):
     try:
         settings = json.loads(core.database[f"settings.{user_id}"])
     except:
         settings = {}
-    if "language" not in settings:
-        settings["language"] = "en"
+    for key in default_settings.keys():
+        if key not in settings:
+            settings[key] = default_settings[key]
     return settings
 
 def set_settings(settings, user_id):

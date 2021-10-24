@@ -525,7 +525,29 @@ async def settings_language_set_command(
     settings["language"] = language_code
     functions.set_settings(settings, interaction.author.id)
     await interaction.response.send_message(f"Your preferred language has been set to **{language_name.title()}**")
-    return
+
+@settings_command.sub_command_group(name="vote-messages", description="Whether or not you want to receive vote messages")
+async def settings_vote_command(_):
+    pass
+
+@settings_vote_command.sub_command(name="status", description="Check if vote messages are currently enabled or not")
+async def settings_vote_status_command(interaction):
+    settings = functions.get_settings(interaction.author.id)
+    await interaction.response.send_message(f"Vote messages are currently **{'enabled' if settings['vote_messages'] else 'disabled'}**")
+
+@settings_vote_command.sub_command(name="enable", description="Enable vote messages")
+async def settings_vote_enable_command(interaction):
+    settings = functions.get_settings(interaction.author.id)
+    settings["vote_messages"] = True
+    functions.set_settings(settings, interaction.author.id)
+    await interaction.response.send_message(f"Vote messages have been successfully **enabled**")
+
+@settings_vote_command.sub_command(name="disable", description="Disable vote messages")
+async def settings_vote_disable_command(interaction):
+    settings = functions.get_settings(interaction.author.id)
+    settings["vote_messages"] = False
+    functions.set_settings(settings, interaction.author.id)
+    await interaction.response.send_message(f"Vote messages have been successfully **disabled**")
 
 @client.slash_command(name="embedify", description="Create a custom embed")
 async def embedify_command(
@@ -3911,12 +3933,13 @@ async def send_user_message(user_id, message):
             continue
 
 async def send_vote_message(user_id):
-    for guild in client.guilds:
-        for member in guild.members:
-            if str(member.id) == user_id:
-                interaction = FakeUserInteraction(member)
-                await interaction.response.send_message(language.get(functions.get_settings(user_id)["language"], "vote_message"), view=VoteView())
-                return
+    if functions.get_settings(user_id)["vote_messages"]:
+        for guild in client.guilds:
+            for member in guild.members:
+                if str(member.id) == user_id:
+                    interaction = FakeUserInteraction(member)
+                    await interaction.response.send_message(language.get(functions.get_settings(user_id)["language"], "vote_message"), view=VoteView())
+                    return
 
 async def on_member_join(member):
     try:
