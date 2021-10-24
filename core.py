@@ -1758,7 +1758,11 @@ async def time_get_command(
         else:
             user_timezone = pytz.timezone(region.replace(" ", "_"))
             now = datetime.datetime.now(user_timezone)
-            embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{region.replace('_', ' ')}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color)
+            region_name = region.replace("_", " ")
+            for timezone in pytz.all_timezones:
+                if timezone.lower().replace("_", " ") == region_name.lower():
+                    region_name = timezone.replace("_", " ")
+            embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{region_name}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color)
             await interaction.response.send_message(embed=embed)
     except KeyError:
         for timezone in pytz.all_timezones:
