@@ -3925,12 +3925,10 @@ async def mute_member(member, duration):
 
 async def send_user_message(user_id, message):
     for guild in client.guilds:
-        try:
-            member = await guild.fetch_member(int(user_id))
-            await member.send(message)
-            return
-        except:
-            continue
+        for member in guild.members:
+            if str(member.id) == str(user_id):
+                await member.send(message)
+                return
 
 async def send_vote_message(user_id):
     if functions.get_settings(user_id)["vote_messages"]:
