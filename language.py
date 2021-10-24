@@ -23,6 +23,13 @@ data = {
         "time": "时间",
         "text": "文字",
     },
+    "ru": {
+        "no_permission": "У вас нет разрешений на использование этой команды!",
+        "not_command_sender": "Вы не являетесь отправителем этой команды!",
+        "vote_message": "Спасибо за то, что вы проголосовали за меня!",
+        "banned_message": "Вам запретили использовать Doge Utilities!",
+        "error_message": "Упс... Doge Utilities столкнулся с ошибкой...",
+    },
 }
 data["zh-tw"] = data["zh-cn"]
 
