@@ -38,6 +38,13 @@ data = {
         "reminder_added": "You will be reminded in",
         "minute": "minute",
         "minutes": "minutes",
+        "support_server": "Doge Utilities support server",
+        "user_accounts": "User accounts",
+        "bot_accounts": "Bot accounts",
+        "total_members": "Total members",
+        "guild_members": "Guild Members",
+        "todo_added": 'Successfully added **"{}"** to your to-do list',
+        "todo_removed": 'Successfully removed **"{}"** from your to-do list',
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -78,6 +85,13 @@ data = {
         "reminder_added": "你会在这段时间后被提醒:",
         "minute": "分钟",
         "minutes": "分钟",
+        "support_server": "我的服务器",
+        "user_accounts": "用户账号",
+        "bot_accounts": "机器人账号",
+        "total_members": "全部账号",
+        "guild_members": "服务器成员",
+        "todo_added": '我成功的把 **"{}"** 加到了你的待办事列表',
+        "todo_removed": '我成功的把你待办事列表里的 **"{}"** 移除了',
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -116,8 +130,8 @@ data = {
         "number_prompt": "Deine generierte Nummer ist",
         "reminder_removed": "Diese Erinnerung wurde erfolgreich entfernt",
         "reminder_added": "Du wirst erinnert in:",
-        "minute": "minute",
-        "minutes": "minuten",
+        "minute": "Minute",
+        "minutes": "Minuten",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
@@ -131,6 +145,7 @@ data = {
         "time": "Время",
         "text": "Текст",
         "todo_list": "Список дел",
+        "support_server": "Сервер поддержки Doge Utilities",
     },
 }
 data["zh-tw"] = data["zh-cn"]
@@ -143,7 +158,10 @@ def get(language, key):
     language_data = data[language]
     if key not in language_data:
         language_data = data["en"]
-        return language_data[key]
+        if key not in language_data:
+            return "?"
+        else:
+            return language_data[key]
     else:
         return language_data[key]
 

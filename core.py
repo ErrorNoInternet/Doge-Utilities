@@ -776,7 +776,7 @@ async def links_command(_):
 
 @links_command.sub_command(name="support", description="Display the official support server for Doge")
 async def support_command(interaction):
-    await interaction.response.send_message(f"Doge Utilities support server: {variables.support_server_invite}")
+    await interaction.response.send_message(f"{functions.get_text(interaction.author.id), 'support_server'}: {variables.support_server_invite}")
 
 @links_command.sub_command(name="invite", description="Invite this bot to another server")
 async def invite_command(interaction):
@@ -3099,8 +3099,8 @@ async def server_members_command(interaction):
         else:
             users += 1
     embed = disnake.Embed(
-        title="Guild Members",
-        description=f"User accounts: **{users}**\nBot accounts: **{bots}**\nTotal members: **{users + bots}**",
+        title=functions.get_text(interaction.author.id, "guild_members"),
+        description=f"{functions.get_text(interaction.author.id, 'user_accounts')}: **{users}**\nBot accounts: **{functions.get_text(interaction.author.id, 'bot_accounts')}**\n{functions.get_text(interaction.author.id, 'total_members')}: **{users + bots}**",
         color=variables.embed_color,
     )
     await interaction.response.send_message(embed=embed)
@@ -3661,7 +3661,7 @@ async def todo_add_command(
         await interaction.response.send_message("That item is already in your to-do list!", ephemeral=True)
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
-    await interaction.response.send_message(f'Successfully added **"{item}"** to your to-do list')
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_added").format(item))
 
 async def todo_remove_autocomplete(interaction, string):
     try:
@@ -3686,7 +3686,7 @@ async def todo_remove_command(
         await interaction.response.send_message("That item is not in your to-do list!", ephemeral=True)
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
-    await interaction.response.send_message(f'Successfully removed **"{item}"** from your to-do list')
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_removed").format(item))
 
 @client.slash_command(name="remind", description="Remind yourself about something")
 async def remind_command(_):
