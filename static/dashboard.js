@@ -29,6 +29,8 @@ function saveLanguage(token, data) {
 		text = request.responseText
 		if (text.includes("ratelimit")) {
 			alert("You are being ratelimited!")
+		} else {
+			alert("Your language has been successfully updated")
 		}
 	}
 }

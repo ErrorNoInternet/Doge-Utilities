@@ -55,6 +55,8 @@ data = {
         "vote_reminder_added": "A **12 hour reminder** has been successfully added!",
         "vote_reminder_exists": "A reminder already exists!",
         "vote_add_reminder": "Add a reminder",
+        "vote_messages_enabled": "Vote messages have been successfully **enabled**",
+        "vote_messages_disabled": "Vote messages have been successfully **disabled**",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -112,6 +114,8 @@ data = {
         "vote_reminder_added": "我成功的给你加了一个**12小时的提醒**!",
         "vote_reminder_exists": "你已经有了一个提醒!",
         "vote_add_reminder": "加一个提醒",
+        "vote_messages_enabled": "投票通知已被成功**打开**",
+        "vote_messages_disabled": "投票通知已被成功**关闭**",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -169,6 +173,8 @@ data = {
         "vote_reminder_added": "Eine **12 Stunden Erinnerung** wurde erfolgreich hinzugefügt!",
         "vote_reminder_exists": "Es gibt bereits eine Erinnerung!",
         "vote_add_reminder": "Füge eine Erinnerung hinzu",
+        "vote_messages_enabled": "Vote Benachrichtigungen wurden erfolgreich **aktiviert**",
+        "vote_messages_disabled": "Vote Benachrichtigungen wurden erfolgreich **deaktiviert**",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",

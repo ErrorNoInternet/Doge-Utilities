@@ -547,14 +547,14 @@ async def settings_vote_enable_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     settings["vote_messages"] = True
     functions.set_settings(settings, interaction.author.id)
-    await interaction.response.send_message(f"Vote messages have been successfully **enabled**")
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_messages_enabled"))
 
 @settings_vote_command.sub_command(name="disable", description="Disable vote messages")
 async def settings_vote_disable_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     settings["vote_messages"] = False
     functions.set_settings(settings, interaction.author.id)
-    await interaction.response.send_message(f"Vote messages have been successfully **disabled**")
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_messages_disabled"))
 
 @client.slash_command(name="embedify", description="Create a custom embed")
 async def embedify_command(
@@ -3641,7 +3641,11 @@ async def definition_command(
     response = requests.get(f"https://api.dictionaryapi.dev/api/v2/entries/{language}/{word.strip()}").json()
     try:
         if response["title"] == "No Definitions Found":
-            await interaction.edit_original_message(content="That word was not found in the dictionary")
+            try:
+                language_name = googletrans.LANGUAGES[language]
+            except:
+                language_name = language
+            await interaction.edit_original_message(content=f"That word was not found in the **{language_name}** dictionary")
             return
     except:
         pass
