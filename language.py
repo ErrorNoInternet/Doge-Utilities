@@ -52,6 +52,9 @@ data = {
         "time_description": "Information for",
         "weekdays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         "vote_websites": "You can vote for me on these websites",
+        "vote_reminder_added": "A **12 hour reminder** has been successfully added!",
+        "vote_reminder_exists": "A reminder already exists!",
+        "vote_add_reminder": "Add a reminder",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -106,6 +109,9 @@ data = {
         "time_description": "关于",
         "weekdays": ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"],
         "vote_websites": "你可以在这些网站上给我投票",
+        "vote_reminder_added": "我成功的给你加了一个**12小时的提醒**!",
+        "vote_reminder_exists": "你已经有了一个提醒!",
+        "vote_add_reminder": "加一个提醒",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

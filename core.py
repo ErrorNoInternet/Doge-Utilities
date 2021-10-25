@@ -42,31 +42,33 @@ database = redis.Redis(
     password=os.environ["REDIS_PASSWORD"],
 )
 
-class VoteView(disnake.ui.View):
-    def __init__(self):
-        super().__init__()
-        self.timeout = None
+def get_vote_view(text="Add a reminder"):
+    class VoteView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+            self.timeout = None
 
-    @disnake.ui.button(label="Add a reminder", style=disnake.ButtonStyle.green, custom_id="vote-reminder-button")
-    async def add_reminder(self, button, interaction):
-        duration = 43200
-        text = functions.get_text(interaction.author.id, "vote_again")
-        try:
-            current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
-        except:
-            current_reminders = []
-        exists = False
-        for reminder in current_reminders:
-            if reminder[1] == duration and reminder[2] == text:
-                exists = True
-        if exists:
-            await interaction.response.send_message("A reminder already exists!")
-            return
-        current_reminders.append([round(time.time()), duration, text])
-        database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
-        button.disabled = True
-        await interaction.message.edit(view=self)
-        await interaction.response.send_message("A **12 hour reminder** has been successfully added!")
+        @disnake.ui.button(label=text, style=disnake.ButtonStyle.green, custom_id="vote-reminder-button")
+        async def add_reminder(self, button, interaction):
+            duration = 43200
+            text = functions.get_text(interaction.author.id, "vote_again")
+            try:
+                current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
+            except:
+                current_reminders = []
+            exists = False
+            for reminder in current_reminders:
+                if reminder[1] == duration and reminder[2] == text:
+                    exists = True
+            if exists:
+                await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_reminder_exists"))
+                return
+            current_reminders.append([round(time.time()), duration, text])
+            database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
+            button.disabled = True
+            await interaction.message.edit(view=self)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_reminder_added"))
+    return VoteView()
 
 class FakeChannelResponse:
     def __init__(self, channel):
@@ -4045,7 +4047,11 @@ async def send_vote_message(user_id):
             for member in guild.members:
                 if str(member.id) == str(user_id):
                     interaction = FakeUserInteraction(member)
-                    await interaction.response.send_message(language.get(functions.get_settings(user_id)["language"], "vote_message"), view=VoteView())
+                    await interaction.response.send_message(
+                        language.get(
+                            functions.get_settings(user_id)["language"], "vote_message"),
+                            view=get_vote_view(functions.get_text(user_id, "vote_add_reminder")),
+                        )
                     return
 
 async def on_member_join(member):

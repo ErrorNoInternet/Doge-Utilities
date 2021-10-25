@@ -146,7 +146,7 @@ async def on_ready():
             target=asyncio.run_coroutine_threadsafe,
             args=(random_status(), core.client.loop, ),
         ).start()
-        core.client.add_view(core.VoteView())
+        core.client.add_view(core.get_vote_view())
 
 @core.client.event
 async def on_raw_reaction_add(payload):
