@@ -165,6 +165,10 @@ data = {
         "weekday": "Wochentag",
         "time_description": "Informationen für",
         "weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+        "vote_reminder_added": "Eine **12 Stunden Erinnerung** wurde erfolgreich hinzugefügt!",
+        "vote_websites": "Du kannst für mich auf folgenden Websites voten",
+        "vote_reminder_exists": "Es gibt bereits eine Erinnerung!",
+        "vote_add_reminder": "Füge eine Erinnerung hinzu",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
