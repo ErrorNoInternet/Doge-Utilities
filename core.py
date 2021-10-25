@@ -818,7 +818,7 @@ async def vote_command(interaction):
     vote_view.add_item(disnake.ui.Button(label="top.gg", url="https://top.gg/bot/854965721805226005/vote"))
     vote_view.add_item(disnake.ui.Button(label="discordbotlist", url="https://discordbotlist.com/bots/doge-utilities/upvote"))
     vote_view.add_item(disnake.ui.Button(label="discords", url="https://discords.com/bots/bot/854965721805226005/vote"))
-    await interaction.response.send_message("You can vote for me on these sites", view=vote_view)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_websites"), view=vote_view)
 
 @links_command.sub_command(name="source", description="Get the link to Doge's source code")
 async def source_command(interaction):
@@ -3816,7 +3816,8 @@ async def remind_add_command(
         return
     current_reminders.append([round(time.time()), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
-    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'reminder_added')} **{duration if round(duration) != 1 else round(duration)} {functions.get_text(interaction.author.id, 'minute') if round(duration) == 1 else functions.get_text(interaction.author.id, 'minutes')}**")
+    output_duration = f"{duration if round(duration) != 1 else round(duration)} {functions.get_text(interaction.author.id, 'minute') if round(duration) == 1 else functions.get_text(interaction.author.id, 'minutes')}"
+    await interaction.response.send_message(functions.get_text(interaction.author.id, 'reminder_added').format(output_duration))
 
 def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
