@@ -20,6 +20,39 @@ function raidProtection(token, data) {
 	}
 }
 
+function saveLanguage(token, data) {
+	var language = document.getElementById("language-select").value
+	var request = new XMLHttpRequest()
+	request.open("GET", `(website)/web/api/save-language/${token}/${data}/${language}`)
+	request.send()
+	request.onreadystatechange = (changeEvent) => {
+		text = request.responseText
+		if (text.includes("ratelimit")) {
+			alert("You are being ratelimited!")
+		}
+	}
+}
+
+function toggleVoteMessages(token, data) {
+	var request = new XMLHttpRequest()
+	request.open("GET", `(website)/web/api/vote-messages/${token}/${data}`)
+	request.send()
+	request.onreadystatechange = (changeEvent) => {
+		text = request.responseText
+		if (text.includes("ratelimit")) {
+			alert("You are being ratelimited!")
+			return
+		}
+		var currentStatus = "Disabled"
+		if (text == "1") {
+			currentStatus = "Enabled"
+		}
+		var button = document.getElementById("vote-messages-button")
+		button.innerHTML = "Vote Messages: " + currentStatus
+		button.style.background = colors[text]
+	}
+}
+
 function toggleFilter(token, name, data) {
 	var request = new XMLHttpRequest()
 	request.open("GET", `(website)/web/api/filter/${token}/${name}/${data}`)

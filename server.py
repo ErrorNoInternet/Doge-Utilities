@@ -6,6 +6,7 @@ import flask
 import random
 import asyncio
 import logging
+import functions
 import variables
 import threading
 from requests_oauthlib import OAuth2Session
@@ -196,12 +197,12 @@ def web_dashboard():
     avatar_url = target_user.avatar
     if avatar_url == None:
         avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(target_user.discriminator) % 5}.png"
-    profile = f"<img class='userIcon' src='{avatar_url}'><p>{target_user}</p>"
+    profile = f"<a href='#user-settings'><img class='userIcon' src='{avatar_url}'><p>{target_user}</p></a>"
 
     servers = ""
     for guild in mutual_guilds:
         default_icon = "/doge"
-        servers += f"<a href='#{guild.id}'><img class='guildIcon' src='{guild.icon if guild.icon != None else default_icon}' alt='{guild.name}'></a>"
+        servers += f"<a href='#{guild.id}'><img class='guildIcon' src='{guild.icon if guild.icon != None else default_icon}'></a>"
 
     server_dashboard = ""
     for guild in mutual_guilds:
@@ -248,11 +249,11 @@ def web_dashboard():
             newline_filter = json.loads(core.database[f"newline.toggle.{guild.id}"])
         except:
             pass
-        server_dashboard += f"<h2 class='serverTitle' id='{guild.id}'>{guild.name}</h2>"
+        server_dashboard += f"<h2 class='sectionTitle' id='{guild.id}'>{guild.name}</h2>"
         server_dashboard += f"<p style='margin-top: 0;'><b>{users}</b> {'user' if users == 1 else 'users'} and <b>{bots}</b> {'bot' if bots == 1 else 'bots'} (<b>{bots + users}</b> total)</p>"
         server_dashboard += f'<button style="margin-top: 20; background-color: {colors[raid_protection]};" id="raid-protection-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_raid_protection_function}">Raid Protection: {"Enabled" if raid_protection == 1 else "Disabled"}</button>'
 
-        server_dashboard += f"<h4 class='subTitle' id='{guild.id}'>Filters</h4>"
+        server_dashboard += f"<h4 class='sectionTitle' id='{guild.id}'>Filters</h4>"
         server_dashboard += f'<button style="margin-top: 5;" id="insults-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_insults_filter_function}">Insults: {"Enabled" if insults_filter == 1 else "Disabled"}</button>'
         server_dashboard += f'<button style="margin-top: 0;" id="spam-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_spam_filter_function}">Spam: {"Enabled" if spam_filter == 1 else "Disabled"}</button>'
         server_dashboard += f'<button style="margin-top: 0;" id="links-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_links_filter_function}">Links: {"Enabled" if links_filter == 1 else "Disabled"}</button>'
@@ -260,7 +261,35 @@ def web_dashboard():
         server_dashboard += f'<button style="margin-top: 0;" id="newline-filter-button.{guild.id}" style="font-size: 100%;" onclick="{toggle_newline_filter_function}">Newline: {"Enabled" if newline_filter == 1 else "Disabled"}</button>'
         server_dashboard += "<hr class='separator'>"
 
-    return load_file("web_dashboard.html", replace={"(profile)": profile, "(servers)": servers, "(server_dashboard)": server_dashboard})
+    save_language_function = f"saveLanguage('{token}', '{target_user.id}')"
+    toggle_vote_messages_function = f"toggleVoteMessages('{token}', '{target_user.id}')"
+    vote_messages = 0
+    try:
+        vote_messages = functions.get_settings(target_user.id)["vote_messages"]
+    except:
+        pass
+    user_dashboard = f"<h1 class='sectionTitle' id='user-settings'>User Settings</h1>"
+    user_dashboard += "<div id='languageSelection'><select name='languages' id='language-select' style='margin-top: 20; width: 150; height: 34;'>"
+    user_language = functions.get_settings(target_user.id)["language"]
+    language_codes = core.googletrans.LANGUAGES
+    user_dashboard += f"<option value='{user_language}'>{language_codes[user_language].title()}</option>"
+    added = [user_language]
+    for language in language_codes:
+        if language not in added:
+            user_dashboard += f"<option value='{language}'>{language_codes[language].title()}</option>"
+    user_dashboard += f'</select></div><div id="languageSelection"><button style="margin-top: 5;" id="save-language-button" style="font-size: 100%;" onclick="{save_language_function}">Save</button></div>'
+    user_dashboard += f'<button style="margin-top: 2; background-color: {colors[vote_messages]};" id="vote-messages-button" style="font-size: 100%;" onclick="{toggle_vote_messages_function}">Vote Messages: {"Enabled" if vote_messages == 1 else "Disabled"}</button>'
+    user_dashboard += "<hr class='separator'>"
+
+    return load_file(
+        "web_dashboard.html",
+        replace={
+            "(profile)": profile,
+            "(servers)": servers,
+            "(server_dashboard)": server_dashboard,
+            "(user_dashboard)": user_dashboard,
+        },
+    )
 
 @app.route("/css")
 def fetch_css():
@@ -349,6 +378,44 @@ def fetch_commands():
 @app.route("/api/version", endpoint="api")
 def fetch_version():
     return f"{variables.version_number}.{variables.build_number}"
+
+@app.route("/web/api/save-language/<token>/<user>/<language>")
+def save_language(token, user, language):
+    try:
+        user_id = user_ids[get_ip(flask.request)]
+        if user_tokens[user_id] != token:
+            flask.abort(403)
+    except:
+        flask.abort(403)
+
+    if language not in core.googletrans.LANGUAGES.keys():
+        flask.abort(404)
+    settings = functions.get_settings(user)
+    settings["language"] = language
+    functions.set_settings(settings, user)
+    return "OK"
+
+@app.route("/web/api/vote-messages/<token>/<user>")
+def toggle_vote_messages(token, user):
+    try:
+        user_id = user_ids[get_ip(flask.request)]
+        if user_tokens[user_id] != token:
+            flask.abort(403)
+    except:
+        flask.abort(403)
+
+    settings = functions.get_settings(user)
+    value = False
+    try:
+        value = settings["vote_messages"]
+    except:
+        pass
+    new_value = False
+    if value == False:
+        new_value = True
+    settings["vote_messages"] = new_value
+    functions.set_settings(settings, user)
+    return str(int(new_value))
 
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
