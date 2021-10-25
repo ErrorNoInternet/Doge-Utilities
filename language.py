@@ -174,7 +174,7 @@ data = {
         "vote_again": "Не забывай голосовать за меня!",
         "todo_empty": "Ваш список дел пустой",
         "generate_number": "Сгенерировать число",
-        "number_prompt": "Ваше случайное число является",
+        "number_prompt": "Ваше случайное число",
         "cpu_usage": "Использование CPU",
         "ram_usage": "Использование RAM",
         "thread_count": "Количество треадов",
@@ -184,7 +184,7 @@ data = {
         "command_count": "Количество команд",
         "disnake_version": "Версия Disnake",
         "bot_version": "Версия бота",
-        "bot_uptime": "Время работы бота",
+        "bot_uptime": "Время работы",
         "shard": "Шард",
         "members_lower": "участники",
         "guilds_lower": "гильдии",
@@ -196,7 +196,8 @@ data = {
         "minute": "минута",
         "minutes": "минуты",
         "latency": "Задержка",
-        "joined_guilds": "гильдии",
+        "joined_guilds": "Гильдий",
+        "uptime_description": "Doge Utilities работает",
     },
 }
 data["zh-tw"] = data["zh-cn"]
