@@ -57,6 +57,9 @@ data = {
         "vote_add_reminder": "Add a reminder",
         "vote_messages_enabled": "Vote messages have been successfully **enabled**",
         "vote_messages_disabled": "Vote messages have been successfully **disabled**",
+        "enabled_lower": "enabled",
+        "disabled_lower": "disabled",
+        "vote_messages_status": "Vote messages are currently **{}**",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -116,6 +119,9 @@ data = {
         "vote_add_reminder": "加一个提醒",
         "vote_messages_enabled": "投票通知已被成功**打开**",
         "vote_messages_disabled": "投票通知已被成功**关闭**",
+        "enabled_lower": "打开",
+        "disabled_lower": "关闭",
+        "vote_messages_status": "投票消息现在属于**{}**状态",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -175,6 +181,9 @@ data = {
         "vote_add_reminder": "Füge eine Erinnerung hinzu",
         "vote_messages_enabled": "Vote Benachrichtigungen wurden erfolgreich **aktiviert**",
         "vote_messages_disabled": "Vote Benachrichtigungen wurden erfolgreich **deaktiviert**",
+        "enabled_lower": "aktiviert",
+        "disabled_lower": "deaktiviert",
+        "vote_messages_status": "Vote Benachrichtigungen sind derzeit **{}**",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",

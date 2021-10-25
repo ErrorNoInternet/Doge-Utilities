@@ -540,7 +540,8 @@ async def settings_vote_command(_):
 @settings_vote_command.sub_command(name="status", description="Check if vote messages are currently enabled or not")
 async def settings_vote_status_command(interaction):
     settings = functions.get_settings(interaction.author.id)
-    await interaction.response.send_message(f"Vote messages are currently **{'enabled' if settings['vote_messages'] else 'disabled'}**")
+    state = f"{functions.get_text(interaction.author.id, 'enabled_lower') if settings['vote_messages'] else functions.get_text(interaction.author.id, 'disabled_lower')}"
+    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'vote_messages_status').format(state)}")
 
 @settings_vote_command.sub_command(name="enable", description="Enable vote messages")
 async def settings_vote_enable_command(interaction):
