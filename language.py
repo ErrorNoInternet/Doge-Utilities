@@ -105,7 +105,7 @@ data = {
         "weekday": "星期",
         "time_description": "关于",
         "weekdays": ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"],
-        "vote_websites", "你可以在这些网站上给我投票",
+        "vote_websites": "你可以在这些网站上给我投票",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
