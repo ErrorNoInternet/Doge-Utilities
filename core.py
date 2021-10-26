@@ -3054,7 +3054,7 @@ async def welcome_status_command(interaction):
 async def server_command(_):
     pass
 
-@server_command.sub_command(name="status", description="See information about this server's filters")
+@server_command.sub_command(name="status", description="See moderation information about this server")
 async def server_status_command(interaction):
     embed = disnake.Embed(color=variables.embed_color)
     raid_protection = 0
