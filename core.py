@@ -531,7 +531,12 @@ async def settings_language_set_command(
     settings = functions.get_settings(interaction.author.id)
     settings["language"] = language_code
     functions.set_settings(settings, interaction.author.id)
-    await interaction.response.send_message(f"Your preferred language has been set to **{language_name.title()}**")
+    default_text = f"Your preferred language has been set to **{language_name.title()}**"
+    language_text = default_text
+    language_name = functions.get_text(interaction.author.id, "language_name")
+    if language_name != "English":
+        language_text = functions.get_text(interaction.author.id, "language_update").format(language_name)
+    await interaction.response.send_message(language_text)
 
 @settings_command.sub_command_group(name="vote-messages", description="Whether or not you want to receive vote messages")
 async def settings_vote_command(_):

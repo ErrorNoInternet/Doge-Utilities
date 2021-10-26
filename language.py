@@ -60,6 +60,8 @@ data = {
         "enabled_lower": "enabled",
         "disabled_lower": "disabled",
         "vote_messages_status": "Vote messages are currently **{}**",
+        "language_update": "Your preferred language has been set to **{}**",
+        "language_name": "English",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -122,6 +124,8 @@ data = {
         "enabled_lower": "打开",
         "disabled_lower": "关闭",
         "vote_messages_status": "投票消息现在属于**{}**状态",
+        "language_update": "你的语言已被换成**{}**",
+        "language_name": "中文",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -184,6 +188,8 @@ data = {
         "enabled_lower": "aktiviert",
         "disabled_lower": "deaktiviert",
         "vote_messages_status": "Vote Benachrichtigungen sind derzeit **{}**",
+        "language_update": "Deine Sprache wurde auf **{}** gesetzt",
+        "language_name": "deutsch",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
@@ -246,6 +252,8 @@ data = {
         "enabled_lower": "включены",
         "disabled_lower": "отключены",
         "vote_messages_status": "Сообщения о голосовании в настоящее время **{}**",
+        "language_update": "Ваш основной язык установлен на **{}**",
+        "language_name": "русский",
     },
 }
 data["zh-tw"] = data["zh-cn"]
