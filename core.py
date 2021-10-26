@@ -3879,6 +3879,20 @@ def set_variable(name, value):
     math_variables[name] = value
     return value
 
+def parse_application_command(command):
+    command_data = "/" + command.data.name + " "
+    for option in command.data.options:
+        command_data += option.name
+        command_data += " "
+        for sub_option_group in option.options:
+            command_data += f"[{sub_option_group.name}]"
+            command_data += " "
+            if sub_option_group.options != []:
+                for sub_option in sub_option_group.options:
+                    command_data += f"[{sub_option.name}]"
+                    command_data += " "
+    return command_data.strip()
+
 def parse_interaction(interaction):
     interaction_data = "/" + interaction.data.name + " "
     for option in interaction.data.options:

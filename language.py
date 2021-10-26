@@ -62,6 +62,9 @@ data = {
         "vote_messages_status": "Vote messages are currently **{}**",
         "language_update": "Your preferred language has been set to **{}**",
         "language_name": "English",
+        "website_links": "Here are the links to my website",
+        "website": "Website",
+        "dashboard": "Dashboard",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -126,6 +129,9 @@ data = {
         "vote_messages_status": "投票消息现在属于**{}**状态",
         "language_update": "你的语言已被换成**{}**",
         "language_name": "中文",
+        "website_links": "这我是我的网站的链接",
+        "website": "网站",
+        "dashboard": "控制板",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

@@ -128,7 +128,8 @@ def web_callback():
     token = discord.fetch_token(
         TOKEN_URL,
         client_secret=OAUTH_CLIENT_SECRET,
-        authorization_response=flask.request.url)
+        authorization_response=flask.request.url,
+    )
     flask.session['oauth2_token'] = token
     return flask.redirect(flask.url_for("web_dashboard", _scheme=URL_SCHEME, _external=True))
 
