@@ -28,7 +28,7 @@ AUTHORIZATION_BASE_URL = BASE_URL + '/oauth2/authorize'
 TOKEN_URL = BASE_URL + '/oauth2/token'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
-allowed_endpoints = ["version-endpoint", "doge-image-endpoint", "icon-endpoint"]
+allowed_endpoints = ["css-page", "index-page", "version-endpoint", "doge-image-endpoint", "icon-endpoint"]
 colors = ["#e74c3c", "#2ecc71"]
 user_ids = {}
 user_tokens = {}
@@ -105,6 +105,8 @@ def request_handler():
         flask.abort(429, "You are being ratelimited!")
     ratelimits[ip_address] = counter + 1
 
+    global website_views
+    website_views += 1
     if flask.request.endpoint not in allowed_endpoints:
         if not core.client.is_ready():
             flask.abort(503, "Doge Utilities is getting ready. Please try again later.")
@@ -293,7 +295,7 @@ def web_dashboard():
         },
     )
 
-@app.route("/css")
+@app.route("/css", endpoint="css-page")
 def fetch_css():
     return load_file("index.css", mimetype="text/css")
 
@@ -325,11 +327,15 @@ def handle_vote():
         response = flask.make_response("Forbidden", 403)
         response.mimetype = "text/plain"; return response
 
-@app.route("/")
+@app.route("/", endpoint="index-page")
 def index():
-    global website_views
-    website_views += 1
-    return load_file("index.html")
+    if not core.client.is_ready():
+        warning_message = "<center><div id='banner'><div style='margin-left: 170;' id='bannerContent'>Doge Utilities is currently initializing. Not all the features will work.</div></div></center>"
+        banner_margin = " margin-top: 50;"
+    else:
+        warning_message = ""
+        banner_margin = ""
+    return load_file("index.html", replace={"(warning_message)": warning_message, "(banner_margin)": banner_margin})
 
 @app.route("/invite")
 def fetch_invite():

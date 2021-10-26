@@ -69,6 +69,20 @@ button:hover {
     display: inline-block;
 }
 
+#banner { 
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #eed202;
+	width: 100%;
+}
+
+#bannerContent {
+	margin: 0 auto; 
+	padding: 10px; 
+	border: 0px solid #000;
+}
+
 .statusText {
 	color: #ffffff;
 	margin: 25;
