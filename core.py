@@ -3087,12 +3087,33 @@ async def server_status_command(interaction):
         newline_filter = json.loads(database[f"newline.toggle.{interaction.guild.id}"])
     except:
         pass
+    try:
+        doge_role_position = interaction.guild.me.top_role.position
+    except:
+        doge_role_position = 0
+    mute_role = None; exists = False
+    for role in interaction.guild.roles:
+        if "mute" in role.name.lower():
+            mute_role = role; exists = True
+    mute_role_position = 0
+    if exists:
+        mute_role_position = mute_role.position
+    ban_role = None; exists = False
+    for role in interaction.guild.roles:
+        if "ban" in role.name.lower():
+            ban_role = role; exists = True
+    ban_role_position = 0
+    if exists:
+        ban_role_position = ban_role.position
     embed.add_field(name="Raid Protection", value=":white_check_mark: Enabled" if raid_protection else ":x: Disabled")
     embed.add_field(name="Newline Filter", value=":white_check_mark: Enabled" if newline_filter else ":x: Disabled")
     embed.add_field(name="Insults Filter", value=":white_check_mark: Enabled" if insults_filter else ":x: Disabled")
     embed.add_field(name="Spam Filter", value=":white_check_mark: Enabled" if spam_filter else ":x: Disabled")
     embed.add_field(name="Links Filter", value=":white_check_mark: Enabled" if links_filter else ":x: Disabled")
     embed.add_field(name="Mention Filter", value=":white_check_mark: Enabled" if mention_filter else ":x: Disabled")
+    embed.add_field(name="Bot Role Position", value=f"{':white_check_mark:' if doge_role_position != 0 else ':x:'} {doge_role_position}")
+    embed.add_field(name="Mute Role Position", value=f"{':white_check_mark:' if doge_role_position > mute_role_position else ':x:'} {mute_role_position}")
+    embed.add_field(name="Ban Role Position", value=f"{':white_check_mark:' if doge_role_position > ban_role_position else ':x:'} {ban_role_position}")
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 5)
 
