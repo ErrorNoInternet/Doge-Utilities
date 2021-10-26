@@ -29,6 +29,8 @@ TOKEN_URL = BASE_URL + '/oauth2/token'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
 allowed_endpoints = [
+    "status-page",
+    "commands-page",
     "invite-page",
     "support-page",
     "donate-page",
@@ -358,7 +360,7 @@ def fetch_server_invite():
 def fetch_donations():
     return load_file("donate.html")
 
-@app.route("/status")
+@app.route("/status", endpoint="status-page")
 def fetch_status():
     member_count = 0
     channel_count = 0
@@ -404,7 +406,7 @@ def fetch_status():
     text += "</div>"
     return load_file("status.html", replace={"(text)": text})
 
-@app.route("/commands")
+@app.route("/commands", endpoint="commands-page")
 def fetch_commands():
     text = "<div class='commandsWrapper'>"
     for command in core.client.slash_commands:
