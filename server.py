@@ -341,7 +341,7 @@ def handle_vote():
 @app.route("/", endpoint="index-page")
 def index():
     if not core.client.is_ready():
-        warning_message = "<center><div id='banner'><div style='margin-left: 170;' id='bannerContent'>Doge Utilities is currently initializing. Not all the features will work.</div></div></center>"
+        warning_message = "<center><div id='banner'><div style='margin-left: 170;' id='bannerContent'>Doge Utilities is currently initializing. You might encounter some issues when using certain features.</div></div></center>"
         banner_margin = " margin-top: 50;"
     else:
         warning_message = ""

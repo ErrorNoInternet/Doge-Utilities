@@ -3654,7 +3654,7 @@ async def definition_command(
     try:
         if response["title"] == "No Definitions Found":
             try:
-                language_name = googletrans.LANGUAGES[language]
+                language_name = googletrans.LANGUAGES[language].title()
             except:
                 language_name = language
             await interaction.edit_original_message(content=f"That word was not found in the **{language_name}** dictionary")
