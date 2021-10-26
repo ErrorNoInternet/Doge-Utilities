@@ -890,7 +890,9 @@ async def shards_command(interaction):
 
 @get_command.sub_command(name="status", description="Display the bot's current statistics")
 async def status_command(interaction):
-    member_count = 0; channel_count = 0; uptime = ""
+    member_count = 0
+    channel_count = 0
+    uptime = ""
     for guild in client.guilds:
         member_count += len(guild.members)
         channel_count += len(guild.channels)

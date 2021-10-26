@@ -342,9 +342,55 @@ def fetch_server_invite():
 def fetch_donations():
     return load_file("donate.html")
 
+@app.route("/status")
+def fetch_status():
+    member_count = 0
+    channel_count = 0
+    uptime = ""
+    for guild in core.client.guilds:
+        member_count += len(guild.members)
+        channel_count += len(guild.channels)
+    process = core.psutil.Process(os.getpid())
+    memory_usage = process.memory_info().rss / 1000000
+    seconds_time = time.time() - core.start_time
+    minutes_time = seconds_time / 60
+    hours_time = minutes_time / 60
+    days_time = hours_time / 24
+    seconds_time = seconds_time % 60
+    minutes_time = minutes_time % 60
+    hours_time = hours_time % 24
+    if days_time >= 1:
+        uptime += str(core.math.floor(days_time)) + "d "
+    if hours_time >= 1:
+        uptime += str(core.math.floor(hours_time)) + "hr "
+    if minutes_time >= 1:
+        uptime += str(core.math.floor(minutes_time)) + "m "
+    if seconds_time >= 1:
+        uptime += str(core.math.floor(seconds_time)) + "s "
+    if uptime == "":
+        uptime = "Unknown"
+    else:
+        uptime = uptime.split(" ")
+        uptime = " ".join(uptime[:3])
+    text = "<div class='statusWrapper'>"
+    text += f"<p class='statusText'><b>Bot Latency</b><br><code>{round(core.client.latency*1000, 2)} ms</code></p>"
+    text += f"<p class='statusText'><b>CPU Usage</b><br><code>{core.psutil.cpu_percent()}%</code></p>"
+    text += f"<p class='statusText'><b>RAM Usage</b><br><code>{round(memory_usage, 2)} MB</code></p>"
+    text += f"<p class='statusText'><b>Thread Count</b><br><code>{threading.active_count()}</code></p>"
+    text += f"<p class='statusText'><b>Joined Guilds</b><br><code>{len(core.client.guilds)}</code></p>"
+    text += f"<p class='statusText'><b>Active Shards</b><br><code>{len(core.client.shards)}</code></p>"
+    text += f"<p class='statusText'><b>Member Count</b><br><code>{member_count}</code></p>"
+    text += f"<p class='statusText'><b>Channel Count</b><br><code>{channel_count}</code></p>"
+    text += f"<p class='statusText'><b>Command Count</b><br><code>{len(core.client.slash_commands)-len(variables.owner_commands)}</code></p>"
+    text += f"<p class='statusText'><b>Disnake Version</b><br><code>{core.disnake.__version__}</code></p>"
+    text += f"<p class='statusText'><b>Bot Version</b><br><code>{variables.version_number}.{variables.build_number}</code></p>"
+    text += f"<p class='statusText'><b>Bot Uptime</b><br><code>{uptime.strip()}</code></p>"
+    text += "</div>"
+    return load_file("status.html", replace={"(text)": text})
+
 @app.route("/commands")
 def fetch_commands():
-    text = "<div class='wrapper'>"
+    text = "<div class='commandsWrapper'>"
     for command in core.client.slash_commands:
         if command.name in variables.owner_commands:
             continue
@@ -373,7 +419,6 @@ def fetch_commands():
             text += f"<code>/{command.name}</code>"
         text += "</p>"
     text += "</div>"
-   
     return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands) - len(variables.owner_commands))})
 
 @app.route("/api/version", endpoint="api")

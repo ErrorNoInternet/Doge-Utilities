@@ -69,6 +69,12 @@ button:hover {
     display: inline-block;
 }
 
+.statusText {
+	color: #ffffff;
+	margin: 25;
+	font-size: 18;
+}
+
 .avatar {
     border-radius: 20%;
 }
@@ -138,7 +144,13 @@ button:hover {
     color: #f1f1f1;
 }
 
-.wrapper {
+.statusWrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.commandsWrapper {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
