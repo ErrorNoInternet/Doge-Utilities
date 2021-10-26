@@ -300,11 +300,11 @@ def fetch_css():
 def fetch_javascript():
     return load_file("dashboard.js", mimetype="text/javascript", replace={"(website)": WEBSITE_URL})
 
-@app.route("/favicon.ico")
+@app.route("/favicon.ico", endpoint="api")
 def fetch_favicon():
     return load_file("favicon.ico", mimetype="image/vnd.microsoft.icon", binary=True)
 
-@app.route("/doge")
+@app.route("/doge", endpoint="api")
 def fetch_doge_image():
     return load_file("doge.png", mimetype="image/png", binary=True)
 
