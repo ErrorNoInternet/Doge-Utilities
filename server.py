@@ -28,7 +28,16 @@ AUTHORIZATION_BASE_URL = BASE_URL + '/oauth2/authorize'
 TOKEN_URL = BASE_URL + '/oauth2/token'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
-allowed_endpoints = ["css-page", "index-page", "version-endpoint", "doge-image-endpoint", "icon-endpoint"]
+allowed_endpoints = [
+    "invite-page",
+    "support-page",
+    "donate-page",
+    "css-page",
+    "index-page",
+    "version-endpoint",
+    "doge-image-endpoint",
+    "icon-endpoint",
+]
 colors = ["#e74c3c", "#2ecc71"]
 user_ids = {}
 user_tokens = {}
@@ -337,15 +346,15 @@ def index():
         banner_margin = ""
     return load_file("index.html", replace={"(warning_message)": warning_message, "(banner_margin)": banner_margin})
 
-@app.route("/invite")
+@app.route("/invite", endpoint="invite-page")
 def fetch_invite():
     return "<meta http-equiv=\"refresh\" content=\"0; url=" + variables.bot_invite_link + "\">"
 
-@app.route("/support")
+@app.route("/support", endpoint="support-page")
 def fetch_server_invite():
     return "<meta http-equiv=\"refresh\" content=\"0; url=" + variables.support_server_invite + "\">"
 
-@app.route("/donate")
+@app.route("/donate", endpoint="donate-page")
 def fetch_donations():
     return load_file("donate.html")
 
