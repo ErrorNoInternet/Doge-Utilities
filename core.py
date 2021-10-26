@@ -533,6 +533,10 @@ async def settings_language_set_command(
     functions.set_settings(settings, interaction.author.id)
     default_text = f"Your preferred language has been set to **{language_name.title()}**"
     language_text = default_text
+    try:
+        del functions.settings_cache[str(interaction.author.id)]
+    except:
+        pass
     language_name = functions.get_text(interaction.author.id, "language_name")
     if language_name != "English":
         language_text = functions.get_text(interaction.author.id, "language_update").format(language_name)
