@@ -28,6 +28,7 @@ AUTHORIZATION_BASE_URL = BASE_URL + '/oauth2/authorize'
 TOKEN_URL = BASE_URL + '/oauth2/token'
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
+allowed_endpoints = ["version-endpoint", "doge-image-endpoint", "icon-endpoint"]
 colors = ["#e74c3c", "#2ecc71"]
 user_ids = {}
 user_tokens = {}
@@ -104,7 +105,7 @@ def request_handler():
         flask.abort(429, "You are being ratelimited!")
     ratelimits[ip_address] = counter + 1
 
-    if flask.request.endpoint != "api":
+    if flask.request.endpoint not in allowed_endpoints:
         if not core.client.is_ready():
             flask.abort(503, "Doge Utilities is getting ready. Please try again later.")
 
@@ -300,11 +301,11 @@ def fetch_css():
 def fetch_javascript():
     return load_file("dashboard.js", mimetype="text/javascript", replace={"(website)": WEBSITE_URL})
 
-@app.route("/favicon.ico", endpoint="api")
+@app.route("/favicon.ico", endpoint="icon-endpoint")
 def fetch_favicon():
     return load_file("favicon.ico", mimetype="image/vnd.microsoft.icon", binary=True)
 
-@app.route("/doge", endpoint="api")
+@app.route("/doge", endpoint="doge-image-endpoint")
 def fetch_doge_image():
     return load_file("doge.png", mimetype="image/png", binary=True)
 
@@ -421,7 +422,7 @@ def fetch_commands():
     text += "</div>"
     return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands) - len(variables.owner_commands))})
 
-@app.route("/api/version", endpoint="api")
+@app.route("/api/version", endpoint="version-endpoint")
 def fetch_version():
     return f"{variables.version_number}.{variables.build_number}"
 
