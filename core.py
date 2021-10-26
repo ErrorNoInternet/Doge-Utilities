@@ -3111,9 +3111,9 @@ async def server_status_command(interaction):
     embed.add_field(name="Spam Filter", value=":white_check_mark: Enabled" if spam_filter else ":x: Disabled")
     embed.add_field(name="Links Filter", value=":white_check_mark: Enabled" if links_filter else ":x: Disabled")
     embed.add_field(name="Mention Filter", value=":white_check_mark: Enabled" if mention_filter else ":x: Disabled")
-    embed.add_field(name="Bot Role Position", value=f"{':white_check_mark:' if doge_role_position != 0 else ':x:'} {doge_role_position}")
-    embed.add_field(name="Mute Role Position", value=f"{':white_check_mark:' if doge_role_position > mute_role_position else ':x:'} {mute_role_position}")
-    embed.add_field(name="Ban Role Position", value=f"{':white_check_mark:' if doge_role_position > ban_role_position else ':x:'} {ban_role_position}")
+    embed.add_field(name="Bot Role", value=f"{':white_check_mark:' if doge_role_position != 0 else ':x:'} {doge_role_position}")
+    embed.add_field(name="Mute Role", value=f"{':white_check_mark:' if doge_role_position > mute_role_position and mute_role_position != 0 else ':x:'} {mute_role_position}")
+    embed.add_field(name="Ban Role", value=f"{':white_check_mark:' if doge_role_position > ban_role_position and ban_role_position != 0 else ':x:'} {ban_role_position}")
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 5)
 
