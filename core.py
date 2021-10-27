@@ -2643,7 +2643,7 @@ async def filter_ignore_list_command(interaction):
         for channel in current_values[value]:
             channels.append(f"<#{channel}>")
         if channels != []:
-            description += f"{functions.get_filter_name(value)}: {' '.join(channels)}\n"
+            description += f"{functions.get_filter_name(value).title()}: {' '.join(channels)}\n"
     embed = disnake.Embed(
         title="Ignored Channels",
         description=description if description != "" else "There are no ignored channels",
