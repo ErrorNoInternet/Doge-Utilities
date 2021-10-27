@@ -18,6 +18,13 @@ embed_color = 0xfc4c02
 large_number = 1e1000
 edited_channels = []
 edited_roles = []
+filters = {
+    "insults": "insults",
+    "spam": "spamming",
+    "links": "links",
+    "mention": "mention",
+    "newline": "newline",
+}
 version_number = 0
 build_number = 0
 for file in os.listdir():

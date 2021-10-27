@@ -143,8 +143,8 @@ class Paginator:
             def update_page(this):
                 for button in this.children:
                     if button.label:
-                        if button.label.startswith("Page"):
-                            button.label = f"Page {self.current_page}/{len(self.embeds)}"
+                        if button.label.strip() != "":
+                            button.label = f"{self.current_page}/{len(self.embeds)}"
 
             @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def first_button(this, _, button_interaction):
@@ -175,7 +175,7 @@ class Paginator:
                 this.update_page()
                 await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
 
-            @disnake.ui.button(label=f"Page {self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
+            @disnake.ui.button(label=f"{self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
             async def page_button(*_):
                 pass
 
@@ -337,8 +337,10 @@ message_strikes = {}
 last_messages = {}
 used_commands = []
 ToggleOption = commands.option_enum(["enable", "disable"])
+FilterOption = commands.option_enum(list(variables.filters.keys()))
 required_intents = disnake.Intents.default()
 required_intents.members = True
+required_intents.messages = True
 client = commands.AutoShardedBot(
     shard_count=variables.shard_count,
     intents=required_intents,
@@ -1030,8 +1032,9 @@ async def setup_banned_command(interaction):
             return
     await interaction.response.send_message("Generating the **Banned** role for the current guild...")
     try:
-        banned_role = await interaction.guild.create_role(name="Banned")
-        guild_roles = len(interaction.guild.roles); retry_count = 0
+        banned_role = await interaction.guild.create_role(name="Banned", permissions=disnake.Permissions(change_nickname=False))
+        guild_roles = len(interaction.guild.roles)
+        retry_count = 0
         while True:
             if retry_count > 100:
                 break
@@ -1042,7 +1045,7 @@ async def setup_banned_command(interaction):
                 retry_count += 1
         for channel in interaction.guild.channels:
             try:
-                await channel.set_permissions(banned_role, view_channel=False, connect=False, change_nickname=False, add_reactions=False)
+                await channel.set_permissions(banned_role, view_channel=False)
             except:
                 pass
     except:
@@ -1066,8 +1069,9 @@ async def setup_muted_command(interaction):
             return
     await interaction.response.send_message("Generating the **Muted** role for the current guild...")
     try:
-        muted_role = await interaction.guild.create_role(name="Muted")
-        guild_roles = len(interaction.guild.roles); retry_count = 0
+        muted_role = await interaction.guild.create_role(name="Muted", permissions=disnake.Permissions(add_reactions=False))
+        guild_roles = len(interaction.guild.roles)
+        retry_count = 0
         while True:
             if retry_count > 100:
                 break
@@ -1078,9 +1082,9 @@ async def setup_muted_command(interaction):
                 retry_count += 1
         for channel in interaction.guild.channels:
             try:
-                if type(channel) == disnake.channel.TextChannel:
+                try:
                     await channel.set_permissions(muted_role, send_messages=False)
-                elif type(channel) == disnake.channel.VoiceChannel:
+                except:
                     await channel.set_permissions(muted_role, connect=False)
             except:
                 pass
@@ -2576,6 +2580,76 @@ async def user_unmute_command(interaction):
 @client.slash_command(name="filter", description="Manage the auto-moderation filters")
 async def filter_command(_):
     pass
+
+@filter_command.sub_command_group(name="ignore", description="Make a specific filter ignore messages from a specific channel")
+async def filter_ignore_command(_):
+    pass
+
+@filter_ignore_command.sub_command(name="add", description="Add a channel to the filter ignore list")
+async def filter_ignore_add_command(
+        interaction,
+        filter: FilterOption = Param(description="The filter you want to add"),
+        channel: disnake.TextChannel = Param(description="The channel you want to add"),
+    ):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+    filter_name = functions.get_filter_name(filter)
+    try:
+        current_values = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
+    except:
+        current_values = {}
+    if filter_name not in current_values:
+        current_values[filter_name] = []
+    current_values[filter_name].append(channel.id)
+    database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
+    await interaction.response.send_message(f"<#{channel.id}> has been added to the **{filter}** filter's ignore list")
+
+@filter_ignore_command.sub_command(name="remove", description="Remove a channel from the filter ignore list")
+async def filter_ignore_add_command(
+        interaction,
+        filter: FilterOption = Param(description="The filter you want to add"),
+        channel: disnake.TextChannel = Param(description="The channel you want to add"),
+    ):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+    filter_name = functions.get_filter_name(filter)
+    try:
+        current_values = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
+    except:
+        current_values = {}
+    if filter_name not in current_values:
+        current_values[filter_name] = []
+    if channel.id in current_values[filter_name]:
+        current_values[filter_name].remove(channel.id)
+        database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
+        await interaction.response.send_message(f"<#{channel.id}> has been removed from the **{filter}** filter's ignore list")
+    else:
+        await interaction.response.send_message(f"<#{channel.id}> is not in the **{filter}** filter's ignore list")
+
+@filter_ignore_command.sub_command(name="list", description="List the ignored channels")
+async def filter_ignore_list_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+    try:
+        current_values = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
+    except:
+        current_values = {}
+    description = ""
+    for value in current_values:
+        channels = []
+        for channel in current_values[value]:
+            channels.append(f"<#{channel}>")
+        if channels != []:
+            description += f"{functions.get_filter_name(value)}: {' '.join(channels)}\n"
+    embed = disnake.Embed(
+        title="Ignored Channels",
+        description=description if description != "" else "There are no ignored channels",
+        color=variables.embed_color,
+    )
+    await interaction.response.send_message(embed=embed)
 
 @filter_command.sub_command_group(name="insults", description="Manage the insults filter")
 async def insults_command(_):
@@ -4260,43 +4334,52 @@ async def on_message(message):
     if not message.author.guild_permissions.administrator:
         if message.author.id not in variables.permission_override:
             try:
-                if json.loads(database[f"insults.toggle.{message.guild.id}"]):
-                    insults = json.loads(database[f"insults.list.{message.guild.id}"])
-                    for word in insults:
-                        if word.lower() in message.content.lower().replace(" ", ""):
-                            try:
-                                await message.delete()
-                            except:
-                                pass
-                            try:
-                                await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
-                            except:
-                                pass
-                            await mute_member(message.author, 0.16)
-                            await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{message.content[:500]}')
-                            return
+                ignored_channels = json.loads(database[f"filter-ignore.{message.guild.id}"])
+            except:
+                ignored_channels = {}
+            for filter in variables.filters.values():
+                if filter not in ignored_channels:
+                    ignored_channels[filter] = []
+            try:
+                if message.channel.id not in ignored_channels["insults"]:
+                    if json.loads(database[f"insults.toggle.{message.guild.id}"]):
+                        insults = json.loads(database[f"insults.list.{message.guild.id}"])
+                        for word in insults:
+                            if word.lower() in message.content.lower().replace(" ", ""):
+                                try:
+                                    await message.delete()
+                                except:
+                                    pass
+                                try:
+                                    await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
+                                except:
+                                    pass
+                                await mute_member(message.author, 0.16)
+                                await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{message.content[:500]}')
+                                return
             except:
                 pass
             try:
-                if json.loads(database[f"links.toggle.{message.guild.id}"]):
-                    link_regexes = ["http://", "https://", "www.", "discord.gg/"]
-                    for regex in link_regexes:
-                        if regex in message.content.lower().replace(" ", ""):
-                            try:
-                                await message.delete()
-                            except:
-                                pass
-                            try:
-                                await message.author.send("Please do not put links in your message!")
-                            except:
-                                pass
-                            await mute_member(message.author, 0.16)
-                            await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{message.content[:500]}')
-                            return
+                if message.channel.id not in ignored_channels["links"]:
+                    if json.loads(database[f"links.toggle.{message.guild.id}"]):
+                        link_regexes = ["http://", "https://", "www.", "discord.gg/"]
+                        for regex in link_regexes:
+                            if regex in message.content.lower().replace(" ", ""):
+                                try:
+                                    await message.delete()
+                                except:
+                                    pass
+                                try:
+                                    await message.author.send("Please do not put links in your message!")
+                                except:
+                                    pass
+                                await mute_member(message.author, 0.16)
+                                await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{message.content[:500]}')
+                                return
             except:
                 pass
             try:
-                if "spam" not in message.channel.name.lower() and "trash" not in message.channel.name.lower():
+                if message.channel.id not in ignored_channels["spamming"]:
                     if json.loads(database[f"spamming.toggle.{message.guild.id}"]):
                         try:
                             last_message_time = last_messages[message.author.id]
@@ -4328,48 +4411,50 @@ async def on_message(message):
             except:
                 pass
             try:
-                if json.loads(database[f"mention.toggle.{message.guild.id}"]):
-                    limit = 10
-                    try:
-                        limit = json.loads(database[f"mention.limit.{message.guild.id}"])
-                    except:
-                        pass
-                    mentions = len(message.raw_mentions)
-                    if mentions > limit:
+                if message.channel.id not in ignored_channels["mention"]:
+                    if json.loads(database[f"mention.toggle.{message.guild.id}"]):
+                        limit = 10
                         try:
-                            await message.delete()
+                            limit = json.loads(database[f"mention.limit.{message.guild.id}"])
                         except:
                             pass
-                        try:
-                            await message.author.send(f"Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
-                        except:
-                            pass
-                        await mute_member(message.author, 0.16)
-                        await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(message.content[:500])}')
-                        return
+                        mentions = len(message.raw_mentions)
+                        if mentions > limit:
+                            try:
+                                await message.delete()
+                            except:
+                                pass
+                            try:
+                                await message.author.send(f"Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
+                            except:
+                                pass
+                            await mute_member(message.author, 0.16)
+                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(message.content[:500])}')
+                            return
             except:
                 pass
             try:
-                if json.loads(database[f"newline.toggle.{message.guild.id}"]):
-                    limit = 10
-                    try:
-                        limit = json.loads(database[f"newline.limit.{message.guild.id}"])
-                    except:
-                        pass
-                    newlines = message.content.count("\n")
-                    if "\n"*limit in message.content:
+                if message.channel.id not in ignored_channels["newline"]:
+                    if json.loads(database[f"newline.toggle.{message.guild.id}"]):
+                        limit = 10
                         try:
-                            await message.delete()
+                            limit = json.loads(database[f"newline.limit.{message.guild.id}"])
                         except:
                             pass
-                        try:
-                            await message.author.send(f"Please do not spam newlines in your message! You just sent **{newlines} {'newline' if newlines == 1 else 'newlines'}** in **1 message**!")
-                        except:
-                            pass
-                        await mute_member(message.author, 0.16)
-                        newline = "\n"
-                        await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{message.content[:500].replace(newline*8, newline+"..."+newline)}')
-                        return
+                        newlines = message.content.count("\n")
+                        if "\n"*limit in message.content:
+                            try:
+                                await message.delete()
+                            except:
+                                pass
+                            try:
+                                await message.author.send(f"Please do not spam newlines in your message! You just sent **{newlines} {'newline' if newlines == 1 else 'newlines'}** in **1 message**!")
+                            except:
+                                pass
+                            await mute_member(message.author, 0.16)
+                            newline = "\n"
+                            await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{message.content[:500].replace(newline*8, newline+"..."+newline)}')
+                            return
             except:
                 pass
     last_messages[message.author.id] = time.time()

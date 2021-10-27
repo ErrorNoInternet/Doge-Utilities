@@ -2,9 +2,18 @@ import time
 import json
 import core
 import language
+import variables
 
 default_settings = {"language": "en", "vote_messages": True}
 settings_cache = {}
+
+def get_filter_name(name):
+    if name in variables.filters.keys():
+        return variables.filters[name]
+    elif name in variables.filters.values():
+        return {value: key for key, value in variables.filters.items()}[name]
+    else:
+        return ""
 
 def get_settings(user_id):
     try:

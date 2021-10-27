@@ -53,6 +53,30 @@ def update_counter(guild_id):
         variables.protected_guilds[guild_id] += 1
 
 @core.client.event
+async def on_guild_channel_create(channel):
+    mute_role = None; exists = False
+    for role in channel.guild.roles:
+        if "mute" in role.name.lower():
+            mute_role = role; exists = True
+    if exists:
+        try:
+            try:
+                await channel.set_permissions(mute_role, send_messages=False)
+            except:
+                await channel.set_permissions(mute_role, connect=False)
+        except:
+            pass
+    ban_role = None; exists = False
+    for role in channel.guild.roles:
+        if "ban" in role.name.lower():
+            ban_role = role; exists = True
+    if exists:
+        try:
+            await channel.set_permissions(ban_role, view_channel=False)
+        except:
+            pass
+
+@core.client.event
 async def on_guild_channel_update(before, after):
     try:
         current_setting = json.loads(core.database[f"{before.guild.id}.raid-protection"])

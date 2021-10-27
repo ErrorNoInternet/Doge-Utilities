@@ -528,17 +528,7 @@ def toggle_filter_settings(token, name, server):
     except:
         flask.abort(403)
 
-    filter_name = ""
-    if name == "insults":
-        filter_name = "insults"
-    elif name == "spam":
-        filter_name = "spamming"
-    elif name == "links":
-        filter_name = "links"
-    elif name == "mention":
-        filter_name = "mention"
-    elif name == "newline":
-        filter_name = "newline"
+    filter_name = functions.get_filter_name(name)
     if filter_name == "":
         flask.abort(404)
 
