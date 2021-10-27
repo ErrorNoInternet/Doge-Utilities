@@ -472,7 +472,7 @@ async def slash_command_handler(interaction):
 
     if get_cooldown(interaction.author.id, interaction.data.name) > 0:
         cooldown_string = generate_cooldown(interaction.data.name, get_cooldown(interaction.author.id, interaction.data.name))
-        embed = disnake.Embed(title="Command Cooldown", description=cooldown_string, color=variables.embed_color)
+        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "command_cooldown"), description=cooldown_string, color=variables.embed_color)
         await interaction.response.send_message(embed=embed, ephemeral=True)
         raise Exception("no permission")
 
@@ -1298,13 +1298,13 @@ async def lookup_command(
         url = "https://discord.com/api/users/" + str(int(user))
         response = requests.get(url, headers=headers).json()
     except:
-        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
         return
     if "10013" not in str(response):
         try:
             response["public_flags"]
         except:
-            await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
             return
         badges = ""
         for flag in variables.public_flags:
@@ -1325,12 +1325,12 @@ async def lookup_command(
         except:
             pass
         embed = disnake.Embed(color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
-        embed.add_field(name="User ID", value=f"`{response['id']}`")
-        embed.add_field(name="Tag", value=f"`{response['username']}#{response['discriminator']}`")
-        embed.add_field(name="Creation Time", value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>")
-        embed.add_field(name="Public Flags", value=f"`{response['public_flags']}` {badges}")
-        embed.add_field(name="Bot User", value=f"`{bot_value}`")
-        embed.add_field(name="System User", value=f"`{system_value}`")
+        embed.add_field(name=functions.get_text(interaction.author.id, "user_id"), value=f"`{response['id']}`")
+        embed.add_field(name=functions.get_text(interaction.author.id, "user_tag"), value=f"`{response['username']}#{response['discriminator']}`")
+        embed.add_field(name=functions.get_text(interaction.author.id, "creation_time"), value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>")
+        embed.add_field(name=functions.get_text(interaction.author.id, "public_flags"), value=f"`{response['public_flags']}` {badges}")
+        embed.add_field(name=functions.get_text(interaction.author.id, "bot_user"), value=f"`{bot_value}`")
+        embed.add_field(name=functions.get_text(interaction.author.id, "system_user"), value=f"`{system_value}`")
 
         if response['avatar'] == None:
             avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(response['discriminator']) % 5}.png"
@@ -1348,7 +1348,7 @@ async def lookup_command(
                 banner_url = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.webp?size=1024"
             embed.set_image(url=banner_url)
     else:
-        embed = disnake.Embed(title="Unknown User", description="Unable to find the specified user", color=variables.embed_color)
+        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "unknown_user"), description=functions.get_text(interaction.author.id, "unknown_user_description"), color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "lookup", 5)
 
@@ -2049,7 +2049,7 @@ async def blacklist_add_command(
     try:
         user_id = int(functions.remove_mentions(user))
     except:
-        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
         return
     current_users = json.loads(database["blacklist"])
     if user_id in current_users:
@@ -2067,7 +2067,7 @@ async def blacklist_remove_command(
     try:
         user_id = int(functions.remove_mentions(user))
     except:
-        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
         return
     current_users = json.loads(database["blacklist"])
     if user_id not in current_users:
@@ -3533,7 +3533,7 @@ async def kick_command(
             await interaction.response.send_message(
                 embed=disnake.Embed(
                     color=disnake.Color.green(),
-                    description=f"**{member}** has been **successfully kicked**",
+                    description=functions.get_text(interaction.author.id, "user_kicked").format(member),
                 )
             )
             await log_message(interaction.guild, f"**{member}** has been kicked by **{interaction.author}**: {reason}")
@@ -3541,7 +3541,7 @@ async def kick_command(
             await interaction.response.send_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    description=f"Unable to kick **{member}**",
+                    description=functions.get_text(interaction.author.id, "unable_to_kick").format(member),
                 )
             )
     else:
@@ -3562,7 +3562,7 @@ async def ban_command(
     try:
         user_id = int(functions.remove_mentions(member))
     except:
-        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
         return
 
     found = False
@@ -3626,7 +3626,7 @@ async def unban_command(
         user_id = int(functions.remove_mentions(member))
         user = await client.fetch_user(user_id)
     except:
-        await interaction.response.send_message("Please mention a valid user!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
         return
     try:
         await interaction.guild.unban(user)
