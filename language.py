@@ -93,7 +93,7 @@ data = {
         "command_count": "指令数",
         "disnake_version": "Disnake版本",
         "bot_version": "机器人版本",
-        "bot_uptime": "机器人运行时间",
+        "bot_uptime": "运行时间",
         "latency": "延迟",
         "shard": "碎片",
         "members_lower": "用户",
