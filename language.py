@@ -194,7 +194,7 @@ data = {
         "user_muted_temporarily": "我成功禁言了**{}** (**{}**)",
         "unable_to_unban": "我无法解除**{}**的封锁",
         "bot_error": "机器人错误",
-        "unable_to_unmute": "我无法禁言**{}**",
+        "unable_to_unmute": "我无法解**{}**的禁言",
         "user_unmuted": "**{}**的禁言已被成功解除",
         "cannot_warn_self": "你不能警告你自己!",
         "cannot_warn_bot": "你不能警告一个机器人!",
