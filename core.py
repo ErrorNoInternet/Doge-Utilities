@@ -2461,7 +2461,7 @@ async def unmute_command(
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
-    if member.top_role.position >= interaction.author.top_role.position:
+    if member.top_role.position >= interaction.author.top_role.position and "mute" not in member.top_role.name.lower():
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_unmute").format(member), ephemeral=True)
         return
 
@@ -2488,7 +2488,7 @@ async def mute_command(
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
-    if member.top_role.position >= interaction.author.top_role.position:
+    if member.top_role.position >= interaction.author.top_role.position and "mute" not in member.top_role.name.lower():
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_mute").format(member), ephemeral=True)
         return
 
@@ -2548,7 +2548,7 @@ async def user_mute_command(interaction):
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
-    if interaction.target.top_role.position >= interaction.author.top_role.position:
+    if interaction.target.top_role.position >= interaction.author.top_role.position and "mute" not in interaction.target.top_role.name.lower():
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_mute").format(interaction.target), ephemeral=True)
         return
     mute_role = None; exists = False
@@ -2577,7 +2577,7 @@ async def user_unmute_command(interaction):
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
-    if interaction.target.top_role.position >= interaction.author.top_role.position:
+    if interaction.target.top_role.position >= interaction.author.top_role.position and "mute" not in interaction.target.top_role.name.lower():
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_unmute").format(interaction.target), ephemeral=True)
         return
     mute_role = None; exists = False
