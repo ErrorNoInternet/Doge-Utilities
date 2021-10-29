@@ -4,8 +4,21 @@ import core
 import language
 import variables
 
-default_settings = {"language": "en", "vote_messages": True}
-settings_cache = {}
+def parse_time(timestamp):
+    timestamp = timestamp.replace(" ", "")
+    numbers = ""
+    unit = ""
+    for letter in timestamp:
+        try:
+            int(letter)
+            numbers += letter
+        except:
+            unit += letter
+    for key, value in variables.unit_abbreviations.items():
+        if unit in value or unit[:-1] in value:
+            unit = key
+            break
+    return int(numbers) * variables.units[unit.lower()]
 
 def get_filter_name(name):
     if name in variables.filters.keys():
@@ -20,9 +33,9 @@ def get_settings(user_id):
         settings = json.loads(core.database[f"settings.{user_id}"])
     except:
         settings = {}
-    for key in default_settings.keys():
+    for key in variables.default_settings.keys():
         if key not in settings:
-            settings[key] = default_settings[key]
+            settings[key] = variables.default_settings[key]
     return settings
 
 def set_settings(settings, user_id):
@@ -31,16 +44,16 @@ def set_settings(settings, user_id):
 def get_text(user_id, key):
     user_id = str(user_id)
     settings = None
-    if user_id in settings_cache:
-        data = settings_cache[user_id]
+    if user_id in variables.settings_cache:
+        data = variables.settings_cache[user_id]
         if time.time() - data[0] < 10:
             settings = data[1]
         else:
             settings = get_settings(user_id)
-            settings_cache[user_id] = [time.time(), settings]
+            variables.settings_cache[user_id] = [time.time(), settings]
     else:
         settings = get_settings(user_id)
-        settings_cache[user_id] = [time.time(), settings]
+        variables.settings_cache[user_id] = [time.time(), settings]
     return language.get(settings['language'], key)
 
 def remove_mentions(user):

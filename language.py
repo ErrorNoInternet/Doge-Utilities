@@ -77,6 +77,7 @@ data = {
         "unknown_user": "Unknown User",
         "unknown_user_description": "The user you specified was not found",
         "command_cooldown": "Command Cooldown",
+        "invalid_duration": "Please enter a valid duration!",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -156,6 +157,7 @@ data = {
         "unknown_user": "用户不存在",
         "unknown_user_description": "你提供的用户不存在",
         "command_cooldown": "指令冷却",
+        "invalid_duration": "请输入一个正确的时间!",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

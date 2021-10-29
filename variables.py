@@ -11,19 +11,40 @@ prefix = "="
 shard_count = 2
 last_command = 0
 protected_guilds = {}
-owner_commands = ["execute", "blacklist"]
 test_guilds = None
-#embed_color = 0x20c2f6
 embed_color = 0xfc4c02
 large_number = 1e1000
 edited_channels = []
 edited_roles = []
+settings_cache = {}
+owner_commands = [
+    "execute",
+    "blacklist",
+]
 filters = {
     "insults": "insults",
     "spam": "spamming",
     "links": "links",
     "mention": "mention",
     "newline": "newline",
+}
+units = {
+    "s": 1,
+    "m": 60,
+    "h": 3600,
+    "d": 86400,
+    "w": 604800,
+}
+unit_abbreviations = {
+    "s": ["sec", "second"],
+    "m": ["min", "minute"],
+    "h": ["hr", "hour"],
+    "d": ["day"],
+    "w": ["week"],
+}
+default_settings = {
+    "language": "en",
+    "vote_messages": True,
 }
 version_number = 0
 build_number = 0

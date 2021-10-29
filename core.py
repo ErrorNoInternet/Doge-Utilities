@@ -2478,7 +2478,7 @@ async def unmute_command(
 async def mute_command(
         interaction,
         member: disnake.Member = Param(description="The member you want to mute"),
-        duration: float = Param(0, name="minutes", description="The target duration"),
+        duration: str = Param(0, description="The target duration"),
     ):
     if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         pass
@@ -2487,6 +2487,13 @@ async def mute_command(
         return
     if member.top_role.position >= interaction.author.top_role.position:
         await interaction.response.send_message(f"You do not have permission to mute **{member}**!", ephemeral=True)
+        return
+
+    original_duration = duration
+    try:
+        duration = functions.parse_time(duration) / 60
+    except:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
         return
 
     mute_role = None; exists = False
@@ -2529,7 +2536,7 @@ async def mute_command(
         except:
             await interaction.response.send_message(f"Unable to mute **{member}**")
             return
-        await interaction.response.send_message(f"Successfully muted **{member}** for **{duration if round(duration) != 1 else round(duration)} {'minute' if round(duration) == 1 else 'minutes'}**")
+        await interaction.response.send_message(f"Successfully muted **{member}** for **{original_duration}**")
 
 @client.user_command(name="Mute Member")
 async def user_mute_command(interaction):
@@ -3908,9 +3915,16 @@ async def remind_remove_command(
 @remind_command.sub_command(name="add", description="Add a new reminder")
 async def remind_add_command(
         interaction,
-        duration: float = Param(name="minutes", description="The duration of the reminder"),
+        duration: str = Param(description="The duration of the reminder"),
         text: str = Param(description="The name of the reminder"),
     ):
+    original_duration = duration
+    try:
+        duration = functions.parse_time(duration) / 60
+    except:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
+        return
+
     if len(text) > 100:
         await interaction.response.send_message("The specified text is too long!", ephemeral=True)
         return
@@ -3929,8 +3943,7 @@ async def remind_add_command(
         return
     current_reminders.append([round(time.time()), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
-    output_duration = f"{duration if round(duration) != 1 else round(duration)} {functions.get_text(interaction.author.id, 'minute') if round(duration) == 1 else functions.get_text(interaction.author.id, 'minutes')}"
-    await interaction.response.send_message(functions.get_text(interaction.author.id, 'reminder_added').format(output_duration))
+    await interaction.response.send_message(functions.get_text(interaction.author.id, 'reminder_added').format(original_duration))
 
 def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
