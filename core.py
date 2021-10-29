@@ -536,7 +536,7 @@ async def settings_language_set_command(
     default_text = f"Your preferred language has been set to **{language_name.title()}**"
     language_text = default_text
     try:
-        del functions.settings_cache[str(interaction.author.id)]
+        del variables.settings_cache[str(interaction.author.id)]
     except:
         pass
     language_name = functions.get_text(interaction.author.id, "language_name")
