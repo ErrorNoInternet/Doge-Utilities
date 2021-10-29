@@ -3510,31 +3510,31 @@ async def warn_command(
         guild_warnings = 0
     else:
         if member.id == interaction.author.id:
-            await interaction.response.send_message("You cannot warn yourself!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "cannot_warn_self"), ephemeral=True)
             return
         if member.bot:
-            await interaction.response.send_message("You cannot warn a bot!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "cannot_warn_bot"), ephemeral=True)
             return
         if member.guild_permissions.administrator:
-            await interaction.response.send_message("You cannot warn an administrator!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "cannot_warn_administrator"), ephemeral=True)
             return
         if member.top_role.position >= interaction.author.top_role.position:
-            await interaction.response.send_message(f"You do not have permission to warn **{member}**!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_warn").format(member), ephemeral=True)
             return
     warnings[str(interaction.guild.id)] = guild_warnings
     database[f"warnings.{member.id}"] = json.dumps(warnings)
     if warning.lower() == "reset":
-        await interaction.response.send_message(f"**{member}**'s warnings have been successfully reset", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "warnings_reset").format(member), ephemeral=True)
         await log_message(interaction.guild, f"**{member}**'s warnings have been reset by **{interaction.author}**")
         return
     try:
-        warning_embed = disnake.Embed(title="Warning", description=warning, color=disnake.Color.yellow())
-        warning_embed.set_footer(text=f"You now have {guild_warnings} {'warning' if guild_warnings == 1 else 'warnings'} in {interaction.guild.name}")
+        warning_embed = disnake.Embed(title=functions.get_text(member.id, "warning"), description=warning, color=disnake.Color.yellow())
+        warning_embed.set_footer(text=functions.get_text(member.id, "warning_count").format(guild_warnings, f"{functions.get_text(member.id, 'warning_lower') if guild_warnings == 1 else functions.get_text(member.id, 'warnings_lower')}", interaction.guild.name))
         await member.send(embed=warning_embed)
-        await interaction.response.send_message(embed=disnake.Embed(description=f"Successfully warned **{member}** (**{guild_warnings}**)", color=disnake.Color.green()))
+        await interaction.response.send_message(embed=disnake.Embed(description=functions.get_text(interaction.author.id, "user_warned").format(member, guild_warnings), color=disnake.Color.green()))
         await log_message(interaction.guild, f"**{member}** has been warned by **{interaction.author}** (**{guild_warnings}**): {warning}")
     except:
-        await interaction.response.send_message(embed=disnake.Embed(description=f"Unable to warn **{member}**", color=disnake.Color.red()))
+        await interaction.response.send_message(embed=disnake.Embed(description=functions.get_text(interaction.author.id, "unable_to_warn").format(member), color=disnake.Color.red()))
     add_cooldown(interaction.author.id, "warn", 5)
 
 @client.slash_command(name="kick", description="Kick a member from your server")
