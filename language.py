@@ -102,6 +102,7 @@ data = {
         "user_warned": "Successfully warned **{}** (**{}**)",
         "unable_to_warn": "Unable to warn **{}**",
         "warnings_reset": "**{}**'s warnings have been successfully reset",
+        "warning_not_specified": "Not specified",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -206,6 +207,7 @@ data = {
         "user_warned": "成功的警告了**{}** (**{}**)",
         "unable_to_warn": "我无法警告**{}**",
         "warnings_reset": "**{}**的警告已被成功清除",
+        "warning_not_specified": "无原因",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

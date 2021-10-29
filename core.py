@@ -3487,7 +3487,7 @@ async def discriminator_command(
 async def warn_command(
         interaction,
         member: disnake.Member = Param(description="The member you want to warn"),
-        warning: str = Param("Not specified", description="The warning you want to give the member (use 'reset' to reset the warnings)"),
+        warning: str = Param(0, description="The warning you want to give the member (use 'reset' to reset the warnings)"),
     ):
     if interaction.author.guild_permissions.kick_members and interaction.author.guild_permissions.ban_members:
         pass
@@ -3496,6 +3496,8 @@ async def warn_command(
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
+    if warning == 0:
+        warning = functions.get_text(interaction.author.id, "warning_not_specified")
     
     try:
         warnings = json.loads(database[f"warnings.{member.id}"])
