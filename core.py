@@ -766,7 +766,7 @@ async def ping_command(interaction):
 @client.slash_command(name="afk", description="Tell other users that you're currently AFK")
 async def afk_command(
         interaction,
-        message: str = Param("I am AFK", description="The reason why you are AFK")
+        message: str = Param("I am AFK", description="The reason why you are AFK"),
     ):
     try:
         current_status = database[f"afk.{interaction.author.id}"]
@@ -1282,13 +1282,13 @@ async def set_autorole_command(
             title="Autorole",
             description=f"This server's autorole has been set to {role_string}",
             color=variables.embed_color,
-        )
+        ),
     )
 
 @client.slash_command(name="lookup", description="Find a user on Discord")
 async def lookup_command(
         interaction,
-        user: str = Param(0, description="The ID of the target user")
+        user: str = Param(0, description="The ID of the target user"),
     ):
     if user == 0:
         user = str(interaction.author.id)
@@ -1437,7 +1437,7 @@ async def hash_command(
         interaction,
         hash_type: str = Param(name="algorithm", description="The type of the output hash (md5, sha256, etc)", autocomplete=autocomplete_algorithms),
         text: str = Param(description="The text you want to hash"),
-        length: int = Param(None, description="The length of the output hash (for shake_128, shake_256, etc)")
+        length: int = Param(None, description="The length of the output hash (for shake_128, shake_256, etc)"),
     ):
     try:
         hash_type = hash_type.strip()
@@ -1526,7 +1526,7 @@ async def binary_decode_command(
 @client.slash_command(name="calculate", description="Evaluate a math expression")
 async def calculate_command(
         interaction,
-        expression: str = Param(description="The math expression you want to evaluate")
+        expression: str = Param(description="The math expression you want to evaluate"),
     ):
     if expression.startswith("`"):
         expression = expression[1:]
@@ -1742,7 +1742,7 @@ async def epoch_date_command(
 @time_command.sub_command(name="date-epoch", description="Convert dates to unix timestamps")
 async def date_epoch_command(
         interaction,
-        text: str = Param(name="date", description="The date")
+        text: str = Param(name="date", description="The date"),
     ):
     try:
         epoch = date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color)
@@ -1755,7 +1755,7 @@ async def date_epoch_command(
 @time_command.sub_command(name="get", description="Get the time information about a specific region")
 async def time_get_command(
         interaction,
-        region: str = Param(description="The region you want to check the time for", autocomplete=autocomplete_timezones)
+        region: str = Param(description="The region you want to check the time for", autocomplete=autocomplete_timezones),
     ):
     region = region.strip()
     try:
@@ -1970,7 +1970,7 @@ async def execute_command(
         interaction,
         code: str = Param(description="The code you want to execute"),
         codeblock: ToggleOption = Param("enable", description="Whether or not you want a codeblock"),
-        ephemeral: ToggleOption = Param("disable", description="Whether or not you want the output to be ephemeral")
+        ephemeral: ToggleOption = Param("disable", description="Whether or not you want the output to be ephemeral"),
     ):
     if code.startswith("```python"):
         code = code[9:]
@@ -2514,9 +2514,9 @@ async def mute_command(
         try:
             await member.add_roles(mute_role)
         except:
-            await interaction.response.send_message(f"Unable to mute **{member}**", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
             return
-        await interaction.response.send_message(f"Successfully muted **{member}** permanently")
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_permanently").format(member))
     else:
         if duration > 43200:
             await interaction.response.send_message("The specified duration is too long!", ephemeral=True)
@@ -2534,9 +2534,9 @@ async def mute_command(
             moderation_data.append([member.id, round(time.time()), duration])
             database["mute." + str(interaction.guild.id)] = json.dumps(moderation_data)
         except:
-            await interaction.response.send_message(f"Unable to mute **{member}**", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
             return
-        await interaction.response.send_message(f"Successfully muted **{member}** for **{original_duration}**")
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_temporarily").format(member, original_duration))
 
 @client.user_command(name="Mute Member")
 async def user_mute_command(interaction):
@@ -2560,9 +2560,9 @@ async def user_mute_command(interaction):
         return
     try:
         await interaction.target.add_roles(mute_role)
-        await interaction.response.send_message(f"Successfully muted **{interaction.target}**")
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_permanently").format(interaction.target))
     except:
-        await interaction.response.send_message(f"Unable to mute **{interaction.target}**", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(interaction.target), ephemeral=True)
 
 @client.user_command(name="Unmute Member")
 async def user_unmute_command(interaction):
@@ -2735,7 +2735,7 @@ async def insults_remove_autocomplete(interaction, string):
 @insults_command.sub_command(name="remove", description="Remove a word from the insults filter")
 async def insults_remove_command(
         interaction,
-        word: str = Param(description="The word you want to remove", autocomplete=insults_remove_autocomplete)
+        word: str = Param(description="The word you want to remove", autocomplete=insults_remove_autocomplete),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
@@ -3245,7 +3245,7 @@ async def logging_disable_command(interaction):
 @server_command.sub_command(name="suggest", description="Send a suggestion to the server owner")
 async def server_suggest_command(
         interaction,
-        suggestion: str = Param(description="The suggestion you want to send")
+        suggestion: str = Param(description="The suggestion you want to send"),
     ):
     await interaction.response.send_message("Sending your suggestion...", ephemeral=True)
     try:
@@ -3646,16 +3646,17 @@ async def unban_command(
         await interaction.response.send_message(
             embed=disnake.Embed(
                 color=disnake.Color.green(),
-                description=f"**{user}** has been **successfully unbanned**",
-            )
+                description=functions.get_text(interaction.author.id, "user_unbanned").format(user),
+            ),
         )
         await log_message(interaction.guild, f"**{user}** has been unbanned by **{interaction.author}**")
     except:
         await interaction.response.send_message(
             embed=disnake.Embed(
                 color=disnake.Color.red(),
-                description=f"Unable to unban **{user}**",
-            )
+                description=functions.get_text(interaction.author.id, "unable_to_unban").format(user),
+            ),
+            ephemeral=True,
         )
 
 def autocomplete_units(_, string):

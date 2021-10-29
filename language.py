@@ -82,6 +82,11 @@ data = {
         "invalid_duration": "Please enter a valid duration!",
         "no_permission_kick": "You do not have permission to kick **{}**!",
         "no_permission_ban": "You do not have permission to ban **{}**!",
+        "unable_to_mute": "Unable to mute **{}**",
+        "no_permission_mute": "You do not have permission to mute **{}**!",
+        "user_muted_permanently": "Successfully muted **{}** permanently",
+        "user_muted_temporarily": "Successfully muted **{}** for **{}**",
+        "unable_to_unban": "Unable to unban **{}**",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -166,6 +171,11 @@ data = {
         "invalid_duration": "请输入一个正确的时间!",
         "no_permission_kick": "你没有权限剔除**{}**!",
         "no_permission_ban": "你没有权限封锁**{}**!",
+        "unable_to_mute": "我无法禁言**{}**",
+        "no_permission_mute": "你没有权限禁言**{}**!",
+        "user_muted_permanently": "我成功禁言了**{}**",
+        "user_muted_temporarily": "我成功禁言了**{}** (**{}**)",
+        "unable_to_unban": "我无法解除**{}**的封锁",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
