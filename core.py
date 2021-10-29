@@ -3497,7 +3497,7 @@ async def warn_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     if warning == 0:
-        warning = functions.get_text(interaction.author.id, "warning_not_specified")
+        warning = functions.get_text(member.id, "warning_not_specified")
     
     try:
         warnings = json.loads(database[f"warnings.{member.id}"])
