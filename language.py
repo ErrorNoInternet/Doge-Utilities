@@ -306,7 +306,7 @@ data = {
         "cannot_warn_administrator": "Du kannst keine Administratoren warnen!",
         "no_permission_warn": "Du hast keine Berechtigungen **{}** zu warnen!",
         "warning": "Warnung",
-        "warning_lower": "Warnen",
+        "warning_lower": "Warnung",
         "warnings_lower": "Warnungen",
         "warning_count": "Du hast jetzt {0} {1} in {2}",
         "user_warned": "**{}** wurde erfolgreich gewarnt. (**{}**)",
