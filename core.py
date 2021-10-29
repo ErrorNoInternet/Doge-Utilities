@@ -4355,7 +4355,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 await mute_member(message.author, 0.16)
-                                await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{message.content[:500]}')
+                                await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{message.content[:1000]}')
                                 return
             except:
                 pass
@@ -4374,7 +4374,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 await mute_member(message.author, 0.16)
-                                await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{message.content[:500]}')
+                                await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{message.content[:1000]}')
                                 return
             except:
                 pass
@@ -4406,7 +4406,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 await mute_member(message.author, 0.16)
-                                await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{message.content[:500]}')
+                                await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{message.content[:1000]}')
                                 return
             except:
                 pass
@@ -4429,7 +4429,7 @@ async def on_message(message):
                             except:
                                 pass
                             await mute_member(message.author, 0.16)
-                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(message.content[:500])}')
+                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(message.content[:1000])}')
                             return
             except:
                 pass
@@ -4453,7 +4453,7 @@ async def on_message(message):
                                 pass
                             await mute_member(message.author, 0.16)
                             newline = "\n"
-                            await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{message.content[:500].replace(newline*8, newline+"..."+newline)}')
+                            await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{message.content[:1000].replace(newline*8, newline+"..."+newline)}')
                             return
             except:
                 pass
