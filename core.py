@@ -2461,6 +2461,9 @@ async def unmute_command(
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
+    if member.top_role.position >= interaction.author.top_role.position:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_unmute").format(member), ephemeral=True)
+        return
 
     mute_role = None; exists = False
     for role in interaction.guild.roles:
@@ -2470,9 +2473,9 @@ async def unmute_command(
         try:
             await member.remove_roles(mute_role)
         except:
-            await interaction.response.send_message(f"Unable to unmute **{member}**")
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(member))
             return
-    await interaction.response.send_message(f"Successfully unmuted **{member}**")
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "user_unmuted").format(member))
 
 @client.slash_command(name="mute", description="Mute a specified member on your server")
 async def mute_command(
@@ -2486,7 +2489,7 @@ async def mute_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     if member.top_role.position >= interaction.author.top_role.position:
-        await interaction.response.send_message(f"You do not have permission to mute **{member}**!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_mute").format(member), ephemeral=True)
         return
 
     original_duration = duration
@@ -2545,6 +2548,9 @@ async def user_mute_command(interaction):
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
+    if interaction.target.top_role.position >= interaction.author.top_role.position:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_mute").format(interaction.target), ephemeral=True)
+        return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
         if "mute" in role.name.lower():
@@ -2571,6 +2577,9 @@ async def user_unmute_command(interaction):
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
+    if interaction.target.top_role.position >= interaction.author.top_role.position:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_unmute").format(interaction.target), ephemeral=True)
+        return
     mute_role = None; exists = False
     for role in interaction.guild.roles:
         if "mute" in role.name.lower():
@@ -2578,11 +2587,11 @@ async def user_unmute_command(interaction):
     if exists:
         try:
             await interaction.target.remove_roles(mute_role)
-            await interaction.response.send_message(f"Successfully unmuted **{interaction.target}**")
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "user_unmuted").format(interaction.target))
         except:
-            await interaction.response.send_message(f"Unable to unmute **{interaction.target}**")
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(interaction.target))
     else:
-        await interaction.response.send_message(f"Unable to unmute **{interaction.target}**")
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(interaction.target))
 
 @client.slash_command(name="filter", description="Manage the auto-moderation filters")
 async def filter_command(_):
