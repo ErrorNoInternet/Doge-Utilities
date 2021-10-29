@@ -87,6 +87,7 @@ data = {
         "user_muted_permanently": "Successfully muted **{}** permanently",
         "user_muted_temporarily": "Successfully muted **{}** for **{}**",
         "unable_to_unban": "Unable to unban **{}**",
+        "bot_error": "Bot Error",
     },
     "zh-cn": {
         "no_permission": "你没有权限用这个指令!",
@@ -176,6 +177,7 @@ data = {
         "user_muted_permanently": "我成功禁言了**{}**",
         "user_muted_temporarily": "我成功禁言了**{}** (**{}**)",
         "unable_to_unban": "我无法解除**{}**的封锁",
+        "bot_error": "机器人错误",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
