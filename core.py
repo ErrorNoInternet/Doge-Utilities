@@ -2514,7 +2514,7 @@ async def mute_command(
         try:
             await member.add_roles(mute_role)
         except:
-            await interaction.response.send_message(f"Unable to mute **{member}**")
+            await interaction.response.send_message(f"Unable to mute **{member}**", ephemeral=True)
             return
         await interaction.response.send_message(f"Successfully muted **{member}** permanently")
     else:
@@ -2534,7 +2534,7 @@ async def mute_command(
             moderation_data.append([member.id, round(time.time()), duration])
             database["mute." + str(interaction.guild.id)] = json.dumps(moderation_data)
         except:
-            await interaction.response.send_message(f"Unable to mute **{member}**")
+            await interaction.response.send_message(f"Unable to mute **{member}**", ephemeral=True)
             return
         await interaction.response.send_message(f"Successfully muted **{member}** for **{original_duration}**")
 
@@ -2562,7 +2562,7 @@ async def user_mute_command(interaction):
         await interaction.target.add_roles(mute_role)
         await interaction.response.send_message(f"Successfully muted **{interaction.target}**")
     except:
-        await interaction.response.send_message(f"Unable to mute **{interaction.target}**")
+        await interaction.response.send_message(f"Unable to mute **{interaction.target}**", ephemeral=True)
 
 @client.user_command(name="Unmute Member")
 async def user_unmute_command(interaction):
@@ -3137,6 +3137,9 @@ async def server_command(_):
 
 @server_command.sub_command(name="status", description="See moderation information about this server")
 async def server_status_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
     embed = disnake.Embed(color=variables.embed_color)
     raid_protection = 0
     try:
@@ -3533,7 +3536,7 @@ async def kick_command(
     ):
     if interaction.author.guild_permissions.kick_members or interaction.author.id in variables.permission_override:
         if member.top_role.position >= interaction.author.top_role.position:
-            await interaction.response.send_message(f"You do not have permission to kick **{member}**!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_kick").format(member), ephemeral=True)
             return
         try:
             await member.kick(reason=reason)
@@ -3549,7 +3552,8 @@ async def kick_command(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     description=functions.get_text(interaction.author.id, "unable_to_kick").format(member),
-                )
+                ),
+                ephemeral=True,
             )
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
@@ -3576,7 +3580,7 @@ async def ban_command(
     for member in interaction.guild.members:
         if member.id == user_id:
             if member.top_role.position >= interaction.author.top_role.position:
-                await interaction.response.send_message(f"You do not have permission to ban **{member}**!", ephemeral=True)
+                await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_ban").format(member), ephemeral=True)
                 return
             found = True
             try:
@@ -3584,7 +3588,7 @@ async def ban_command(
                 await interaction.response.send_message(
                     embed=disnake.Embed(
                         color=disnake.Color.green(),
-                        description=f"**{member}** has been **successfully banned**",
+                        description=functions.get_text(interaction.author.id, "user_banned").format(member),
                     )
                 )
                 await log_message(interaction.guild, f"**{member}** has been banned by **{interaction.author}**: {reason}")
@@ -3592,8 +3596,9 @@ async def ban_command(
                 await interaction.response.send_message(
                     embed=disnake.Embed(
                         color=disnake.Color.red(),
-                        description=f"Unable to ban **{member}**",
-                    )
+                        description=functions.get_text(interaction.author.id, "unable_to_ban").format(member),
+                    ),
+                    ephemeral=True,
                 )
     if not found:
         try:
@@ -3606,7 +3611,7 @@ async def ban_command(
             await interaction.response.send_message(
                 embed=disnake.Embed(
                     color=disnake.Color.green(),
-                    description=f"**{user}** has been **successfully banned**",
+                    description=functions.get_text(interaction.author.id, "user_banned").format(user),
                 )
             )
             await log_message(interaction.guild, f"**{user}** has been banned by **{interaction.author}**: {reason}")
@@ -3614,8 +3619,9 @@ async def ban_command(
             await interaction.response.send_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
-                    description=f"Unable to ban **{user}**",
-                )
+                    description=functions.get_text(interaction.author.id, "unable_to_ban").format(user),
+                ),
+                ephemeral=True,
             )
 
 @client.slash_command(name="unban", description="Unban a specified member from your server")
