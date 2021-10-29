@@ -104,7 +104,7 @@ data = {
         "warnings_reset": "**{}**'s warnings have been successfully reset",
     },
     "zh-cn": {
-        "no_permission": "你没有权限用这个指令!",
+        "no_permission": "你没有权限使用这个指令!",
         "not_command_sender": "这个指令不是你发的!",
         "vote_message": "谢谢你给我投票!",
         "banned_message": "你已被禁止使用Doge Utilities!",
@@ -205,7 +205,7 @@ data = {
         "warning_count": "你现在在{2}里有{0}个{1}",
         "user_warned": "成功的警告了**{}** (**{}**)",
         "unable_to_warn": "我无法警告**{}**",
-        "warnings_reset": "**{}**的警告已被成功清楚",
+        "warnings_reset": "**{}**的警告已被成功清除",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
