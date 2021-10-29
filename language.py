@@ -203,7 +203,7 @@ data = {
         "warning": "警告",
         "warning_lower": "警告",
         "warnings_lower": "警告",
-        "warning_count": "你现在在{2}里有{0}个{1}",
+        "warning_count": "你在{2}有{0}个{1}",
         "user_warned": "成功的警告了**{}** (**{}**)",
         "unable_to_warn": "我无法警告**{}**",
         "warnings_reset": "**{}**的警告已被成功清除",
