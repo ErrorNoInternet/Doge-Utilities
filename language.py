@@ -201,7 +201,7 @@ data = {
         "unknown_user": "用户不存在",
         "unknown_user_description": "你提供的用户不存在",
         "command_cooldown": "指令冷却",
-        "command_cooldown_description": "请你等**{}{}**后再使用`{}`",
+        "command_cooldown_description": "请在**{}{}**后使用`{}`",
         "invalid_duration": "请输入一个正确的时间!",
         "no_permission_kick": "你没有权限剔除**{}**!",
         "no_permission_ban": "你没有权限封锁**{}**!",
