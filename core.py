@@ -426,9 +426,6 @@ def generate_cooldown(user_id, command, cooldown_time):
         cooldown_unit = functions.get_text(user_id, cooldown_unit[:-1])
     else:
         cooldown_unit = functions.get_text(user_id, cooldown_unit)
-    if str(cooldown_time) == "inf":
-        cooldown_time = "for an"
-        cooldown_unit = "eternity"
     return functions.get_text(user_id, "command_cooldown_description").format(cooldown_time, cooldown_unit, command)
 
 @client.before_message_command_invoke
@@ -469,7 +466,7 @@ async def slash_command_handler(interaction):
         raise Exception("no permission")
 
     if interaction.data.name in variables.owner_commands and interaction.author.id not in variables.bot_owners:
-        await interaction.response.send_message("You are not the owner of Doge Utilities!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "not_bot_owner"), ephemeral=True)
         raise Exception("no permission")
 
     if get_cooldown(interaction.author.id, interaction.data.name) > 0:

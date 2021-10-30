@@ -120,6 +120,7 @@ data = {
         "years": "years",
         "suggestion_sent": "Your suggestion has been successfully sent",
         "sending_suggestion": "Sending your suggestion...",
+        "not_bot_owner": "You are not the owner of Doge Utilities!",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -242,6 +243,7 @@ data = {
         "years": "年",
         "suggestion_sent": "你的建议已被成功发送",
         "sending_suggestion": "正在发送你的建议。。。",
+        "not_bot_owner": "你不是Doge Utilities的主人!",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
