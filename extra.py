@@ -66,7 +66,7 @@ async def find_user(client, user_id):
     else: text += f"\nFound `{user_id}` in `{counter}/{len(client.guilds)}` servers"
     print(text)
 
-async def get_translations(languages=["en", "zh-cn", "de", "ru", "sk"]):
+def get_translations(languages=["en", "zh-cn", "de", "ru", "sk"]):
     for language_name in languages:
-        print(f"{language_name}: {len(language.data[language_name])}")
+        print(f"`{language_name}`: {len(language.data[language_name])}")
 
