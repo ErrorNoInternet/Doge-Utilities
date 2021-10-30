@@ -858,6 +858,61 @@ async def website_command(interaction):
 async def get_command(_):
     pass
 
+@get_command.sub_command(name="supporters", description="Get information about Doge Utilities' supporters")
+async def supporters_command(interaction):
+    users = []
+    added = []
+    users_string = ""
+    for value in variables.supporters.values():
+        if type(value) == list:
+            for user in value:
+                users.append(await client.getch_user(user))
+        if type(value) == dict:
+            for user in value.values():
+                if type(user) == list:
+                    for user_id in user:
+                        users.append(await client.getch_user(user_id))
+                else:
+                    users.append(await client.getch_user(user))
+    for user in users:
+        if user:
+            if user.id not in added:
+                users_string += f"**{user.name}**, "
+                added.append(user.id)
+    description = f"Big thanks to {users_string[:-2]}, and a lot more awesome people!"
+    embed = disnake.Embed(description=description, color=variables.embed_color)
+
+    developers = []
+    for developer in variables.supporters["developers"]:
+        user = await client.getch_user(developer)
+        if user:
+            developers.append(user.name)
+    embed.add_field(name="Developers", value="\n".join(developers))
+
+    ideas = []
+    for idea in variables.supporters["ideas"]:
+        user = await client.getch_user(idea)
+        if user:
+            ideas.append(user.name)
+    embed.add_field(name="Ideas", value="\n".join(ideas))
+
+    translators = []
+    for language, translator in variables.supporters["translators"].items():
+        translator_users = []
+        for user_id in translator:
+            user = await client.getch_user(user_id)
+            if user:
+                translator_users.append(user.name)
+        flag = language
+        if "-" in flag:
+            flag = flag.split("-")[1]
+        if flag == "en":
+            flag = "us"
+        translators.append(f":flag_{flag}: {', '.join(translator_users)}")
+    embed.add_field(name="Translators", value="\n".join(translators))
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "get", 3)
+
 @get_command.sub_command(name="shards", description="Get information about Doge Utilities' shards")
 async def shards_command(interaction):
     pages = {}; current_page = 1; page_limit = 20; current_item = 0; index = 1
@@ -888,7 +943,7 @@ async def shards_command(interaction):
         color=variables.embed_color,
     )
     await pager.start(interaction)
-    add_cooldown(interaction.author.id, "shards", 3)
+    add_cooldown(interaction.author.id, "get", 3)
 
 @get_command.sub_command(name="status", description="Display the bot's current statistics")
 async def status_command(interaction):
@@ -1532,7 +1587,10 @@ async def calculate_command(
         expression = expression[1:]
     if expression.endswith("`"):
         expression = expression[:-1]
-    answer = evaluate_expression(expression); embed = disnake.Embed(color=variables.embed_color)
+    answer = evaluate_expression(expression)
+    if answer == None:
+        answer = functions.get_text(interaction.author.id, "unknown_answer")
+    embed = disnake.Embed(color=variables.embed_color)
     embed.add_field(name="Expression", value="`" + expression + "`")
     embed.add_field(name="Result", value="`" + answer + "`", inline=False)
     await interaction.response.send_message(embed=embed)
@@ -4101,7 +4159,7 @@ def evaluate_expression(expression):
     try:
         answer = str(simpleeval.simple_eval(expression, functions=math_functions))
     except:
-        answer = "Unknown Answer"
+        answer = None
     return answer
 
 async def log_message(guild, message):
