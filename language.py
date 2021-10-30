@@ -470,7 +470,7 @@ data = {
         "current_date": "Dátum",
         "weekday": "Pracovný deň",
         "time_description": "Informácia pre",
-        "weekdays": "['Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota', 'Nedeľa']",
+        "weekdays": ['Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota', 'Nedeľa'],
         "vote_websites": "Hlasovať za mňa môžeš na týchto stránkach",
         "vote_reminder_added": "12 hodinová pripomienka bola úspešne pridaná!",
         "vote_reminder_exists": "Pripomienka už existuje!",
