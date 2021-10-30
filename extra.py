@@ -93,19 +93,22 @@ async def ask_translations(message, user_id, target_language):
         return
     await target_user.send('Hello! I am here to ask you for some translations... If you want to stop, simply reply with "cancel" or "stop".')
     counter = 0
+    stopped = False
     for question in questions:
         counter += 1
         await target_user.send(f'({counter}/{len(questions)}) What is **{get_language(target_language).title()}** for "{language.data["en"][question]}"?')
         msg = await core.client.wait_for("message", check=check)
         if msg.content.lower() == "cancel" or msg.content.lower() == "stop":
             await target_user.send("Okay! Thanks for participating!")
+            stopped = True
             break
         results.append(f'`{question}`: "{msg.content}"')
-    await target_user.send("Looks like we are done! Thank you for all your translations!")
-    await target_user.send("Do you have anything extra to say? If you do, please send them. If you don't, please send \"no\".")
-    msg = await core.client.wait_for("message", check=check)
-    results.append("\nAdditional text: " + msg.content)
-    await target_user.send("We are finished! Thanks!")
+    if not stopped:
+        await target_user.send("Looks like we are done! Thank you for all your translations!")
+        await target_user.send("Do you have anything extra to say? If you do, please send them. If you don't, please send \"no\".")
+        msg = await core.client.wait_for("message", check=check)
+        results.append("\n**Additional text:** " + msg.content)
+        await target_user.send("We are finished! Thanks!")
     output = f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n" + "\n".join(results)
     pager = core.Paginator(title="Translations", segments=[output[i: i + 2000] for i in range(0, len(output), 2000)], color=variables.embed_color)
     await pager.start(core.FakeUserInteraction(message.author))
