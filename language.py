@@ -564,7 +564,7 @@ data = {
         "expression": "Výraz",
         "result": "Výsledok",
         "unknown_answer": "Neznáma odpoveď",
-        "second": "Sekunda",
+        "second": "sekunda",
         "seconds": "sekundy",
         "hour": "hodina",
         "hours": "hodiny",

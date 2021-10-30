@@ -363,7 +363,7 @@ threading.Thread(name="web_server", target=server.run).start()
 help_paginator = Paginator(
     title="Getting Started",
     color=variables.embed_color,
-    timeout=None,
+    timeout=600,
     segments=[variables.help_text[i: i + 1000] for i in range(0, len(variables.help_text), 1000)],
 )
 
