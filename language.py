@@ -127,7 +127,7 @@ data = {
         "vote_message": "谢谢你给我投票!",
         "banned_message": "你已被禁止使用Doge Utilities!",
         "error_message": "很抱歉，Doge Utilities出错了。。。",
-        "use_in_server": "请你在服务器里用Doge Utilities!",
+        "use_in_server": "请你在服务器里使用Doge Utilities!",
         "no_reminders": "你没有提醒",
         "reminders": "提醒",
         "reminder": "提醒",
