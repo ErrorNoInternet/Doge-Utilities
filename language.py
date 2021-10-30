@@ -521,7 +521,7 @@ data = {
         "warning_lower": "varovanie",
         "warnings_lower": "varovania",
         "warning_count": "Teraz máš {0} {1} v {2}",
-        "user_warned": "Používateľ **{}** bol úspešne varovaný za **{}**",
+        "user_warned": "Používateľ **{}** bol úspešne varovaný za (**{}**)",
         "unable_to_warn": "Nie som schopný varovať **{}**",
         "warnings_reset": "Varovania používateľa **{}** boli resetované",
         "not_specified": "Nešpecifikované",
