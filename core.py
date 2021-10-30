@@ -401,7 +401,7 @@ def get_cooldown(id, command):
 def add_cooldown(id, command, cooldown_time):
     user_cooldowns[f"{id}.{command}"] = [time.time(), cooldown_time]
 
-def generate_cooldown(command, cooldown_time):
+def generate_cooldown(user_id, command, cooldown_time):
     cooldown_unit = "seconds"
     if cooldown_time >= 60:
         cooldown_unit = "minutes"
@@ -423,11 +423,13 @@ def generate_cooldown(command, cooldown_time):
     if str(cooldown_time).endswith(".0"):
         cooldown_time = round(cooldown_time)
     if cooldown_time == 1:
-        cooldown_unit = cooldown_unit[:-1]
+        cooldown_unit = functions.get_text(user_id, cooldown_unit[:-1])
+    else:
+        cooldown_unit = functions.get_text(user_id, cooldown_unit)
     if str(cooldown_time) == "inf":
         cooldown_time = "for an"
         cooldown_unit = "eternity"
-    return f"Please wait **{cooldown_time} {cooldown_unit}** before using the `{command}` command again"
+    return functions.get_text(user_id, "command_cooldown_description").format(cooldown_time, cooldown_unit, command)
 
 @client.before_message_command_invoke
 async def message_command_handler(interaction):
@@ -471,7 +473,11 @@ async def slash_command_handler(interaction):
         raise Exception("no permission")
 
     if get_cooldown(interaction.author.id, interaction.data.name) > 0:
-        cooldown_string = generate_cooldown(interaction.data.name, get_cooldown(interaction.author.id, interaction.data.name))
+        cooldown_string = generate_cooldown(
+            interaction.author.id,
+            interaction.data.name,
+            get_cooldown(interaction.author.id, interaction.data.name),
+        )
         embed = disnake.Embed(title=functions.get_text(interaction.author.id, "command_cooldown"), description=cooldown_string, color=variables.embed_color)
         await interaction.response.send_message(embed=embed, ephemeral=True)
         raise Exception("no permission")
