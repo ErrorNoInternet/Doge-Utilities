@@ -102,7 +102,8 @@ data = {
         "user_warned": "Successfully warned **{}** (**{}**)",
         "unable_to_warn": "Unable to warn **{}**",
         "warnings_reset": "**{}**'s warnings have been successfully reset",
-        "warning_not_specified": "Not specified",
+        "not_specified": "Not specified",
+        "generate_number_limit": "You have generated **5 numbers** already. Please re-run the command to continue.",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -207,7 +208,8 @@ data = {
         "user_warned": "成功的警告了**{}** (**{}**)",
         "unable_to_warn": "我无法警告**{}**",
         "warnings_reset": "**{}**的警告已被成功清除",
-        "warning_not_specified": "无原因",
+        "not_specified": "无原因",
+        "generate_number_limit": "你已经生成了**五个数字**。如果你想继续，请重新运行指令。",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
@@ -312,7 +314,7 @@ data = {
         "user_warned": "**{}** wurde erfolgreich gewarnt. (**{}**)",
         "unable_to_warn": "**{}** warnen nicht möglich",
         "warnings_reset": "Die Warnungen von **{}** wurden erfolgreich zurückgesetzt",
-        "warning_not_specified": "Nicht angegeben",
+        "not_specified": "Nicht angegeben",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
@@ -417,7 +419,7 @@ data = {
         "user_warned": "**{}** успешно предупреждён (**{}**)",
         "unable_to_warn": "Невозможно дать предупреждение **{}**",
         "warnings_reset": "Предупреждения **{}** было успешно сняты",
-        "warning_not_specified": "Не указано",
+        "not_specified": "Не указано",
     },
     "sk": {
         "no_permission": "Nemáš oprávnenie na použitie tohto príkazu!",
@@ -522,7 +524,7 @@ data = {
         "user_warned": "Používateľ **{}** bol úspešne varovaný za **{}**",
         "unable_to_warn": "Nie som schopný varovať **{}**",
         "warnings_reset": "Varovania používateľa **{}** boli resetované",
-        "warning_not_specified": "Nešpecifikované",
+        "not_specified": "Nešpecifikované",
     },
 }
 data["zh-tw"] = data["zh-cn"]

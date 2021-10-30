@@ -1126,13 +1126,13 @@ async def random_command(
             if self.uses < 5:
                 self.uses += 1
                 random_number = round(random.uniform(low_number, high_number), 2)
-                await interaction.edit_original_message(content=f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**")
+                await button_interaction.response.edit_message(content=f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**")
             else:
                 new_view = disnake.ui.View()
                 new_view.add_item(disnake.ui.Button(label=button_text, style=disnake.ButtonStyle.gray, disabled=True))
                 await interaction.edit_original_message(view=new_view)
                 await button_interaction.response.send_message(
-                    "You have generated **5 numbers** already. Please re-run the command to continue.",
+                    functions.get_text(interaction.author.id, "generate_number_limit"),
                     ephemeral=True,
                 )
                 self.stop()
@@ -3497,7 +3497,7 @@ async def warn_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     if warning == 0:
-        warning = functions.get_text(member.id, "warning_not_specified")
+        warning = functions.get_text(member.id, "not_specified")
     
     try:
         warnings = json.loads(database[f"warnings.{member.id}"])
@@ -3543,8 +3543,11 @@ async def warn_command(
 async def kick_command(
         interaction,
         member: disnake.Member = Param(description="The member you want to kick"),
-        reason: str = Param("Not specified", description="The reason for kicking the member"),
+        reason: str = Param(0, description="The reason for kicking the member"),
     ):
+    if reason == 0:
+        reason = functions.get_text(member.id, "not_specified")
+
     if interaction.author.guild_permissions.kick_members or interaction.author.id in variables.permission_override:
         if member.top_role.position >= interaction.author.top_role.position:
             await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_kick").format(member), ephemeral=True)
@@ -3575,6 +3578,9 @@ async def ban_command(
         member: str = Param(description="The ID of the member you want to ban"),
         reason: str = Param("Not specified", description="The reason for banning the member"),
     ):
+    if reason == 0:
+        reason = functions.get_text(member.id, "not_specified")
+
     if interaction.author.guild_permissions.ban_members or interaction.author.id in variables.permission_override:
         pass
     else:
