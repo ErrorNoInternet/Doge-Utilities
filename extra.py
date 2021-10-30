@@ -79,7 +79,7 @@ async def ask_translations(message, user_id, target_language):
         print(f"`{user_id}` was not found")
         return
     def check(result):
-        return result.author.id == target_user.id
+        return result.author.id == target_user.id and str(result.channel.type) == "private"
     def get_language(code):
         return core.googletrans.LANGUAGES[code]
 
@@ -102,6 +102,10 @@ async def ask_translations(message, user_id, target_language):
             break
         results.append(f'`{question}`: "{msg.content}"')
     await target_user.send("Looks like we are done! Thank you for all your translations!")
+    await target_user.send("Do you have anything extra to say? If you do, please send them. If you don't, please send \"no\".")
+    msg = await core.client.wait_for("message", check=check)
+    results.append("\nAdditional text: " + msg.content)
+    await target_user.send("We are finished! Thanks!")
     output = f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n" + "\n".join(results)
     pager = core.Paginator(title="Translations", segments=[output[i: i + 2000] for i in range(0, len(output), 2000)], color=variables.embed_color)
     await pager.start(core.FakeUserInteraction(message.author))
