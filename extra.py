@@ -54,10 +54,10 @@ async def post_announcement(message, title, text, mention=False):
                             self.stop()
                     old_message = await message.channel.send(view=CommandView(channel), embed=embed)
 
-def find_user(client, user_id):
+def find_user(user_id):
     text = ""
     counter = 0
-    for guild in client.guilds:
+    for guild in core.client.guilds:
       for member in guild.members:
         if member.id == user_id:
           counter += 1
