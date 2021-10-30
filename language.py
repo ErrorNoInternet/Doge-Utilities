@@ -158,8 +158,6 @@ data = {
         "current_shard": "当前碎片",
         "reminder_removed": "那个提醒已被成功移除",
         "reminder_added": "你会在**{}**后被提醒",
-        "minute": "分钟",
-        "minutes": "分钟",
         "support_server": "我的服务器",
         "user_accounts": "用户账号",
         "bot_accounts": "机器人账号",
