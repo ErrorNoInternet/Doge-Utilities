@@ -161,7 +161,7 @@ class Paginator:
                 else:
                     self.current_page = 1
                 this.update_page()
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
+                await button_interaction.response.edit_message(embed=self.embeds[self.current_page-1], view=this)
 
             @disnake.ui.button(emoji="◀️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def previous_button(this, _, button_interaction):
@@ -173,7 +173,7 @@ class Paginator:
                 if self.current_page < 1:
                     self.current_page = len(self.embeds)
                 this.update_page()
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
+                await button_interaction.response.edit_message(embed=self.embeds[self.current_page-1], view=this)
 
             @disnake.ui.button(label=f"{self.current_page}/{len(self.embeds)}", style=disnake.ButtonStyle.gray, disabled=True)
             async def page_button(*_):
@@ -189,7 +189,7 @@ class Paginator:
                 if self.current_page > len(self.embeds):
                     self.current_page = 1
                 this.update_page()
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
+                await button_interaction.response.edit_message(embed=self.embeds[self.current_page-1], view=this)
 
             @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
             async def last_button(this, _, button_interaction):
@@ -206,7 +206,7 @@ class Paginator:
                 else:
                     self.current_page = len(self.embeds)
                 this.update_page()
-                await this.interaction.edit_original_message(embed=self.embeds[self.current_page-1], view=this)
+                await button_interaction.response.edit_message(embed=self.embeds[self.current_page-1], view=this)
         self.view = PaginatorView
 
     async def start(self, interaction, ephemeral=False, deferred=False):
@@ -3825,7 +3825,6 @@ async def todo_list_command(interaction):
         text = functions.get_text(interaction.author.id, "todo_empty")
     embed = disnake.Embed(title=functions.get_text(interaction.author.id, "todo_list"), description=text, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
-    add_cooldown(interaction.author.id, "todo", 3)
 
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
 async def todo_add_command(
