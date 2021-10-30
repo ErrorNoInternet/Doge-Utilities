@@ -1279,7 +1279,7 @@ async def suggest_command(
                             original_messages.append(await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}", view=SuggestionView()))
                         except:
                             pass
-    await interaction.edit_original_message(content="Your suggestion has been successfully sent")
+    await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
     add_cooldown(interaction.author.id, "suggest", 300)
 
 @client.slash_command(name="autorole", description="Manage automatically assigned roles")
@@ -3323,7 +3323,7 @@ async def server_suggest_command(
     await interaction.response.send_message("Sending your suggestion...", ephemeral=True)
     try:
         await interaction.guild.owner.send(f"**{interaction.author.name}#{interaction.author.discriminator}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}")
-        await interaction.edit_original_message(content="Your suggestion has been successfully sent")
+        await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
     except:
         await interaction.edit_original_message(content="Unable to send your suggestion")
     add_cooldown(interaction.author.id, "server", 300)

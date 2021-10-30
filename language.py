@@ -118,6 +118,7 @@ data = {
         "months": "months",
         "year": "year",
         "years": "years",
+        "suggestion_sent": "Your suggestion has been successfully sent",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -240,6 +241,7 @@ data = {
         "months": "月",
         "year": "年",
         "years": "年",
+        "suggestion_sent": "你的建议已被成功发送",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
