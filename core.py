@@ -1224,7 +1224,7 @@ async def suggest_command(
         interaction,
         suggestion: str = Param(description="The suggestion you want to send"),
     ):
-    await interaction.response.send_message("Sending your suggestion...", ephemeral=True)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True)
     class SuggestionView(disnake.ui.View):
         def __init__(self):
             super().__init__()
@@ -1597,8 +1597,8 @@ async def calculate_command(
     if answer == None:
         answer = functions.get_text(interaction.author.id, "unknown_answer")
     embed = disnake.Embed(color=variables.embed_color)
-    embed.add_field(name="Expression", value="`" + expression + "`")
-    embed.add_field(name="Result", value="`" + answer + "`", inline=False)
+    embed.add_field(name=functions.get_text(interaction.author.id, "expression"), value="`" + expression + "`")
+    embed.add_field(name=functions.get_text(interaction.author.id, "result"), value="`" + answer + "`", inline=False)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "calculate", 3)
 
@@ -3320,7 +3320,7 @@ async def server_suggest_command(
         interaction,
         suggestion: str = Param(description="The suggestion you want to send"),
     ):
-    await interaction.response.send_message("Sending your suggestion...", ephemeral=True)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True)
     try:
         await interaction.guild.owner.send(f"**{interaction.author.name}#{interaction.author.discriminator}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}")
         await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
