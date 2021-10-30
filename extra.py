@@ -1,6 +1,7 @@
 import core
 import string
 import disnake
+import language
 import variables
 
 async def auto_count(channel_id):
@@ -53,7 +54,7 @@ async def post_announcement(message, title, text, mention=False):
                             self.stop()
                     old_message = await message.channel.send(view=CommandView(channel), embed=embed)
 
-async def find_user(client, message, user_id):
+async def find_user(client, user_id):
     text = ""
     counter = 0
     for guild in client.guilds:
@@ -63,5 +64,9 @@ async def find_user(client, message, user_id):
           text += f"Found `{member}` in `{guild}`\n"
     if not counter: text += f"Unable to find `{user_id}`"
     else: text += f"\nFound `{user_id}` in `{counter}/{len(client.guilds)}` servers"
-    await message.channel.send(text)
+    print(text)
+
+async def get_translations(languages):
+    for language_name in languages:
+        print(f"{language_name}: {len(language.data[language_name])}")
 
