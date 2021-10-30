@@ -1233,7 +1233,7 @@ async def suggest_command(
         @disnake.ui.button(label="Accept", style=disnake.ButtonStyle.green)
         async def accept_button(self, _, button_interaction):
             try:
-                await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **accepted** by **{button_interaction.author}**")
+                await interaction.author.send(f"The suggestion you sent ({functions.shrink(suggestion, 20)}) has been **accepted** by **{button_interaction.author}**")
             except:
                 await button_interaction.response.send_message("Unable to accept")
                 return
@@ -1247,7 +1247,7 @@ async def suggest_command(
         @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
         async def reject_button(self, _, button_interaction):
             try:
-                await interaction.author.send(f"The suggestion you sent ({suggestion[:20].strip()}...) has been **rejected** by **{button_interaction.author}**")
+                await interaction.author.send(f"The suggestion you sent ({functions.shrink(suggestion, 20)}) has been **rejected** by **{button_interaction.author}**")
             except:
                 await button_interaction.response.send_message("Unable to reject")
                 return
@@ -1956,7 +1956,7 @@ async def autocomplete_youtube(_, string):
     for result in raw_results:
         result = result.replace('\\"', "\"")
         if len(result) > 100:
-            result = result[:97] + "..."
+            result = functions.shrink(result, 100)
         search_results.append(result)
     return search_results[:20]
 
@@ -4455,7 +4455,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 await mute_member(message.author, 0.16)
-                                await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{message.content[:1000]}')
+                                await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
                 pass
@@ -4474,7 +4474,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 await mute_member(message.author, 0.16)
-                                await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{message.content[:1000]}')
+                                await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
                 pass
@@ -4506,7 +4506,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 await mute_member(message.author, 0.16)
-                                await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{message.content[:1000]}')
+                                await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
                 pass
@@ -4529,7 +4529,7 @@ async def on_message(message):
                             except:
                                 pass
                             await mute_member(message.author, 0.16)
-                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(message.content[:1000])}')
+                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(functions.shrink(message.content, 1500))}')
                             return
             except:
                 pass
@@ -4553,7 +4553,7 @@ async def on_message(message):
                                 pass
                             await mute_member(message.author, 0.16)
                             newline = "\n"
-                            await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{message.content[:1000].replace(newline*8, newline+"..."+newline)}')
+                            await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500).replace(newline*8, newline+"..."+newline)}')
                             return
             except:
                 pass

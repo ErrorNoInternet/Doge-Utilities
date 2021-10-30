@@ -4,6 +4,14 @@ import core
 import language
 import variables
 
+def shrink(text, length):
+    original_length = len(text)
+    text = text[:length]
+    if len(text) == original_length:
+        return text.strip()
+    else:
+        return text[:-3].strip() + "..."
+
 def parse_time(timestamp):
     timestamp = timestamp.replace(" ", "")
     numbers = ""
