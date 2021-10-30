@@ -63,10 +63,46 @@ def find_user(user_id):
           counter += 1
           text += f"Found `{member}` in `{guild}`\n"
     if not counter: text += f"Unable to find `{user_id}`"
-    else: text += f"\nFound `{user_id}` in `{counter}/{len(client.guilds)}` servers"
+    else: text += f"\nFound `{user_id}` in `{counter}/{len(core.client.guilds)}` servers"
     print(text)
 
 def get_translations(languages=["en", "zh-cn", "de", "ru", "sk"]):
     for language_name in languages:
         print(f"`{language_name}`: {len(language.data[language_name])}")
+
+async def ask_translations(message, user_id, target_language):
+    target_user = None
+    for user in core.client.users:
+        if user.id == user_id:
+            target_user = user
+    if target_user == None:
+        print(f"`{user_id}` was not found")
+        return
+    def check(result):
+        return result.author.id == target_user.id
+    def get_language(code):
+        return core.googletrans.LANGUAGES[code]
+
+    questions = []
+    results = []
+    for key in language.data["en"].keys():
+        if key not in language.data[target_language].keys():
+            questions.append(key)
+    if len(questions) == 0:
+        print(f"There is nothing missing for **{get_language(target_language).title()}**")
+        return
+    await target_user.send('Hello! I am here to ask you for some translations... If you want to stop, simply reply with "cancel" or "stop".')
+    counter = 0
+    for question in questions:
+        counter += 1
+        await target_user.send(f'({counter}/{len(questions)}) What is **{get_language(target_language).title()}** for "{language.data["en"][question]}"?')
+        msg = await core.client.wait_for("message", check=check)
+        if msg.content.lower() == "cancel" or msg.content.lower() == "stop":
+            await target_user.send("Okay! Thanks for participating!")
+            break
+        results.append(f'`{question}`: "{msg.content}"')
+    await target_user.send("Looks like we are done! Thank you for all your translations!")
+    output = f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n" + "\n".join(results)
+    pager = core.Paginator(title="Translations", segments=[output[i: i + 2000] for i in range(0, len(output), 2000)], color=variables.embed_color)
+    await pager.start(core.FakeUserInteraction(message.author))
 
