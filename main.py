@@ -54,8 +54,14 @@ def update_counter(guild_id):
 
 @core.client.event
 async def on_guild_channel_create(channel):
-    variables.updated_channels.append(channel.id)
-    await channel.delete()
+    try:
+        current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
+        if not current_setting:
+            return
+        variables.updated_channels.append(channel.id)
+        await channel.delete()
+    except:
+        pass
 
     mute_role = None; exists = False
     for role in channel.guild.roles:
@@ -124,8 +130,14 @@ async def on_guild_channel_delete(channel):
 
 @core.client.event
 async def on_guild_role_create(role):
-    variables.updated_channels.append(role.id)
-    await role.delete()
+    try:
+        current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
+        if not current_setting:
+            return
+        variables.updated_roles.append(role.id)
+        await role.delete()
+    except:
+        pass
 
 @core.client.event
 async def on_guild_role_update(before, after):
