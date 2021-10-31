@@ -1957,7 +1957,7 @@ async def stackoverflow_command(
                     f"([link to post]({result['link']}))\n"
                     f"Tags: {tags[:-2]}"
                 ),
-                inline = False
+                inline = False,
             )
         await interaction.edit_original_message(embed=embed)
     except disnake.HTTPException:
