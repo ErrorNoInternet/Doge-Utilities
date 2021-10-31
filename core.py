@@ -36,12 +36,6 @@ from dateutil import parser
 from disnake.ext import commands
 from disnake.ext.commands import Param
 
-database = redis.Redis(
-    host=os.environ["REDIS_HOST"],
-    port=int(os.environ["REDIS_PORT"]),
-    password=os.environ["REDIS_PASSWORD"],
-)
-
 def get_vote_view(text="Add a reminder"):
     class VoteView(disnake.ui.View):
         def __init__(self):
@@ -347,6 +341,11 @@ client = commands.AutoShardedBot(
     test_guilds=variables.test_guilds,
     sync_permissions=True,
 )
+database = redis.Redis(
+    host=os.environ["REDIS_HOST"],
+    port=int(os.environ["REDIS_PORT"]),
+    password=os.environ["REDIS_PASSWORD"],
+)
 threading.Thread(
     name="manage_muted_members",
     target=asyncio.run_coroutine_threadsafe,
@@ -368,8 +367,8 @@ help_paginator = Paginator(
 )
 
 def parse_status_variables(text):
-    text = text.replace("[users]", str(len(list(client.get_all_members()))))
-    text = text.replace("[servers]", str(len(client.guilds)))
+    text = text.replace("[users]", f"{len(list(client.get_all_members())):,}")
+    text = text.replace("[servers]", f"{len(client.guilds):,}")
     return text
 
 async def select_status():
