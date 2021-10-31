@@ -105,19 +105,33 @@ class FakeMessageInteraction:
         await self.response.edit_message(content=content, embed=embed, view=view)
 
 class Paginator:
-    def __init__(self, title, segments, color=0x000000, prefix="", suffix="", target_page=1, timeout=300):
+    def __init__(
+            self,
+            title,
+            segments,
+            color=0x000000,
+            prefix="",
+            suffix="",
+            target_page=1,
+            timeout=300,
+            button_style=disnake.ButtonStyle.gray,
+        ):
         self.embeds = []
         self.current_page = target_page
         self.timeout = timeout
+        self.button_style = button_style
 
         for segment in segments:
-            self.embeds.append(
-                disnake.Embed(
-                    title=title,
-                    color=color,
-                    description=prefix + segment + suffix,
+            if type(segment) == disnake.Embed:
+                self.embeds.append(segment)
+            else:
+                self.embeds.append(
+                    disnake.Embed(
+                        title=title,
+                        color=color,
+                        description=prefix + segment + suffix,
+                    )
                 )
-            )
 
         if self.current_page > len(segments) or self.current_page < 1:
             self.current_page = 1
@@ -141,7 +155,7 @@ class Paginator:
                         if button.label.strip() != "":
                             button.label = f"{self.current_page}/{len(self.embeds)}"
 
-            @disnake.ui.button(emoji="⏪", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="⏪", style=self.button_style, disabled=True if len(self.embeds) == 1 else False)
             async def first_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_command_sender"), ephemeral=True)
@@ -158,7 +172,7 @@ class Paginator:
                 this.update_page()
                 await button_interaction.response.edit_message(embed=self.embeds[self.current_page-1], view=this)
 
-            @disnake.ui.button(emoji="◀️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="◀️", style=self.button_style, disabled=True if len(self.embeds) == 1 else False)
             async def previous_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_command_sender"), ephemeral=True)
@@ -174,7 +188,7 @@ class Paginator:
             async def page_button(*_):
                 pass
 
-            @disnake.ui.button(emoji="▶️", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="▶️", style=self.button_style, disabled=True if len(self.embeds) == 1 else False)
             async def next_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_command_sender"), ephemeral=True)
@@ -186,7 +200,7 @@ class Paginator:
                 this.update_page()
                 await button_interaction.response.edit_message(embed=self.embeds[self.current_page-1], view=this)
 
-            @disnake.ui.button(emoji="⏩", style=disnake.ButtonStyle.gray, disabled=True if len(self.embeds) == 1 else False)
+            @disnake.ui.button(emoji="⏩", style=self.button_style, disabled=True if len(self.embeds) == 1 else False)
             async def last_button(this, _, button_interaction):
                 if button_interaction.author != this.interaction.author:
                     await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_command_sender"), ephemeral=True)
