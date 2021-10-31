@@ -3863,7 +3863,7 @@ async def todo_add_command(
     except:
         todo_list = []
     if len(todo_list) >= 20:
-        await interaction.response.send_message("You can only add up to **20 items**!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("20"), ephemeral=True)
         return
     if len(item) > 50:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
@@ -3982,7 +3982,7 @@ async def remind_add_command(
     except:
         current_reminders = []
     if len(current_reminders) >= 5:
-        await interaction.response.send_message("You already have **5 reminders**!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("5"), ephemeral=True)
         return
     current_reminders.append([round(time.time()), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)

@@ -150,6 +150,7 @@ data = {
         "mentioned_user": "The user you mentioned",
         "i_am_afk": "I am AFK",
         "text_too_long": "The specified text is too long!",
+        "item_limit": "You can only add up to **{} items**!",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -300,8 +301,9 @@ data = {
         "currently_afk": "**{}**现在是AFK ({}): **{}**",
         "already_afk": "你已经是AFK!",
         "mentioned_user": "你@的用户",
-        "i_am_afk": "我现在是AFK",
+        "i_am_afk": "我不在",
         "text_too_long": "你提供的字太长了!",
+        "item_limit": "你只能加**{}个**物品!",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
