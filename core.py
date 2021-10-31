@@ -4645,7 +4645,7 @@ async def on_slash_command_error(interaction, error):
                             print(f"Unable to send error to {member}: {new_error}")
 
         embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_error"), description=f"Uh oh! Doge Utilities has ran into an error!\nThis error has been sent to our bot creators.\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.now())
-        embed.set_footer(text="Doge Utilities error report")
+        embed.set_footer(text=functions.get_text(interaction.author.id, "bot_error_report"))
         try:
             await interaction.response.send_message(embed=embed, ephemeral=True)
         except:
