@@ -702,12 +702,16 @@ async def qr_command(
 async def currency_command(_):
     pass
 
+def autocomplete_currencies(_, string):
+    currencies = [item.upper() for item in list(requests.get("https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json").json().keys())]
+    return list(filter(lambda currency: string.lower() in currency.lower(), currencies))[:20]
+
 @currency_command.sub_command(name="convert", description="Convert amounts from one currency to another")
 async def currency_convert_command(
         interaction,
         amount: float = Param(description="The amount (for the input currency)"),
-        input_currency: str = Param(name="input-currency", description="The input currency"),
-        output_currency: str = Param(name="output-currency", description="The output currency"),
+        input_currency: str = Param(name="input-currency", description="The input currency", autocomplete=autocomplete_currencies),
+        output_currency: str = Param(name="output-currency", description="The output currency", autocomplete=autocomplete_currencies),
     ):
     try:
         input_currency = input_currency.lower().strip()
