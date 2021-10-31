@@ -55,7 +55,7 @@ def update_counter(guild_id):
 @core.client.event
 async def on_guild_channel_create(channel):
     try:
-        current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
+        current_setting = json.loads(core.database[f"{channel.guild.id}.raid-protection"])
         if not current_setting:
             return
         variables.updated_channels.append(channel.id)
