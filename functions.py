@@ -30,7 +30,7 @@ def display_time(user_id, duration):
         unit = get_text(user_id, unit)
     if str(duration) == "inf":
         duration = get_text(user_id, "infinity")
-    return f"{duration} {get_text(user_id, unit)}"
+    return f"{duration} {unit}"
 
 def shrink(text, length):
     original_length = len(text)
