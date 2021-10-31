@@ -266,7 +266,7 @@ data = {
         "qr_code": "QR码",
         "qr_create_failed": "我无法生成二维码",
         "correct_answer": "你答对了!",
-        "wrong_answer": "你打错了。。。真确答案是**{}**。",
+        "wrong_answer": "你答错了。。。真确答案是**{}**。",
         "unable_to_clear": "我无法清除消息",
         "max_clear_messages": "你最多只能清除**1000个消息**!",
         "cleared": "我成功清除了**{}个{}**",
