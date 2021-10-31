@@ -56,10 +56,9 @@ def update_counter(guild_id):
 async def on_guild_channel_create(channel):
     try:
         current_setting = json.loads(core.database[f"{channel.guild.id}.raid-protection"])
-        if not current_setting:
-            return
-        variables.updated_channels.append(channel.id)
-        await channel.delete()
+        if current_setting:
+            variables.updated_channels.append(channel.id)
+            await channel.delete()
     except:
         pass
 
@@ -132,10 +131,9 @@ async def on_guild_channel_delete(channel):
 async def on_guild_role_create(role):
     try:
         current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
-        if not current_setting:
-            return
-        variables.updated_roles.append(role.id)
-        await role.delete()
+        if current_setting:
+            variables.updated_roles.append(role.id)
+            await role.delete()
     except:
         pass
 
