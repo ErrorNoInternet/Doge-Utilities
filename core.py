@@ -1583,7 +1583,9 @@ async def clear_command(
         except:
             await interaction.edit_original_message(content="Unable to clear messages")
             return
-        await interaction.edit_original_message(content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**{user_text}{contains_text}")
+        await interaction.edit_original_message(
+            content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**{user_text}{contains_text}",
+        )
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
     add_cooldown(interaction.author.id, "clear", 5)
@@ -1597,7 +1599,6 @@ async def scramble_command(
         interaction,
         text: str = Param(description="The text you want to manipulate"),
     ):
-
     letters = []
     for letter in text:
         letters.append(letter)
@@ -1614,7 +1615,6 @@ async def wide_command(
         interaction,
         text: str = Param(description="The text you want to manipulate"),
     ):
-
     new_text = ""
     for letter in text:
         new_text += letter + " "
@@ -1626,7 +1626,6 @@ async def unwide_command(
         interaction,
         text: str = Param(description="The text you want to manipulate"),
     ):
-
     new_text = ""
     space_character = False
     for letter in text.replace("   ", "  "):
