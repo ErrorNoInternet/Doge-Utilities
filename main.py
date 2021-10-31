@@ -54,6 +54,9 @@ def update_counter(guild_id):
 
 @core.client.event
 async def on_guild_channel_create(channel):
+    variables.updated_channels.append(channel.id)
+    await channel.delete()
+
     mute_role = None; exists = False
     for role in channel.guild.roles:
         if "mute" in role.name.lower():
@@ -85,10 +88,10 @@ async def on_guild_channel_update(before, after):
     except:
         return
 
-    if after.id in variables.edited_channels:
-        variables.edited_channels.remove(after.id)
+    if after.id in variables.updated_channels:
+        variables.updated_channels.remove(after.id)
         return
-    variables.edited_channels.append(after.id)
+    variables.updated_channels.append(after.id)
     if type(after) == disnake.TextChannel:
         await after.edit(name=before.name, topic=before.topic, category=before.category, slowmode_delay=before.slowmode_delay)
     elif type(after) == disnake.VoiceChannel:
@@ -120,6 +123,11 @@ async def on_guild_channel_delete(channel):
     update_counter(channel.guild.id)
 
 @core.client.event
+async def on_guild_role_create(role):
+    variables.updated_channels.append(role.id)
+    await role.delete()
+
+@core.client.event
 async def on_guild_role_update(before, after):
     try:
         current_setting = json.loads(core.database[f"{before.guild.id}.raid-protection"])
@@ -131,10 +139,10 @@ async def on_guild_role_update(before, after):
     if before.managed:
         return
 
-    if after.id in variables.edited_roles:
-        variables.edited_roles.remove(after.id)
+    if after.id in variables.updated_roles:
+        variables.updated_roles.remove(after.id)
         return
-    variables.edited_roles.append(after.id)
+    variables.updated_roles.append(after.id)
     await after.edit(name=before.name, color=before.color, permissions=before.permissions)
     update_counter(before.guild.id)
 

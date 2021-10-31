@@ -14,8 +14,8 @@ protected_guilds = {}
 test_guilds = None
 embed_color = 0xfc4c02
 large_number = 1e1000
-edited_channels = []
-edited_roles = []
+updated_channels = []
+updated_roles = []
 settings_cache = {}
 owner_commands = [
     "execute",
