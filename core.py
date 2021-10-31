@@ -1555,7 +1555,7 @@ async def clear_command(
         await interaction.response.defer(ephemeral=True)
 
         if count > 1000:
-            await interaction.edit_original_message(content="You can only clear up to **1000 messages**!")
+            await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "max_clear_messages"))
             return
         elif count < 0:
             await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "no_negative_numbers"))
@@ -1565,15 +1565,16 @@ async def clear_command(
         def member_check(target_message):
             return target_message.author.id == member.id
         contains = contains.strip()
-        user_text = ""
-        contains_text = ""
+        user_text = None
+        contains_text = None
         try:
             if contains != "":
-                contains_text = f' that contained **"{contains}"**'
+                contains_text = contains
+
             if member == 0:
                 messages = len(await interaction.channel.purge(limit=count, check=contains_check))
             else:
-                user_text = f" from **{member}**"
+                user_text = member
                 def check(target_message):
                     if contains_check(target_message) and member_check(target_message):
                         return True
@@ -1581,11 +1582,19 @@ async def clear_command(
                         return False
                 messages = len(await interaction.channel.purge(limit=count, check=check))
         except:
-            await interaction.edit_original_message(content="Unable to clear messages")
+            await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "unable_to_clear"))
             return
-        await interaction.edit_original_message(
-            content=f"Successfully deleted **{messages} {'message' if messages == 1 else 'messages'}**{user_text}{contains_text}",
-        )
+        text = ""
+        message_label = functions.get_text(interaction.author.id, 'message_lower') if messages == 1 else functions.get_text(interaction.author.id, 'messages_lower')
+        if user_text:
+            text = functions.get_text(interaction.author.id, "cleared_from").format(messages, message_label, member)
+        elif contains_text:
+            text = functions.get_text(interaction.author.id, "cleared_contains").format(messages, message_label, contains)
+        elif user_text and contains_text:
+            text = functions.get_text(interaction.author.id, "cleared_from_contains").format(messages, message_label, member, contains)
+        else:
+            text = functions.get_text(interaction.author.id, "cleared").format(messages, message_label)
+        await interaction.edit_original_message(content=text)
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
     add_cooldown(interaction.author.id, "clear", 5)
