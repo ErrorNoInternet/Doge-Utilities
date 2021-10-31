@@ -142,6 +142,7 @@ data = {
         "player_one": "Player 1",
         "player_two": "Player 2",
         "game_starts_in_three": "The game starts in **3 seconds**!",
+        "join_tictactoe": "Click to join the TicTacToe game",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -286,6 +287,7 @@ data = {
         "player_one": "玩家1",
         "player_two": "玩家2",
         "game_starts_in_three": "游戏会在**3秒**后开始!",
+        "join_tictactoe": "点击按钮加入TicTacToe游戏",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

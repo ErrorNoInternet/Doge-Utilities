@@ -2262,7 +2262,7 @@ async def tictactoe_command(interaction):
 
             await interaction.edit_original_message(view=self)
 
-    await interaction.response.send_message("Click to join the TicTacToe game", view=GameLauncher())
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "join_tictactoe"), view=GameLauncher())
     add_cooldown(interaction.author.id, "game", 20)
 
 @game_command.sub_command(name="trivia", description="Start a trivia game")
