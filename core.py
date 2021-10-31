@@ -98,6 +98,7 @@ class FakeMessageInteraction:
     def __init__(self, message):
         self.author = message.author
         self.guild = message.guild
+        self.channel = message.channel
         self.response = FakeChannelResponse(message.channel)
 
     async def edit_original_message(self, content=None, embed=None, view=None):
