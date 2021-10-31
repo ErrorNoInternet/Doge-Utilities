@@ -1823,10 +1823,13 @@ async def nickname_command(
             if member.top_role.position >= interaction.author.top_role.position:
                 await interaction.response.send_message(f"You do not have permission to edit **{member}**'s nickname!", ephemeral=True)
                 return
+        variables.updated_members.append(member.id)
         await member.edit(nick=nickname)
         await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
         add_cooldown(interaction.author.id, "nickname", 3)
     except:
+        if member.id in variables.updated_members:
+            variables.updated_members.remove(member.id)
         await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname", ephemeral=True)
         return
 

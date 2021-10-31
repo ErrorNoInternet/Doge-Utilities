@@ -16,6 +16,7 @@ embed_color = 0xfc4c02
 large_number = 1e1000
 updated_channels = []
 updated_roles = []
+updated_members = []
 settings_cache = {}
 owner_commands = [
     "execute",
