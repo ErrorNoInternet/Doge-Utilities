@@ -749,23 +749,26 @@ async def ping_command(interaction):
 @client.slash_command(name="afk", description="Tell other users that you're currently AFK")
 async def afk_command(
         interaction,
-        message: str = Param("I am AFK", description="The reason why you are AFK"),
+        message: str = Param(0, description="The reason why you are AFK"),
     ):
+    if message == 0:
+        message = functions.get_text(interaction.author.id, "i_am_afk")
+
     try:
         current_status = database[f"afk.{interaction.author.id}"]
     except:
         current_status = None
 
     if current_status:
-        await interaction.response.send_message("You are already AFK!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "already_afk"), ephemeral=True)
         return
     else:
         if len(message) > 1000:
-            await interaction.response.send_message("The specified message is too long!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
             return
 
         database[f"afk.{interaction.author.id}"] = json.dumps([round(time.time()), message])
-        await interaction.response.send_message(f'Your AFK message has been set to **"{functions.remove_mentions(message)}"**')
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "afk_set").format(functions.remove_mentions(message)))
 
 @client.slash_command(name="links", description="Get links for Doge Utilities")
 async def links_command(_):
@@ -3863,7 +3866,7 @@ async def todo_add_command(
         await interaction.response.send_message("You can only add up to **20 items**!", ephemeral=True)
         return
     if len(item) > 50:
-        await interaction.response.send_message("The specified item is too long!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
         return
     if item not in todo_list: 
         todo_list.append(item)
@@ -3966,7 +3969,7 @@ async def remind_add_command(
         return
 
     if len(text) > 100:
-        await interaction.response.send_message("The specified text is too long!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
         return
     if duration > 10080:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
@@ -4522,11 +4525,21 @@ async def on_message(message):
     for mention in message.mentions:
         try:
             afk_status = json.loads(database[f"afk.{mention.id}"])
-            user_name = "The user you mentioned"
+            user_name = None
             for user in client.users:
                 if user.id == mention.id:
                     user_name = user.name
-            await message.reply(f"**{user_name}** is currently AFK (<t:{afk_status[0]}:R>): **{functions.remove_mentions(afk_status[1])}**")
+            if not user_name:
+                user_name = functions.get_text(message.author.id, "mentioned_user")
+            await message.reply(
+                functions.get_text(
+                    message.author.id, "currently_afk",
+                ).format(
+                    user_name,
+                    f"<t:{afk_status[0]}:R>",
+                    functions.remove_mentions(afk_status[1]),
+                ),
+            )
         except:
             pass
     
