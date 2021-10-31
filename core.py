@@ -2222,19 +2222,19 @@ async def tictactoe_command(interaction):
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
-        @disnake.ui.button(label="Player 1", style=disnake.ButtonStyle.blurple)
+        @disnake.ui.button(label=functions.get_text(interaction.author.id, "player_one"), style=disnake.ButtonStyle.blurple)
         async def player_one(self, button, button_interaction):
             button.label = button_interaction.author.name
             button.disabled = True
 
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
-                await button_interaction.response.send_message("Successfully joined the game!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "joined_game"), ephemeral=True)
             else:
-                await button_interaction.response.send_message("You have already joined the game!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "already_joined"), ephemeral=True)
                 return
             if len(players) == 2:
-                await interaction.edit_original_message(view=self, content="The game starts in **3 seconds**!")
+                await interaction.edit_original_message(view=self, content=functions.get_text(interaction.author.id, "game_starts_in_three"))
                 await asyncio.sleep(3)
                 await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
                 self.stop()
@@ -2242,19 +2242,19 @@ async def tictactoe_command(interaction):
 
             await interaction.edit_original_message(view=self)
 
-        @disnake.ui.button(label="Player 2", style=disnake.ButtonStyle.blurple)
+        @disnake.ui.button(label=functions.get_text(interaction.author.id, "player_two"), style=disnake.ButtonStyle.blurple)
         async def player_two(self, button, button_interaction):
             button.label = button_interaction.author.name
             button.disabled = True
 
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
-                await button_interaction.response.send_message("Successfully joined the game!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "joined_game"), ephemeral=True)
             else:
-                await button_interaction.response.send_message("You have already joined the game!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "already_joined"), ephemeral=True)
                 return
             if len(players) == 2:
-                await interaction.edit_original_message(view=self, content="The game starts in **3 seconds**!")
+                await interaction.edit_original_message(view=self, content=functions.get_text(interaction.author.id, "game_starts_in_three"))
                 await asyncio.sleep(3)
                 await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
                 self.stop()

@@ -137,6 +137,11 @@ data = {
         "message_lower": "message",
         "messages_lower": "messages",
         "bot_error_report": "Doge Utilities error report",
+        "joined_game": "Successfully joined the game!",
+        "already_joined": "You have already joined the game!",
+        "player_one": "Player 1",
+        "player_two": "Player 2",
+        "game_starts_in_three": "The game starts in **3 seconds**!",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -276,6 +281,11 @@ data = {
         "message_lower": "消息",
         "messages_lower": "消息",
         "bot_error_report": "Doge Utilities错误报告",
+        "joined_game": "成功加入了游戏!",
+        "already_joined": "你已经加入了游戏!",
+        "player_one": "玩家1",
+        "player_two": "玩家2",
+        "game_starts_in_three": "游戏会在**3秒**后开始!",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
