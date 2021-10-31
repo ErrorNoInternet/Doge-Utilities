@@ -402,31 +402,8 @@ def add_cooldown(id, command, cooldown_time):
     user_cooldowns[f"{id}.{command}"] = [time.time(), cooldown_time]
 
 def generate_cooldown(user_id, command, cooldown_time):
-    cooldown_unit = "seconds"
-    if cooldown_time >= 60:
-        cooldown_unit = "minutes"
-        cooldown_time = cooldown_time / 60
-        if cooldown_time >= 60:
-            cooldown_unit = "hours"
-            cooldown_time = cooldown_time / 60
-            if cooldown_time >= 24:
-                cooldown_unit = "days"
-                cooldown_time = cooldown_time / 24
-                if cooldown_time >= 30.4:
-                    cooldown_unit = "months"
-                    cooldown_time = cooldown_time / 30.4
-                    if cooldown_time >= 12:
-                        cooldown_unit = "years"
-                        cooldown_time = cooldown_time / 12
-
-    cooldown_time = round(cooldown_time, 1)
-    if str(cooldown_time).endswith(".0"):
-        cooldown_time = round(cooldown_time)
-    if cooldown_time == 1:
-        cooldown_unit = functions.get_text(user_id, cooldown_unit[:-1])
-    else:
-        cooldown_unit = functions.get_text(user_id, cooldown_unit)
-    return functions.get_text(user_id, "command_cooldown_description").format(cooldown_time, cooldown_unit, command)
+    cooldown_text = functions.display_time(cooldown_time)
+    return functions.get_text(user_id, "command_cooldown_description").format(cooldown_text, command)
 
 @client.before_message_command_invoke
 async def message_command_handler(interaction):
@@ -508,7 +485,7 @@ async def settings_language_get_command(interaction):
     language = settings["language"]
     if language in googletrans.LANGUAGES:
         language = googletrans.LANGUAGES[language]
-    await interaction.response.send_message(f"Your preferred language is set to **{language.title()}**")
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "current_language_description").format(functions.get_text(interaction.author.id, "language_name")))
 
 async def autocomplete_languages(_, string):
     languages = []
@@ -1346,67 +1323,32 @@ async def set_autorole_command(
 @client.slash_command(name="lookup", description="Find a user on Discord")
 async def lookup_command(
         interaction,
-        user: str = Param(0, description="The ID of the target user"),
+        user: disnake.User = Param(0, description="The ID of the target user"),
     ):
     if user == 0:
-        user = str(interaction.author.id)
-    user = functions.remove_mentions(user)
-    headers = {"Authorization": "Bot " + os.environ["TOKEN"]}
-    try:
-        url = "https://discord.com/api/users/" + str(int(user))
-        response = requests.get(url, headers=headers).json()
-    except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
-        return
-    if "10013" not in str(response):
-        try:
-            response["public_flags"]
-        except:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
-            return
-        badges = ""
-        for flag in variables.public_flags:
-            if response['public_flags'] & int(flag) == int(flag):
-                if variables.public_flags[flag] != "None":
-                    try:
-                        badges += variables.badge_list[variables.public_flags[flag]]
-                    except:
-                        raise Exception(f"unable to find badge: {variables.public_flags[flag]}")
-        bot_value = False
-        try:
-            bot_value = response["bot"]
-        except:
-            pass
-        system_value = False
-        try:
-            system_value = response["system"]
-        except:
-            pass
-        embed = disnake.Embed(color=int(hex(response['accent_color']), 16) if response['accent_color'] else 0x000000)
-        embed.add_field(name=functions.get_text(interaction.author.id, "user_id"), value=f"`{response['id']}`")
-        embed.add_field(name=functions.get_text(interaction.author.id, "user_tag"), value=f"`{response['username']}#{response['discriminator']}`")
-        embed.add_field(name=functions.get_text(interaction.author.id, "creation_time"), value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>")
-        embed.add_field(name=functions.get_text(interaction.author.id, "public_flags"), value=f"`{response['public_flags']}` {badges}")
-        embed.add_field(name=functions.get_text(interaction.author.id, "bot_user"), value=f"`{bot_value}`")
-        embed.add_field(name=functions.get_text(interaction.author.id, "system_user"), value=f"`{system_value}`")
+        user = interaction.author
 
-        if response['avatar'] == None:
-            avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(response['discriminator']) % 5}.png"
-        else:
-            if response['avatar'].startswith("a_"):
-                avatar_url = f"https://cdn.discordapp.com/avatars/{response['id']}/{response['avatar']}.gif?size=512"
-            else:
-                avatar_url = f"https://cdn.discordapp.com/avatars/{response['id']}/{response['avatar']}.webp?size=512"
-        embed.set_thumbnail(url=avatar_url)
-
-        if response['banner'] != None:
-            if response['banner'].startswith("a_"):
-                banner_url = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.gif?size=1024"
-            else:
-                banner_url = f"https://cdn.discordapp.com/banners/{response['id']}/{response['banner']}.webp?size=1024"
-            embed.set_image(url=banner_url)
-    else:
-        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "unknown_user"), description=functions.get_text(interaction.author.id, "unknown_user_description"), color=variables.embed_color)
+    badges = ""
+    for flag in variables.public_flags:
+        if user.public_flags.value & int(flag) == int(flag):
+            if variables.public_flags[flag] != "None":
+                try:
+                    badges += variables.badge_list[variables.public_flags[flag]]
+                except:
+                    raise Exception(f"unable to find badge: {variables.public_flags[flag]}")
+    accent_color = 0x000000
+    user_object = await client.fetch_user(user.id)
+    if user_object.accent_color != None:
+        accent_color = user_object.accent_color
+    embed = disnake.Embed(color=accent_color)
+    embed.add_field(name=functions.get_text(interaction.author.id, "user_id"), value=f"`{user.id}`")
+    embed.add_field(name=functions.get_text(interaction.author.id, "user_tag"), value=f"`{user.name}#{user.discriminator}`")
+    embed.add_field(name=functions.get_text(interaction.author.id, "creation_time"), value=f"<t:{functions.parse_snowflake(int(user.id))}:R>")
+    embed.add_field(name=functions.get_text(interaction.author.id, "public_flags"), value=f"`{user.public_flags.value}` {badges}")
+    embed.add_field(name=functions.get_text(interaction.author.id, "bot_user"), value=f"`{user.bot}`")
+    embed.add_field(name=functions.get_text(interaction.author.id, "system_user"), value=f"`{user.system}`")
+    embed.set_thumbnail(url=user.avatar if user.avatar else user.default_avatar)
+    if user_object.banner: embed.set_image(url=user_object.banner)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "lookup", 5)
 
@@ -1613,7 +1555,7 @@ async def clear_command(
             await interaction.edit_original_message(content="You can only clear up to **1000 messages**!")
             return
         elif count < 0:
-            await interaction.edit_original_message(content="No negative numbers please!")
+            await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "no_negative_numbers"))
             return
         def contains_check(target_message):
             return contains.lower() in target_message.content.lower()
@@ -2583,10 +2525,10 @@ async def mute_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_permanently").format(member))
     else:
         if duration > 43200:
-            await interaction.response.send_message("The specified duration is too long!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
             return
         if duration < 0:
-            await interaction.response.send_message("No negative numbers please!", ephemeral=True)
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "no_negative_numbers"), ephemeral=True)
             return
         try:
             moderation_data = json.loads(database["mute." + str(interaction.guild.id)])
@@ -2600,7 +2542,7 @@ async def mute_command(
         except:
             await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
             return
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_temporarily").format(member, original_duration))
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_temporarily").format(member, functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
 
 @client.user_command(name="Mute Member")
 async def user_mute_command(interaction):
@@ -4013,10 +3955,10 @@ async def remind_add_command(
         await interaction.response.send_message("The specified text is too long!", ephemeral=True)
         return
     if duration > 10080:
-        await interaction.response.send_message("The specified duration is too long!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
         return
     if duration < 0:
-        await interaction.response.send_message("No negative numbers please!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_negative_numbers"), ephemeral=True)
         return
     try:
         current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
@@ -4027,7 +3969,7 @@ async def remind_add_command(
         return
     current_reminders.append([round(time.time()), duration*60, text])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, 'reminder_added').format(original_duration))
+    await interaction.response.send_message(functions.get_text(interaction.author.id, 'reminder_added').format(functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
 
 def epoch_to_date(epoch):
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))

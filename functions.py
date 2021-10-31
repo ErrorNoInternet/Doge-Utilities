@@ -4,6 +4,34 @@ import core
 import language
 import variables
 
+def display_time(user_id, duration):
+    unit = "seconds"
+    if duration >= 60:
+        unit = "minutes"
+        duration = duration / 60
+        if duration >= 60:
+            unit = "hours"
+            duration = duration / 60
+            if duration >= 24:
+                unit = "days"
+                duration = duration / 24
+                if duration >= 30.4:
+                    unit = "months"
+                    duration = duration / 30.4
+                    if duration >= 12:
+                        unit = "years"
+                        duration = duration / 12
+    duration = round(duration, 1)
+    if str(duration).endswith(".0"):
+        duration = round(duration)
+    if duration == 1:
+        unit = get_text(user_id, unit[:-1])
+    else:
+        unit = get_text(user_id, unit)
+    if str(duration) == "inf":
+        duration = get_text(user_id, "infinity")
+    return f"{duration} {get_text(user_id, unit)}"
+
 def shrink(text, length):
     original_length = len(text)
     text = text[:length]
