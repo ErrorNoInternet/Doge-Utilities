@@ -729,7 +729,7 @@ async def currency_list_command(interaction):
     response = requests.get("https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json").json()
     output = ""
     for key in response.keys():
-        output += f"{key}: {response[key]}\n"
+        output += f"{key.upper()}: {response[key]}\n"
     segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
     pager = Paginator(
         prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", segments=segments,
