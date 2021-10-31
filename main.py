@@ -57,8 +57,11 @@ async def on_guild_channel_create(channel):
     try:
         current_setting = json.loads(core.database[f"{channel.guild.id}.raid-protection"])
         if current_setting:
-            variables.updated_channels.append(channel.id)
-            await channel.delete()
+            if channel.id not in variables.updated_channels:
+                variables.updated_channels.append(channel.id)
+                await channel.delete()
+            else:
+                variables.updated_channels.remove(channel.id)
     except:
         pass
 
@@ -135,8 +138,11 @@ async def on_guild_role_create(role):
     try:
         current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
         if current_setting:
-            variables.updated_roles.append(role.id)
-            await role.delete()
+            if role.id not in variables.updated_roles:
+                variables.updated_roles.append(role.id)
+                await role.delete()
+            else:
+                variables.updated_roles.remove(role.id)
     except:
         pass
 
