@@ -114,6 +114,9 @@ async def on_guild_channel_delete(channel):
     except:
         return
 
+    if channel.id in variables.updated_channels:
+        variables.updated_channels.remove(channel.id)
+        return
     global server_channels
     for cached_channel in server_channels[channel.guild.id]:
         if channel.id == cached_channel.id:
@@ -168,6 +171,9 @@ async def on_guild_role_delete(role):
     if role.managed:
         return
 
+    if role.id in variables.updated_roles:
+        variables.updated_roles.remove(role.id)
+        return
     global server_roles
     for cached_role in server_roles[role.guild.id]:
         if role.id == cached_role.id:
