@@ -461,7 +461,7 @@ async def slash_command_handler(interaction):
         if afk_key in database.keys():
             del database[afk_key]
             try:
-                await interaction.author.send("Your AFK has been removed!")
+                await interaction.author.send(functions.get_text(interaction.author.id, "afk_removed"))
             except:
                 pass
 
@@ -4516,7 +4516,7 @@ async def on_message(message):
     if afk_key in database.keys():
         del database[afk_key]
         try:
-            await message.author.send("Your AFK has been removed!")
+            await message.author.send(functions.get_text(message.author.id, "afk_removed"))
         except:
             pass
     for mention in message.mentions:
