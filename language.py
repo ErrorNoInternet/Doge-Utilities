@@ -123,6 +123,9 @@ data = {
         "no_negative_numbers": "No negative numbers please!",
         "duration_too_long": "The specified duration is too long!",
         "current_language_description": "Your preferred language is set to **{}**",
+        "border_size_too_big": "The border size must not exceed 32!",
+        "qr_code": "QR Code",
+        "qr_create_failed": "Unable to create a QR code",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -248,6 +251,9 @@ data = {
         "no_negative_numbers": "请不要输入负数!",
         "duration_too_long": "你提供的时间太长了!",
         "current_language_description": "你的显示语言是**{}**",
+        "border_size_too_big": "边框大小不能超过32!",
+        "qr_code": "QR码",
+        "qr_create_failed": "我无法生成二维码",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

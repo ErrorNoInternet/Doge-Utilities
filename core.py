@@ -683,7 +683,7 @@ async def qr_command(
     ):
     await interaction.response.defer()
     if border > 32:
-        await interaction.edit_original_message(content="The border size must be smaller than 32!")
+        await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "border_size_too_big"))
         return
     try:
         qr_code = qrcode.QRCode(border=border)
@@ -691,12 +691,12 @@ async def qr_command(
         image = qr_code.make_image(fill_color=foreground, back_color=background)
         image.save("images/qr.png")
 
-        embed = disnake.Embed(title="QR Code", color=variables.embed_color)
+        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "qr_code"), color=variables.embed_color)
         embed.set_image(url="attachment://qr.png")
         await interaction.edit_original_message(embed=embed, file=disnake.File("images/qr.png"))
         add_cooldown(interaction.author.id, "qr", 10)
     except:
-        await interaction.edit_original_message(content="Unable to create a QR code")
+        await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "qr_create_failed"))
 
 @client.slash_command(name="currency", description="Convert currencies")
 async def currency_command(_):
