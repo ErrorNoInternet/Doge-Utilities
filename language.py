@@ -126,6 +126,8 @@ data = {
         "border_size_too_big": "The border size must not exceed 32!",
         "qr_code": "QR Code",
         "qr_create_failed": "Unable to create a QR code",
+        "correct_answer": "Correct answer!",
+        "wrong_answer": "Wrong answer... The correct answer was **{}**.",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -254,6 +256,8 @@ data = {
         "border_size_too_big": "边框大小不能超过32!",
         "qr_code": "QR码",
         "qr_create_failed": "我无法生成二维码",
+        "correct_answer": "你答对了!",
+        "wrong_answer": "你打错了。。。真确答案是**{}**。",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

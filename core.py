@@ -2298,9 +2298,9 @@ async def trivia_command(interaction):
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
             else:
-                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
             await self.close(button.label)
 
         answer = random.choice(answers); answers.remove(answer)
@@ -2311,9 +2311,9 @@ async def trivia_command(interaction):
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
             else:
-                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
             await self.close(button.label)
 
         answer = random.choice(answers); answers.remove(answer)
@@ -2324,9 +2324,9 @@ async def trivia_command(interaction):
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
             else:
-                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
             await self.close(button.label)
 
         answer = random.choice(answers); answers.remove(answer)
@@ -2337,9 +2337,9 @@ async def trivia_command(interaction):
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message("Correct answer!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
             else:
-                await button_interaction.response.send_message(f"Wrong answer... The correct answer was **{correct_answer}**.", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
             await self.close(button.label)
 
     embed = disnake.Embed(
