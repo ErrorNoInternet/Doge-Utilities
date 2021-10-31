@@ -853,7 +853,7 @@ async def status_command(interaction):
     )
     embed.add_field(
         name=functions.get_text(interaction.author.id, "command_count"),
-        value="```" + str(len(client.slash_commands)-len(variables.owner_commands)) + "```",
+        value="```" + str(len(client.slash_commands)) + "```",
     )
     embed.add_field(
         name=functions.get_text(interaction.author.id, "disnake_version"),

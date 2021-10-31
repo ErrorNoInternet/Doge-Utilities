@@ -399,7 +399,7 @@ def fetch_status():
     text += f"<p class='statusText'><b>Active Shards</b><br><code>{len(core.client.shards)}</code></p>"
     text += f"<p class='statusText'><b>Member Count</b><br><code>{member_count}</code></p>"
     text += f"<p class='statusText'><b>Channel Count</b><br><code>{channel_count}</code></p>"
-    text += f"<p class='statusText'><b>Command Count</b><br><code>{len(core.client.slash_commands)-len(variables.owner_commands)}</code></p>"
+    text += f"<p class='statusText'><b>Command Count</b><br><code>{len(core.client.slash_commands)}</code></p>"
     text += f"<p class='statusText'><b>Disnake Version</b><br><code>{core.disnake.__version__}</code></p>"
     text += f"<p class='statusText'><b>Bot Version</b><br><code>{variables.version_number}.{variables.build_number}</code></p>"
     text += f"<p class='statusText'><b>Bot Uptime</b><br><code>{uptime.strip()}</code></p>"
