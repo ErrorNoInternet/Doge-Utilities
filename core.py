@@ -1861,9 +1861,9 @@ async def channel_lock_command(interaction):
     try:
         await interaction.channel.set_permissions(interaction.guild.default_role, send_messages=False)
     except:
-        await interaction.response.send_message(f"I was unable to lock {interaction.channel.mention}", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_lock").format(interaction.channel.mention), ephemeral=True)
         return
-    await interaction.response.send_message(f"{interaction.channel.mention} has been successfully locked")
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "channel_locked").format(interaction.channel.mention), ephemeral=True)
 
 @channel_command.sub_command(name="unlock", description="Unlock the current channel")
 async def channel_unlock_command(interaction):
@@ -1874,9 +1874,9 @@ async def channel_unlock_command(interaction):
     try:
         await interaction.channel.set_permissions(interaction.guild.default_role, send_messages=True)
     except:
-        await interaction.response.send_message(f"I was unable to unlock {interaction.channel.mention}", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unlock").format(interaction.channel.mention), ephemeral=True)
         return
-    await interaction.response.send_message(f"{interaction.channel.mention} has been successfully unlocked")
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "channel_unlocked").format(interaction.channel.mention), ephemeral=True)
 
 @channel_command.sub_command(name="slowmode", description="Change this channel's slowmode")
 async def channel_slowmode_command(

@@ -151,6 +151,10 @@ data = {
         "i_am_afk": "I am AFK",
         "text_too_long": "The specified text is too long!",
         "item_limit": "You can only add up to **{} items**!",
+        "channel_locked": "{} has been successfully locked",
+        "channel_unlocked": "{} has been successfully unlocked",
+        "unable_to_lock": "I am unable to lock {}",
+        "unable_to_unlock": "I am unable to unlock {}",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -304,6 +308,10 @@ data = {
         "i_am_afk": "我不在",
         "text_too_long": "你提供的字太长了!",
         "item_limit": "你只能加**{}个**物品!",
+        "channel_locked": "{} 已被成功锁定",
+        "channel_unlocked": "{} 已被成功解锁",
+        "unable_to_lock": "我无法锁定 {}",
+        "unable_to_unlock": "我无法解锁 {}",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
