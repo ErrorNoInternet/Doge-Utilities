@@ -437,7 +437,7 @@ def fetch_commands():
             text += f"<code>/{command.name}</code>"
         text += "</p>"
     text += "</div>"
-    return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands) - len(variables.owner_commands))})
+    return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands))})
 
 @app.route("/api/version", endpoint="version-endpoint")
 def fetch_version():
