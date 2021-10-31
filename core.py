@@ -3370,10 +3370,11 @@ async def github_command(
         interaction,
         repository: str = Param(description="The repository you want to fetch"),
     ):
+    await interaction.response.defer()
     response = requests.get(f"https://api.github.com/repos/{repository.strip()}").json()
     try:
         if response["message"] == "Not Found":
-            await interaction.response.send_message("That GitHub repository was not found")
+            await interaction.edit_original_message(content="That GitHub repository was not found")
             return
     except:
         pass
@@ -3395,7 +3396,7 @@ async def github_command(
     embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>")
     embed.add_field(name="Description", value=f"{response['description']}")
     embed.set_thumbnail(url=response["owner"]["avatar_url"])
-    await interaction.response.send_message(embed=embed)
+    await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "github", 5)
 
 @client.slash_command(name="choose", description="Choose a random item from the list")
