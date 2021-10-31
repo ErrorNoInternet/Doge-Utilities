@@ -67,6 +67,7 @@ async def on_member_update(before, after):
     variables.updated_members.append(after.id)
     try:
         await after.edit(nick=before.nick)
+        update_counter(after.guild.id)
     except:
         if after.id in variables.updated_members:
             variables.updated_members.remove(after.id)
@@ -274,6 +275,6 @@ core.client.topggpy = topgg.DBLClient(
     core.client,
     os.environ["TOPGG_TOKEN"],
     autopost=True,
-    post_shard_count=True
+    post_shard_count=True,
 )
 core.client.run(os.environ["TOKEN"])
