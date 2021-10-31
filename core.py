@@ -402,7 +402,7 @@ def add_cooldown(id, command, cooldown_time):
     user_cooldowns[f"{id}.{command}"] = [time.time(), cooldown_time]
 
 def generate_cooldown(user_id, command, cooldown_time):
-    cooldown_text = functions.display_time(cooldown_time)
+    cooldown_text = functions.display_time(user_id, cooldown_time)
     return functions.get_text(user_id, "command_cooldown_description").format(cooldown_text, command)
 
 @client.before_message_command_invoke
