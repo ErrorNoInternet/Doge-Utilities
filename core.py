@@ -58,6 +58,9 @@ def get_vote_view(text="Add a reminder"):
             if exists:
                 await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_reminder_exists"))
                 return
+            if len(current_reminders) >= 5:
+                await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("5"))
+                return
             current_reminders.append([round(time.time()), duration, text])
             database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
             button.disabled = True
