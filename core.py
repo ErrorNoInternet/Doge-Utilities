@@ -1586,12 +1586,12 @@ async def clear_command(
             return
         text = ""
         message_label = functions.get_text(interaction.author.id, 'message_lower') if messages == 1 else functions.get_text(interaction.author.id, 'messages_lower')
-        if user_text:
+        if user_text and contains_text:
+            text = functions.get_text(interaction.author.id, "cleared_from_contains").format(messages, message_label, member, contains)
+        elif user_text:
             text = functions.get_text(interaction.author.id, "cleared_from").format(messages, message_label, member)
         elif contains_text:
             text = functions.get_text(interaction.author.id, "cleared_contains").format(messages, message_label, contains)
-        elif user_text and contains_text:
-            text = functions.get_text(interaction.author.id, "cleared_from_contains").format(messages, message_label, member, contains)
         else:
             text = functions.get_text(interaction.author.id, "cleared").format(messages, message_label)
         await interaction.edit_original_message(content=text)
