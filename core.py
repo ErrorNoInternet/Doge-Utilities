@@ -1784,7 +1784,7 @@ async def youtube_command(
     except:
         await interaction.edit_original_message(content="I couldn't find that video on YouTube")
         return
-    if search_results == None:
+    if not search_results:
         await interaction.edit_original_message(content="I couldn't find that video on YouTube")
         return
     await interaction.edit_original_message(content=f"Here's the video I found: https://youtube.com/watch?v={search_results[0]}")
