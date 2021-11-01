@@ -113,3 +113,17 @@ async def ask_translations(message, user_id, target_language):
     pager = core.Paginator(title="Translations", segments=[output[i: i + 2000] for i in range(0, len(output), 2000)], color=variables.embed_color)
     await pager.start(core.FakeUserInteraction(message.author))
 
+def messages_per_second():
+    differences = []
+    counter = 0
+    current_second = core.math.floor(core.time.time())
+    for cached_message in core.client.cached_messages:
+        sent_time = core.math.floor(cached_message.created_at.timestamp())
+        if current_second != sent_time:
+            differences.append(counter)
+            current_second = sent_time
+            counter = 0
+        else:
+            counter += 1
+    print(f"I am receiving **{round(sum(differences)/len(differences), 2)} messages** per second")
+
