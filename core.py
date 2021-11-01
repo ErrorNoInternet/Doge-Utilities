@@ -195,7 +195,6 @@ required_intents = disnake.Intents.default()
 required_intents.members = True
 required_intents.messages = True
 client = commands.AutoShardedBot(
-    max_messages=2048,
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
