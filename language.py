@@ -684,7 +684,7 @@ data = {
         "afk_set": "Tvoja AFK správa bola nastavená na **\"{}\"**",
         "currently_afk": "**{}** je momentálne AFK ({}): **{}**",
         "already_afk": "Už si AFK!",
-        "mentioned_user": "Používateľ, ktorého si spomenula",
+        "mentioned_user": "Používateľ, ktorého si spomenul/a",
         "i_am_afk": "Som AFK",
         "text_too_long": "Daný text je príliš dlhý!",
         "item_limit": "Môžeš pridať maximálne **{}** vecí!",

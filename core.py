@@ -1465,6 +1465,30 @@ async def clear_command(
 async def text_command(_):
     pass
 
+@text_command.sub_command(name="italic", description="Make text look italic")
+async def italic_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+    output = ""
+    for letter in text:
+        if letter in variables.ascii_characters:
+            output += variables.italic_characters[variables.ascii_characters.count(letter)]
+    await interaction.response.send_message(functions.remove_mentions(output))
+    add_cooldown(interaction.author.id, "text", 3)
+
+@text_command.sub_command(name="bold", description="Make text look bold")
+async def bold_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+    output = ""
+    for letter in text:
+        if letter in variables.ascii_characters:
+            output += variables.bold_characters[variables.ascii_characters.count(letter)]
+    await interaction.response.send_message(functions.remove_mentions(output))
+    add_cooldown(interaction.author.id, "text", 3)
+
 @text_command.sub_command(name="scramble", description="Scramble the letters in a sentence")
 async def scramble_command(
         interaction,

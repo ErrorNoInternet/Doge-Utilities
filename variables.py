@@ -1,4 +1,5 @@
 import os
+import string
 
 bot_owners = [531392146767347712, 469870741165441034]
 permission_override = bot_owners
@@ -12,12 +13,15 @@ shard_count = 2
 last_command = 0
 protected_guilds = {}
 test_guilds = None
-embed_color = 0xfc4c02
+embed_color = 0x20c2f6
 large_number = 1e1000
 updated_channels = []
 updated_roles = []
 updated_members = []
 settings_cache = {}
+ascii_characters = string.ascii_lowercase + string.ascii_uppercase + string.digits
+bold_characters = "𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗"
+italic_characters = "𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡0123456789"
 owner_commands = [
     "execute",
     "blacklist",
