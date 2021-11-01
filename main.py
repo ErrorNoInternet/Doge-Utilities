@@ -17,7 +17,7 @@ if not os.path.exists("images"):
     os.mkdir("images")
 
 def update_objects():
-    time.sleep(10)
+    time.sleep(30)
 
     global server_channels
     global server_roles
@@ -30,6 +30,7 @@ def update_objects():
 async def random_status():
     idle = False
     cycles = 120
+
     while True:
         cycles += 1
         try:
