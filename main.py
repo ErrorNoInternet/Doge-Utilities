@@ -260,6 +260,10 @@ async def on_guild_join(guild):
     await core.on_guild_join(guild)
 
 @core.client.event
+async def on_guild_remove(guild):
+    await core.on_guild_remove(guild)
+
+@core.client.event
 async def on_error(event, *_):
     if event == "on_application_command":
         return

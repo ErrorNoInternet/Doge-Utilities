@@ -4163,6 +4163,11 @@ async def on_member_remove(member):
     except:
         pass
 
+async def on_guild_remove(guild):
+    for key in database.keys():
+        if str(guild.id) in key.decode("utf-8"):
+            del database[key]
+
 async def on_guild_join(guild):
     try:
         async for entry in guild.audit_logs(limit=10):
