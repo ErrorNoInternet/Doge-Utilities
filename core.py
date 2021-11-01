@@ -1473,7 +1473,7 @@ async def italic_command(
     output = ""
     for letter in text:
         if letter in variables.ascii_characters:
-            output += variables.italic_characters[variables.ascii_characters.count(letter)]
+            output += variables.italic_characters[variables.ascii_characters.index(letter)]
     await interaction.response.send_message(functions.remove_mentions(output))
     add_cooldown(interaction.author.id, "text", 3)
 
@@ -1485,7 +1485,7 @@ async def bold_command(
     output = ""
     for letter in text:
         if letter in variables.ascii_characters:
-            output += variables.bold_characters[variables.ascii_characters.count(letter)]
+            output += variables.bold_characters[variables.ascii_characters.index(letter)]
     await interaction.response.send_message(functions.remove_mentions(output))
     add_cooldown(interaction.author.id, "text", 3)
 

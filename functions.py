@@ -45,16 +45,15 @@ def parse_time(timestamp):
     numbers = ""
     unit = ""
     for letter in timestamp:
+        number = False
         try:
-            number = False
-            try:
-                int(letter)
-                number = True
-            except:
-                pass
-            if number or letter == ".":
-                numbers += letter
+            int(letter)
+            number = True
         except:
+            pass
+        if number or letter == ".":
+            numbers += letter
+        else:
             unit += letter
     for key, value in variables.unit_abbreviations.items():
         if unit in value or unit[:-1] in value:
