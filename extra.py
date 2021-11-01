@@ -123,15 +123,15 @@ def messages_per_second():
         if str(cached_message.channel.type) != "private":
             if cached_message.guild.id not in guilds:
                 guilds.append(cached_message.guild.id)
-            if cached_message.author.id not in members:
-                members.append(cached_message.author.id)
-            sent_time = core.math.floor(cached_message.created_at.timestamp())
-            if current_second != sent_time:
-                differences.append(counter)
-                current_second = sent_time
-                counter = 0
-            else:
-                counter += 1
+        if cached_message.author.id not in members:
+            members.append(cached_message.author.id)
+        sent_time = core.math.floor(cached_message.created_at.timestamp())
+        if current_second != sent_time:
+            differences.append(counter)
+            current_second = sent_time
+            counter = 0
+        else:
+            counter += 1
     average = round(sum(differences)/len(differences), 2)
     if average == 1.0:
         average = 1
