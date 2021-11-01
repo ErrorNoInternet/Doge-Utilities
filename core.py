@@ -1063,6 +1063,7 @@ async def suggest_command(
         interaction,
         suggestion: str = Param(description="The suggestion you want to send"),
     ):
+    suggestion = functions.shrink(suggestion, 1500)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True)
     class SuggestionView(disnake.ui.View):
         def __init__(self):
@@ -3159,6 +3160,7 @@ async def server_suggest_command(
         interaction,
         suggestion: str = Param(description="The suggestion you want to send"),
     ):
+    suggestion = functions.shrink(suggestion, 1500)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True)
     try:
         await interaction.guild.owner.send(f"**{interaction.author.name}#{interaction.author.discriminator}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}")
