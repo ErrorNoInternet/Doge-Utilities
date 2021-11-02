@@ -4145,6 +4145,18 @@ async def on_member_join(member):
                     await channel.send(welcome_message)
     except:
         pass
+    mute_key = f"muted.{member.id}.{member.guild.id}".encode("utf-8")
+    if mute_key in database.keys():
+        del database[mute_key]
+        mute_role = None; exists = False
+        for role in member.guild.roles:
+            if "mute" in role.name.lower():
+                mute_role = role; exists = True
+        if exists:
+            try:
+                await member.add_roles(mute_role)
+            except:
+                pass
 
 async def on_member_remove(member):
     try:
@@ -4162,6 +4174,12 @@ async def on_member_remove(member):
                     await channel.send(leave_message)
     except:
         pass
+    muted = False
+    for role in member.roles:
+        if "mute" in role.name.lower():
+            muted = True
+    if muted:
+        database[f"muted.{member.id}.{member.guild.id}"] = 1
 
 async def on_guild_remove(guild):
     for key in database.keys():
