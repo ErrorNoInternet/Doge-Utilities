@@ -111,7 +111,7 @@ async def ask_translations(message, user_id, target_language):
         results.append("\n**Additional text:** " + msg.content)
         await msg.reply("Got it! Thanks!", mention_author=False)
     output = f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n" + "\n".join(results)
-    pager = disnake_paginator.Paginator(title="Translations", segments=disnake_paginator.split(output), color=variables.embed_color)
+    pager = disnake_paginator.ButtonPaginator(title="Translations", segments=disnake_paginator.split(output), color=variables.embed_color)
     await pager.start(disnake_paginator.wrappers.UserInteractionWrapper(message.author))
 
 def messages_per_second():
