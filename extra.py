@@ -118,7 +118,7 @@ def messages_per_second():
     guilds = []
     members = []
     counter = 0
-    current_second = core.math.floor(core.time.time())
+    current_second = 0
     for cached_message in core.client.cached_messages:
         if str(cached_message.channel.type) != "private":
             if cached_message.guild.id not in guilds:
