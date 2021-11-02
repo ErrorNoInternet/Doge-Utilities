@@ -119,7 +119,7 @@ def messages_per_second():
     guilds = []
     members = []
     counter = 0
-    current_second = 0
+    current_time = 0
     for cached_message in core.client.cached_messages:
         if str(cached_message.channel.type) != "private":
             if cached_message.guild.id not in guilds:
@@ -127,7 +127,7 @@ def messages_per_second():
         if cached_message.author.id not in members:
             members.append(cached_message.author.id)
         sent_time = cached_message.created_at.timestamp()
-        if sent_time - current_second > 1:
+        if sent_time - current_time > 1:
             differences.append(counter)
             current_second = sent_time
             counter = 0

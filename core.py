@@ -3108,7 +3108,7 @@ async def server_status_command(interaction):
     members = []
     channels = []
     counter = 0
-    current_second = 0
+    current_time = 0
     guild_messages = []
     for message in client.cached_messages:
         if message.guild:
@@ -3119,8 +3119,8 @@ async def server_status_command(interaction):
             members.append(cached_message.author.id)
         if cached_message.channel.id not in channels:
             channels.append(cached_message.channel.id)
-        sent_time = math.floor(cached_message.created_at.timestamp())
-        if current_second != sent_time:
+        sent_time = cached_message.created_at.timestamp()
+        if sent_time - current_time > 1:
             differences.append(counter)
             current_second = sent_time
             counter = 0
