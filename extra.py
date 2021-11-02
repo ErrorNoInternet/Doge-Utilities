@@ -126,8 +126,8 @@ def messages_per_second():
                 guilds.append(cached_message.guild.id)
         if cached_message.author.id not in members:
             members.append(cached_message.author.id)
-        sent_time = core.math.floor(cached_message.created_at.timestamp())
-        if current_second != sent_time:
+        sent_time = cached_message.created_at.timestamp()
+        if sent_time - current_second > 1:
             differences.append(counter)
             current_second = sent_time
             counter = 0
