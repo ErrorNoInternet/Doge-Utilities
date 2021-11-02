@@ -2006,7 +2006,7 @@ async def tictactoe_command(interaction):
 
             if view.current_player == view.X:
                 if button_interaction.author.id != players[0]:
-                    await button_interaction.response.send_message("It is not your turn!", ephemeral=True)
+                    await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "wrong_turn"), ephemeral=True)
                     return
 
                 self.style = disnake.ButtonStyle.danger
@@ -2017,7 +2017,7 @@ async def tictactoe_command(interaction):
                 content = f"It is now <@{players[1]}>'s (O) turn"
             else:
                 if button_interaction.author.id != players[1]:
-                    await button_interaction.response.send_message("It is not your turn!", ephemeral=True)
+                    await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "wrong_turn"), ephemeral=True)
                     return
 
                 self.style = disnake.ButtonStyle.success
@@ -2116,9 +2116,9 @@ async def tictactoe_command(interaction):
 
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "joined_game"), ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "joined_game"), ephemeral=True)
             else:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "already_joined"), ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "already_joined"), ephemeral=True)
                 return
             if len(players) == 2:
                 await interaction.edit_original_message(view=self, content=functions.get_text(interaction.author.id, "game_starts_in_three"))
@@ -2136,9 +2136,9 @@ async def tictactoe_command(interaction):
 
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "joined_game"), ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "joined_game"), ephemeral=True)
             else:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "already_joined"), ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "already_joined"), ephemeral=True)
                 return
             if len(players) == 2:
                 await interaction.edit_original_message(view=self, content=functions.get_text(interaction.author.id, "game_starts_in_three"))
