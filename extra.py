@@ -3,6 +3,7 @@ import string
 import disnake
 import language
 import variables
+import disnake_paginator
 
 async def auto_count(channel_id):
 	digits = str(string.digits)
@@ -110,8 +111,8 @@ async def ask_translations(message, user_id, target_language):
         results.append("\n**Additional text:** " + msg.content)
         await msg.reply("Got it! Thanks!", mention_author=False)
     output = f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n" + "\n".join(results)
-    pager = core.Paginator(title="Translations", segments=[output[i: i + 2000] for i in range(0, len(output), 2000)], color=variables.embed_color)
-    await pager.start(core.FakeUserInteraction(message.author))
+    pager = disnake_paginator.Paginator(title="Translations", segments=disnake_paginator.split(output), color=variables.embed_color)
+    await pager.start(disnake_paginator.wrappers.UserInteractionWrapper(message.author))
 
 def messages_per_second():
     differences = []
