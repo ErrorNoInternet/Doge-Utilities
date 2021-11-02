@@ -129,7 +129,7 @@ def messages_per_second():
         sent_time = cached_message.created_at.timestamp()
         if sent_time - current_time > 1:
             differences.append(counter)
-            current_second = sent_time
+            current_time = sent_time
             counter = 0
         else:
             counter += 1
