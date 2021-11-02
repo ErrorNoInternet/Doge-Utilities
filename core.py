@@ -195,6 +195,7 @@ required_intents = disnake.Intents.default()
 required_intents.members = True
 required_intents.messages = True
 client = commands.AutoShardedBot(
+    max_messages=2048,
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
@@ -3048,11 +3049,12 @@ async def welcome_status_command(interaction):
 async def server_command(_):
     pass
 
-@server_command.sub_command(name="status", description="See moderation information about this server")
+@server_command.sub_command(name="status", description="View statistics for this server")
 async def server_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
+    await interaction.response.defer()
     embed = disnake.Embed(color=variables.embed_color)
     raid_protection = 0
     try:
@@ -3102,6 +3104,33 @@ async def server_status_command(interaction):
     ban_role_position = 0
     if exists:
         ban_role_position = ban_role.position
+    differences = []
+    members = []
+    channels = []
+    counter = 0
+    current_second = 0
+    guild_messages = []
+    for message in client.cached_messages:
+        if message.guild:
+            if message.guild.id == interaction.guild.id:
+                guild_messages.append(message)
+    for cached_message in guild_messages:
+        if cached_message.author.id not in members:
+            members.append(cached_message.author.id)
+        if cached_message.channel.id not in channels:
+            channels.append(cached_message.channel.id)
+        sent_time = math.floor(cached_message.created_at.timestamp())
+        if current_second != sent_time:
+            differences.append(counter)
+            current_second = sent_time
+            counter = 0
+        else:
+            counter += 1
+    average = 0
+    if len(differences) > 0:
+        average = round(sum(differences)/len(differences), 2)
+        if average == 1.0:
+            average = 1
     embed.add_field(name="Raid Protection", value=":white_check_mark: Enabled" if raid_protection else ":x: Disabled")
     embed.add_field(name="Newline Filter", value=":white_check_mark: Enabled" if newline_filter else ":x: Disabled")
     embed.add_field(name="Insults Filter", value=":white_check_mark: Enabled" if insults_filter else ":x: Disabled")
@@ -3109,9 +3138,12 @@ async def server_status_command(interaction):
     embed.add_field(name="Links Filter", value=":white_check_mark: Enabled" if links_filter else ":x: Disabled")
     embed.add_field(name="Mention Filter", value=":white_check_mark: Enabled" if mention_filter else ":x: Disabled")
     embed.add_field(name="Bot Role", value=f"{':white_check_mark:' if doge_role_position != 0 else ':x:'} #{doge_role_position}")
-    embed.add_field(name="Mute Role", value=f"{':white_check_mark:' if doge_role_position > mute_role_position and mute_role_position != 0 else ':x:'} #{mute_role_position}")
-    embed.add_field(name="Ban Role", value=f"{':white_check_mark:' if doge_role_position > ban_role_position and ban_role_position != 0 else ':x:'} #{ban_role_position}")
-    await interaction.response.send_message(embed=embed)
+    embed.add_field(name="Muted Role", value=f"{':white_check_mark:' if doge_role_position > mute_role_position and mute_role_position != 0 else ':x:'} #{mute_role_position}")
+    embed.add_field(name="Banned Role", value=f"{':white_check_mark:' if doge_role_position > ban_role_position and ban_role_position != 0 else ':x:'} #{ban_role_position}")
+    embed.add_field(name="Message Rate", value=f"{average}/s")
+    embed.add_field(name="Active Members", value=f"{len(members)}")
+    embed.add_field(name="Active Channels", value=f"{len(channels)}")
+    await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 5)
 
 @server_command.sub_command_group(name="logging", description="Manage the log channel for your server")
