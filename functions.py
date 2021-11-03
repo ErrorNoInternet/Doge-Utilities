@@ -59,6 +59,8 @@ def parse_time(timestamp):
         if unit in value or unit[:-1] in value:
             unit = key
             break
+    if unit == "":
+        unit = "m"
     return float(numbers) * variables.units[unit.lower()]
 
 def get_filter_name(name):
