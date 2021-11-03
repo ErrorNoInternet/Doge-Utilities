@@ -170,7 +170,7 @@ data = {
         "time": "时间",
         "text": "文字",
         "vote_again": "不要忘记给我投票!",
-        "todo_list": "待办事项列表",
+        "todo_list": "待办事列表",
         "todo_empty": "你的待办事列表是空的",
         "generate_number": "生成数字",
         "number_prompt": "你的随机数字是",
