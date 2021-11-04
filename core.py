@@ -505,7 +505,7 @@ async def reaction_delete_command(
         await interaction.response.send_message("That reaction role wasn't found!", ephemeral=True)
         return
     else:
-        await interaction.response.send_message("That reaction role has been successfully deleted", ephemeral=True)
+        await interaction.response.send_message("That reaction role has been successfully deleted!", ephemeral=True)
         return
 
 @reaction_command.sub_command(name="list", description="List all the reaction roles in this server")
