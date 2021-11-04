@@ -421,7 +421,7 @@ async def embedify_command(
         embed_color = int(colors[0][1:], 16)
     embed = disnake.Embed(title=title, description=description, color=embed_color)
     await interaction.channel.send(embed=embed)
-    await interaction.response.send_message("Your custom embed has been successfully generated", ephemeral=True)
+    await interaction.response.send_message("Your custom embed has been successfully generated!", ephemeral=True)
 
 @client.slash_command(name="reaction-roles", description="Manage the reaction roles")
 async def reaction_command(_):
@@ -461,7 +461,7 @@ async def reaction_create_command(
     except:
         reaction_roles = []
     if len(reaction_roles) >= 20:
-        await interaction.response.send_message("You can only add up to **20 roles** in 1 server!", ephemeral=True)
+        await interaction.response.send_message("You can only add up to **20 reaction roles** in 1 server!", ephemeral=True)
         return
     reaction_roles.append({"message": message_id, "emoji": emoji, "role": role.id, "channel": interaction.channel.id})
     database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
