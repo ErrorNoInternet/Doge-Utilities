@@ -1193,11 +1193,8 @@ async def set_autorole_command(
 @client.slash_command(name="lookup", description="Find a user on Discord")
 async def lookup_command(
         interaction,
-        user: disnake.User = Param(0, description="The ID of the target user"),
+        user: disnake.User = Param(default=lambda interaction: interaction.author, description="The ID of the target user"),
     ):
-    if user == 0:
-        user = interaction.author
-
     badges = ""
     for flag in variables.public_flags:
         if user.public_flags.value & int(flag) == int(flag):
@@ -1233,11 +1230,8 @@ async def permissions_command(_):
 @permissions_command.sub_command(name="member", description="Check the permissions of a member")
 async def permissions_member_command(
         interaction,
-        member: disnake.Member = Param(0, description="The member you want to check permissions for"),
+        member: disnake.Member = Param(default=lambda interaction: interaction.author, description="The member you want to check permissions for"),
     ):
-    if member == 0:
-        member = interaction.author
-    
     permission_list = build_member_permissions(member)
     embed = disnake.Embed(title="User Permissions", description=f"Permissions for <@{member.id}>\n\n" + permission_list, color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
@@ -1709,10 +1703,8 @@ async def time_get_command(
 async def nickname_command(
         interaction,
         nickname: str = Param(description="The new nickname"),
-        member: disnake.Member = Param(0, description="The target member"),
+        member: disnake.Member = Param(default=lambda interaction: interaction.author, description="The target member"),
     ):
-    if member == 0:
-        member = interaction.author
     if member.id != interaction.author.id:
         if not interaction.author.guild_permissions.manage_nicknames and interaction.author.id not in variables.permission_override:
             await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
@@ -3394,12 +3386,9 @@ async def pypi_command(
 @client.slash_command(name="discriminator", description="Find users with the same discriminator")
 async def discriminator_command(
         interaction,
-        discriminator: str = Param(0, description="The discriminator to look for"),
+        discriminator: str = Param(default=lambda interaction: interaction.author.discriminator, description="The discriminator to look for"),
     ):
     await interaction.response.defer()
-
-    if discriminator == 0:
-        discriminator = interaction.author.discriminator
     members = []
     discriminator = discriminator.replace("#", "")
     try:
