@@ -329,7 +329,7 @@ async def slash_command_handler(interaction):
 @client.slash_command(name="help", description="Get started with Doge Utilities")
 async def help_command(interaction):
     await help_paginator.start(interaction)
-    add_cooldown(interaction.author.id, "help", 60)
+    add_cooldown(interaction.author.id, "help", 30)
 
 @client.slash_command(name="settings", description="Manage")
 async def settings_command(_):
@@ -457,7 +457,7 @@ async def reaction_create_command(
         await interaction.response.send_message("I can't add that emoji to the message!", ephemeral=True)
         return
     try:
-        reaction_roles = json.loads(database["reaction-roles"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     counter = 0
@@ -468,12 +468,12 @@ async def reaction_create_command(
         await interaction.response.send_message("You can only add up to **20 roles** in 1 server!", ephemeral=True)
         return
     reaction_roles.append({"message": message_id, "emoji": emoji, "guild": interaction.guild.id, "role": role.id, "channel": interaction.channel.id})
-    database["reaction-roles"] = json.dumps(reaction_roles)
+    database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
     await interaction.response.send_message("A new reaction role has been successfully created!", ephemeral=True)
 
 def autocomplete_reaction_roles(interaction, string):
     try:
-        reaction_roles = json.loads(database["reaction-roles"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     roles = []
@@ -496,7 +496,7 @@ async def reaction_delete_command(
         return
 
     try:
-        reaction_roles = json.loads(database["reaction-roles"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     exists = False
@@ -505,7 +505,7 @@ async def reaction_delete_command(
             if reaction_role["guild"] == interaction.guild.id:
                 exists = True
                 reaction_roles.remove(reaction_role)
-                database["reaction-roles"] = json.dumps(reaction_roles)
+                database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
                 break
     if not exists:
         await interaction.response.send_message("That reaction role wasn't found!", ephemeral=True)
@@ -521,7 +521,7 @@ async def reaction_list_command(interaction):
         return
 
     try:
-        reaction_roles = json.loads(database["reaction-roles"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     roles = []
@@ -4227,7 +4227,7 @@ async def on_reaction_add(payload):
     if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
         return
     try:
-        reaction_roles = json.loads(database["reaction-roles"])
+        reaction_roles = json.loads(database[f"reaction-roles.{payload.guild_id}"])
     except:
         return
 
@@ -4258,14 +4258,14 @@ async def on_reaction_add(payload):
                                 await log_message(target_guild, f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)")
                     else:
                         reaction_roles.remove(reaction_role)
-                        database["reaction-roles"] = json.dumps(reaction_roles)
+                        database[f"reaction-roles.{payload.guild_id}"] = json.dumps(reaction_roles)
                     return
 
 async def on_reaction_remove(payload):
     if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
         return
     try:
-        reaction_roles = json.loads(database["reaction-roles"])
+        reaction_roles = json.loads(database[f"reaction-roles.{payload.guild_id}"])
     except:
         return
 
@@ -4302,7 +4302,7 @@ async def on_reaction_remove(payload):
                                 await log_message(target_guild, f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)")
                     else:
                         reaction_roles.remove(reaction_role)
-                        database["reaction-roles"] = json.dumps(reaction_roles)
+                        database[f"reaction-roles.{payload.guild_id}"] = json.dumps(reaction_roles)
                     return
 
 async def on_message(message):
