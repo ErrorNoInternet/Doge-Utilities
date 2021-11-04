@@ -156,6 +156,7 @@ data = {
         "unable_to_lock": "I am unable to lock {}",
         "unable_to_unlock": "I am unable to unlock {}",
         "wrong_turn": "It is not your turn!",
+        "not_in_game": "You did not join that game!",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -314,6 +315,7 @@ data = {
         "unable_to_lock": "我无法锁定 {}",
         "unable_to_unlock": "我无法解锁 {}",
         "wrong_turn": "这不是你玩的时候!",
+        "not_in_game": "你没有加入那个游戏!",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

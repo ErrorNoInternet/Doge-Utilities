@@ -325,6 +325,15 @@ async def slash_command_handler(interaction):
                 await interaction.author.send(functions.get_text(interaction.author.id, "afk_removed"))
             except:
                 pass
+    if interaction.data.name == "text":
+        try:
+            insults = json.loads(database[f"insults.list.{interaction.guild.id}"])
+            for word in insults:
+                if word.lower() in interaction.data.options[0].options[0].value.replace(" ", ""):
+                    await interaction.response.send_message("Please do not use that word!", ephemeral=True)
+                    raise Exception("no permission")
+        except:
+            pass
 
 @client.slash_command(name="help", description="Get started with Doge Utilities")
 async def help_command(interaction):
@@ -1463,7 +1472,11 @@ async def italic_command(
     for letter in text:
         if letter in variables.ascii_characters:
             output += variables.italic_characters[variables.ascii_characters.index(letter)]
-    await interaction.response.send_message(functions.remove_mentions(output))
+    output = functions.remove_mentions(output)
+    if output == "":
+        await interaction.response.send_message("I couldn't make your text italic!", ephemeral=True)
+    else:
+        await interaction.response.send_message(output)
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="bold", description="Make text look bold")
@@ -1475,7 +1488,11 @@ async def bold_command(
     for letter in text:
         if letter in variables.ascii_characters:
             output += variables.bold_characters[variables.ascii_characters.index(letter)]
-    await interaction.response.send_message(functions.remove_mentions(output))
+    output = functions.remove_mentions(output)
+    if output == "":
+        await interaction.response.send_message("I couldn't make your text bold!", ephemeral=True)
+    else:
+        await interaction.response.send_message(output)
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="scramble", description="Scramble the letters in a sentence")
@@ -1989,7 +2006,7 @@ async def tictactoe_command(interaction):
                 return
 
             if button_interaction.author.id not in players:
-                await button_interaction.response.send_message("You did not join that TicTacToe game!", ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_in_game"), ephemeral=True)
                 return
 
             if view.current_player == view.X:
@@ -2114,7 +2131,6 @@ async def tictactoe_command(interaction):
                 await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
                 self.stop()
                 return
-
             await interaction.edit_original_message(view=self)
 
         @disnake.ui.button(label=functions.get_text(interaction.author.id, "player_two"), style=disnake.ButtonStyle.blurple)
@@ -2134,7 +2150,6 @@ async def tictactoe_command(interaction):
                 await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
                 self.stop()
                 return
-
             await interaction.edit_original_message(view=self)
 
     await interaction.response.send_message(functions.get_text(interaction.author.id, "join_tictactoe"), view=GameLauncher())
