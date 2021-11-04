@@ -328,7 +328,10 @@ async def slash_command_handler(interaction):
     if interaction.data.name == "text":
         if not interaction.author.guild_permissions.administrator:
             try:
-                ignored_channels = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
+                try:
+                    ignored_channels = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
+                except:
+                    ignored_channels = {"insults": []}
                 if interaction.channel.id not in ignored_channels["insults"]:
                     if json.loads(database[f"insults.toggle.{interaction.guild.id}"]):
                         insults = json.loads(database[f"insults.list.{interaction.guild.id}"])
