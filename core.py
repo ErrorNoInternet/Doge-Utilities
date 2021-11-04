@@ -326,14 +326,18 @@ async def slash_command_handler(interaction):
             except:
                 pass
     if interaction.data.name == "text":
-        try:
-            insults = json.loads(database[f"insults.list.{interaction.guild.id}"])
-            for word in insults:
-                if word.lower() in interaction.data.options[0].options[0].value.replace(" ", ""):
-                    await interaction.response.send_message("Please do not use that word!", ephemeral=True)
-                    raise Exception("no permission")
-        except:
-            pass
+        if not interaction.author.guild_permissions.administrator:
+            try:
+                ignored_channels = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
+                if interaction.channel.id not in ignored_channels["insults"]:
+                    if json.loads(database[f"insults.toggle.{interaction.guild.id}"]):
+                        insults = json.loads(database[f"insults.list.{interaction.guild.id}"])
+                        for word in insults:
+                            if word.lower() in interaction.data.options[0].options[0].value.replace(" ", ""):
+                                await interaction.response.send_message(f'Please do not use the word **"{word.lower()}"**!', ephemeral=True)
+                                raise Exception("no permission")
+            except:
+                pass
 
 @client.slash_command(name="help", description="Get started with Doge Utilities")
 async def help_command(interaction):
