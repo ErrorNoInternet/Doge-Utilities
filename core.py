@@ -520,7 +520,7 @@ async def reaction_list_command(interaction):
         reaction_roles = []
     description = ""
     for role in reaction_roles:
-        description += f"{role['emoji']}: {role['message']} ([message](https://discord.com/channels/{role['guild']}/{role['channel']}/{role['message']}))\n"
+        description += f"{role['emoji']}: {role['message']} ([message](https://discord.com/channels/{interaction.guild.id}/{role['channel']}/{role['message']}))\n"
     embed = disnake.Embed(title="Reaction Roles", description=description if description != '' else 'There are no reaction roles in this server', color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
