@@ -224,6 +224,7 @@ help_paginator = disnake_paginator.ButtonPaginator(
     color=variables.embed_color,
     timeout=600,
     segments=[variables.help_text[i: i + 1000] for i in range(0, len(variables.help_text), 1000)],
+    invalid_user_function=functions.invalid_user_function,
 )
 
 def parse_status_variables(text):
@@ -593,6 +594,7 @@ async def currency_list_command(interaction):
     segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
     pager = disnake_paginator.ButtonPaginator(
         prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", segments=segments,
+        invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction)
     add_cooldown(interaction.author.id, "currency", 5)
@@ -787,6 +789,7 @@ async def shards_command(interaction):
         segments=pages.values(),
         target_page=current_page,
         color=variables.embed_color,
+        invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction)
     add_cooldown(interaction.author.id, "get", 3)
@@ -1670,6 +1673,7 @@ async def time_get_command(
                 color=variables.embed_color,
                 prefix="```\n", suffix="```",
                 title=f"Timezone List", segments=segments,
+                invalid_user_function=functions.invalid_user_function,
             )
             await pager.start(interaction)
         elif region.lower() == "epoch" or region.lower() == "unix":
@@ -1921,6 +1925,7 @@ async def execute_command(
             color=variables.embed_color, 
             title=f"Code Output", 
             segments=segments,
+            invalid_user_function=functions.invalid_user_function,
         )
         await interaction.edit_original_message(view=pager.view(interaction), embed=pager.embeds[0])
     elif len(output.strip()) == 0:
@@ -2871,7 +2876,7 @@ async def leave_enable_command(interaction):
     try:
         database[f"leave.text.{interaction.guild.id}"]
     except:
-        await interaction.response.send_message(f"Please set a leave message first", ephemeral=True)
+        await interaction.response.send_message(f"Please set a leave channel and message first", ephemeral=True)
         return
     try:
         channel_id = json.loads(database[f"leave.channel.{interaction.guild.id}"])
@@ -2882,7 +2887,7 @@ async def leave_enable_command(interaction):
         if not found:
             raise Exception("unable to find channel")
     except:
-        await interaction.response.send_message(f"Please set a leave channel first", ephemeral=True)
+        await interaction.response.send_message(f"Please set a leave channel and message first", ephemeral=True)
         return
 
     database[f"leave.toggle.{interaction.guild.id}"] = 1
@@ -2964,7 +2969,7 @@ async def welcome_enable_command(interaction):
     try:
         database[f"welcome.text.{interaction.guild.id}"]
     except:
-        await interaction.response.send_message(f"Please set a welcome message first", ephemeral=True)
+        await interaction.response.send_message(f"Please set a welcome channel and message first", ephemeral=True)
         return
     try:
         channel_id = json.loads(database[f"welcome.channel.{interaction.guild.id}"])
@@ -2975,7 +2980,7 @@ async def welcome_enable_command(interaction):
         if not found:
             raise Exception("unable to find channel")
     except:
-        await interaction.response.send_message(f"Please set a welcome channel first", ephemeral=True)
+        await interaction.response.send_message(f"Please set a welcome channel and message first", ephemeral=True)
         return
 
     database[f"welcome.toggle.{interaction.guild.id}"] = 1
@@ -3417,6 +3422,7 @@ async def discriminator_command(
     segments = disnake_paginator.split(output, 1000)
     pager = disnake_paginator.ButtonPaginator(
         prefix=f"```\n", suffix="```", color=variables.embed_color, title="Discriminator", segments=segments,
+        invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction, deferred=True)
     add_cooldown(interaction.author.id, "discriminator", 5)
@@ -4546,6 +4552,7 @@ async def on_message(message):
                 color=variables.embed_color, 
                 title=f"Code Output", 
                 segments=segments,
+                invalid_user_function=functions.invalid_user_function,
             )
             await pager.start(disnake_paginator.wrappers.MessageInteractionWrapper(message))
         elif len(output.strip()) == 0:
@@ -4592,6 +4599,7 @@ async def on_slash_command_error(interaction, error):
                             if not sent:
                                 pager = disnake_paginator.ButtonPaginator(
                                     color=disnake.Color.red(), title="Error Report", segments=segments, timeout=None,
+                                    invalid_user_function=functions.invalid_user_function,
                                 )
                                 await pager.start(disnake_paginator.wrappers.UserInteractionWrapper(member))
                                 sent = True

@@ -4,6 +4,9 @@ import core
 import language
 import variables
 
+async def invalid_user_function(interaction):
+    await interaction.response.send_message(get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+
 def display_time(user_id, duration):
     unit = "seconds"
     if duration >= 60:
@@ -41,7 +44,7 @@ def shrink(text, length):
         return text[:-3].strip() + "..."
 
 def parse_time(timestamp):
-    timestamp = timestamp.replace(" ", "")
+    timestamp = timestamp.replace(" ", "").lower()
     numbers = ""
     unit = ""
     for letter in timestamp:
