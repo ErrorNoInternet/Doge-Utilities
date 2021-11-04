@@ -460,14 +460,10 @@ async def reaction_create_command(
         reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
-    counter = 0
-    for reaction_role in reaction_roles:
-        if reaction_role["guild"] == interaction.guild.id:
-            counter += 1
-    if counter > 20:
+    if len(reaction_roles) >= 20:
         await interaction.response.send_message("You can only add up to **20 roles** in 1 server!", ephemeral=True)
         return
-    reaction_roles.append({"message": message_id, "emoji": emoji, "guild": interaction.guild.id, "role": role.id, "channel": interaction.channel.id})
+    reaction_roles.append({"message": message_id, "emoji": emoji, "role": role.id, "channel": interaction.channel.id})
     database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
     await interaction.response.send_message("A new reaction role has been successfully created!", ephemeral=True)
 
@@ -478,8 +474,7 @@ def autocomplete_reaction_roles(interaction, string):
         reaction_roles = []
     roles = []
     for reaction_role in reaction_roles:
-        if reaction_role["guild"] == interaction.guild.id:
-            roles.append(str(reaction_role["message"]))
+        roles.append(str(reaction_role["message"]))
     return list(filter(lambda id: string in id, roles))[:20]
 
 @reaction_command.sub_command(name="remove", description="Remove a reaction role from this server")
@@ -502,11 +497,10 @@ async def reaction_delete_command(
     exists = False
     for reaction_role in reaction_roles:
         if str(reaction_role["message"]) == message_id:
-            if reaction_role["guild"] == interaction.guild.id:
-                exists = True
-                reaction_roles.remove(reaction_role)
-                database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
-                break
+            exists = True
+            reaction_roles.remove(reaction_role)
+            database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
+            break
     if not exists:
         await interaction.response.send_message("That reaction role wasn't found!", ephemeral=True)
         return
@@ -524,12 +518,8 @@ async def reaction_list_command(interaction):
         reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
-    roles = []
-    for reaction_role in reaction_roles:
-        if reaction_role["guild"] == interaction.guild.id:
-            roles.append(reaction_role)
     description = ""
-    for role in roles:
+    for role in reaction_roles:
         description += f"{role['emoji']}: {role['message']} ([message](https://discord.com/channels/{role['guild']}/{role['channel']}/{role['message']}))\n"
     embed = disnake.Embed(title="Reaction Roles", description=description if description != '' else 'There are no reaction roles in this server', color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
@@ -4283,7 +4273,7 @@ async def on_reaction_remove(payload):
                     if role:
                         member = None
                         for guild in client.guilds:
-                            if guild.id == reaction_role["guild"]:
+                            if guild.id == payload.guild_id:
                                 for user in guild.members:
                                     if user.id == payload.user_id:
                                         member = user
