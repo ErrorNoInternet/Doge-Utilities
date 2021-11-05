@@ -474,6 +474,7 @@ data = {
         "unable_to_lock": "Ich kann {} nicht sperren",
         "unable_to_unlock": "Ich kann {} nicht entsperren",
         "wrong_turn": "Du bist nicht an der Reihe!",
+        "not_in_game": "Du bist diesem Spiel nicht beigetreten!",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",

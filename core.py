@@ -477,7 +477,7 @@ async def reaction_create_command(
     except:
         reaction_roles = []
     if len(reaction_roles) >= 20:
-        await interaction.response.send_message("You can only add up to **20 reaction roles** in 1 server!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("20"), ephemeral=True)
         return
     reaction_roles.append({"message": message_id, "emoji": emoji, "role": role.id, "channel": interaction.channel.id})
     database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
@@ -2531,12 +2531,15 @@ async def filter_ignore_add_command(
         current_values = {}
     if filter_name not in current_values:
         current_values[filter_name] = []
+    if len(current_values[filter_name]) >= 10:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("10"), ephemeral=True)
+        return
     current_values[filter_name].append(channel.id)
     database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
     await interaction.response.send_message(f"<#{channel.id}> has been added to the **{filter}** filter's ignore list")
 
 @filter_ignore_command.sub_command(name="remove", description="Remove a channel from the filter ignore list")
-async def filter_ignore_add_command(
+async def filter_ignore_remove_command(
         interaction,
         filter: FilterOption = Param(description="The filter you want to add"),
         channel: disnake.TextChannel = Param(description="The channel you want to add"),
