@@ -3524,7 +3524,7 @@ async def kick_command(
 async def ban_command(
         interaction,
         member: str = Param(description="The ID of the member you want to ban"),
-        reason: str = Param("Not specified", description="The reason for banning the member"),
+        reason: str = Param(0, description="The reason for banning the member"),
     ):
     if reason == 0:
         reason = functions.get_text(member.id, "not_specified")
