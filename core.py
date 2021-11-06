@@ -2607,7 +2607,12 @@ async def insults_list_command(interaction):
         insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
     except:
         insults_data = []
-    embed = disnake.Embed(title="Insults List", description="There are no swear words configured for your server" if insults_data == [] else '\n'.join(insults_data), color=variables.embed_color)
+    insults = []
+    counter = 0
+    for insult in insults_data:
+        counter += 1
+        insults.append(f"**{counter}.** {insult}")
+    embed = disnake.Embed(title="Insults List", description="There are no insults configured for this server" if insults == [] else '\n'.join(insults), color=variables.embed_color)
     await interaction.response.send_message(embed=embed)
 
 @insults_command.sub_command(name="status", description="See the current status of the insults filter")
