@@ -649,7 +649,7 @@ async def support_command(interaction):
 @links_command.sub_command(name="invite", description="Invite this bot to another server")
 async def invite_command(interaction):
     guild_member = True
-    if interaction.author == interaction.guild.owner:
+    if interaction.author.id == interaction.guild.owner.id:
         guild_member = False
 
     class CommandView(disnake.ui.View):
@@ -666,7 +666,10 @@ async def invite_command(interaction):
 
         async def on_timeout(self):
             for button in self.children:
-                button.disabled = True
+                try:
+                    button.disabled = True
+                except:
+                    pass
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
