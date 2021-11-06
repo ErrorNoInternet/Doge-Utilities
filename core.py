@@ -1744,7 +1744,8 @@ async def nickname_command(
                 return
         variables.updated_members.append(member.id)
         await member.edit(nick=nickname)
-        await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to **{nickname}**")
+        nicknameString = f'**"{nickname}"**'
+        await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to {nicknameString}")
         add_cooldown(interaction.author.id, "nickname", 3)
     except:
         if member.id in variables.updated_members:
