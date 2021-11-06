@@ -661,8 +661,14 @@ async def invite_command(interaction):
                 disnake.ui.Button(
                     label="Invite Link",
                     url=variables.bot_invite_link,
-                )
+                ),
             )
+
+        async def on_timeout(self):
+            for button in self.children:
+                button.disabled = True
+            await interaction.edit_original_message(view=self)
+            return await super().on_timeout()
 
         @disnake.ui.button(label="Leave Server", style=disnake.ButtonStyle.red, disabled=guild_member)
         async def leave_server(self, _, button_interaction):
