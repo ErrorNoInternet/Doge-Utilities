@@ -84,6 +84,8 @@ async def ask_translations(message, user_id, target_language):
     def get_language(code):
         return core.googletrans.LANGUAGES[code]
 
+    if target_language not in language.data:
+        language.data[target_language] = {}
     questions = []
     results = []
     for key in language.data["en"].keys():
@@ -104,6 +106,7 @@ async def ask_translations(message, user_id, target_language):
             stopped = True
             break
         results.append(f'`{question}`: "{msg.content}"')
+        language.data[target_language][question] = msg.content
     if not stopped:
         await target_user.send("Looks like we are done! Thank you for all your translations!")
         await target_user.send("Do you have anything extra to say? If you do, please send them. If you don't, please send \"no\".")
