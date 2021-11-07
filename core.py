@@ -666,10 +666,7 @@ async def invite_command(interaction):
 
         async def on_timeout(self):
             for button in self.children:
-                try:
-                    button.disabled = True
-                except:
-                    pass
+                button.disabled = True
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
