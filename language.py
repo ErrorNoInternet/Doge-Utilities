@@ -157,6 +157,7 @@ data = {
         "unable_to_unlock": "I am unable to unlock {}",
         "wrong_turn": "It is not your turn!",
         "not_in_game": "You did not join that game!",
+        "bot_status": "Bot Status",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -316,6 +317,7 @@ data = {
         "unable_to_unlock": "我无法解锁 {}",
         "wrong_turn": "这不是你玩的时候!",
         "not_in_game": "你没有加入那个游戏!",
+        "bot_status": "机器人状态",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

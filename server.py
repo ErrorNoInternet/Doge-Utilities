@@ -394,6 +394,7 @@ def fetch_status():
     user_id = 0
     if user_ip in user_ids:
         user_id = user_ids[user_ip]
+    bot_status_text = functions.get_text(user_id, "bot_status")
     text = "<div class='statusWrapper'>"
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'latency')}</b><br><code>{round(core.client.latency*1000, 2)} ms</code></p>"
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'cpu_usage')}</b><br><code>{core.psutil.cpu_percent()}%</code></p>"
@@ -408,7 +409,7 @@ def fetch_status():
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'bot_version')}</b><br><code>{variables.version_number}.{variables.build_number}</code></p>"
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'bot_uptime')}</b><br><code>{uptime.strip()}</code></p>"
     text += "</div>"
-    return load_file("status.html", replace={"(text)": text})
+    return load_file("status.html", replace={"(text)": text, "(bot_status)": bot_status_text})
 
 @app.route("/commands", endpoint="commands-page")
 def fetch_commands():
