@@ -390,19 +390,23 @@ def fetch_status():
     else:
         uptime = uptime.split(" ")
         uptime = " ".join(uptime[:3])
+    user_ip = get_ip(flask.request)
+    user_id = 0
+    if user_ip in user_ids:
+        user_id = user_ids[user_ip]
     text = "<div class='statusWrapper'>"
-    text += f"<p class='statusText'><b>Bot Latency</b><br><code>{round(core.client.latency*1000, 2)} ms</code></p>"
-    text += f"<p class='statusText'><b>CPU Usage</b><br><code>{core.psutil.cpu_percent()}%</code></p>"
-    text += f"<p class='statusText'><b>RAM Usage</b><br><code>{round(memory_usage, 2)} MB</code></p>"
-    text += f"<p class='statusText'><b>Thread Count</b><br><code>{threading.active_count()}</code></p>"
-    text += f"<p class='statusText'><b>Joined Guilds</b><br><code>{len(core.client.guilds)}</code></p>"
-    text += f"<p class='statusText'><b>Active Shards</b><br><code>{len(core.client.shards)}</code></p>"
-    text += f"<p class='statusText'><b>Member Count</b><br><code>{member_count}</code></p>"
-    text += f"<p class='statusText'><b>Channel Count</b><br><code>{channel_count}</code></p>"
-    text += f"<p class='statusText'><b>Command Count</b><br><code>{len(core.client.slash_commands)}</code></p>"
-    text += f"<p class='statusText'><b>Disnake Version</b><br><code>{core.disnake.__version__}</code></p>"
-    text += f"<p class='statusText'><b>Bot Version</b><br><code>{variables.version_number}.{variables.build_number}</code></p>"
-    text += f"<p class='statusText'><b>Bot Uptime</b><br><code>{uptime.strip()}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'latency')}</b><br><code>{round(core.client.latency*1000, 2)} ms</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'cpu_usage')}</b><br><code>{core.psutil.cpu_percent()}%</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'ram_usage')}</b><br><code>{round(memory_usage, 2)} MB</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'thread_count')}</b><br><code>{threading.active_count()}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'joined_guilds')}</b><br><code>{len(core.client.guilds)}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'active_shards')}</b><br><code>{len(core.client.shards)}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'member_count')}</b><br><code>{member_count}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'channel_count')}</b><br><code>{channel_count}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'command_count')}</b><br><code>{len(core.client.slash_commands)}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'disnake_version')}</b><br><code>{core.disnake.__version__}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'bot_version')}</b><br><code>{variables.version_number}.{variables.build_number}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'bot_uptime')}</b><br><code>{uptime.strip()}</code></p>"
     text += "</div>"
     return load_file("status.html", replace={"(text)": text})
 
