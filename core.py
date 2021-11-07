@@ -337,7 +337,7 @@ async def slash_command_handler(interaction):
                         insults = json.loads(database[f"insults.list.{interaction.guild.id}"])
                         for word in insults:
                             if word.lower() in interaction.data.options[0].options[0].value.replace(" ", ""):
-                                await interaction.response.send_message(f'Please do not use the word **"{word.lower()}"**!', ephemeral=True)
+                                await interaction.response.send_message(f'Please do not use the word **"{word.lower()}"** in this server!', ephemeral=True)
                                 raise Exception("no permission")
             except:
                 pass
