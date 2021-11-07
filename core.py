@@ -3657,7 +3657,7 @@ async def convert_command(
     output_unit = output_unit.strip()
     data = converter.convert(amount, input_unit, output_unit)
     if data["error"] == 404:
-        await interaction.response.send_message("That input/output pair is not supported", ephemeral=True)
+        await interaction.response.send_message("That input/output pair is not supported!", ephemeral=True)
         return
     elif data["error"] == 403:
         await interaction.response.send_message("The input and output unit is the same!", ephemeral=True)
