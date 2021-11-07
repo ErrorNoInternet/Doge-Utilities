@@ -3535,71 +3535,39 @@ async def kick_command(
 @client.slash_command(name="ban", description="Ban a specified member from your server")
 async def ban_command(
         interaction,
-        member: str = Param(description="The ID of the member you want to ban"),
+        user: disnake.User = Param(description="The ID of the member you want to ban"),
         reason: str = Param(0, description="The reason for banning the member"),
     ):
-    if reason == 0:
-        reason = functions.get_text(member.id, "not_specified")
-
     if interaction.author.guild_permissions.ban_members or interaction.author.id in variables.permission_override:
         pass
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
 
-    try:
-        user_id = int(functions.remove_mentions(member))
-    except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
-        return
-
-    found = False
+    if reason == 0:
+        reason = functions.get_text(user.id, "not_specified")
     for member in interaction.guild.members:
-        if member.id == user_id:
+        if member.id == user.id:
             if member.top_role.position >= interaction.author.top_role.position:
                 await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_ban").format(member), ephemeral=True)
                 return
-            found = True
-            try:
-                await member.ban(reason=reason, delete_message_days=0)
-                await interaction.response.send_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.green(),
-                        description=functions.get_text(interaction.author.id, "user_banned").format(member),
-                    )
-                )
-                await log_message(interaction.guild, f"**{member}** has been banned by **{interaction.author}**: {reason}")
-            except:
-                await interaction.response.send_message(
-                    embed=disnake.Embed(
-                        color=disnake.Color.red(),
-                        description=functions.get_text(interaction.author.id, "unable_to_ban").format(member),
-                    ),
-                    ephemeral=True,
-                )
-    if not found:
-        try:
-            try:
-                user = await client.fetch_user(user_id)
-            except:
-                await interaction.response.send_message("Unable to find the specified user")
-                return
-            await interaction.guild.ban(user, reason=reason, delete_message_days=0)
-            await interaction.response.send_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.green(),
-                    description=functions.get_text(interaction.author.id, "user_banned").format(user),
-                )
-            )
-            await log_message(interaction.guild, f"**{user}** has been banned by **{interaction.author}**: {reason}")
-        except:
-            await interaction.response.send_message(
-                embed=disnake.Embed(
-                    color=disnake.Color.red(),
-                    description=functions.get_text(interaction.author.id, "unable_to_ban").format(user),
-                ),
-                ephemeral=True,
-            )
+    try:
+        await interaction.guild.ban(user, reason=reason, delete_message_days=0)
+        await interaction.response.send_message(
+            embed=disnake.Embed(
+                color=disnake.Color.green(),
+                description=functions.get_text(interaction.author.id, "user_banned").format(user),
+            ),
+        )
+        await log_message(interaction.guild, f"**{user}** has been banned by **{interaction.author}**: {reason}")
+    except:
+        await interaction.response.send_message(
+            embed=disnake.Embed(
+                color=disnake.Color.red(),
+                description=functions.get_text(interaction.author.id, "unable_to_ban").format(user),
+            ),
+            ephemeral=True,
+        )
 
 @client.slash_command(name="unban", description="Unban a specified member from your server")
 async def unban_command(
