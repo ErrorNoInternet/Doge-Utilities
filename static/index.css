@@ -37,6 +37,10 @@ p {
     color: rgb(255, 255, 255);
 }
 
+h3 {
+    color: rgb(255, 255, 255);
+}
+
 button {
     margin: auto;
     display: block;

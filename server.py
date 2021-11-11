@@ -11,7 +11,7 @@ import variables
 import threading
 from requests_oauthlib import OAuth2Session
 
-app = flask.Flask("doge-server")
+app = flask.Flask("doge-utilities")
 logger = logging.getLogger('werkzeug')
 logger.setLevel(logging.ERROR)
 
@@ -39,6 +39,7 @@ allowed_endpoints = [
     "version-endpoint",
     "doge-image-endpoint",
     "icon-endpoint",
+    "privacy-page",
 ]
 colors = ["#e74c3c", "#2ecc71"]
 user_ids = {}
@@ -359,6 +360,10 @@ def fetch_server_invite():
 @app.route("/donate", endpoint="donate-page")
 def fetch_donations():
     return load_file("donate.html")
+
+@app.route("/privacy", endpoint="privacy-page")
+def fetch_privacy_page():
+    return load_file("privacy.html")
 
 @app.route("/status", endpoint="status-page")
 def fetch_status():
