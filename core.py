@@ -2580,8 +2580,18 @@ async def filter_ignore_list_command(interaction):
     description = ""
     for value in current_values:
         channels = []
+        deleted = []
         for channel in current_values[value]:
-            channels.append(f"<#{channel}>")
+            exists = False
+            for server_channel in interaction.guld.channels:
+                if server_channel.id == channel:
+                    exists = True
+            if exists:
+                channels.append(f"<#{channel}>")
+            else:
+                deleted.append(channel)
+        for channel in deleted:
+            current_values[value].remove(channel)
         if channels != []:
             description += f"{functions.get_filter_name(value).title()}: {' '.join(channels)}\n"
     embed = disnake.Embed(
