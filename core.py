@@ -2596,7 +2596,7 @@ async def filter_ignore_list_command(interaction):
             current_values[value] = values
         if channels != []:
             description += f"{functions.get_filter_name(value).title()}: {' '.join(channels)}\n"
-    database["filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
+    database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
     embed = disnake.Embed(
         title="Ignored Channels",
         description=description if description != "" else "There are no ignored channels",
