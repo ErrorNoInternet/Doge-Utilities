@@ -464,7 +464,7 @@ data = {
         "game_starts_in_three": "Das Spiel startet in **3 Sekunden**!",
         "join_tictactoe": "Klicke, um der TicTacToe Partie beizutreten",
         "afk_removed": "Dein AFK wurde entfernt!",
-        "afk_set": "Deine AFK Nachricht wurde auf **{}** gesetzt",
+        "afk_set": "Deine AFK Nachricht wurde auf **\"{}\"** gesetzt",
         "currently_afk": "**{}** ist im Moment AFK ({}): **{}**",
         "already_afk": "Du bist bereits AFK!",
         "mentioned_user": "Der Nutzer, den du erwähnt hast",
