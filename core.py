@@ -2591,7 +2591,9 @@ async def filter_ignore_list_command(interaction):
             else:
                 deleted.append(channel)
         for channel in deleted:
-            current_values[value].remove(channel)
+            values = current_values[value]
+            values.remove(channel)
+            current_values[value] = values
         if channels != []:
             description += f"{functions.get_filter_name(value).title()}: {' '.join(channels)}\n"
     database["filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
