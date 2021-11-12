@@ -2583,7 +2583,7 @@ async def filter_ignore_list_command(interaction):
         deleted = []
         for channel in current_values[value]:
             exists = False
-            for server_channel in interaction.guld.channels:
+            for server_channel in interaction.guild.channels:
                 if server_channel.id == channel:
                     exists = True
             if exists:
