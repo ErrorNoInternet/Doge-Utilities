@@ -29,7 +29,7 @@ Feel free to donate some Dogecoin at `D5Gy8ADPTbzGLD3qvpv4ZkNNrPMNkYX49j`!
 git clone https://github.com/ErrorNoInternet/Doge-Utilities
 cd Doge-Utilities
 pip install -r requirements.txt
-python3 main.py
+python3 -OO main.py
 ```
 
 ## Links
