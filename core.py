@@ -1623,7 +1623,7 @@ async def color_command(
     ):
     colors = generate_color(color_code)
     if colors == 1:
-        await interaction.response.send_message("Invalid color code")
+        await interaction.response.send_message(f"`{color_code}` is not a valid color code!")
         return
     else:
         hex_color = colors[0]; rgb_color = colors[1]
