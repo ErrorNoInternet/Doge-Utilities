@@ -77,6 +77,7 @@ def load_file(file_name, mimetype="text/html", binary=False, replace={}):
         side_bar = side_bar_file.read()
         side_bar_file.close()
         html = html.replace("(side_bar)", side_bar)
+        html = html.replace("(website)", os.environ["WEBSITE_URL"])
 
     response = flask.make_response(html, 200)
     response.mimetype = mimetype
