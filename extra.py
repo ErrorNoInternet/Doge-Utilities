@@ -1,4 +1,7 @@
 import core
+import json
+import struct
+import socket
 import string
 import disnake
 import language
@@ -140,4 +143,56 @@ def messages_per_second():
     if average == 1.0:
         average = 1
     print(f"I am receiving **{average} {'message' if average == 1 else 'messages'}/s** from **{len(members)} {'member' if len(members) == 1 else 'members'}** across **{len(guilds)} {'guild' if len(guilds) == 1 else 'guilds'}**")
+
+def minepinger(ip):
+    port = 25565
+    if ":" in ip:
+        port = int(ip.split(":")[1])
+
+    def read_var_int():
+        i = 0
+        j = 0
+        while True:
+            k = sock.recv(1)
+            if not k:
+                return 0
+            k = k[0]
+            i |= (k & 0x7f) << (j * 7)
+            j += 1
+            if j > 5:
+                raise ValueError('var_int too big')
+            if not (k & 0x80):
+                return i
+
+    sock = socket.socket()
+    sock.settimeout(10)
+    sock.connect((ip, port))
+    try:
+        host = ip.encode('utf-8')
+        data = b''
+        data += b'\x00'
+        data += b'\x04'
+        data += struct.pack('>b', len(host)) + host
+        data += struct.pack('>H', port)
+        data += b'\x01'
+        data = struct.pack('>b', len(data)) + data
+        sock.sendall(data + b'\x01\x00')
+        length = read_var_int()
+        if length < 10:
+            if length < 0:
+                raise ValueError('negative length read')
+            else:
+                raise ValueError('invalid response %s' % sock.read(length))
+
+        sock.recv(1)
+        length = read_var_int()
+        data = b''
+        while len(data) != length:
+            chunk = sock.recv(length - len(data))
+            if not chunk:
+                raise ValueError('connection abborted')
+            data += chunk
+        return json.loads(data)
+    finally:
+        sock.close()
 
