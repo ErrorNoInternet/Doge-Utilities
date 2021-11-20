@@ -148,6 +148,7 @@ def minepinger(ip):
     port = 25565
     if ":" in ip:
         port = int(ip.split(":")[1])
+        ip = ip.split(":")[0]
 
     def read_var_int():
         i = 0
