@@ -2281,6 +2281,8 @@ async def fetch_minecraft_server_command(
             error = "Connection reset by peer"
         elif error == "[Errno 111] Connection refused":
             error = "Connection refused"
+        elif error == "[Errno -5] No address associated with hostname":
+            error = "No address associated with hostname"
         elif error == "timed out":
             error = "Connection timed out"
         elif error == "'socket' object has no attribute 'read'" or error == "Expecting value: line 1 column 1 (char 0)":
