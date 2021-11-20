@@ -158,6 +158,10 @@ data = {
         "wrong_turn": "It is not your turn!",
         "not_in_game": "You did not join that game!",
         "bot_status": "Bot Status",
+        "minecraft_server": "Minecraft Server",
+        "players": "Players",
+        "unknown_upper": "Unknown",
+        "unable_to_connect": "Unable to connect",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -318,6 +322,10 @@ data = {
         "wrong_turn": "这不是你玩的时候!",
         "not_in_game": "你没有加入那个游戏!",
         "bot_status": "机器人状态",
+        "minecraft_server": "我的世界服务器",
+        "players": "玩家",
+        "unknown_upper": "未知",
+        "unable_to_connect": "无法连接",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

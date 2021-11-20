@@ -2265,6 +2265,82 @@ async def trivia_command(interaction):
 async def fetch_command(_):
     pass
 
+@fetch_command.sub_command(name="minecraft-server", description="Fetch a Minecraft server")
+async def fetch_minecraft_server_command(
+        interaction,
+        server_ip: str = Param(name="server-ip", description="The IP of the Minecraft server"),
+    ):
+    await interaction.response.defer()
+    try:
+        server = functions.minepinger(server_ip)
+    except Exception as error:
+        error = str(error)
+        if error == "[Errno -2] Name or service not known":
+            error = "Name or service not known"
+        elif error == "timed out":
+            error = "Timed out"
+        elif error == "'socket' object has no attribute 'read'" or error == "Expecting value: line 1 column 1 (char 0)":
+            error = "Not a valid Minecraft server"
+        elif error == "connect(): port must be 0-65535.":
+            error = "Port must be from 0 to 65535"
+        elif error == "[Errno 111] Connection refused":
+            error = "Connection refused (port 25565)"
+        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "unable_to_connect"), description=error, color=disnake.Color.red())
+        await interaction.edit_original_message(embed=embed)
+        return
+
+    if type(server['description']) == str:
+        server_description = server['description']
+    else:
+        server_description = server['description']['text']
+        try:
+            for segment in server['description']['extra']:
+                bold = False
+                if "bold" in segment.keys():
+                    bold = segment['bold']
+                italic = False
+                if "italic" in segment.keys():
+                    italic = segment['italic']
+                underlined = False
+                if "underlined" in segment.keys():
+                    underlined = segment['underlined']
+                text = segment["text"]
+                if bold:
+                    text = "**" + text + "**"
+                if italic:
+                    text = "_" + text + "_"
+                if underlined:
+                    text = "__" + text + "__"
+                server_description += text
+                server_description = server_description.replace("****", "")
+        except:
+            pass
+    server_players = ""
+    try:
+        for player in server['players']['sample']:
+          server_players += f"**{player['name']}**, "
+    except:
+        pass
+    if server_players == "":
+        server_players = functions.get_text(interaction.author.id, "unknown_upper")
+    else:
+        server_players = server_players[:-2]
+
+    description = f"`{server_ip}` (**{server['version']['name']}**, **v{server['version']['protocol']}**)\n{server_description}\n\n**{functions.get_text(interaction.author.id, 'players')}** (**{server['players']['online']}**/**{server['players']['max']}**): {functions.shrink(server_players, 1500)}"
+    image = False
+    if "favicon" in server.keys():
+        try:
+            file = open("images/icon.png", "wb+")
+            file.write(base64.b64decode(server['favicon'][22:]))
+            file.close()
+            image = True
+        except:
+            pass
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "minecraft_server"), description=description, color=disnake.Color.green())
+    if image: embed.set_thumbnail(url="attachment://icon.png")
+    await interaction.edit_original_message(embed=embed, file=disnake.File("images/icon.png") if image else None)
+    add_cooldown(interaction.author.id, "fetch", 5)
+
 @fetch_command.sub_command(name="weather", description="Fetch the weather in a region")
 async def fetch_weather_command(
         interaction,
