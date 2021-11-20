@@ -2277,14 +2277,18 @@ async def fetch_minecraft_server_command(
         error = str(error)
         if error == "[Errno -2] Name or service not known":
             error = "Name or service not known"
+        elif error == "[Errno 104] Connection reset by peer":
+            error = "Connection reset by peer"
+        elif error == "[Errno 111] Connection refused":
+            error = "Connection refused"
         elif error == "timed out":
-            error = "Timed out"
+            error = "Connection timed out"
         elif error == "'socket' object has no attribute 'read'" or error == "Expecting value: line 1 column 1 (char 0)":
             error = "Not a valid Minecraft server"
         elif error == "connect(): port must be 0-65535.":
             error = "Port must be from 0 to 65535"
-        elif error == "[Errno 111] Connection refused":
-            error = "Connection refused (port 25565)"
+        elif "invalid literal" in error:
+            error = "Invalid port specified"
         embed = disnake.Embed(title=functions.get_text(interaction.author.id, "unable_to_connect"), description=error, color=disnake.Color.red())
         await interaction.edit_original_message(embed=embed)
         return
