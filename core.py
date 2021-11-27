@@ -1806,7 +1806,7 @@ async def search_command(_):
 async def autocomplete_youtube(_, string):
     response = requests.get(f"https://youtube.com/results?search_query={string}")
     raw_results = []
-    items = response.content.decode("unicode_escape").split(",")
+    items = response.content.decode("utf-8").split(",")
     for item in items:
         if item.startswith('"title":{"runs":[{"text":') and item.endswith('"}]'):
             raw_results.append(item.split('"title":{"runs":[{"text":"')[1].split('"}]')[0])
