@@ -30,9 +30,10 @@ import traceback
 import simpleeval
 import contextlib
 import googletrans
+import disnake_paginator
+
 from PIL import Image
 from typing import List
-import disnake_paginator
 from dateutil import parser
 from disnake.ext import commands
 from disnake.ext.commands import Param
@@ -2332,7 +2333,7 @@ async def fetch_minecraft_server_command(
     else:
         server_players = server_players[:-2]
 
-    description = f"`{server_ip}` (**{server['version']['name']}**, **v{server['version']['protocol']}**)\n{server_description}\n\n**{functions.get_text(interaction.author.id, 'players')}** (**{server['players']['online']}**/**{server['players']['max']}**): {functions.shrink(server_players, 1500)}"
+    description = f"`{server_ip}` (**{server['version']['name']}**, **v{server['version']['protocol']}**)\n{server_description}\n\n**{functions.get_text(interaction.author.id, 'players')}** (**{server['players']['online']}**/**{server['players']['max']}**)**:** {functions.shrink(server_players, 1500)}"
     image = False
     if "favicon" in server.keys():
         try:
