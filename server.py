@@ -127,34 +127,39 @@ def request_handler():
 
 @app.route("/backend/execute", endpoint="execute-endpoint")
 def execute_code():
-    if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
-        try:
-            code = flask.request.json["code"]
-        except:
-            response = flask.make_response("no code specified", 500)
+    try:
+        if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
+            try:
+                code = flask.request.json["code"]
+            except:
+                response = flask.make_response("no code specified", 500)
+                response.mimetype = "text/plain"
+                return response
+
+            stdout = core.io.StringIO()
+            try:
+                with core.contextlib.redirect_stdout(stdout):
+                    if "#globals" in code:
+                        exec(f"def run_code():\n{core.textwrap.indent(code, '   ')}", globals())
+                        globals()["run_code"]()
+                    else:
+                        dictionary = dict(locals(), **globals())
+                        exec(f"def run_code():\n{core.textwrap.indent(code, '   ')}", dictionary, dictionary)
+                        dictionary["run_code"]()
+                    output = stdout.getvalue()
+            except Exception as error:
+                output = "`" + str(error) + "`"
+            output = output.replace(os.getenv("TOKEN"), "<TOKEN>")
+
+            response = flask.make_response(output, 200)
             response.mimetype = "text/plain"
             return response
-
-        stdout = core.io.StringIO()
-        try:
-            with core.contextlib.redirect_stdout(stdout):
-                if "#globals" in code:
-                    exec(f"def run_code():\n{core.textwrap.indent(code, '   ')}", globals())
-                    globals()["run_code"]()
-                else:
-                    dictionary = dict(locals(), **globals())
-                    exec(f"def run_code():\n{core.textwrap.indent(code, '   ')}", dictionary, dictionary)
-                    dictionary["run_code"]()
-                output = stdout.getvalue()
-        except Exception as error:
-            output = "`" + str(error) + "`"
-        output = output.replace(os.getenv("TOKEN"), "<TOKEN>")
-
-        response = flask.make_response(output, 200)
-        response.mimetype = "text/plain"
-        return response
-    else:
-        response = flask.make_response("invalid web secret", 403)
+        else:
+            response = flask.make_response("invalid web secret", 403)
+            response.mimetype = "text/plain"
+            return response
+    except:
+        response = flask.make_response("Forbidden", 403)
         response.mimetype = "text/plain"
         return response
 
@@ -362,17 +367,24 @@ def fetch_doge_image():
 def handle_vote():
     global vote_counter
     vote_counter += 1
-    if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
-        vote_user_id = flask.request.json["user"]
-        asyncio.run_coroutine_threadsafe(
-            core.send_vote_message(vote_user_id), core.client.loop,
-        )
+    try:
+        if flask.request.headers["Authorization"] == os.getenv("WEB_SECRET"):
+            vote_user_id = flask.request.json["user"]
+            asyncio.run_coroutine_threadsafe(
+                core.send_vote_message(vote_user_id), core.client.loop,
+            )
 
-        response = flask.make_response("OK", 200)
-        response.mimetype = "text/plain"; return response
-    else:
+            response = flask.make_response("OK", 200)
+            response.mimetype = "text/plain"
+            return response
+        else:
+            response = flask.make_response("Forbidden", 403)
+            response.mimetype = "text/plain"
+            return response
+    except:
         response = flask.make_response("Forbidden", 403)
-        response.mimetype = "text/plain"; return response
+        response.mimetype = "text/plain"
+        return response
 
 @app.route("/", endpoint="index-page")
 def index():
