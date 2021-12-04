@@ -211,9 +211,6 @@ def web_dashboard():
     if mutual_guilds == []:
         return load_file("no_servers.html", replace={"(invite)": variables.bot_invite_link})
 
-    for guild in core.client.guilds:
-        mutual_guilds.append(guild)
-
     avatar_url = target_user.avatar
     if avatar_url == None:
         avatar_url = f"https://cdn.discordapp.com/embed/avatars/{int(target_user.discriminator) % 5}.png"
