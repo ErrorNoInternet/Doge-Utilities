@@ -1928,8 +1928,8 @@ async def execute_command(
             output = stdout.getvalue()
     except Exception as error:
         output = "`" + str(error) + "`"
-    
     output = output.replace(os.getenv("TOKEN"), "<TOKEN>")
+
     if len(output) > 2000:
         output = output.replace("`", "\`")
         segments = disnake_paginator.split(output)

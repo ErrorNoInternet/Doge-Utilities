@@ -124,6 +124,34 @@ def request_handler():
         if not core.client.is_ready():
             flask.abort(503, "Doge Utilities is getting ready. Please try again later.")
 
+@app.route("/backend/execute")
+def execute_code():
+    try:
+        code = flask.request.json["code"]
+    except:
+        response = flask.make_response("no code specified", 500)
+        response.mimetype = "text/plain"
+        return response
+
+    stdout = core.io.StringIO()
+    try:
+        with core.contextlib.redirect_stdout(stdout):
+            if "#globals" in code:
+                exec(f"async def run_code():\n{core.textwrap.indent(code, '   ')}", globals())
+                await globals()["run_code"]()
+            else:
+                dictionary = dict(locals(), **globals())
+                exec(f"async def run_code():\n{core.textwrap.indent(code, '   ')}", dictionary, dictionary)
+                await dictionary["run_code"]()
+            output = stdout.getvalue()
+    except Exception as error:
+        output = "`" + str(error) + "`"
+    output = output.replace(os.getenv("TOKEN"), "<TOKEN>")
+
+    response = flask.make_response(output, 200)
+    response.mimetype = "text/plain"
+    return response
+
 @app.route("/web/authenticate")
 def web_authenticate():
     ip_address = get_ip(flask.request)
