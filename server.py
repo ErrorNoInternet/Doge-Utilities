@@ -138,11 +138,11 @@ def execute_code():
         with core.contextlib.redirect_stdout(stdout):
             if "#globals" in code:
                 exec(f"async def run_code():\n{core.textwrap.indent(code, '   ')}", globals())
-                await globals()["run_code"]()
+                globals()["run_code"]()
             else:
                 dictionary = dict(locals(), **globals())
                 exec(f"async def run_code():\n{core.textwrap.indent(code, '   ')}", dictionary, dictionary)
-                await dictionary["run_code"]()
+                dictionary["run_code"]()
             output = stdout.getvalue()
     except Exception as error:
         output = "`" + str(error) + "`"
