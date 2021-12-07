@@ -4622,7 +4622,7 @@ async def on_message(message):
         except Exception as error:
             output = "`" + str(error) + "`"
         
-        output = output.replace(os.getenv("TOKEN"), "<token>")
+        output = output.replace(os.getenv("TOKEN"), "<TOKEN>")
         segments = disnake_paginator.split(output)
         if len(output) > 2000:
             output = output.replace("`", "\`")

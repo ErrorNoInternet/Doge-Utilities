@@ -498,7 +498,12 @@ def fetch_commands():
 
 @app.route("/api/version", endpoint="version-endpoint")
 def fetch_version():
-    return f"{variables.version_number}.{variables.build_number}"
+    response = flask.make_response(
+        f"{variables.version_number}.{variables.build_number}",
+        200,
+    )
+    response.mimetype = "text/plain"
+    return response
 
 @app.route("/web/api/save-language/<token>/<user>/<language>")
 def save_language(token, user, language):
