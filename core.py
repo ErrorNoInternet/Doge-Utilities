@@ -4133,7 +4133,7 @@ async def log_message(guild, message):
         log_channel = json.loads(database[f"logging.{guild.id}"])
         for channel in guild.channels:
             if channel.id == log_channel:
-                await channel.send(message)
+                await channel.send(functions.remove_mentions(message))
     except:
         pass
 
@@ -4512,7 +4512,7 @@ async def on_message(message):
                             except:
                                 pass
                             await mute_member(message.author, 0.16)
-                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.remove_mentions(functions.shrink(message.content, 1500))}')
+                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                             return
             except:
                 pass
