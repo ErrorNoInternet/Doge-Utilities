@@ -4133,7 +4133,7 @@ async def log_message(guild, message):
         log_channel = json.loads(database[f"logging.{guild.id}"])
         for channel in guild.channels:
             if channel.id == log_channel:
-                await channel.send(functions.remove_mentions(message))
+                await channel.send(message, allowed_mentions=disnake.AllowedMentions.none())
     except:
         pass
 
