@@ -9,11 +9,7 @@ owner_permissions = {}
 for owner in bot_owners:
     owner_permissions[owner] = True
 
-class Color:
-	def __int__(self):
-		return random.choice([0xC30F16, 0x0FC362])
-embed_color = Color()
-
+embed_color = lambda: random.choice([0xC30F16, 0x0FC362])
 prefix = "="
 shard_count = 2
 last_command = 0

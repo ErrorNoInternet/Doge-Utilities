@@ -222,7 +222,7 @@ threading.Thread(name="blacklist_manager", target=manage_blacklist).start()
 threading.Thread(name="web_server", target=server.run).start()
 help_paginator = disnake_paginator.ButtonPaginator(
     title="Getting Started",
-    color=variables.embed_color,
+    color=variables.embed_color(),
     timeout=600,
     segments=[variables.help_text[i: i + 1000] for i in range(0, len(variables.help_text), 1000)],
     invalid_user_function=functions.invalid_user_function,
@@ -313,7 +313,7 @@ async def slash_command_handler(interaction):
             interaction.data.name,
             get_cooldown(interaction.author.id, interaction.data.name),
         )
-        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "command_cooldown"), description=cooldown_string, color=variables.embed_color)
+        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "command_cooldown"), description=cooldown_string, color=variables.embed_color())
         await interaction.response.send_message(embed=embed, ephemeral=True)
         raise Exception("no permission")
 
@@ -430,13 +430,13 @@ async def embedify_command(
         interaction,
         title: str = Param(description="The title of the embed"),
         description: str = Param(description="The description of the embed"),
-        color: str = Param("#" + str(hex(variables.embed_color))[2:], description="The color of the embed"),
+        color: str = Param("#" + str(hex(variables.embed_color()))[2:], description="The color of the embed"),
     ):
-    embed_color = variables.embed_color
+    embed_color() = variables.embed_color()
     colors = generate_color(color, generate_image=False)
     if colors != 1:
-        embed_color = int(colors[0][1:], 16)
-    embed = disnake.Embed(title=title, description=description, color=embed_color)
+        embed_color() = int(colors[0][1:], 16)
+    embed = disnake.Embed(title=title, description=description, color=embed_color())
     await interaction.channel.send(embed=embed)
     await interaction.response.send_message("Your custom embed has been successfully generated!", ephemeral=True)
 
@@ -538,7 +538,7 @@ async def reaction_list_command(interaction):
     description = ""
     for role in reaction_roles:
         description += f"{role['emoji']} - <@&{role['role']}>: {role['message']} ([message](https://discord.com/channels/{interaction.guild.id}/{role['channel']}/{role['message']}))\n"
-    embed = disnake.Embed(title="Reaction Roles", description=description if description != '' else 'There are no reaction roles in this server', color=variables.embed_color)
+    embed = disnake.Embed(title="Reaction Roles", description=description if description != '' else 'There are no reaction roles in this server', color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="qr", description="Generate a QR code with custom data")
@@ -559,7 +559,7 @@ async def qr_command(
         image = qr_code.make_image(fill_color=foreground, back_color=background)
         image.save("images/qr.png")
 
-        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "qr_code"), color=variables.embed_color)
+        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "qr_code"), color=variables.embed_color())
         embed.set_image(url="attachment://qr.png")
         await interaction.edit_original_message(embed=embed, file=disnake.File("images/qr.png"))
         add_cooldown(interaction.author.id, "qr", 10)
@@ -586,7 +586,7 @@ async def currency_convert_command(
         output_currency = output_currency.lower().strip()
         url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{input_currency}/{output_currency}.json"
         response = requests.get(url).json(); value = response[output_currency] * amount
-        embed = disnake.Embed(title="Currency Conversion", description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color)
+        embed = disnake.Embed(title="Currency Conversion", description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color())
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "currency", 5)
     except:
@@ -600,7 +600,7 @@ async def currency_list_command(interaction):
         output += f"{key.upper()}: {response[key]}\n"
     segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
     pager = disnake_paginator.ButtonPaginator(
-        prefix=f"```\n", suffix="```", color=variables.embed_color, title="Currency List", segments=segments,
+        prefix=f"```\n", suffix="```", color=variables.embed_color(), title="Currency List", segments=segments,
         invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction)
@@ -611,7 +611,7 @@ async def ping_command(interaction):
     embed = disnake.Embed(
         title="Pong :ping_pong:",
         description=f"{functions.get_text(interaction.author.id, 'latency')}: **{round(client.latency * 1000, 1)} ms**",
-        color=variables.embed_color,
+        color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
 
@@ -703,7 +703,7 @@ async def source_command(interaction):
         description += f"\nActive Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
     except:
         pass
-    embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color)
+    embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color())
     embed.set_thumbnail(url=client.user.avatar)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "source", 10)
@@ -741,7 +741,7 @@ async def supporters_command(interaction):
                 users_string += f"**{user.name}**, "
                 added.append(user.id)
     description = f"Big thanks to {users_string[:-2]}, and a lot more awesome people!"
-    embed = disnake.Embed(description=description, color=variables.embed_color)
+    embed = disnake.Embed(description=description, color=variables.embed_color())
 
     developers = []
     for developer in variables.supporters["developers"]:
@@ -801,7 +801,7 @@ async def shards_command(interaction):
         title=functions.get_text(interaction.author.id, "active_shards"),
         segments=pages.values(),
         target_page=current_page,
-        color=variables.embed_color,
+        color=variables.embed_color(),
         invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction)
@@ -838,7 +838,7 @@ async def status_command(interaction):
         uptime = uptime.split(" ")
         uptime = " ".join(uptime[:3])
     
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     embed.add_field(
         name=functions.get_text(interaction.author.id, "latency"),
         value="```" + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```",
@@ -899,7 +899,7 @@ async def version_command(interaction):
             file_size += len(file.read()); file.close()
         except:
             pass
-    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"), description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color)
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"), description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 
@@ -926,7 +926,7 @@ async def uptime_command(interaction):
     embed = disnake.Embed(
         title=functions.get_text(interaction.author.id, "bot_uptime"),
         description=f"{functions.get_text(interaction.author.id, 'uptime_description')} **{uptime}**",
-        color=variables.embed_color,
+        color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
 
@@ -1163,7 +1163,7 @@ async def list_autorole_command(interaction):
         role_string = ""
         for role in role_list:
             role_string += "<@&" + role + "> "
-        await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color))
+        await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color()))
     except:
         await interaction.response.send_message(f"This server does not have autorole configured")
 
@@ -1199,7 +1199,7 @@ async def set_autorole_command(
         embed=disnake.Embed(
             title="Autorole",
             description=f"This server's autorole has been set to {role_string}",
-            color=variables.embed_color,
+            color=variables.embed_color(),
         ),
     )
 
@@ -1246,7 +1246,7 @@ async def permissions_member_command(
         member: disnake.Member = Param(default=lambda interaction: interaction.author, description="The member you want to check permissions for"),
     ):
     permission_list = build_member_permissions(member)
-    embed = disnake.Embed(title="User Permissions", description=f"Permissions for <@{member.id}>\n\n" + permission_list, color=variables.embed_color)
+    embed = disnake.Embed(title="User Permissions", description=f"Permissions for <@{member.id}>\n\n" + permission_list, color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
 
@@ -1256,14 +1256,14 @@ async def permissions_role_command(
         role: disnake.Role = Param(description="The role you want to check permissions for"),
     ):
     permission_list = build_role_permissions(role)
-    embed = disnake.Embed(title="Role Permissions", description=f"Permissions for <@&{role.id}>\n\n" + permission_list, color=variables.embed_color)
+    embed = disnake.Embed(title="Role Permissions", description=f"Permissions for <@&{role.id}>\n\n" + permission_list, color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
 
 @client.user_command(name="View Permissions")
 async def user_permissions_command(interaction):
     permission_list = build_member_permissions(interaction.target)
-    embed = disnake.Embed(title="User Permissions", description=f"Permissions for <@{interaction.target.id}>\n\n" + permission_list, color=variables.embed_color)
+    embed = disnake.Embed(title="User Permissions", description=f"Permissions for <@{interaction.target.id}>\n\n" + permission_list, color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="raid-protection", description="Change the raid protection settings")
@@ -1320,7 +1320,7 @@ async def hash_command(
         hash_type = hash_type.strip()
         text = text.strip()
         output_hash = hash_text(hash_type, text, length=length)
-        embed = disnake.Embed(color=variables.embed_color)
+        embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Text", value=text)
         embed.add_field(name=f"Hash ({hash_type})", value="`" + output_hash + "`", inline=False)
         await interaction.response.send_message(embed=embed)
@@ -1340,7 +1340,7 @@ async def base64_encode_command(
     ):
     try:
         output_code = base64.b64encode(text.encode("utf-8")).decode("utf-8")
-        embed = disnake.Embed(color=variables.embed_color)
+        embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Text", value=text); embed.add_field(name="Base64", value="`" + output_code + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
@@ -1354,7 +1354,7 @@ async def base64_decode_command(
     ):
     try:
         output_text = base64.b64decode(text.encode("utf-8")).decode("utf-8")
-        embed = disnake.Embed(color=variables.embed_color)
+        embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Base64", value="`" + text + "`"); embed.add_field(name="Text", value=output_text, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
@@ -1372,7 +1372,7 @@ async def binary_encode_command(
     ):
     try:
         output_code = ' '.join(format(ord(letter), '08b') for letter in text)
-        embed = disnake.Embed(color=variables.embed_color)
+        embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Text", value=text)
         embed.add_field(name="Binary", value="`" + output_code + "`", inline=False)
         await interaction.response.send_message(embed=embed)
@@ -1391,7 +1391,7 @@ async def binary_decode_command(
         for letter in text.split():
             number = int(letter, 2)
             output_text += chr(number)
-        embed = disnake.Embed(color=variables.embed_color)
+        embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Binary", value="`" + text + "`")
         embed.add_field(name="Text", value=output_text, inline=False)
         await interaction.response.send_message(embed=embed)
@@ -1412,7 +1412,7 @@ async def calculate_command(
     answer = evaluate_expression(expression)
     if answer == None:
         answer = functions.get_text(interaction.author.id, "unknown_answer")
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     embed.add_field(name=functions.get_text(interaction.author.id, "expression"), value="`" + expression + "`")
     embed.add_field(name=functions.get_text(interaction.author.id, "result"), value="`" + answer + "`", inline=False)
     await interaction.response.send_message(embed=embed)
@@ -1652,7 +1652,7 @@ async def epoch_date_command(
         text: str = Param(name="timestamp", description="The unix timestamp"),
     ):
     try:
-        date = epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color)
+        date = epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Epoch", value="`" + text + "`"); embed.add_field(name="Date", value=date, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
@@ -1665,7 +1665,7 @@ async def date_epoch_command(
         text: str = Param(name="date", description="The date"),
     ):
     try:
-        epoch = date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color)
+        epoch = date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Date", value=text); embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
@@ -1685,14 +1685,14 @@ async def time_get_command(
                 output += timezone + "\n"
             segments = disnake_paginator.split(output, 1000)
             pager = disnake_paginator.ButtonPaginator(
-                color=variables.embed_color,
+                color=variables.embed_color(),
                 prefix="```\n", suffix="```",
                 title=f"Timezone List", segments=segments,
                 invalid_user_function=functions.invalid_user_function,
             )
             await pager.start(interaction)
         elif region.lower() == "epoch" or region.lower() == "unix":
-            embed = disnake.Embed(title="Time", description=f"Current epoch time: **{round(time.time())}**", color=variables.embed_color)
+            embed = disnake.Embed(title="Time", description=f"Current epoch time: **{round(time.time())}**", color=variables.embed_color())
             await interaction.response.send_message(embed=embed)
         else:
             user_timezone = pytz.timezone(region.replace(" ", "_"))
@@ -1701,7 +1701,7 @@ async def time_get_command(
             for timezone in pytz.all_timezones:
                 if timezone.lower().replace("_", " ") == region_name.lower():
                     region_name = timezone.replace("_", " ")
-            embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{region_name}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color)
+            embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{region_name}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color())
             await interaction.response.send_message(embed=embed)
     except KeyError:
         for timezone in pytz.all_timezones:
@@ -1710,12 +1710,12 @@ async def time_get_command(
                 if region.replace(" ", "_").lower() == city.lower():
                     user_timezone = pytz.timezone(timezone)
                     now = datetime.datetime.now(user_timezone)
-                    embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{timezone.replace('_', ' ')}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color)
+                    embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'), description=f"{functions.get_text(interaction.author.id, 'time_description')} **{timezone.replace('_', ' ')}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color())
                     await interaction.response.send_message(embed=embed)
                     return
             except:
                 pass
-        embed = disnake.Embed(title="Time", description=f"That timezone was not found", color=variables.embed_color)
+        embed = disnake.Embed(title="Time", description=f"That timezone was not found", color=variables.embed_color())
         await interaction.response.send_message(embed=embed)
         return
     add_cooldown(interaction.author.id, "time", 3)
@@ -1860,7 +1860,7 @@ async def stackoverflow_command(
         embed = disnake.Embed(
             title="StackOverflow",
             description=f'Here are the **top {len(final_results)}** results for **"{text}"**',
-            color=variables.embed_color,
+            color=variables.embed_color(),
         )
         for result in final_results:
             tags = ""
@@ -1936,7 +1936,7 @@ async def execute_command(
         pager = disnake_paginator.ButtonPaginator(
             prefix=f"{codeblock}\n", 
             suffix=codeblock, 
-            color=variables.embed_color, 
+            color=variables.embed_color(), 
             title=f"Code Output", 
             segments=segments,
             invalid_user_function=functions.invalid_user_function,
@@ -1962,7 +1962,7 @@ async def blacklist_list_command(interaction):
         if user_tag == None:
             user_tag = "unknown"
         blacklisted_users.append(f"{user} (**{user_tag}**)")
-    embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color)
+    embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color())
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 @blacklist_command.sub_command(name="add", description="Add a user to the blacklist")    
@@ -2257,7 +2257,7 @@ async def trivia_command(interaction):
 
     embed = disnake.Embed(
         description=description,
-        color=variables.embed_color,
+        color=variables.embed_color(),
     )
     await interaction.edit_original_message(embed=embed, view=CommandView())
     add_cooldown(interaction.author.id, "game", 3)
@@ -2379,7 +2379,7 @@ async def fetch_weather_command(
     except:
         country = ""
 
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     embed.set_thumbnail(url=f"https://openweathermap.org/img/wn/{response['weather'][0]['icon']}@2x.png")
     embed.add_field(name=f"Location{country}", value=response['name'])
     embed.add_field(name="Current Weather", value=response['weather'][0]['main'])
@@ -2407,7 +2407,7 @@ async def fetch_astronauts_command(interaction):
     except:
         await interaction.edit_original_message(content="I was unable to fetch the people in space")
         return
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     stations = []
     for person in response["people"]:
         if person["craft"] not in stations:
@@ -2432,7 +2432,7 @@ async def meme_command(interaction):
         await interaction.edit_original_message(content="I was unable to fetch a meme from Reddit")
         return
     description = f"Posted by **{response['author']}** in **{response['subreddit']}** (**{response['ups']}** upvotes)"
-    embed = disnake.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embed_color)
+    embed = disnake.Embed(title=response["title"], url=response["postLink"], description=description, color=variables.embed_color())
     embed.set_image(url=response["url"])
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 3)
@@ -2441,7 +2441,7 @@ async def meme_command(interaction):
 async def joke_command(interaction):
     await interaction.response.defer()
     response = requests.get("http://random-joke-api.herokuapp.com/random").json()
-    embed = disnake.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color)
+    embed = disnake.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color())
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 3)
 
@@ -2683,7 +2683,7 @@ async def filter_ignore_list_command(interaction):
     embed = disnake.Embed(
         title="Ignored Channels",
         description=description if description != "" else "There are no ignored channels",
-        color=variables.embed_color,
+        color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
 
@@ -2705,7 +2705,7 @@ async def insults_list_command(interaction):
     for insult in insults_data:
         counter += 1
         insults.append(f"**{counter}.** {insult}")
-    embed = disnake.Embed(title="Insults List", description="There are no insults configured for this server" if insults == [] else '\n'.join(insults), color=variables.embed_color)
+    embed = disnake.Embed(title="Insults List", description="There are no insults configured for this server" if insults == [] else '\n'.join(insults), color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
 
 @insults_command.sub_command(name="status", description="See the current status of the insults filter")
@@ -3175,7 +3175,7 @@ async def server_status_command(interaction):
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     await interaction.response.defer()
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     raid_protection = 0
     try:
         raid_protection = json.loads(database[f"{interaction.guild.id}.raid-protection"])
@@ -3333,7 +3333,7 @@ async def server_members_command(interaction):
     embed = disnake.Embed(
         title=functions.get_text(interaction.author.id, "guild_members"),
         description=f"{functions.get_text(interaction.author.id, 'user_accounts')}: **{users}**\n{functions.get_text(interaction.author.id, 'bot_accounts')}: **{bots}**\n{functions.get_text(interaction.author.id, 'total_members')}: **{users + bots}**",
-        color=variables.embed_color,
+        color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
 
@@ -3370,7 +3370,7 @@ async def server_information_command(interaction):
     except:
         pass
 
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     if interaction.guild.icon != None:
         embed.set_thumbnail(url=interaction.guild.icon)
     if interaction.guild.banner != None:
@@ -3414,7 +3414,7 @@ async def github_command(
             return
     except:
         pass
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     embed.add_field(name="Repository", value=f"[URL]({response['html_url']})")
     embed.add_field(name="Owner", value=f"{response['owner']['login']}")
     embed.add_field(name="Name", value=f"{response['name']}")
@@ -3491,7 +3491,7 @@ async def pypi_command(
         if size > 1000:
             size_unit = "MB"
             size = size / 1000
-    embed = disnake.Embed(color=variables.embed_color)
+    embed = disnake.Embed(color=variables.embed_color())
     embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
     embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
     embed.add_field(name="Owner", value=response["info"]["author"] if response["info"]["author"] != "" else "None")
@@ -3533,7 +3533,7 @@ async def discriminator_command(
     output = "\n".join(members)
     segments = disnake_paginator.split(output, 1000)
     pager = disnake_paginator.ButtonPaginator(
-        prefix=f"```\n", suffix="```", color=variables.embed_color, title="Discriminator", segments=segments,
+        prefix=f"```\n", suffix="```", color=variables.embed_color(), title="Discriminator", segments=segments,
         invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction, deferred=True)
@@ -3726,7 +3726,7 @@ async def convert_command(
     description = f"**{round(amount, 6):,} {data['input_abbreviation']}** = **{round(data['result'], 6):,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
     embed = disnake.Embed(
         title="Conversion",
-        color=variables.embed_color,
+        color=variables.embed_color(),
         description=description,
     )
     await interaction.response.send_message(embed=embed)
@@ -3742,7 +3742,7 @@ async def translate_command(
     try:
         translator = googletrans.Translator()
         result = translator.translate(text, dest=language.strip())
-        embed = disnake.Embed(color=variables.embed_color)
+        embed = disnake.Embed(color=variables.embed_color())
         source_language = googletrans.LANGUAGES[result.src.lower()].title().replace("(", "").replace(")", "")
         destination_language = googletrans.LANGUAGES[result.dest.lower()].title().replace("(", "").replace(")", "")
         embed.add_field(name=f"Original Text ({source_language})", value=text, inline=False)
@@ -3771,7 +3771,7 @@ async def message_translate_command(interaction):
                 return
         translator = googletrans.Translator()
         result = translator.translate(text, dest=functions.get_settings(interaction.author.id)["language"])
-        embed = disnake.Embed(color=variables.embed_color)
+        embed = disnake.Embed(color=variables.embed_color())
         source_language = googletrans.LANGUAGES[result.src.lower()].title().replace("(", "").replace(")", "")
         destination_language = googletrans.LANGUAGES[result.dest.lower()].title().replace("(", "").replace(")", "")
         embed.add_field(name=f"Original Text ({source_language})", value=text, inline=False)
@@ -3832,7 +3832,7 @@ async def definition_command(
         except:
             pass
         description += f"\n\n**Type:** {meaning['partOfSpeech']}\n**Definition:** {meaning['definitions'][0]['definition']}\n**Example:** {example}\n**Synonyms:** {synonyms}"
-    embed = disnake.Embed(title="Definition", description=description, color=variables.embed_color)
+    embed = disnake.Embed(title="Definition", description=description, color=variables.embed_color())
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "definition", 5)
 
@@ -3853,7 +3853,7 @@ async def todo_list_command(interaction):
         text += f"**{counter}.** {todo}\n"
     if text == "":
         text = functions.get_text(interaction.author.id, "todo_empty")
-    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "todo_list"), description=text, color=variables.embed_color)
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "todo_list"), description=text, color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
 
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
@@ -3924,7 +3924,7 @@ async def remind_list_command(interaction):
     embed = disnake.Embed(
         title=functions.get_text(interaction.author.id, "reminders"),
         description=text, 
-        color=variables.embed_color,
+        color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "remind", 3)
@@ -4402,7 +4402,7 @@ async def on_message(message):
 
     prefix = variables.prefix
     if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
-        await message.channel.send(embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
+        await message.channel.send(embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color()))
         return
     
     if message.content.startswith(f"<@{client.user.id}> "):
@@ -4571,7 +4571,7 @@ async def on_message(message):
             pass
     
     if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id not in variables.bot_owners:
-        await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color))
+        await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color()))
         return
 
     if message.content.startswith(prefix+"execute"):
@@ -4629,7 +4629,7 @@ async def on_message(message):
             pager = disnake_paginator.ButtonPaginator(
                 prefix=f"{codeblock}{output_language}\n", 
                 suffix=codeblock, 
-                color=variables.embed_color, 
+                color=variables.embed_color(), 
                 title=f"Code Output", 
                 segments=segments,
                 invalid_user_function=functions.invalid_user_function,

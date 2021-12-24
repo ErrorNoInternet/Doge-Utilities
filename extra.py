@@ -27,7 +27,7 @@ async def post_announcement(message, title, text, mention=False):
         if guild.id == 879662689708806154:
             for channel in guild.channels:
                 if channel.id == 879665441545519134:
-                    embed = disnake.Embed(title=title, description=text, color=variables.embed_color)
+                    embed = disnake.Embed(title=title, description=text, color=variables.embed_color())
                     class CommandView(disnake.ui.View):
                         def __init__(self, channel):
                             super().__init__()
@@ -114,7 +114,7 @@ async def ask_translations(message, user_id, target_language):
         results.append("\n**Additional text:** " + msg.content)
         await msg.reply("Got it! Thanks!", mention_author=False)
     output = f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n" + "\n".join(results)
-    pager = disnake_paginator.ButtonPaginator(title="Translations", segments=disnake_paginator.split(output), color=variables.embed_color)
+    pager = disnake_paginator.ButtonPaginator(title="Translations", segments=disnake_paginator.split(output), color=variables.embed_color())
     await pager.start(disnake_paginator.wrappers.UserInteractionWrapper(message.author))
 
 def messages_per_second():
