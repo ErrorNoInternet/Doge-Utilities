@@ -8,6 +8,7 @@ topggpy
 disnake
 requests
 simpleeval
+discord.py==1.7.3
 python-dateutil
 disnake-paginator
 googletrans==4.0.0rc1
