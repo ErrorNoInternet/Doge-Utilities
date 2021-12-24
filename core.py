@@ -435,7 +435,7 @@ async def embedify_command(
     embed_color = variables.embed_color()
     colors = generate_color(color, generate_image=False)
     if colors != 1:
-        embed_color() = int(colors[0][1:], 16)
+        embed_color = int(colors[0][1:], 16)
     embed = disnake.Embed(title=title, description=description, color=embed_color())
     await interaction.channel.send(embed=embed)
     await interaction.response.send_message("Your custom embed has been successfully generated!", ephemeral=True)
