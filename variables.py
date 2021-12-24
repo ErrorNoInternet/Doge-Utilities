@@ -11,7 +11,7 @@ for owner in bot_owners:
 
 class Color:
 	def __int__(self):
-		return random.choice([0xC30F16, #0FC362])
+		return random.choice([0xC30F16, 0x0FC362])
 embed_color = Color()
 
 prefix = "="
