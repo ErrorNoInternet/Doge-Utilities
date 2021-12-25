@@ -430,7 +430,7 @@ async def embedify_command(
         interaction,
         title: str = Param(description="The title of the embed"),
         description: str = Param(description="The description of the embed"),
-        color: str = Param("#" + str(hex(variables.embed_color()))[2:], description="The color of the embed"),
+        color: str = Param(functions.parse_color(variables.embed_color()), description="The color of the embed"),
     ):
     embed_color = variables.embed_color()
     colors = generate_color(color, generate_image=False)

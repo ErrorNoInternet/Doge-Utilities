@@ -6,6 +6,12 @@ import socket
 import language
 import variables
 
+def parse_color(color):
+  string = str(hex(color))[2:]
+  while len(string) < 6:
+    string = "0" + string
+  return "#" + string
+
 def minepinger(ip):
     port = 25565
     if ":" in ip:
