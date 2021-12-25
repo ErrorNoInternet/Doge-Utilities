@@ -5,9 +5,6 @@ import random
 bot_owners = [531392146767347712, 469870741165441034]
 permission_override = bot_owners
 message_managers = bot_owners
-owner_permissions = {}
-for owner in bot_owners:
-    owner_permissions[owner] = True
 
 embed_color = lambda: random.choice([0xC30F16, 0x0FC362])
 prefix = "="

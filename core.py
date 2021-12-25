@@ -1886,8 +1886,6 @@ async def stackoverflow_command(
         return
     add_cooldown(interaction.author.id, "search", 10)
 
-@commands.guild_permissions(879662689708806154, user_ids=variables.owner_permissions)
-@commands.guild_permissions(828241152896663552, user_ids=variables.owner_permissions)
 @client.slash_command(name="execute", description="Execute code on Doge Utilities", default_permission=False)
 async def execute_command(
         interaction,
@@ -1947,8 +1945,6 @@ async def execute_command(
     else:
         await interaction.edit_original_message(content=output)
 
-@commands.guild_permissions(879662689708806154, user_ids=variables.owner_permissions)
-@commands.guild_permissions(828241152896663552, user_ids=variables.owner_permissions)
 @client.slash_command(name="blacklist", description="Manage Doge Utilities' blacklist", default_permission=False)
 async def blacklist_command(_):
     pass
