@@ -205,7 +205,7 @@ client = commands.AutoShardedBot(
 database = redis.Redis(
     host=os.environ["REDIS_HOST"],
     port=int(os.environ["REDIS_PORT"]),
-    password=os.environ["REDIS_PASSWORD"],
+    password=os.getenv("REDIS_PASSWORD"),
 )
 threading.Thread(
     name="manage_muted_members",
@@ -1203,8 +1203,50 @@ async def set_autorole_command(
         ),
     )
 
-@client.slash_command(name="lookup", description="Find a user on Discord")
-async def lookup_command(
+@client.slash_command(name="lookup", description="Find a user or application on Discord")
+async def lookup_command(_):
+    pass
+
+@lookup_command.sub_command(name="application", description="Find an application on Discord")
+async def lookup_application_command(
+        interaction,
+        application_id: str = Param(name="application-id", description="The ID of the target application"),
+    ):
+    response = requests.get(f"https://discord.com/api/v9/applications/{application_id}/rpc").json()
+    if "code" in response.keys():
+        await interaction.response.send_message("The application you specified wasn't found!", ephemeral=True)
+        return
+    embed = disnake.Embed(description=response["description"], color=variables.embed_color())
+    embed.set_thumbnail(url=f"https://cdn.discordapp.com/app-icons/{response['id']}/{response['icon']}.webp")
+    embed.add_field(name="Application Name", value=response["name"])
+    embed.add_field(name="Application ID", value="`" + response["id"] + "`")
+    embed.add_field(name="Public Bot", value="`" + str(response["bot_public"]) + "`")
+    embed.add_field(name="Public Flags", value="`" + str(response["flags"]) + "`")
+    embed.add_field(name="Terms of Service", value="None" if "terms_of_service_url" not in response.keys() else f"[Link]({response['terms_of_service_url']})")
+    embed.add_field(name="Privacy Policy", value="None" if "privacy_policy_url" not in response.keys() else f"[Link]({response['privacy_policy_url']})")
+    embed.add_field(name="Creation Time", value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>")
+    embed.add_field(name="Default Invite URL", value="None" if "custom_install_url" in response.keys() else f"[Link](https://discord.com/oauth2/authorize?client_id={response['id']}&permissions={response['install_params']['permissions']}&scope={'%20'.join(response['install_params']['scopes'])})")
+    embed.add_field(name="Custom Invite URL", value="None" if "custom_install_url" not in response.keys() else f"[Link]({response['custom_install_url']})")
+
+    bot_intents = ""
+    for application_flag in variables.application_flags:
+        if response['flags'] & application_flag == application_flag:
+            intent_name = variables.application_flags[application_flag]
+            if intent_name.replace(" (unverified)", "") not in bot_intents:
+                bot_intents += f"{intent_name}, "
+    embed.add_field(name="Intents", value="None" if bot_intents == "" else bot_intents[:-2])
+
+    bot_tags = ""
+    if "tags" in response.keys():
+        for tag in response['tags']:
+            bot_tags += tag + ", "
+    embed.add_field(name="Tags", value="None" if bot_tags == "" else bot_tags[:-2], inline=False)
+
+    await interaction.response.send_message(embed=embed)
+    add_cooldown(interaction.author.id, "lookup", 5)
+
+@lookup_command.sub_command(name="user", description="Find a user on Discord")
+async def lookup_user_command(
         interaction,
         user: disnake.User = Param(default=lambda interaction: interaction.author, description="The ID of the target user"),
     ):
