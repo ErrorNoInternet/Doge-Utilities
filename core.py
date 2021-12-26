@@ -1225,7 +1225,7 @@ async def lookup_application_command(
     embed.add_field(name="Terms of Service", value="None" if "terms_of_service_url" not in response.keys() else f"[Link]({response['terms_of_service_url']})")
     embed.add_field(name="Privacy Policy", value="None" if "privacy_policy_url" not in response.keys() else f"[Link]({response['privacy_policy_url']})")
     embed.add_field(name="Creation Time", value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>")
-    embed.add_field(name="Default Invite URL", value="None" if "custom_install_url" in response.keys() else f"[Link](https://discord.com/oauth2/authorize?client_id={response['id']}&permissions={response['install_params']['permissions']}&scope={'%20'.join(response['install_params']['scopes'])})")
+    embed.add_field(name="Default Invite URL", value="None" if "install_params" not in response.keys() else f"[Link](https://discord.com/oauth2/authorize?client_id={response['id']}&permissions={response['install_params']['permissions']}&scope={'%20'.join(response['install_params']['scopes'])})")
     embed.add_field(name="Custom Invite URL", value="None" if "custom_install_url" not in response.keys() else f"[Link]({response['custom_install_url']})")
 
     bot_intents = ""
