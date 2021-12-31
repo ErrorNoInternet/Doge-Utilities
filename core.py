@@ -684,7 +684,7 @@ async def invite_command(interaction):
                         ephemeral=True,
                     )
             else:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_command_sender"), ephemeral=True)
     await interaction.response.send_message("Here is Doge Utilities' invite link", view=CommandView())
 
 @links_command.sub_command(name="vote", description="Get links to vote for the bot")
