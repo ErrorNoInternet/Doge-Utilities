@@ -1,4 +1,6 @@
 import core
+import time
+import math
 import string
 import disnake
 import language
@@ -122,17 +124,17 @@ def messages_per_second():
     guilds = []
     members = []
     counter = 0
-    current_time = 0
+    current_second = math.floor(time.time())
     for cached_message in core.client.cached_messages:
         if str(cached_message.channel.type) != "private":
             if cached_message.guild.id not in guilds:
                 guilds.append(cached_message.guild.id)
         if cached_message.author.id not in members:
             members.append(cached_message.author.id)
-        sent_time = cached_message.created_at.timestamp()
-        if sent_time - current_time > 1:
+        sent_time = math.floor(cached_message.created_at.timestamp())
+        if current_second != sent_time:
             differences.append(counter)
-            current_time = sent_time
+            current_second = sent_time
             counter = 0
         else:
             counter += 1

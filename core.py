@@ -3263,32 +3263,32 @@ async def server_status_command(interaction):
     if exists:
         ban_role_position = ban_role.position
     differences = []
+    guilds = []
     members = []
     channels = []
     counter = 0
-    current_time = 0
-    guild_messages = []
-    for message in client.cached_messages:
-        if message.guild:
-            if message.guild.id == interaction.guild.id:
-                guild_messages.append(message)
-    for cached_message in guild_messages:
+    current_second = math.floor(time.time())
+    for cached_message in client.cached_messages:
+        if str(cached_message.channel.type) != "private":
+            if cached_message.guild.id not in guilds:
+                guilds.append(cached_message.guild.id)
         if cached_message.author.id not in members:
             members.append(cached_message.author.id)
         if cached_message.channel.id not in channels:
             channels.append(cached_message.channel.id)
-        sent_time = cached_message.created_at.timestamp()
-        if sent_time - current_time > 1:
+        sent_time = math.floor(cached_message.created_at.timestamp())
+        if current_second != sent_time:
             differences.append(counter)
-            current_time = sent_time
+            current_second = sent_time
             counter = 0
         else:
             counter += 1
-    average = 0
     if len(differences) > 0:
         average = round(sum(differences)/len(differences), 2)
         if average == 1.0:
             average = 1
+    else:
+        average = 0.0
     embed.add_field(name="Raid Protection", value=":white_check_mark: Enabled" if raid_protection else ":x: Disabled")
     embed.add_field(name="Newline Filter", value=":white_check_mark: Enabled" if newline_filter else ":x: Disabled")
     embed.add_field(name="Insults Filter", value=":white_check_mark: Enabled" if insults_filter else ":x: Disabled")
