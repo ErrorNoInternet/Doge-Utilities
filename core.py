@@ -3263,15 +3263,14 @@ async def server_status_command(interaction):
     if exists:
         ban_role_position = ban_role.position
     differences = []
-    guilds = []
     members = []
     channels = []
     counter = 0
     current_second = math.floor(time.time())
     for cached_message in client.cached_messages:
-        if str(cached_message.channel.type) != "private":
-            if cached_message.guild.id not in guilds:
-                guilds.append(cached_message.guild.id)
+        if cached_message.guild:
+            if cached_message.guild.id != interaction.guild.id:
+                continue
         if cached_message.author.id not in members:
             members.append(cached_message.author.id)
         if cached_message.channel.id not in channels:
