@@ -1529,7 +1529,7 @@ async def italic_command(
         if letter in variables.ascii_characters:
             output += variables.italic_characters[variables.ascii_characters.index(letter)]
     output = functions.remove_mentions(output)
-    if output == "":
+    if output.strip() == "":
         await interaction.response.send_message("I couldn't make your text italic!", ephemeral=True)
     else:
         await interaction.response.send_message(output)
@@ -1545,7 +1545,7 @@ async def bold_command(
         if letter in variables.ascii_characters:
             output += variables.bold_characters[variables.ascii_characters.index(letter)]
     output = functions.remove_mentions(output)
-    if output == "":
+    if output.strip() == "":
         await interaction.response.send_message("I couldn't make your text bold!", ephemeral=True)
     else:
         await interaction.response.send_message(output)
