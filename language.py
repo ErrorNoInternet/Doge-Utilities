@@ -143,7 +143,7 @@ data = {
         "player_two": "Player 2",
         "game_starts_in_three": "The game starts in **3 seconds**!",
         "join_tictactoe": "Click to join the TicTacToe game",
-        "afk_removed": "Your AFK has been removed!",
+        "afk_removed": "Your AFK status has been removed!",
         "afk_set": "Your AFK message has been set to **\"{}\"**",
         "currently_afk": "**{}** is currently AFK ({}): **{}**",
         "already_afk": "You are already AFK!",
