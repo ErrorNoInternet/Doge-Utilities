@@ -451,7 +451,7 @@ async def reaction_create_command(
         emoji: str = Param(description="The emoji you want to add to the message"),
         role: disnake.Role = Param(description="The role you want to add to users when they add a reaction"),
     ):
-    if not interaction.author.guild_permissions.manage_roles:
+    if not interaction.author.guild_permissions.manage_roles and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     if role.position >= interaction.author.top_role.position:
@@ -503,7 +503,7 @@ async def reaction_delete_command(
             autocomplete=autocomplete_reaction_roles,
         ),
     ):
-    if not interaction.author.guild_permissions.manage_roles:
+    if not interaction.author.guild_permissions.manage_roles and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
 
@@ -527,7 +527,7 @@ async def reaction_delete_command(
 
 @reaction_command.sub_command(name="list", description="List all the reaction roles in this server")
 async def reaction_list_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles:
+    if not interaction.author.guild_permissions.manage_roles and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
 
@@ -936,7 +936,7 @@ async def setup_command(_):
 
 @setup_command.sub_command(name="banned", description="Setup a 'Banned' role in your server")
 async def setup_banned_command(interaction):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
+    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override or interaction.author.guild_permissions.administrator:
         pass
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
@@ -973,7 +973,7 @@ async def setup_banned_command(interaction):
 
 @setup_command.sub_command(name="muted", description="Setup a 'Muted' role in your server")
 async def setup_muted_command(interaction):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
+    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override or interaction.author.guild_permissions.administrator:
         pass
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
@@ -1145,7 +1145,7 @@ async def autorole_command(_):
 
 @autorole_command.sub_command(name="disable", description="Disable autorole in your server")
 async def disable_autorole_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
 
@@ -1154,7 +1154,7 @@ async def disable_autorole_command(interaction):
 
 @autorole_command.sub_command(name="list", description="List all the automatically assigned roles")
 async def list_autorole_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
 
@@ -1176,7 +1176,7 @@ async def set_autorole_command(
         role4: disnake.Role = Param(0, description="A role you want to automatically assign"),
         role5: disnake.Role = Param(0, description="A role you want to automatically assign"),
     ):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override:
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     
@@ -2585,9 +2585,7 @@ async def mute_command(
 
 @client.user_command(name="Mute Member")
 async def user_mute_command(interaction):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
-        pass
-    else:
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     if interaction.target.top_role.position >= interaction.author.top_role.position and "mute" not in interaction.target.top_role.name.lower():
@@ -2614,9 +2612,7 @@ async def user_mute_command(interaction):
 
 @client.user_command(name="Unmute Member")
 async def user_unmute_command(interaction):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override:
-        pass
-    else:
+    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     if interaction.target.top_role.position >= interaction.author.top_role.position and "mute" not in interaction.target.top_role.name.lower():
