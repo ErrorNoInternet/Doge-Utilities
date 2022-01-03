@@ -3938,7 +3938,7 @@ async def todo_remove_command(
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_removed").format(item))
 
-@client.slash_command(name="remind", description="Remind yourself about something")
+@client.slash_command(name="reminders", description="Remind yourself about something")
 async def remind_command(_):
     pass
 
@@ -3960,7 +3960,7 @@ async def remind_list_command(interaction):
         color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
-    add_cooldown(interaction.author.id, "remind", 3)
+    add_cooldown(interaction.author.id, "reminders", 3)
 
 async def remind_remove_autocomplete(interaction, string):
     try:
