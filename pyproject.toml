@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "Doge-Utilities"
+version = "0.1.0"
+description = ""
+authors = ["ErrorNoInternet <<>>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Flask = "^2.0.2"
+googletrans = "^3.0.0"
+psutil = "^5.9.0"
+pytz = "^2021.3"
+qrcode = "^7.3.1"
+redis = "^4.1.0"
+requests-oauthlib = "^1.3.0"
+simpleeval = "^0.9.11"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
