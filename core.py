@@ -2478,7 +2478,7 @@ async def meme_command(interaction):
 @fetch_command.sub_command(name="joke", description="Fetch a random joke")
 async def joke_command(interaction):
     await interaction.response.defer()
-    response = requests.get("http://random-joke-api.herokuapp.com/random").json()
+    response = requests.get("http://yet-another-api.herokuapp.com/api/jokes/random").json()
     embed = disnake.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color())
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 3)
