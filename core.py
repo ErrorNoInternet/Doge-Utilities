@@ -4694,12 +4694,20 @@ async def on_slash_command_error(interaction, error):
                     await interaction.channel.send("Message too long to be sent!")
             return
 
+        error_id = random.randint(0, 32768)
         escaped_character = '\`'
         interaction_data = parse_interaction(interaction)
         formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
-        formatted_error = formatted_error.replace("`", escaped_character)
-        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Error:**\n```\n{formatted_error}"
-        segments = disnake_paginator.split(output)
+        file = open(f"error-{error_id}.txt", "w+")
+        file.write(formatted_error)
+        file.close()
+        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Error**:\n```\n{error}```**Time:**\n```\n{datetime.datetime.now()}```"
+        report_embed = disnake.Embed(
+            title="Error Report",
+            description=output,
+            color=disnake.Color.red(),
+        )
+
         for user_id in variables.message_managers:
             sent = False
             for guild in client.guilds:
@@ -4707,15 +4715,7 @@ async def on_slash_command_error(interaction, error):
                     if member.id == user_id:
                         try:
                             if not sent:
-                                pager = disnake_paginator.ButtonPaginator(
-                                    color=disnake.Color.red(),
-                                    title="Error Report",
-                                    segments=segments,
-                                    timeout=None,
-                                    suffix="```",
-                                    invalid_user_function=functions.invalid_user_function,
-                                )
-                                await pager.start(disnake_paginator.wrappers.UserInteractionWrapper(member))
+                                await member.send(embed=report_embed, file=disnake.File(f"error-{error_id}.txt"))
                                 sent = True
                         except Exception as new_error:
                             print(f"Unable to send error to {member}: {new_error}")
@@ -4729,3 +4729,6 @@ async def on_slash_command_error(interaction, error):
                 await interaction.edit_original_message(embed=embed)
             except:
                 await interaction.channel.send(embed=embed)
+
+        await asyncio.sleep(30)
+        os.remove(f"error-{error_id}.txt")
