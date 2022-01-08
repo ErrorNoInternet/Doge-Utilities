@@ -4698,10 +4698,7 @@ async def on_slash_command_error(interaction, error):
         interaction_data = parse_interaction(interaction)
         formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
         formatted_error = formatted_error.replace("`", escaped_character)
-        codeblock = "```\n"
-        if len(formatted_error) > 2000:
-            codeblock = ""
-        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Error:**\n{codeblock}{formatted_error}{codeblock}"
+        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Error:**\n```\n{formatted_error}"
         segments = disnake_paginator.split(output)
         for user_id in variables.message_managers:
             sent = False
@@ -4711,7 +4708,11 @@ async def on_slash_command_error(interaction, error):
                         try:
                             if not sent:
                                 pager = disnake_paginator.ButtonPaginator(
-                                    color=disnake.Color.red(), title="Error Report", segments=segments, timeout=None,
+                                    color=disnake.Color.red(),
+                                    title="Error Report",
+                                    segments=segments,
+                                    timeout=None,
+                                    suffix="```",
                                     invalid_user_function=functions.invalid_user_function,
                                 )
                                 await pager.start(disnake_paginator.wrappers.UserInteractionWrapper(member))
