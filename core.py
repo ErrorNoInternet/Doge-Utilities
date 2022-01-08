@@ -4701,7 +4701,7 @@ async def on_slash_command_error(interaction, error):
         file = open(f"error-{error_id}.txt", "w+")
         file.write(formatted_error)
         file.close()
-        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Error**:\n```\n{error}```**Time:**\n```\n{datetime.datetime.now()}```"
+        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Time:**\n```\n{datetime.datetime.now()}```**Error:**\n```\n{error}```"
         report_embed = disnake.Embed(
             title="Error Report",
             description=output,
