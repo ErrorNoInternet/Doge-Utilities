@@ -1866,6 +1866,14 @@ async def youtube_command(
         interaction,
         query: str = Param(description="The search query", autocomplete=autocomplete_youtube),
     ):
+    try:
+        ignored_channels = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
+        if interaction.channel.id not in ignored_channels["links"]:
+            if json.loads(database[f"links.toggle.{interaction.guild.id}"]):
+                await interaction.response.send_message("The YouTube command is disabled in this server!", ephemeral=True)
+    except:
+        pass
+
     await interaction.response.defer()
     response = requests.get(f"https://youtube.com/results?search_query={query}")
     try:
@@ -2478,7 +2486,7 @@ async def meme_command(interaction):
 @fetch_command.sub_command(name="joke", description="Fetch a random joke")
 async def joke_command(interaction):
     await interaction.response.defer()
-    response = requests.get("http://yet-another-api.herokuapp.com/api/jokes/random").json()
+    response = requests.get("http://yet-another-api.herokuapp.com/api/jokes/random").json()[0]
     embed = disnake.Embed(description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color())
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 3)
