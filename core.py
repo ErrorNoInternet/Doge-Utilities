@@ -2312,6 +2312,40 @@ async def trivia_command(interaction):
 async def fetch_command(_):
     pass
 
+@fetch_command.sub_command(name="github", description="Fetch a repository on GitHub")
+async def github_command(
+        interaction,
+        repository: str = Param(description="The repository you want to fetch"),
+    ):
+    await interaction.response.defer()
+    response = requests.get(f"https://api.github.com/repos/{repository.strip()}").json()
+    try:
+        if response["message"] == "Not Found":
+            await interaction.edit_original_message(content="That GitHub repository was not found")
+            return
+    except:
+        pass
+    embed = disnake.Embed(color=variables.embed_color())
+    embed.add_field(name="Repository", value=f"[URL]({response['html_url']})")
+    embed.add_field(name="Owner", value=f"{response['owner']['login']}")
+    embed.add_field(name="Name", value=f"{response['name']}")
+    embed.add_field(name="Language", value=f"{response['language']}")
+    embed.add_field(name="Issues", value=f"{response['open_issues']:,}")
+    embed.add_field(name="Watchers", value=f"{response['subscribers_count']:,}")
+    embed.add_field(name="Stars", value=f"{response['stargazers_count']:,}")
+    embed.add_field(name="Forks", value=f"{response['forks']:,}")
+    embed.add_field(name="License", value=f"{response['license']['name'] if response['license'] != None else 'None'}")
+    embed.add_field(name="Size", value=f"{round(response['size']/1000, 2):,} MB")
+    embed.add_field(name="Branch", value=f"{response['default_branch']}")
+    embed.add_field(name="Forked", value=f"{response['fork']}")
+    embed.add_field(name="Archived", value=f"{response['archived']}")
+    embed.add_field(name="Created", value=f"<t:{str(parser.isoparse(response['created_at']).timestamp()).split('.')[0]}:d>")
+    embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>")
+    embed.add_field(name="Description", value=f"{response['description']}")
+    embed.set_thumbnail(url=response["owner"]["avatar_url"])
+    await interaction.edit_original_message(embed=embed)
+    add_cooldown(interaction.author.id, "github", 5)
+
 @fetch_command.sub_command(name="minecraft-server", description="Fetch a Minecraft server")
 async def fetch_minecraft_server_command(
         interaction,
@@ -3441,40 +3475,6 @@ async def server_information_command(interaction):
         embed.add_field(name="Description", value=interaction.guild.description)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 3)
-
-@client.slash_command(name="github", description="Fetch a repository on GitHub")
-async def github_command(
-        interaction,
-        repository: str = Param(description="The repository you want to fetch"),
-    ):
-    await interaction.response.defer()
-    response = requests.get(f"https://api.github.com/repos/{repository.strip()}").json()
-    try:
-        if response["message"] == "Not Found":
-            await interaction.edit_original_message(content="That GitHub repository was not found")
-            return
-    except:
-        pass
-    embed = disnake.Embed(color=variables.embed_color())
-    embed.add_field(name="Repository", value=f"[URL]({response['html_url']})")
-    embed.add_field(name="Owner", value=f"{response['owner']['login']}")
-    embed.add_field(name="Name", value=f"{response['name']}")
-    embed.add_field(name="Language", value=f"{response['language']}")
-    embed.add_field(name="Issues", value=f"{response['open_issues']:,}")
-    embed.add_field(name="Watchers", value=f"{response['subscribers_count']:,}")
-    embed.add_field(name="Stars", value=f"{response['stargazers_count']:,}")
-    embed.add_field(name="Forks", value=f"{response['forks']:,}")
-    embed.add_field(name="License", value=f"{response['license']['name'] if response['license'] != None else 'None'}")
-    embed.add_field(name="Size", value=f"{round(response['size']/1000, 2):,} MB")
-    embed.add_field(name="Branch", value=f"{response['default_branch']}")
-    embed.add_field(name="Forked", value=f"{response['fork']}")
-    embed.add_field(name="Archived", value=f"{response['archived']}")
-    embed.add_field(name="Created", value=f"<t:{str(parser.isoparse(response['created_at']).timestamp()).split('.')[0]}:d>")
-    embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>")
-    embed.add_field(name="Description", value=f"{response['description']}")
-    embed.set_thumbnail(url=response["owner"]["avatar_url"])
-    await interaction.edit_original_message(embed=embed)
-    add_cooldown(interaction.author.id, "github", 5)
 
 @client.slash_command(name="choose", description="Choose a random item from the list")
 async def choose_command(
