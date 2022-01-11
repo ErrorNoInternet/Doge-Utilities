@@ -40,6 +40,7 @@ allowed_endpoints = [
     "doge-image-endpoint",
     "icon-endpoint",
     "privacy-page",
+    "terms-page",
     "execute-endpoint"
 ]
 colors = ["#e74c3c", "#2ecc71"]
@@ -411,6 +412,10 @@ def fetch_donations():
 @app.route("/privacy", endpoint="privacy-page")
 def fetch_privacy_page():
     return load_file("privacy.html")
+
+@app.route("/terms", endpoint="terms-page")
+def fetch_terms_page():
+    return load_file("terms.html")
 
 @app.route("/status", endpoint="status-page")
 def fetch_status():
