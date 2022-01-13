@@ -3266,7 +3266,7 @@ async def auto_mute_set_command(
         return
     database[f"auto-mute.{interaction.guild.id}"] = json.dumps(duration)
 
-    await interaction.response.send_message(f"This server's auto-mute duration has been set to {functions.display_time(interaction.author.id, functions.parse_time(original_duration))}")
+    await interaction.response.send_message(f"This server's auto-mute duration has been set to **{functions.display_time(interaction.author.id, functions.parse_time(original_duration))}**")
     add_cooldown(interaction.author.id, "server", 5)
 
 @auto_mute_command.sub_command(name="get", description="Get this server's current auto-mute setting")
@@ -3279,7 +3279,7 @@ async def auto_mute_get_command(interaction):
         duration = json.loads(database[f"auto-mute.{interaction.guild.id}"])
     except:
         duration = 10
-    await interaction.response.send_message(f"This server's auto-mute duration is currently set to {functions.display_time(interaction.author.id, duration)}")
+    await interaction.response.send_message(f"This server's auto-mute duration is currently set to **{functions.display_time(interaction.author.id, duration)}**")
     add_cooldown(interaction.author.id, "server", 5)
 
 @server_command.sub_command(name="status", description="View statistics for this server")
