@@ -3245,11 +3245,11 @@ async def welcome_status_command(interaction):
 async def server_command(_):
     pass
 
-@server_command.sub_command_group(name="auto-mute", description="Change this server's auto-mute settings")
+@server_command.sub_command_group(name="auto-mute", description="Manage this server's auto-mute settings")
 async def auto_mute_command(_):
     pass
 
-@auto_mute_command.sub_command(name="set", description="Set this server's auto-mute settings")
+@auto_mute_command.sub_command(name="set", description="Change this server's auto-mute duration")
 async def auto_mute_set_command(
         interaction,
         duration: str = Param(description="The duration the user will muted for when they trigger a filter"),
