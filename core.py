@@ -3245,6 +3245,43 @@ async def welcome_status_command(interaction):
 async def server_command(_):
     pass
 
+@server_command.sub_command_group(name="auto-mute", description="Change this server's auto-mute settings")
+async def auto_mute_command(_):
+    pass
+
+@auto_mute_command.sub_command(name="set", description="Set this server's auto-mute settings")
+async def auto_mute_set_command(
+        interaction,
+        duration: str,
+    ):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+
+    original_duration = duration
+    try:
+        duration = functions.parse_time(duration)
+    except:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
+        return
+    database[f"auto-mute.{interaction.guild.id}"] = json.dumps(duration)
+
+    await interaction.response.send_message(f"This server's auto-mute duration has been set to {functions.display_time(interaction.author.id, functions.parse_time(original_duration))}")
+    add_cooldown(interaction.author.id, "server", 5)
+
+@auto_mute_command.sub_command(name="get", description="Get this server's current auto-mute setting")
+async def auto_mute_get_command(interaction):
+    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+
+    try:
+        duration = json.loads(database[f"auto-mute.{interaction.guild.id}"])
+    except:
+        duration = 10
+    await interaction.response.send_message(f"This server's auto-mute duration is currently set to {functions.display_time(interaction.author.id, duration)}")
+    add_cooldown(interaction.author.id, "server", 5)
+
 @server_command.sub_command(name="status", description="View statistics for this server")
 async def server_status_command(interaction):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
@@ -4235,6 +4272,9 @@ def generate_color(color_code, generate_image=True):
         return 1
 
 async def mute_member(member, duration):
+    if duration == 0:
+        return
+
     mute_role = None; exists = False
     for role in member.guild.roles:
         if "mute" in role.name.lower():
@@ -4465,6 +4505,10 @@ async def on_message(message):
                 if filter not in ignored_channels:
                     ignored_channels[filter] = []
             try:
+                mute_duration = json.loads(database[f"auto-mute.{message.guild.id}"])
+            except:
+                mute_duration = 10
+            try:
                 if message.channel.id not in ignored_channels["insults"]:
                     if json.loads(database[f"insults.toggle.{message.guild.id}"]):
                         insults = json.loads(database[f"insults.list.{message.guild.id}"])
@@ -4478,7 +4522,7 @@ async def on_message(message):
                                     await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
                                 except:
                                     pass
-                                await mute_member(message.author, 0.16)
+                                await mute_member(message.author, mute_duration / 60)
                                 await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
@@ -4497,7 +4541,7 @@ async def on_message(message):
                                     await message.author.send("Please do not put links in your message!")
                                 except:
                                     pass
-                                await mute_member(message.author, 0.16)
+                                await mute_member(message.author, mute_duration / 60)
                                 await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
@@ -4529,7 +4573,7 @@ async def on_message(message):
                                     await message.author.send(f"Stop spamming! You are sending more than **{strikes} {'message' if strikes == 1 else 'messages'}** in **15 seconds**!")
                                 except:
                                     pass
-                                await mute_member(message.author, 0.16)
+                                await mute_member(message.author, mute_duration / 60)
                                 await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
@@ -4552,7 +4596,7 @@ async def on_message(message):
                                 await message.author.send(f"Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
                             except:
                                 pass
-                            await mute_member(message.author, 0.16)
+                            await mute_member(message.author, mute_duration / 60)
                             await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                             return
             except:
@@ -4575,7 +4619,7 @@ async def on_message(message):
                                 await message.author.send(f"Please do not spam newlines in your message! You just sent **{newlines} {'newline' if newlines == 1 else 'newlines'}** in **1 message**!")
                             except:
                                 pass
-                            await mute_member(message.author, 0.16)
+                            await mute_member(message.author, mute_duration / 60)
                             newline = "\n"
                             await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500).replace(newline*8, newline+"..."+newline)}')
                             return
