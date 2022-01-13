@@ -3252,7 +3252,7 @@ async def auto_mute_command(_):
 @auto_mute_command.sub_command(name="set", description="Set this server's auto-mute settings")
 async def auto_mute_set_command(
         interaction,
-        duration: str,
+        duration: str = Param(description="The duration the user will muted for when they trigger a filter"),
     ):
     if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
