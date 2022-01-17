@@ -2312,6 +2312,39 @@ async def trivia_command(interaction):
 async def fetch_command(_):
     pass
 
+@fetch_command.sub_command(name="pypi", description="Fetch a project on PyPi")
+async def pypi_command(
+        interaction,
+        project: str = Param(description="The PyPi project that you want to search"),
+    ):
+    await interaction.response.defer()
+    response = requests.get(f"https://pypi.org/pypi/{project.strip()}/json")
+    if response.status_code == 404:
+        await interaction.edit_original_message(content="That PyPi package was not found")
+        return
+    response = response.json()
+    size_unit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
+    if size > 1000:
+        size_unit = "KB"
+        size = size / 1000
+        if size > 1000:
+            size_unit = "MB"
+            size = size / 1000
+    embed = disnake.Embed(color=variables.embed_color())
+    embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
+    embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
+    embed.add_field(name="Owner", value=response["info"]["author"] if response["info"]["author"] != "" else "None")
+    embed.add_field(name="Name", value=response["info"]["name"])
+    embed.add_field(name="Version", value=response["info"]["version"])
+    embed.add_field(name="License", value=response["info"]["license"] if response["info"]["license"] != "" else "None")
+    embed.add_field(name="Yanked", value=response["info"]["yanked"])
+    embed.add_field(name="Size", value=f"{round(size, 2)} {size_unit}")
+    embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
+    embed.add_field(name="Summary", value=response["info"]["summary"])
+    embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
+    await interaction.edit_original_message(embed=embed)
+    add_cooldown(interaction.author.id, "fetch", 5)
+
 @fetch_command.sub_command(name="github", description="Fetch a repository on GitHub")
 async def github_command(
         interaction,
@@ -3550,39 +3583,6 @@ async def choose_command(
         items.append(item10)
     random_item = random.choice(items)
     await interaction.response.send_message(f'{functions.get_text(interaction.author.id, "i_choose")} **"{random_item}"**')
-
-@client.slash_command(name="pypi", description="Fetch a project on PyPi")
-async def pypi_command(
-        interaction,
-        project: str = Param(description="The PyPi project that you want to search"),
-    ):
-    await interaction.response.defer()
-    response = requests.get(f"https://pypi.org/pypi/{project.strip()}/json")
-    if response.status_code == 404:
-        await interaction.edit_original_message(content="That PyPi package was not found")
-        return
-    response = response.json()
-    size_unit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
-    if size > 1000:
-        size_unit = "KB"
-        size = size / 1000
-        if size > 1000:
-            size_unit = "MB"
-            size = size / 1000
-    embed = disnake.Embed(color=variables.embed_color())
-    embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
-    embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
-    embed.add_field(name="Owner", value=response["info"]["author"] if response["info"]["author"] != "" else "None")
-    embed.add_field(name="Name", value=response["info"]["name"])
-    embed.add_field(name="Version", value=response["info"]["version"])
-    embed.add_field(name="License", value=response["info"]["license"] if response["info"]["license"] != "" else "None")
-    embed.add_field(name="Yanked", value=response["info"]["yanked"])
-    embed.add_field(name="Size", value=f"{round(size, 2)} {size_unit}")
-    embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
-    embed.add_field(name="Summary", value=response["info"]["summary"])
-    embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
-    await interaction.edit_original_message(embed=embed)
-    add_cooldown(interaction.author.id, "pypi", 5)
 
 @client.slash_command(name="discriminator", description="Find users with the same discriminator")
 async def discriminator_command(
