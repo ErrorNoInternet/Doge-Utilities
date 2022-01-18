@@ -4395,6 +4395,24 @@ async def on_guild_join(guild):
     except:
         pass
 
+async def cleanup_reactions(payload):
+    try:
+        reaction_roles = json.loads(database[f"reaction-roles.{payload.guild_id}"])
+    except:
+        return
+    new_reaction_roles = []
+    for reaction_role in reaction_roles:
+        try:
+            for guild in client.guilds:
+                for channel in guild.channels:
+                    if int(reaction_role["channel"]) == channel.id:
+                        message = await channel.fetch_message(int(reaction_role["message"]))
+                        new_reaction_roles.append(reaction_role)
+        except:
+            pass
+    if len(reaction_roles) != len(new_reaction_roles):
+        database[f"reaction-roles.{payload.guild_id}"] = json.dumps(new_reaction_roles)
+
 async def on_reaction_add(payload):
     if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
         return

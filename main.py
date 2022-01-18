@@ -236,10 +236,12 @@ async def on_ready():
 @core.client.event
 async def on_raw_reaction_add(payload):
     await core.on_reaction_add(payload)
+    await core.cleanup_reactions(payload)
 
 @core.client.event
 async def on_raw_reaction_remove(payload):
     await core.on_reaction_remove(payload)
+    await core.cleanup_reactions(payload)
 
 @core.client.event
 async def on_member_join(member):
