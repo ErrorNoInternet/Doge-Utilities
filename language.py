@@ -181,6 +181,8 @@ data = {
         "ideas": "Ideas",
         "translators": "Translators",
         "big_thanks_to": "Big thanks to {}, and a lot more awesome people!",
+        "currency_conversion": "Currency Conversion",
+        "source_code_here": "You can find my code [here]({})",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -364,6 +366,8 @@ data = {
         "ideas": "主意",
         "translators": "翻译",
         "big_thanks_to": "很感谢 {}, 和很多其他人!",
+        "currency_conversion": "货币转换",
+        "source_code_here": "你可以在[这里]({})找到我的源代码",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

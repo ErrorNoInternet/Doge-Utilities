@@ -586,7 +586,7 @@ async def currency_convert_command(
         output_currency = output_currency.lower().strip()
         url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{input_currency}/{output_currency}.json"
         response = requests.get(url).json(); value = response[output_currency] * amount
-        embed = disnake.Embed(title="Currency Conversion", description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color())
+        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "currency_conversion"), description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color())
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "currency", 5)
     except:
@@ -700,7 +700,7 @@ async def vote_command(interaction):
 
 @links_command.sub_command(name="source", description="Get the link to Doge's source code")
 async def source_command(interaction):
-    description = "You can find my code [here](https://github.com/ErrorNoInternet/Doge-Utilities)"
+    description = functions.get_text(interaction.author.id, "source_code_here").format("https://github.com/ErrorNoInternet/Doge-Utilities")
     try:
         response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
         description += f"\nActive Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
