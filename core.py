@@ -502,6 +502,10 @@ async def reaction_delete_command(
             description="The ID of the message you want to remove reaction roles for",
             autocomplete=autocomplete_reaction_roles,
         ),
+        emoji: str = Param(
+            None,
+            description="The emoji on the message you want to remove",
+        )
     ):
     if not interaction.author.guild_permissions.manage_roles and not interaction.author.guild_permissions.administrator:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
@@ -512,12 +516,19 @@ async def reaction_delete_command(
     except:
         reaction_roles = []
     exists = False
+    new_reaction_roles = []
     for reaction_role in reaction_roles:
-        if str(reaction_role["message"]) == message_id:
-            exists = True
-            reaction_roles.remove(reaction_role)
-            database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
-            break
+        if not emoji:
+            if str(reaction_role["message"]) == message_id:
+                exists = True
+            else:
+                new_reaction_roles.append(reaction_role)
+        else:
+            if str(reaction_role["message"]) == message_id and reaction_role["emoji"] == emoji:
+                exists = True
+            else:
+                new_reaction_roles.append(reaction_role)
+    database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(new_reaction_roles)
     if not exists:
         await interaction.response.send_message("That reaction role wasn't found!", ephemeral=True)
         return
