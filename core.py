@@ -4131,7 +4131,7 @@ async def cleanup_reactions(payload):
             for guild in client.guilds:
                 for channel in guild.channels:
                     if int(reaction_role["channel"]) == channel.id:
-                        message = await channel.fetch_message(int(reaction_role["message"]))
+                        await channel.fetch_message(int(reaction_role["message"]))
                         new_reaction_roles.append(reaction_role)
         except:
             pass
