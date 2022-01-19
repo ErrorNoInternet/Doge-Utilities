@@ -390,7 +390,7 @@ async def settings_language_set_command(
     settings = functions.get_settings(interaction.author.id)
     settings["language"] = language_code
     functions.set_settings(settings, interaction.author.id)
-    default_text = f"Your preferred language has been set to **{language_name.title()}**"
+    default_text = functions.get_text(interaction.author.id, "language_update").format(language_name.title())
     language_text = default_text
     try:
         del variables.settings_cache[str(interaction.author.id)]
@@ -438,7 +438,7 @@ async def embedify_command(
         embed_color = int(colors[0][1:], 16)
     embed = disnake.Embed(title=title, description=description, color=embed_color)
     await interaction.channel.send(embed=embed)
-    await interaction.response.send_message("Your custom embed has been successfully generated!", ephemeral=True)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "custom_embed_generated"), ephemeral=True)
 
 @client.slash_command(name="reaction-roles", description="Manage the reaction roles")
 async def reaction_command(_):
@@ -455,7 +455,7 @@ async def reaction_create_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
     if role.position >= interaction.author.top_role.position:
-        await interaction.response.send_message("You do not have permission to manage this role!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_manage_role"), ephemeral=True)
         return
 
     if message_id.endswith("/"):
@@ -466,12 +466,12 @@ async def reaction_create_command(
     try:
         message = await interaction.channel.fetch_message(int(message_id))
     except:
-        await interaction.response.send_message("Please enter a valid message ID (that exists in this channel)", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "enter_valid_message_id"), ephemeral=True)
         return
     try:
         await message.add_reaction(emoji)
     except:
-        await interaction.response.send_message("I can't add that emoji to the message!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_add_emoji"), ephemeral=True)
         return
     try:
         reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
@@ -482,7 +482,7 @@ async def reaction_create_command(
         return
     reaction_roles.append({"message": message_id, "emoji": emoji, "role": role.id, "channel": interaction.channel.id})
     database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
-    await interaction.response.send_message("A new reaction role has been successfully created!", ephemeral=True)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "reaction_role_created"), ephemeral=True)
 
 def autocomplete_reaction_roles(interaction, string):
     try:
@@ -538,7 +538,7 @@ async def reaction_list_command(interaction):
     description = ""
     for role in reaction_roles:
         description += f"{role['emoji']} - <@&{role['role']}>: {role['message']} ([message](https://discord.com/channels/{interaction.guild.id}/{role['channel']}/{role['message']}))\n"
-    embed = disnake.Embed(title="Reaction Roles", description=description if description != '' else 'There are no reaction roles in this server', color=variables.embed_color())
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "reaction_roles"), description=description if description != '' else functions.get_text(interaction.author.id, "no_reaction_roles"), color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
 
 @client.slash_command(name="qr", description="Generate a QR code with custom data")
@@ -3169,7 +3169,7 @@ async def leave_status_command(interaction):
         value = json.loads(database[f"leave.toggle.{interaction.guild.id}"])
     except:
         pass
-    text = "There is nothing here..."
+    text = functions.get_text(interaction.author.id, "nothing_here")
     try:
         text = database[f"leave.text.{interaction.guild.id}"].decode("utf-8")
     except:
@@ -3262,7 +3262,7 @@ async def welcome_status_command(interaction):
         value = json.loads(database[f"welcome.toggle.{interaction.guild.id}"])
     except:
         pass
-    text = "There is nothing here..."
+    text = functions.get_text(interaction.author.id, "nothing_here")
     try:
         text = database[f"welcome.text.{interaction.guild.id}"].decode("utf-8")
     except:
