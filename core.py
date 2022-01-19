@@ -75,58 +75,6 @@ def reset_strikes():
         time.sleep(15)
         message_strikes = {}
 
-async def manage_muted_members():
-    await asyncio.sleep(10)
-    while True:
-        try:
-            for key in database.keys():
-                if key.decode("utf-8").startswith("mute."):
-                    database_value = json.loads(database[key])
-                    if database_value == []:
-                        del database[key]
-                    for value in database_value:
-                        try:
-                            guild_id = int(key.decode("utf-8").split(".")[1])
-                            user_id = int(value[0])
-                            mute_start = float(value[1])
-                            duration = float(value[2])
-                        except:
-                            moderation_data = json.loads(database[key])
-                            moderation_data.remove(value)
-                            database[key] = json.dumps(moderation_data)
-                            continue
-                        if (time.time() / 60) > ((mute_start / 60) + duration):
-                            try:
-                                mute_role = None; target_guild = None
-                                for guild in client.guilds:
-                                    if guild.id == guild_id:
-                                        target_guild = guild
-                                member = await target_guild.fetch_member(user_id)
-                                for role in target_guild.roles:
-                                    if "mute" in role.name.lower():
-                                        mute_role = role
-                                if mute_role:
-                                    try:
-                                        await member.remove_roles(mute_role)
-                                    except:
-                                        pass
-                                    moderation_data = json.loads(database[key])
-                                    moderation_data.remove(value)
-                                    database[key] = json.dumps(moderation_data)
-                            except:
-                                moderation_data = json.loads(database[key])
-                                moderation_data.remove(value)
-                                database[key] = json.dumps(moderation_data)
-        except Exception as error:
-            print(f"Fatal error in manage_muted_members: {error}")
-            try:
-                moderation_data = json.loads(database[key])
-                moderation_data.remove(value)
-                database[key] = json.dunps(moderation_data)
-            except:
-                pass
-        await asyncio.sleep(10)
-
 async def manage_reminders():
     await asyncio.sleep(10)
     while True:
@@ -207,11 +155,6 @@ database = redis.Redis(
     port=int(os.environ["REDIS_PORT"]),
     password=os.getenv("REDIS_PASSWORD"),
 )
-threading.Thread(
-    name="manage_muted_members",
-    target=asyncio.run_coroutine_threadsafe,
-    args=(manage_muted_members(), client.loop, ),
-).start()
 threading.Thread(
     name="manage_reminders",
     target=asyncio.run_coroutine_threadsafe,
@@ -943,87 +886,6 @@ async def uptime_command(interaction):
         color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
-
-@client.slash_command(name="setup", description="Setup mute and ban roles in your server")
-async def setup_command(_):
-    pass
-
-@setup_command.sub_command(name="banned", description="Setup a 'Banned' role in your server")
-async def setup_banned_command(interaction):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override or interaction.author.guild_permissions.administrator:
-        pass
-    else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
-        return
-
-    roles = interaction.guild.roles
-    for role in roles:
-        if role.name == "Banned":
-            await interaction.response.send_message("The **Banned** role already exists in this guild")
-            return
-    await interaction.response.send_message("Generating the **Banned** role for the current guild...")
-    try:
-        banned_role = await interaction.guild.create_role(name="Banned", permissions=disnake.Permissions(change_nickname=False))
-        guild_roles = len(interaction.guild.roles)
-        retry_count = 0
-        while True:
-            if retry_count > 100:
-                break
-            try:
-                await banned_role.edit(position=guild_roles - retry_count)
-                break
-            except:
-                retry_count += 1
-        for channel in interaction.guild.channels:
-            try:
-                await channel.set_permissions(banned_role, view_channel=False)
-            except:
-                pass
-    except:
-        await interaction.edit_original_message(content=f"Unable to generate the **Banned** role for this guild")
-        return
-    await interaction.edit_original_message(content=f"Successfully generated the **Banned** role for this guild")
-    add_cooldown(interaction.author.id, "setup", 30)
-
-@setup_command.sub_command(name="muted", description="Setup a 'Muted' role in your server")
-async def setup_muted_command(interaction):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.id in variables.permission_override or interaction.author.guild_permissions.administrator:
-        pass
-    else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
-        return
-
-    roles = interaction.guild.roles
-    for role in roles:
-        if role.name == "Muted":
-            await interaction.response.send_message("The **Muted** role already exists in this guild")
-            return
-    await interaction.response.send_message("Generating the **Muted** role for the current guild...")
-    try:
-        muted_role = await interaction.guild.create_role(name="Muted", permissions=disnake.Permissions(add_reactions=False))
-        guild_roles = len(interaction.guild.roles)
-        retry_count = 0
-        while True:
-            if retry_count > 100:
-                break
-            try:
-                await muted_role.edit(position=guild_roles - retry_count)
-                break
-            except:
-                retry_count += 1
-        for channel in interaction.guild.channels:
-            try:
-                try:
-                    await channel.set_permissions(muted_role, send_messages=False)
-                except:
-                    await channel.set_permissions(muted_role, connect=False)
-            except:
-                pass
-    except:
-        await interaction.edit_original_message(content=f"Unable to generate the **Muted** role for this guild")
-        return
-    await interaction.edit_original_message(content=f"Successfully generated the **Muted** role for this guild")
-    add_cooldown(interaction.author.id, "setup", 30)
 
 @client.slash_command(name="random", description="Generate a random number between the range")
 async def random_command(
@@ -2592,133 +2454,49 @@ async def unmute_command(
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
-    if member.top_role.position >= interaction.author.top_role.position and "mute" not in member.top_role.name.lower():
+    if member.top_role.position >= interaction.author.top_role.position:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_unmute").format(member), ephemeral=True)
         return
 
-    mute_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    if exists:
-        try:
-            await member.remove_roles(mute_role)
-        except:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(member))
-            return
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "user_unmuted").format(member))
+    try:
+        await member.timeout(duration=None)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_unmuted").format(member))
+    except:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(member))
 
 @client.slash_command(name="mute", description="Mute a specified member on your server")
 async def mute_command(
         interaction,
         member: disnake.Member = Param(description="The member you want to mute"),
-        duration: str = Param(0, description="The target duration"),
+        duration: str = Param(description="The target duration"),
     ):
     if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         pass
     else:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
         return
-    if member.top_role.position >= interaction.author.top_role.position and "mute" not in member.top_role.name.lower():
+    if member.top_role.position >= interaction.author.top_role.position:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_mute").format(member), ephemeral=True)
         return
 
     original_duration = duration
     try:
-        duration = functions.parse_time(duration) / 60
+        duration = functions.parse_time(duration)
     except:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
         return
 
-    mute_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    if not exists:
-        await setup_muted_command(interaction)
-    mute_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    if not exists:
-        await interaction.response.send_message("Unable to find mute role")
+    if duration > 2592000:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
         return
-
-    if duration == 0:
-        try:
-            await member.add_roles(mute_role)
-        except:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
-            return
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_permanently").format(member))
-    else:
-        if duration > 43200:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
-            return
-        if duration < 0:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "no_negative_numbers"), ephemeral=True)
-            return
-        try:
-            moderation_data = json.loads(database["mute." + str(interaction.guild.id)])
-        except:
-            database["mute." + str(interaction.guild.id)] = json.dumps([])
-            moderation_data = json.loads(database["mute." + str(interaction.guild.id)])
-        try:
-            await member.add_roles(mute_role)
-            moderation_data.append([member.id, round(time.time()), duration])
-            database["mute." + str(interaction.guild.id)] = json.dumps(moderation_data)
-        except:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
-            return
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_temporarily").format(member, functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
-
-@client.user_command(name="Mute Member")
-async def user_mute_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
-        return
-    if interaction.target.top_role.position >= interaction.author.top_role.position and "mute" not in interaction.target.top_role.name.lower():
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_mute").format(interaction.target), ephemeral=True)
-        return
-    mute_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    if not exists:
-        await setup_muted_command(interaction)
-    mute_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    if not exists:
-        await interaction.response.send_message("Unable to find mute role")
+    if duration < 0:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_negative_numbers"), ephemeral=True)
         return
     try:
-        await interaction.target.add_roles(mute_role)
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted_permanently").format(interaction.target))
+        await member.timeout(duration=duration)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted").format(member, functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(interaction.target), ephemeral=True)
-
-@client.user_command(name="Unmute Member")
-async def user_unmute_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
-        return
-    if interaction.target.top_role.position >= interaction.author.top_role.position and "mute" not in interaction.target.top_role.name.lower():
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_unmute").format(interaction.target), ephemeral=True)
-        return
-    mute_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    if exists:
-        try:
-            await interaction.target.remove_roles(mute_role)
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "user_unmuted").format(interaction.target))
-        except:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(interaction.target))
-    else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(interaction.target))
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
 
 @client.slash_command(name="filter", description="Manage the auto-moderation filters")
 async def filter_command(_):
@@ -3366,24 +3144,7 @@ async def server_status_command(interaction):
         newline_filter = json.loads(database[f"newline.toggle.{interaction.guild.id}"])
     except:
         pass
-    try:
-        doge_role_position = interaction.guild.me.top_role.position
-    except:
-        doge_role_position = 0
-    mute_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    mute_role_position = 0
-    if exists:
-        mute_role_position = mute_role.position
-    ban_role = None; exists = False
-    for role in interaction.guild.roles:
-        if "ban" in role.name.lower():
-            ban_role = role; exists = True
-    ban_role_position = 0
-    if exists:
-        ban_role_position = ban_role.position
+    
     differences = []
     members = []
     channels = []
@@ -3416,9 +3177,6 @@ async def server_status_command(interaction):
     embed.add_field(name="Spam Filter", value=":white_check_mark: Enabled" if spam_filter else ":x: Disabled")
     embed.add_field(name="Links Filter", value=":white_check_mark: Enabled" if links_filter else ":x: Disabled")
     embed.add_field(name="Mention Filter", value=":white_check_mark: Enabled" if mention_filter else ":x: Disabled")
-    embed.add_field(name="Bot Role", value=f"{':white_check_mark:' if doge_role_position != 0 else ':x:'} #{doge_role_position}")
-    embed.add_field(name="Muted Role", value=f"{':white_check_mark:' if doge_role_position > mute_role_position and mute_role_position != 0 else ':x:'} #{mute_role_position}")
-    embed.add_field(name="Banned Role", value=f"{':white_check_mark:' if doge_role_position > ban_role_position and ban_role_position != 0 else ':x:'} #{ban_role_position}")
     embed.add_field(name="Message Rate", value=f"{average}/s")
     embed.add_field(name="Active Members", value=f"{len(members)}")
     embed.add_field(name="Active Channels", value=f"{len(channels)}")
@@ -4285,35 +4043,6 @@ def generate_color(color_code, generate_image=True):
     else:
         return 1
 
-async def mute_member(member, duration):
-    if duration == 0:
-        return
-
-    mute_role = None; exists = False
-    for role in member.guild.roles:
-        if "mute" in role.name.lower():
-            mute_role = role; exists = True
-    if not exists:
-        return
-
-    if duration == 0:
-        try:
-            await member.add_roles(mute_role)
-        except:
-            pass
-    else:
-        try:
-            moderation_data = json.loads(database["mute." + str(member.guild.id)])
-        except:
-            database["mute." + str(member.guild.id)] = json.dumps([])
-            moderation_data = json.loads(database["mute." + str(member.guild.id)])
-        try:
-            await member.add_roles(mute_role)
-            moderation_data.append([member.id, round(time.time()), duration])
-            database["mute." + str(member.guild.id)] = json.dumps(moderation_data)
-        except:
-            pass
-
 async def send_user_message(user_id, message):
     for guild in client.guilds:
         for member in guild.members:
@@ -4358,18 +4087,6 @@ async def on_member_join(member):
                     await channel.send(welcome_message)
     except:
         pass
-    mute_key = f"muted.{member.id}.{member.guild.id}".encode("utf-8")
-    if mute_key in database.keys():
-        del database[mute_key]
-        mute_role = None; exists = False
-        for role in member.guild.roles:
-            if "mute" in role.name.lower():
-                mute_role = role; exists = True
-        if exists:
-            try:
-                await member.add_roles(mute_role)
-            except:
-                pass
 
 async def on_member_remove(member):
     try:
@@ -4387,12 +4104,6 @@ async def on_member_remove(member):
                     await channel.send(leave_message)
     except:
         pass
-    muted = False
-    for role in member.roles:
-        if "mute" in role.name.lower():
-            muted = True
-    if muted:
-        database[f"muted.{member.id}.{member.guild.id}"] = 1
 
 async def on_guild_remove(guild):
     for key in database.keys():
@@ -4554,7 +4265,7 @@ async def on_message(message):
                                     await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
                                 except:
                                     pass
-                                await mute_member(message.author, mute_duration / 60)
+                                await message.author.timeout(duration=mute_duration, reason="Using a banned word")
                                 await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
@@ -4573,7 +4284,7 @@ async def on_message(message):
                                     await message.author.send("Please do not put links in your message!")
                                 except:
                                     pass
-                                await mute_member(message.author, mute_duration / 60)
+                                await message.author.timeout(duration=mute_duration, reason="Sending links")
                                 await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
@@ -4605,7 +4316,7 @@ async def on_message(message):
                                     await message.author.send(f"Stop spamming! You are sending more than **{strikes} {'message' if strikes == 1 else 'messages'}** in **15 seconds**!")
                                 except:
                                     pass
-                                await mute_member(message.author, mute_duration / 60)
+                                await message.author.timeout(duration=mute_duration, reason="Spamming messages")
                                 await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                                 return
             except:
@@ -4628,7 +4339,7 @@ async def on_message(message):
                                 await message.author.send(f"Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
                             except:
                                 pass
-                            await mute_member(message.author, mute_duration / 60)
+                            await message.author.timeout(duration=mute_duration, reason="Spamming mentions")
                             await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
                             return
             except:
@@ -4651,7 +4362,7 @@ async def on_message(message):
                                 await message.author.send(f"Please do not spam newlines in your message! You just sent **{newlines} {'newline' if newlines == 1 else 'newlines'}** in **1 message**!")
                             except:
                                 pass
-                            await mute_member(message.author, mute_duration / 60)
+                            await message.author.timeout(duration=mute_duration, reason="Spamming newlines")
                             newline = "\n"
                             await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500).replace(newline*8, newline+"..."+newline)}')
                             return

@@ -24,6 +24,42 @@ async def auto_count(channel_id):
 					number = 0
 				await channel.send(number)
 
+async def post_update(message, items):
+    for guild in core.client.guilds:
+        if guild.id == 879662689708806154:
+            for channel in guild.channels:
+                if channel.id == 897679369835774002:
+                    description = ""
+                    for item in items:
+                        description += f"**-** {item}\n"
+                    embed = disnake.Embed(description=description, color=variables.embed_color())
+                    class CommandView(disnake.ui.View):
+                        def __init__(self, channel):
+                            super().__init__()
+                            self.channel = channel
+
+                        @disnake.ui.button(label="Post Update", style=disnake.ButtonStyle.green)
+                        async def post_update(self, _, interaction):
+                            if interaction.author != message.author:
+                                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                                return
+
+                            await old_message.edit(view=None)
+                            announcement = await self.channel.send(embed=embed)
+                            await announcement.publish()
+                            self.stop()
+
+                        @disnake.ui.button(label="Cancel", style=disnake.ButtonStyle.red)
+                        async def cancel(self, _, interaction):
+                            if interaction.author != message.author:
+                                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                                return
+
+                            await old_message.edit(view=None)
+                            await interaction.response.send_message("Successfully cancelled update", ephemeral=True)
+                            self.stop()
+                    old_message = await message.channel.send(view=CommandView(channel), embed=embed)
+
 async def post_announcement(message, title, text, mention=False):
     for guild in core.client.guilds:
         if guild.id == 879662689708806154:
