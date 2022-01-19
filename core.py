@@ -2486,7 +2486,7 @@ async def mute_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
         return
 
-    if duration > 2592000:
+    if duration > 2419200:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
         return
     if duration < 0:
