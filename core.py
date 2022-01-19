@@ -537,7 +537,7 @@ async def reaction_list_command(interaction):
         reaction_roles = []
     description = ""
     for role in reaction_roles:
-        description += f"{role['emoji']} - <@&{role['role']}>: {role['message']} ([message](https://discord.com/channels/{interaction.guild.id}/{role['channel']}/{role['message']}))\n"
+        description += f"{role['emoji']} - <@&{role['role']}>: {role['message']} ([{functions.get_text(interaction.author.id, 'message_lower')}](https://discord.com/channels/{interaction.guild.id}/{role['channel']}/{role['message']}))\n"
     embed = disnake.Embed(title=functions.get_text(interaction.author.id, "reaction_roles"), description=description if description != '' else functions.get_text(interaction.author.id, "no_reaction_roles"), color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
 
@@ -600,7 +600,7 @@ async def currency_list_command(interaction):
         output += f"{key.upper()}: {response[key]}\n"
     segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
     pager = disnake_paginator.ButtonPaginator(
-        prefix=f"```\n", suffix="```", color=variables.embed_color(), title="Currency List", segments=segments,
+        prefix=f"```\n", suffix="```", color=variables.embed_color(), title=functions.get_text(interaction.author.id, "currency_list"), segments=segments,
         invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction)
@@ -660,7 +660,7 @@ async def invite_command(interaction):
             self.clicked = False
             self.add_item(
                 disnake.ui.Button(
-                    label="Invite Link",
+                    label=functions.get_text(interaction.author.id, "invite_link"),
                     url=variables.bot_invite_link,
                 ),
             )
@@ -671,21 +671,24 @@ async def invite_command(interaction):
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
-        @disnake.ui.button(label="Leave Server", style=disnake.ButtonStyle.red, disabled=guild_member)
+        @disnake.ui.button(label=functions.get_text(interaction.author.id, "leave_server"), style=disnake.ButtonStyle.red, disabled=guild_member)
         async def leave_server(self, _, button_interaction):
             if button_interaction.author == interaction.author:
                 if self.clicked:
-                    await button_interaction.response.send_message("Leaving server...", ephemeral=True)
+                    await button_interaction.response.send_message(
+                        functions.get_text(button_interaction.author.id, "leaving_server"),
+                        ephemeral=True,
+                    )
                     await button_interaction.guild.leave()
                 else:
                     self.clicked = True
                     await button_interaction.response.send_message(
-                        "Are you sure you want me to leave this server? Please press the button again to confirm.",
+                        functions.get_text(button_interaction.author.id, "leave_server_confirm"),
                         ephemeral=True,
                     )
             else:
                 await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_command_sender"), ephemeral=True)
-    await interaction.response.send_message("Here is Doge Utilities' invite link", view=CommandView())
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "here_is_invite_link"), view=CommandView())
 
 @links_command.sub_command(name="vote", description="Get links to vote for the bot")
 async def vote_command(interaction):
@@ -703,7 +706,7 @@ async def source_command(interaction):
         description += f"\nActive Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
     except:
         pass
-    embed = disnake.Embed(title="Source Code", description=description, color=variables.embed_color())
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "source_code"), description=description, color=variables.embed_color())
     embed.set_thumbnail(url=client.user.avatar)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "source", 10)
@@ -740,7 +743,7 @@ async def supporters_command(interaction):
             if user.id not in added:
                 users_string += f"**{user.name}**, "
                 added.append(user.id)
-    description = f"Big thanks to {users_string[:-2]}, and a lot more awesome people!"
+    description = functions.get_text(interaction.author.id, "big_thanks_to").format(users_string[:-2])
     embed = disnake.Embed(description=description, color=variables.embed_color())
 
     developers = []
@@ -748,14 +751,14 @@ async def supporters_command(interaction):
         user = await client.getch_user(developer)
         if user:
             developers.append(user.name)
-    embed.add_field(name="Developers", value="\n".join(developers))
+    embed.add_field(name=functions.get_text(interaction.author.id, "developers"), value="\n".join(developers))
 
     ideas = []
     for idea in variables.supporters["ideas"]:
         user = await client.getch_user(idea)
         if user:
             ideas.append(user.name)
-    embed.add_field(name="Ideas", value="\n".join(ideas))
+    embed.add_field(name=functions.get_text(interaction.author.id, "ideas"), value="\n".join(ideas))
 
     translators = []
     for language, translator in variables.supporters["translators"].items():
@@ -770,7 +773,7 @@ async def supporters_command(interaction):
         if flag == "en":
             flag = "us"
         translators.append(f":flag_{flag}: {', '.join(translator_users)}")
-    embed.add_field(name="Translators", value="\n".join(translators))
+    embed.add_field(name=functions.get_text(interaction.author.id, "translators"), value="\n".join(translators))
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 
