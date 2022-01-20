@@ -604,7 +604,7 @@ async def support_command(interaction):
 @links_command.sub_command(name="invite", description="Invite this bot to another server")
 async def invite_command(interaction):
     guild_member = True
-    if interaction.author.id == interaction.guild.owner.id:
+    if interaction.author.id == interaction.guild.owner_id:
         guild_member = False
 
     class CommandView(disnake.ui.View):
@@ -3295,7 +3295,7 @@ async def server_information_command(interaction):
     embed.add_field(name="Server ID", value=f"`{interaction.guild.id}`")
     embed.add_field(name="Server Region", value=f"{interaction.guild.region}")
     embed.add_field(name="Creation Time", value=f"<t:{functions.parse_snowflake(interaction.guild.id)}:R>")
-    embed.add_field(name="Server Owner", value=f"`{interaction.guild.owner.id}`")
+    embed.add_field(name="Server Owner", value=f"`{interaction.guild.owner_id}`")
     embed.add_field(name="Channels", value=f"{text_channels + voice_channels + categories:,}")
     embed.add_field(name="Roles", value=f"{len(interaction.guild.roles):,}")
     embed.add_field(name="Categories", value=f"{categories:,}")
