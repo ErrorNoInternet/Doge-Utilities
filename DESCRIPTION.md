@@ -2,12 +2,6 @@
 This is a simple Discord bot that has a ton of useful tools, such as raid protection, welcome/leave messages, autorole, auto-moderation, custom duration mutes, mute/ban roles, currency converters, color visualizers, memes, jokes, user lookup, filters, and a lot more!
 
 ### Server Setup
-- Setup-Muted
-  - This is a command that creates a "Muted" role in your server that can mute members
-
-- Setup-Banned
-  - This is a command that creates a "Banned" role in your server that can cause all the channels to disappear for any user
-
 - Raid-Protection
   - Prevent your server from being raided! Channels and roles will automatically be recreated (when deleted) if this feature is on
 
@@ -23,6 +17,9 @@ This is a simple Discord bot that has a ton of useful tools, such as raid protec
 
 - Links
   - Stop members from sending links and advertisements! Enable this filter with `/filter links enable`.
+
+- Mention
+  - Stop people from spamming mentions in their message with the `/filter mention enable` command.
 
 ### Moderation Tools
 - Mute 
