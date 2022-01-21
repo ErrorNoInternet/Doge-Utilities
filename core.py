@@ -1006,7 +1006,7 @@ async def suggest_command(
 
         @disnake.ui.button(emoji="🤷", style=disnake.ButtonStyle.gray)
         async def ignore_button(self, _, button_interaction):
-            await button_interaction.response.send_message("Ignored successfully")
+            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "ignored_successfully"))
             for button in self.children:
                 button.disabled = True
             for original_message in original_messages:
@@ -1022,7 +1022,7 @@ async def suggest_command(
                     if member.id == user_id:
                         sent = True
                         try:
-                            original_messages.append(await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **has sent a suggestion**\n{suggestion}", view=SuggestionView()))
+                            original_messages.append(await member.send(f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) **{functions.get_text(member.id, 'has_sent_suggestion')}**\n{suggestion}", view=SuggestionView()))
                         except:
                             pass
     await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
