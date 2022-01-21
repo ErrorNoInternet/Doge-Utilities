@@ -182,6 +182,7 @@ data = {
         "big_thanks_to": "Big thanks to {}, and a lot more awesome people!",
         "currency_conversion": "Currency Conversion",
         "source_code_here": "You can find my code [here]({})",
+        "banned_word": "Please do not use the word **\"{}\"** in this server!",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -366,6 +367,7 @@ data = {
         "big_thanks_to": "很感谢 {}, 和很多其他人!",
         "currency_conversion": "货币转换",
         "source_code_here": "你可以在[这里]({})找到我的源代码",
+        "banned_word": "请不要此服务器中使用**\"{}\"**这个词!",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

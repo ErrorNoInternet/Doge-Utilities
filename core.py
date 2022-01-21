@@ -280,8 +280,11 @@ async def slash_command_handler(interaction):
                     if json.loads(database[f"insults.toggle.{interaction.guild.id}"]):
                         insults = json.loads(database[f"insults.list.{interaction.guild.id}"])
                         for word in insults:
-                            if word.lower() in interaction.data.options[0].options[0].value.replace(" ", ""):
-                                await interaction.response.send_message(f'Please do not use the word **"{word.lower()}"** in this server!', ephemeral=True)
+                            if word.lower() in interaction.data.options[0].options[0].value.replace(" ", "").lower():
+                                await interaction.response.send_message(
+                                    functions.get_text(interaction.author.id, "banned_word").format(word.lower()),
+                                    ephemeral=True,
+                                )
                                 raise Exception("no permission")
             except:
                 pass
@@ -4262,7 +4265,7 @@ async def on_message(message):
                                 except:
                                     pass
                                 try:
-                                    await message.author.send(f'Please do not use the word **"{word.lower()}"** in this server!')
+                                    await message.author.send(functions.get_text(message.author.id, "banned_word").format(word.lower()))
                                 except:
                                     pass
                                 await message.author.timeout(duration=mute_duration, reason="Using a banned word")
