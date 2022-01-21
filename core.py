@@ -660,7 +660,7 @@ async def source_command(interaction):
     description = functions.get_text(interaction.author.id, "source_code_here").format("https://github.com/ErrorNoInternet/Doge-Utilities")
     try:
         response = requests.get("https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
-        description += f"\nActive Issues: **{response['open_issues']}**, Forks: **{response['forks']}**\nStargazers: **{response['stargazers_count']}**, Watchers: **{response['subscribers_count']}**"
+        description += f"\n{functions.get_text(interaction.author.id, 'active_issues')}: **{response['open_issues']}**, {functions.get_text(interaction.author.id, 'forks')}: **{response['forks']}**\n{functions.get_text(interaction.author.id, 'stargazers')}: **{response['stargazers_count']}**, {functions.get_text(interaction.author.id, 'watchers')}: **{response['subscribers_count']}**"
     except:
         pass
     embed = disnake.Embed(title=functions.get_text(interaction.author.id, "source_code"), description=description, color=variables.embed_color())
@@ -793,7 +793,7 @@ async def status_command(interaction):
     if seconds_time >= 1:
         uptime += str(math.floor(seconds_time)) + "s "
     if uptime == "":
-        uptime = "Unknown"
+        uptime = functions.get_text(interaction.author.id, "unknown_upper")
     else:
         uptime = uptime.split(" ")
         uptime = " ".join(uptime[:3])
@@ -859,7 +859,7 @@ async def version_command(interaction):
             file_size += len(file.read()); file.close()
         except:
             pass
-    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"), description=f"Version: **{variables.version_number}**\nBuild: **{variables.build_number}**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**\nSize: **{round(file_size / 1000)} KB**", color=variables.embed_color())
+    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"), description=f"{functions.get_text(interaction.author.id, 'version_upper')}: **{variables.version_number}**\n{functions.get_text(interaction.author.id, 'build_upper')}: **{variables.build_number}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**", color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 
@@ -964,37 +964,47 @@ async def suggest_command(
     class SuggestionView(disnake.ui.View):
         def __init__(self):
             super().__init__()
-            self.timeout = None
+            self.timeout = 3600
 
-        @disnake.ui.button(label="Accept", style=disnake.ButtonStyle.green)
+        async def on_timeout(self):
+            for button in self.children:
+                button.disabled = True
+            await interaction.edit_original_message(view=self)
+            return await super().on_timeout()
+
+        @disnake.ui.button(emoji="✅", style=disnake.ButtonStyle.green)
         async def accept_button(self, _, button_interaction):
             try:
-                await interaction.author.send(f"The suggestion you sent ({functions.shrink(suggestion, 20)}) has been **accepted** by **{button_interaction.author}**")
+                await interaction.author.send(
+                    functions.get_text(interaction.author.id, "suggestion_accepted").format(functions.shrink(suggestion, 20), button_interaction.author),
+                )
             except:
-                await button_interaction.response.send_message("Unable to accept")
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "unable_to_accept"))
                 return
-            await button_interaction.response.send_message("Accepted successfully")
+            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "accepted_successfully"))
             for button in self.children:
                 button.disabled = True
             for original_message in original_messages:
                 await original_message.edit(view=self)
             self.stop()
 
-        @disnake.ui.button(label="Reject", style=disnake.ButtonStyle.red)
+        @disnake.ui.button(emoji="❌", style=disnake.ButtonStyle.red)
         async def reject_button(self, _, button_interaction):
             try:
-                await interaction.author.send(f"The suggestion you sent ({functions.shrink(suggestion, 20)}) has been **rejected** by **{button_interaction.author}**")
+                await interaction.author.send(
+                    functions.get_text(interaction.author.id, "suggestion_rejected").format(functions.shrink(suggestion, 20), button_interaction.author),
+                )
             except:
-                await button_interaction.response.send_message("Unable to reject")
+                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "unable_to_reject"))
                 return
-            await button_interaction.response.send_message("Rejected successfully")
+            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "rejected_successfully"))
             for button in self.children:
                 button.disabled = True
             for original_message in original_messages:
                 await original_message.edit(view=self)
             self.stop()
 
-        @disnake.ui.button(label="Ignore", style=disnake.ButtonStyle.gray)
+        @disnake.ui.button(emoji="🤷", style=disnake.ButtonStyle.gray)
         async def ignore_button(self, _, button_interaction):
             await button_interaction.response.send_message("Ignored successfully")
             for button in self.children:
@@ -1029,7 +1039,7 @@ async def disable_autorole_command(interaction):
         return
 
     del database[f"autorole.{interaction.guild.id}"]
-    await interaction.response.send_message("Autorole has been **disabled** for this server")
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "autorole_disabled"))
 
 @autorole_command.sub_command(name="list", description="List all the automatically assigned roles")
 async def list_autorole_command(interaction):
@@ -1042,9 +1052,9 @@ async def list_autorole_command(interaction):
         role_string = ""
         for role in role_list:
             role_string += "<@&" + role + "> "
-        await interaction.response.send_message(embed=disnake.Embed(title="Autorole", description=f"This server's autorole is {role_string}", color=variables.embed_color()))
+        await interaction.response.send_message(embed=disnake.Embed(title=functions.get_text(interaction.author.id, "autorole_upper"), description=functions.get_text(interaction.author.id, "autorole_description").format(role_string), color=variables.embed_color()))
     except:
-        await interaction.response.send_message(f"This server does not have autorole configured")
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_autorole"))
 
 @autorole_command.sub_command(name="set", description="Change the automatically assigned roles")
 async def set_autorole_command(
@@ -1076,8 +1086,8 @@ async def set_autorole_command(
         role_string += f"<@&{role}> "
     await interaction.response.send_message(
         embed=disnake.Embed(
-            title="Autorole",
-            description=f"This server's autorole has been set to {role_string}",
+            title=functions.get_text(interaction.author.id, "autorole_upper"),
+            description=functions.get_text(interaction.author.id, "autorole_set").format(role_string),
             color=variables.embed_color(),
         ),
     )
@@ -1093,7 +1103,7 @@ async def lookup_application_command(
     ):
     response = requests.get(f"https://discord.com/api/v9/applications/{application_id}/rpc").json()
     if "code" in response.keys():
-        await interaction.response.send_message("The application you specified wasn't found!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "application_not_found"), ephemeral=True)
         return
     embed = disnake.Embed(description=response["description"], color=variables.embed_color())
     embed.set_thumbnail(url=f"https://cdn.discordapp.com/app-icons/{response['id']}/{response['icon']}.webp")
