@@ -153,7 +153,7 @@ def get_text(user_id, key):
     settings = None
     if user_id in variables.settings_cache:
         data = variables.settings_cache[user_id]
-        if time.time() - data[0] < 10:
+        if time.time() - data[0] < 20:
             settings = data[1]
         else:
             settings = get_settings(user_id)
