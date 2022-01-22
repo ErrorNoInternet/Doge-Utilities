@@ -1022,7 +1022,7 @@ async def suggest_command(
                     if member.id == user_id:
                         sent = True
                         try:
-                            user_string = f'**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`)'
+                            user_string = f'{interaction.author.name}#{interaction.author.discriminator} (`{interaction.author.id}`)'
                             original_messages.append(await member.send(f"**{functions.get_text(member.id, 'has_sent_suggestion').format(user_string)}**\n{suggestion}", view=SuggestionView()))
                         except:
                             pass

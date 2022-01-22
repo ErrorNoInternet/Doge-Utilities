@@ -593,7 +593,7 @@ data = {
         "translators": "Übersetzer",
         "big_thanks_to": "Großes Danke an {}, und noch viel mehr großartige Personen!",
         "currency_conversion": "Währungsunwandlung",
-        "source_code_here": "Du kannst meinen Programmcode [here]({}) finden",
+        "source_code_here": "Du kannst meinen Programmcode [hier]({}) finden",
         "banned_word": "Bitte nutze nicht das Wort **\"{}\"** auf diesem Server!",
         "active_issues": "Aktuelle Probleme",
         "forks": "Kopie",
@@ -614,6 +614,8 @@ data = {
         "unable_to_reject": "Ich konnte diesen Vorschlag nicht ablehnen",
         "accepted_successfully": "Dieser Vorschlag wurde erfolgreich akzeptiert",
         "rejected_successfully": "Dieser Vorschlag wurde erfolgreich abgelehnt",
+        "ignored_successfully": "Dieser Vorschlag wurde ignoriert",
+        "has_sent_suggestion": "{} hat etwas vorgeschlagen",
     },
     "ru": {
         "no_permission": "У вас нет разрешений на использование этой команды!",
