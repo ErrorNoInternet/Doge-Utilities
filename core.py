@@ -2230,7 +2230,7 @@ async def pypi_command(
     embed.add_field(name="Yanked", value=response["info"]["yanked"])
     embed.add_field(name="Size", value=f"{round(size, 2)} {size_unit}")
     embed.add_field(name="Updated", value=f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>")
-    embed.add_field(name="Summary", value=response["info"]["summary"])
+    embed.add_field(name="Summary", value=response["info"]["summary"] if response["info"]["summary"] != "" else "None")
     embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 5)
