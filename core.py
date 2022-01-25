@@ -1110,7 +1110,7 @@ async def lookup_application_command(
     embed.set_thumbnail(url=f"https://cdn.discordapp.com/app-icons/{response['id']}/{response['icon']}.webp")
     embed.add_field(name="Application Name", value=response["name"])
     embed.add_field(name="Application ID", value="`" + response["id"] + "`")
-    embed.add_field(name="Public Bot", value="`" + str(response["bot_public"]) + "`")
+    embed.add_field(name="Public Bot", value="`" + f"{str(response['bot_public']) if str(response['bot_public']) != None else 'No Bot'}" + "`")
     embed.add_field(name="Public Flags", value="`" + str(response["flags"]) + "`")
     embed.add_field(name="Terms of Service", value="None" if "terms_of_service_url" not in response.keys() else f"[Link]({response['terms_of_service_url']})")
     embed.add_field(name="Privacy Policy", value="None" if "privacy_policy_url" not in response.keys() else f"[Link]({response['privacy_policy_url']})")
