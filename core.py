@@ -167,7 +167,7 @@ help_paginator = disnake_paginator.ButtonPaginator(
     title="Getting Started",
     color=variables.embed_color(),
     timeout=600,
-    segments=[variables.help_text[i: i + 1200] for i in range(0, len(variables.help_text), 1200)],
+    segments=[variables.help_text[i: i + 1000] for i in range(0, len(variables.help_text), 1000)],
     invalid_user_function=functions.invalid_user_function,
 )
 
