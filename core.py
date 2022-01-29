@@ -1554,12 +1554,13 @@ async def color_command(
         interaction,
         color_code: str = Param(name="color", description="The color code you want to visualize"),
     ):
-    colors = generate_color(color_code)
+    colors = generate_color(color_code.lower())
     if colors == 1:
-        await interaction.response.send_message(f"`{color_code}` is not a valid color code!")
+        await interaction.response.send_message(f"`{color_code.lower()}` is not a valid color code!")
         return
     else:
-        hex_color = colors[0]; rgb_color = colors[1]
+        hex_color = colors[0]
+        rgb_color = colors[1]
         embed = disnake.Embed(color=int("0x" + hex_color[1:], 16))
         embed.set_image(url="attachment://color.png")
         embed.add_field(name="Hex", value=hex_color)
