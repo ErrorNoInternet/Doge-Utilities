@@ -1409,6 +1409,18 @@ async def clear_command(
 async def text_command(_):
     pass
 
+@text_command.sub_command(name="sort", description="Sort all the letters")
+async def text_sort_command(
+        interaction,
+        text: str = Param(description="The text you want to manipulate"),
+    ):
+    letters = []
+    for letter in text:
+        letters.append(letter)
+    letters.sort()
+    await interaction.response.send_message(functions.remove_mentions("".join(letters)))
+    add_cooldown(interaction.author.id, "text", 3)
+
 @text_command.sub_command(name="italic", description="Make text look italic")
 async def italic_command(
         interaction,
