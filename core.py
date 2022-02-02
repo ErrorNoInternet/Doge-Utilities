@@ -2496,6 +2496,7 @@ async def mute_command(
         interaction,
         member: disnake.Member = Param(description="The member you want to mute"),
         duration: str = Param(description="The target duration"),
+        reason: str = Param(None, description="The reason you are muting the member for"),
     ):
     if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         pass
@@ -2520,7 +2521,7 @@ async def mute_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "no_negative_numbers"), ephemeral=True)
         return
     try:
-        await member.timeout(duration=duration)
+        await member.timeout(duration=duration, reason=reason)
         await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted").format(member, functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
     except:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
