@@ -1414,11 +1414,7 @@ async def text_sort_command(
         interaction,
         text: str = Param(description="The text you want to manipulate"),
     ):
-    letters = []
-    for letter in text:
-        letters.append(letter)
-    letters.sort()
-    await interaction.response.send_message(functions.remove_mentions("".join(letters)))
+    await interaction.response.send_message(functions.remove_mentions("".join(sorted(text))))
     add_cooldown(interaction.author.id, "text", 3)
 
 @text_command.sub_command(name="italic", description="Make text look italic")
