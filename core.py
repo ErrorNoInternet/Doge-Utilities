@@ -3730,6 +3730,29 @@ async def todo_list_command(interaction):
     embed = disnake.Embed(title=functions.get_text(interaction.author.id, "todo_list"), description=text, color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
 
+@todo_command.sub_command(name="edit", description="Modify an item in your to-do list")
+async def todo_edit_command(
+        interaction,
+        item: str = Param(description="The item you want to modify", autocomplete=todo_list_autocomplete),
+        new_name: str = Param(name="new-name", description="The new name of the item"),
+    ):
+    item = item.strip()
+    new_name = new_name.strip()
+    if len(new_name) > 50:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
+        return
+    try:
+        todo_list = json.loads(database[f"todo.{interaction.author.id}"])
+    except:
+        todo_list = []
+    try:
+        index = todo_list.index(item)
+        todo_list[index] = new_name
+        database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
+        await interaction.response.send_message("That item has been successfully updated!")
+    except:
+        await interaction.response.send_message("That item is not in your to-do list!", ephemeral=True)
+
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
 async def todo_add_command(
         interaction,
@@ -3754,7 +3777,7 @@ async def todo_add_command(
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_added").format(item))
 
-async def todo_remove_autocomplete(interaction, string):
+async def todo_list_autocomplete(interaction, string):
     try:
         items = json.loads(database[f"todo.{interaction.author.id}"])
     except:
@@ -3764,7 +3787,7 @@ async def todo_remove_autocomplete(interaction, string):
 @todo_command.sub_command(name="remove", description="Remove an item from your to-do list")
 async def todo_remove_command(
         interaction,
-        item: str = Param(description="The item you want to add to your to-do list", autocomplete=todo_remove_autocomplete),
+        item: str = Param(description="The item you want to add to your to-do list", autocomplete=todo_list_autocomplete),
     ):
     item = item.strip()
     try:
