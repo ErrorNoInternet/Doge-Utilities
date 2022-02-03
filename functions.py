@@ -7,10 +7,10 @@ import language
 import variables
 
 def parse_color(color):
-  string = str(hex(color))[2:]
-  while len(string) < 6:
-    string = "0" + string
-  return "#" + string
+    string = str(hex(color))[2:]
+    while len(string) < 6:
+        string = "0" + string
+    return "#" + string
 
 def minepinger(ip):
     port = 25565
@@ -168,6 +168,8 @@ def remove_mentions(user):
     user = user.replace("@", "")
     user = user.replace("!", "")
     user = user.replace(">", "")
+    if user.strip() == "":
+        return "(no text)"
     return user
 
 def parse_snowflake(id):
