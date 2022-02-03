@@ -3714,6 +3714,13 @@ async def definition_command(
 async def todo_command(_):
     pass
 
+async def todo_list_autocomplete(interaction, string):
+    try:
+        items = json.loads(database[f"todo.{interaction.author.id}"])
+    except:
+        items = []
+    return list(filter(lambda item: string.lower() in item.lower(), items))[:20]
+
 @todo_command.sub_command(name="list", description="Show your to-do list")
 async def todo_list_command(interaction):
     try:
@@ -3776,13 +3783,6 @@ async def todo_add_command(
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_added").format(item))
-
-async def todo_list_autocomplete(interaction, string):
-    try:
-        items = json.loads(database[f"todo.{interaction.author.id}"])
-    except:
-        items = []
-    return list(filter(lambda item: string.lower() in item.lower(), items))[:20]
 
 @todo_command.sub_command(name="remove", description="Remove an item from your to-do list")
 async def todo_remove_command(
