@@ -3752,6 +3752,9 @@ async def todo_edit_command(
         todo_list = json.loads(database[f"todo.{interaction.author.id}"])
     except:
         todo_list = []
+    if new_name in todo_list:
+        await interaction.response.send_message("That item is already in your to-do list!", ephemeral=True)
+        return
     try:
         index = todo_list.index(item)
         todo_list[index] = new_name
