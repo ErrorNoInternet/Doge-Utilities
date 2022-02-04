@@ -1673,14 +1673,15 @@ async def nickname_command(
             return
 
     try:
-        if member.id == interaction.author.id:
-            if not member.guild_permissions.change_nickname:
-                await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
-                return
-        else:
-            if member.top_role.position >= interaction.author.top_role.position:
-                await interaction.response.send_message(f"You do not have permission to edit **{member}**'s nickname!", ephemeral=True)
-                return
+        if interaction.author.id not in variables.permission_override:
+            if member.id == interaction.author.id:
+                if not member.guild_permissions.change_nickname:
+                    await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+                    return
+            else:
+                if member.top_role.position >= interaction.author.top_role.position:
+                    await interaction.response.send_message(f"You do not have permission to edit **{member}**'s nickname!", ephemeral=True)
+                    return
         variables.updated_members.append(member.id)
         await member.edit(nick=nickname)
         nicknameString = f'**"{nickname}"**'
