@@ -3753,15 +3753,15 @@ async def todo_edit_command(
     except:
         todo_list = []
     if new_name in todo_list:
-        await interaction.response.send_message("That item is already in your to-do list!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_already_added"), ephemeral=True)
         return
     try:
         index = todo_list.index(item)
         todo_list[index] = new_name
         database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
-        await interaction.response.send_message("That item has been successfully updated!")
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_updated"))
     except:
-        await interaction.response.send_message("That item is not in your to-do list!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_not_added"), ephemeral=True)
 
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
 async def todo_add_command(
@@ -3782,7 +3782,7 @@ async def todo_add_command(
     if item not in todo_list: 
         todo_list.append(item)
     else:
-        await interaction.response.send_message("That item is already in your to-do list!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_already_added"), ephemeral=True)
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_added").format(item))
@@ -3800,7 +3800,7 @@ async def todo_remove_command(
     if item in todo_list:
         todo_list.remove(item)
     else:
-        await interaction.response.send_message("That item is not in your to-do list!", ephemeral=True)
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_not_added"), ephemeral=True)
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_removed").format(item))

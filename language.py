@@ -204,6 +204,9 @@ data = {
         "rejected_successfully": "That suggestion has been successfully rejected",
         "ignored_successfully": "That suggestion has been successfully ignored",
         "has_sent_suggestion": "{} has sent a suggestion",
+        "todo_already_added": "That item is already in your to-do list!",
+        "todo_not_added": "That item is not in your to-do list!",
+        "item_updated": "That item has been successfully updated!",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -410,6 +413,9 @@ data = {
         "rejected_successfully": "建议已被成功拒绝",
         "ignored_successfully": "建议已被成功忽略",
         "has_sent_suggestion": "{} 发送了一个建议",
+        "todo_already_added": "那个物品已经在您的待办事列表里了!",
+        "todo_not_added": "那个物品不在您的待办事列表里!",
+        "item_updated": "那个物品已被成功更新!",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
