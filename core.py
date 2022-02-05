@@ -3783,14 +3783,14 @@ async def todo_clear_command(interaction):
             await button_interaction.response.send_message("Your to-do list has been successfully cleared!", ephemeral=True)
             for button in self.children:
                 button.disabled = True
-            await button_interaction.message.edit(view=self)
+            await interaction.edit_original_message(view=self)
 
         @disnake.ui.button(label="No", style=disnake.ButtonStyle.red)
         async def cancel(self, button, button_interaction):
             await button_interaction.response.send_message("Operation cancelled!", ephemeral=True)
             for button in self.children:
                 button.disabled = True
-            await button_interaction.message.edit(view=self)
+            await interaction.edit_original_message(view=self)
     await interaction.response.send_message("Are you sure you want to clear your to-do list?", view=ConfirmationView(), ephemeral=True)
 
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
