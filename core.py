@@ -4301,8 +4301,19 @@ async def on_reaction_remove(payload):
                     return
 
 async def on_message(message):
-    if message.author.bot or not message.guild:
+    if message.author.bot:
         return
+
+    if not message.guild:
+        if "discord.com/invite/" in message.content or "discord.gg/" in message.content:
+            segments = message.content.split("/")
+            if len(segments) < 5:
+                for segment in segments:
+                    response = requests.get(f"https://discord.com/api/invites/{segment}").json()
+                    if response["code"] == 10006:
+                        continue
+                    await message.reply(f'If you want me to be in your server **"{response["guild"]["name"]}"**, please invite me with the following link:\n{variables.bot_invite_link + "&guild_id=" + response["guild"]["id"]}', mention_author=False)
+                    return
 
     prefix = variables.prefix
     if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
