@@ -4308,15 +4308,28 @@ async def on_message(message):
         if "discord.com/invite/" in message.content or "discord.gg/" in message.content:
             segments = message.content.split("/")
             if len(segments) < 5:
-                for segment in segments:
+                for segment in list(reversed(segments)):
                     if segment.strip() != "":
                         response = requests.get(f"https://discord.com/api/invites/{segment}").json()
                         if response["code"] != 10006:
                             guild_name = response["guild"]["name"]
                             guild_id = response["guild"]["id"]
-                            embed = disnake.Embed(title="Server Invite", description=f'If you want me to join your server **"{guild_name}"**, please invite me with [this link]({variables.bot_invite_link + "&guild_id=" + guild_id})', color=variables.embed_color())
+                            for guild in client.guilds:
+                                if str(guild.id) == guild_id:
+                                    embed = disnake.Embed(
+                                        title="Server Invite",
+                                        description="I am already in that Discord server!",
+                                        color=variables.embed_color(),
+                                    )
+                                    await message.reply(embed=embed, mention_author=False)
+                                    return
+                            embed = disnake.Embed(
+                                title="Server Invite",
+                                description=f'If you want me to join your server **"{guild_name}"**, please invite me with [this link]({variables.bot_invite_link + "&guild_id=" + guild_id})',
+                                color=variables.embed_color(),
+                            )
                             await message.reply(embed=embed, mention_author=False)
-                            break
+                            return
         return
 
     prefix = variables.prefix
