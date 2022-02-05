@@ -4309,15 +4309,14 @@ async def on_message(message):
             segments = message.content.split("/")
             if len(segments) < 5:
                 for segment in segments:
-                    response = requests.get(f"https://discord.com/api/invites/{segment}").json()
-                    print(response)
-                    print(segment)
-                    print(segments)
-                    if response["code"] != 10006:
-                        guild_name = response["guild"]["name"]
-                        guild_id = response["guild"]["id"]
-                        await message.reply(f'If you want me to be in your server **"{guild_name}"**, please invite me with the following link:\n{variables.bot_invite_link + "&guild_id=" + guild_id}', mention_author=False)
-                        break
+                    if segment.strip() != "":
+                        response = requests.get(f"https://discord.com/api/invites/{segment}").json()
+                        if response["code"] != 10006:
+                            guild_name = response["guild"]["name"]
+                            guild_id = response["guild"]["id"]
+                            embed = disnake.Embed(title="Server Invite", description=f'If you want me to join your server **"{guild_name}"**, please invite me with [this link]({variables.bot_invite_link + "&guild_id=" + guild_id})', color=variables.embed_color())
+                            await message.reply(embed=embed, mention_author=False)
+                            break
         return
 
     prefix = variables.prefix
