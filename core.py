@@ -3791,7 +3791,7 @@ async def todo_clear_command(interaction):
             for button in self.children:
                 button.disabled = True
             await button_interaction.message.edit(view=self)
-    await interaction.response.send_message(view=ConfirmationView(), ephemeral=True)
+    await interaction.response.send_message("Are you sure you want to clear your to-do list?", view=ConfirmationView(), ephemeral=True)
 
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
 async def todo_add_command(
