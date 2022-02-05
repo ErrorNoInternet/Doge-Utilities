@@ -8,6 +8,7 @@ import disnake
 import asyncio
 import variables
 import threading
+import traceback
 
 initialize_time = time.time()
 first_run = False
@@ -256,7 +257,8 @@ async def on_message(message):
     try:
         await core.on_message(message)
     except Exception as error:
-        print("Uncaught exception: " + str(error))
+        formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
+        print(formatted_error)
 
 @core.client.event
 async def on_guild_join(guild):
