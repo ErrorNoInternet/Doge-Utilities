@@ -3764,6 +3764,35 @@ async def todo_edit_command(
     except:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_not_added"), ephemeral=True)
 
+@todo_command.sub_command(name="clear", description="Clear your to-do list")
+async def todo_clear_command(interaction):
+    class ConfirmationView(disnake.ui.View):
+        def __init__(self):
+            super().__init__()
+            self.timeout = 120
+
+        async def on_timeout(self):
+            for button in self.children:
+                button.disabled = True
+            await interaction.edit_original_message(view=self)
+            return await super().on_timeout()
+
+        @disnake.ui.button(label="Yes", style=disnake.ButtonStyle.green)
+        async def clear_todo(self, button, button_interaction):
+            database[f"todo.{interaction.author.id}"] = json.dumps([])
+            await button_interaction.response.send_message("Your to-do list has been successfully cleared!", ephemeral=True)
+            for button in self.children:
+                button.disabled = True
+            await button_interaction.message.edit(view=self)
+
+        @disnake.ui.button(label="No", style=disnake.ButtonStyle.red)
+        async def cancel(self, button, button_interaction):
+            await button_interaction.response.send_message("Operation cancelled!", ephemeral=True)
+            for button in self.children:
+                button.disabled = True
+            await button_interaction.message.edit(view=self)
+    await interaction.response.send_message(view=ConfirmationView(), ephemeral=True)
+
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
 async def todo_add_command(
         interaction,
