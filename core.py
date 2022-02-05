@@ -4310,6 +4310,9 @@ async def on_message(message):
             if len(segments) < 5:
                 for segment in segments:
                     response = requests.get(f"https://discord.com/api/invites/{segment}").json()
+                    print(response)
+                    print(segment)
+                    print(segments)
                     if response["code"] != 10006:
                         guild_name = response["guild"]["name"]
                         guild_id = response["guild"]["id"]
