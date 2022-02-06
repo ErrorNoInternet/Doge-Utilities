@@ -3777,21 +3777,21 @@ async def todo_clear_command(interaction):
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
-        @disnake.ui.button(label="Yes", style=disnake.ButtonStyle.green)
+        @disnake.ui.button(label=functions.get_text(interaction.author.id, "yes_upper"), style=disnake.ButtonStyle.green)
         async def clear_todo(self, button, button_interaction):
             database[f"todo.{interaction.author.id}"] = json.dumps([])
-            await button_interaction.response.send_message("Your to-do list has been successfully cleared!", ephemeral=True)
+            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "todo_cleared"), ephemeral=True)
             for button in self.children:
                 button.disabled = True
             await interaction.edit_original_message(view=self)
 
-        @disnake.ui.button(label="No", style=disnake.ButtonStyle.red)
+        @disnake.ui.button(label=functions.get_text(interaction.author.id, "no_upper"), style=disnake.ButtonStyle.red)
         async def cancel(self, button, button_interaction):
-            await button_interaction.response.send_message("Operation cancelled!", ephemeral=True)
+            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "operation_cancelled"), ephemeral=True)
             for button in self.children:
                 button.disabled = True
             await interaction.edit_original_message(view=self)
-    await interaction.response.send_message("Are you sure you want to clear your to-do list?", view=ConfirmationView(), ephemeral=True)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_clear_confirm"), view=ConfirmationView(), ephemeral=True)
 
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
 async def todo_add_command(

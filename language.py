@@ -207,6 +207,11 @@ data = {
         "todo_already_added": "That item is already in your to-do list!",
         "todo_not_added": "That item is not in your to-do list!",
         "item_updated": "That item has been successfully updated!",
+        "todo_cleared": "Your to-do list has been successfully cleared!",
+        "operation_cancelled": "Operation cancelled!",
+        "todo_clear_confirm": "Are you sure you want to clear your to-do list?",
+        "yes_upper": "Yes",
+        "no_upper": "No",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -416,6 +421,11 @@ data = {
         "todo_already_added": "那个物品已经在您的待办事列表里了!",
         "todo_not_added": "那个物品不在您的待办事列表里!",
         "item_updated": "那个物品已被成功更新!",
+        "todo_cleared": "您的待办事列表已被成功清除!",
+        "operation_cancelled": "已取消!",
+        "todo_clear_confirm": "您确定您要清除你的待办事列表吗?",
+        "yes_upper": "是",
+        "no_upper": "否",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
