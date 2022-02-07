@@ -3922,6 +3922,7 @@ async def remind_add_command(
     if type == "Repeated":
         if duration < 60:
             await interaction.response.send_message(functions.get_text(interaction.author.id, "repeated_reminders_small"), ephemeral=True)
+            return
     if duration > 10080:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
         return
