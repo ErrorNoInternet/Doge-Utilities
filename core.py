@@ -90,6 +90,10 @@ async def manage_reminders():
                             start_time = value[0]
                             duration = value[1]
                             text = value[2]
+                            try:
+                                type = value[3]
+                            except:
+                                type = "Normal"
                         except:
                             reminder_data = json.loads(database[key])
                             reminder_data.remove(value)
@@ -104,9 +108,17 @@ async def manage_reminders():
                                             if not sent:
                                                 sent = True
                                                 await member.send(f"**{functions.get_text(member.id, 'reminder')}:** {text}")
-                                reminder_data = json.loads(database[key])
-                                reminder_data.remove(value)
-                                database[key] = json.dumps(reminder_data)
+                                if type == "Normal":
+                                    reminder_data = json.loads(database[key])
+                                    reminder_data.remove(value)
+                                    database[key] = json.dumps(reminder_data)
+                                else:
+                                    reminder_data = json.loads(database[key])
+                                    reminder_data.remove(value)
+                                    new_value = value
+                                    new_value[0] = int(time.time())
+                                    reminder_data.append(new_value)
+                                    database[key] = json.dumps(reminder_data)
                             except:
                                 reminder_data = json.loads(database[key])
                                 reminder_data.remove(value)
@@ -139,6 +151,7 @@ message_strikes = {}
 last_messages = {}
 used_commands = []
 ToggleOption = commands.option_enum(["enable", "disable"])
+ReminderOption = commands.option_enum(["Normal", "Repeated"])
 FilterOption = commands.option_enum(list(variables.filters.keys()))
 required_intents = disnake.Intents.default()
 required_intents.members = True
@@ -336,12 +349,12 @@ async def settings_language_set_command(
     settings = functions.get_settings(interaction.author.id)
     settings["language"] = language_code
     functions.set_settings(settings, interaction.author.id)
-    default_text = functions.get_text(interaction.author.id, "language_update").format(language_name.title())
-    language_text = default_text
     try:
         del variables.settings_cache[str(interaction.author.id)]
     except:
         pass
+    default_text = functions.get_text(interaction.author.id, "language_update").format(language_name.title())
+    language_text = default_text
     language_name = functions.get_text(interaction.author.id, "language_name")
     if language_name != "English":
         language_text = functions.get_text(interaction.author.id, "language_update").format(language_name)
@@ -3848,7 +3861,7 @@ async def remind_list_command(interaction):
     text = ""
     for reminder in current_reminders:
         end_time = reminder[0] + reminder[1]
-        text += f"**{functions.get_text(interaction.author.id, 'time')}:** <t:{round(end_time)}:R>\n**{functions.get_text(interaction.author.id, 'text')}:** {reminder[2]}\n\n"
+        text += f"**{functions.get_text(interaction.author.id, 'time')}:** <t:{round(end_time)}:R>\n**{functions.get_text(interaction.author.id, 'text')}:** {reminder[2]}\n**{functions.get_text(interaction.author.id, 'type')}:** {functions.get_text(interaction.author.id, 'normal_upper') if reminder[3] == 'Normal' else functions.get_text(interaction.author.id, 'repeated_upper')}\n\n"
     if text == "":
         text = functions.get_text(interaction.author.id, "no_reminders")
     embed = disnake.Embed(
@@ -3894,6 +3907,7 @@ async def remind_add_command(
         interaction,
         duration: str = Param(description="The duration of the reminder"),
         text: str = Param(description="The name of the reminder"),
+        type: ReminderOption = Param("Normal", description="The type of the reminder"),
     ):
     original_duration = duration
     try:
@@ -3905,6 +3919,9 @@ async def remind_add_command(
     if len(text) > 100:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
         return
+    if type == "Repeated":
+        if duration < 60:
+            await interaction.response.send_message(functions.get_text(interaction.author.id, "repeated_reminders_small"), ephemeral=True)
     if duration > 10080:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
         return
@@ -3918,7 +3935,7 @@ async def remind_add_command(
     if len(current_reminders) >= 5:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("5"), ephemeral=True)
         return
-    current_reminders.append([round(time.time()), duration*60, text])
+    current_reminders.append([round(time.time()), duration*60, text, type])
     database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
     await interaction.response.send_message(functions.get_text(interaction.author.id, 'reminder_added').format(functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
 

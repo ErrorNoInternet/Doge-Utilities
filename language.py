@@ -212,6 +212,10 @@ data = {
         "todo_clear_confirm": "Are you sure you want to clear your to-do list?",
         "yes_upper": "Yes",
         "no_upper": "No",
+        "repeated_reminders_small": "The minimum duration for repeated reminders is **1 hour**",
+        "type": "Type",
+        "normal_upper": "Normal",
+        "repeated_upper": "Repeated",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -426,6 +430,10 @@ data = {
         "todo_clear_confirm": "您确定您要清除你的待办事列表吗?",
         "yes_upper": "是",
         "no_upper": "否",
+        "repeated_reminders_small": "重复提醒的最小时间段是**1小时**",
+        "type": "类型",
+        "normal_upper": "正常",
+        "repeated_upper": "重复",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",
