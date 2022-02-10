@@ -190,7 +190,8 @@ def parse_status_variables(text):
     return text
 
 async def select_status():
-    client_status = disnake.Status.online; status_type = random.choice(variables.status_types)
+    client_status = disnake.Status.online
+    status_type = random.choice(variables.status_types)
     if status_type == "Playing":
         status_text = parse_status_variables(random.choice(variables.status1))
         await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.playing, name=status_text))
@@ -555,7 +556,8 @@ async def currency_convert_command(
         input_currency = input_currency.lower().strip()
         output_currency = output_currency.lower().strip()
         url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{input_currency}/{output_currency}.json"
-        response = requests.get(url).json(); value = response[output_currency] * amount
+        response = requests.get(url).json()
+        value = response[output_currency] * amount
         embed = disnake.Embed(title=functions.get_text(interaction.author.id, "currency_conversion"), description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color())
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "currency", 5)
@@ -749,7 +751,11 @@ async def supporters_command(interaction):
 
 @get_command.sub_command(name="shards", description="Get information about Doge Utilities' shards")
 async def shards_command(interaction):
-    pages = {}; current_page = 1; page_limit = 20; current_item = 0; index = 1
+    pages = {}
+    current_page = 1
+    page_limit = 20
+    current_item = 0
+    index = 1
     for shard in client.shards:
         current_server = ""
         shard_guilds = 0
@@ -757,7 +763,7 @@ async def shards_command(interaction):
         for guild in client.guilds:
             if guild.shard_id == shard:
                 shard_guilds += 1
-                shard_members += len(guild.members)
+                shard_members += guild.member_count
                 if guild.id == interaction.guild.id:
                     current_server = "**"
         temporary_text = f"{current_server}{functions.get_text(interaction.author.id, 'shard')} `{client.shards[shard].id}` - `{round(client.shards[shard].latency * 1000, 2)} ms` (`{shard_guilds}` {functions.get_text(interaction.author.id, 'guilds_lower')}, `{shard_members}` {functions.get_text(interaction.author.id, 'members_lower')}){current_server}\n"
@@ -869,7 +875,8 @@ async def version_command(interaction):
     for object in os.listdir():
         try:
             file = open(object, "rb")
-            file_size += len(file.read()); file.close()
+            file_size += len(file.read())
+            file.close()
         except:
             pass
     embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"), description=f"{functions.get_text(interaction.author.id, 'version_upper')}: **{variables.version_number}**\n{functions.get_text(interaction.author.id, 'build_upper')}: **{variables.build_number}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**", color=variables.embed_color())
@@ -952,7 +959,8 @@ async def random_command(
 async def disconnect_members_command(interaction):
     if interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
         await interaction.response.send_message("Disconnecting all members from voice channels...")
-        members = 0; failed = 0
+        members = 0
+        failed = 0
 
         for channel in interaction.guild.channels:
             if type(channel) == disnake.channel.VoiceChannel:
@@ -1286,7 +1294,8 @@ async def base64_encode_command(
     try:
         output_code = base64.b64encode(text.encode("utf-8")).decode("utf-8")
         embed = disnake.Embed(color=variables.embed_color())
-        embed.add_field(name="Text", value=text); embed.add_field(name="Base64", value="`" + output_code + "`", inline=False)
+        embed.add_field(name="Text", value=text)
+        embed.add_field(name="Base64", value="`" + output_code + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Unable to encode the specified text")
@@ -1300,7 +1309,8 @@ async def base64_decode_command(
     try:
         output_text = base64.b64decode(text.encode("utf-8")).decode("utf-8")
         embed = disnake.Embed(color=variables.embed_color())
-        embed.add_field(name="Base64", value="`" + text + "`"); embed.add_field(name="Text", value=output_text, inline=False)
+        embed.add_field(name="Base64", value="`" + text + "`")
+        embed.add_field(name="Text", value=output_text, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Unable to decode the specified text")
@@ -1606,8 +1616,10 @@ async def epoch_date_command(
         text: str = Param(name="timestamp", description="The unix timestamp"),
     ):
     try:
-        date = epoch_to_date(int(text)); embed = disnake.Embed(color=variables.embed_color())
-        embed.add_field(name="Epoch", value="`" + text + "`"); embed.add_field(name="Date", value=date, inline=False)
+        date = epoch_to_date(int(text))
+        embed = disnake.Embed(color=variables.embed_color())
+        embed.add_field(name="Epoch", value="`" + text + "`")
+        embed.add_field(name="Date", value=date, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Invalid unix timestamp")
@@ -1619,8 +1631,10 @@ async def date_epoch_command(
         text: str = Param(name="date", description="The date"),
     ):
     try:
-        epoch = date_to_epoch(text); embed = disnake.Embed(color=variables.embed_color())
-        embed.add_field(name="Date", value=text); embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
+        epoch = date_to_epoch(text)
+        embed = disnake.Embed(color=variables.embed_color())
+        embed.add_field(name="Date", value=text)
+        embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Invalid date")
@@ -2162,7 +2176,8 @@ async def trivia_command(interaction):
             await interaction.edit_original_message(view=new_view)
             self.stop()
         
-        answer = random.choice(answers); answers.remove(answer)
+        answer = random.choice(answers)
+        answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_1(self, button, button_interaction):
             if interaction.author != button_interaction.author:
@@ -2175,7 +2190,8 @@ async def trivia_command(interaction):
                 await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
             await self.close(button.label)
 
-        answer = random.choice(answers); answers.remove(answer)
+        answer = random.choice(answers)
+        answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_2(self, button, button_interaction):
             if interaction.author != button_interaction.author:
@@ -2188,7 +2204,8 @@ async def trivia_command(interaction):
                 await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
             await self.close(button.label)
 
-        answer = random.choice(answers); answers.remove(answer)
+        answer = random.choice(answers)
+        answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_3(self, button, button_interaction):
             if interaction.author != button_interaction.author:
@@ -2201,7 +2218,8 @@ async def trivia_command(interaction):
                 await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
             await self.close(button.label)
 
-        answer = random.choice(answers); answers.remove(answer)
+        answer = random.choice(answers)
+        answers.remove(answer)
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_4(self, button, button_interaction):
             if interaction.author != button_interaction.author:
@@ -2236,7 +2254,8 @@ async def pypi_command(
         await interaction.edit_original_message(content="That PyPi package was not found")
         return
     response = response.json()
-    size_unit = "bytes"; size = response["urls"][len(response["urls"])-1]["size"]
+    size_unit = "bytes"
+    size = response["urls"][len(response["urls"])-1]["size"]
     if size > 1000:
         size_unit = "KB"
         size = size / 1000
@@ -3949,14 +3968,20 @@ def date_to_epoch(timestamp):
     if timestamp.count(" ") == 0:
         if timestamp.count("-") == 2:
             timestamp += " 00:00:00"
-    date = timestamp.split(" ")[0]; time = timestamp.split(" ")[1]
-    date_parts = date.split("-"); time_parts = time.split(":")
+    date = timestamp.split(" ")[0]
+    time = timestamp.split(" ")[1]
+    date_parts = date.split("-")
+    time_parts = time.split(":")
     for i in range(len(date_parts)):
         date_parts[i] = int(date_parts[i])
     for i in range(len(time_parts)):
         time_parts[i] = int(time_parts[i])
-    year = date_parts[0]; month = date_parts[1]; day = date_parts[2]
-    hour = time_parts[0]; minute = time_parts[1]; second = time_parts[2]
+    year = date_parts[0]
+    month = date_parts[1]
+    day = date_parts[2]
+    hour = time_parts[0]
+    minute = time_parts[1]
+    second = time_parts[2]
     epoch = datetime.datetime(year, month, day, hour, minute, second).timestamp()
     return int(epoch)
 
@@ -4094,7 +4119,8 @@ def rgb_to_hex(rgb_color):
     return '#%02x%02x%02x' % rgb_color
 
 def generate_color(color_code, generate_image=True):
-    image_width = 180; image_height = 80
+    image_width = 180
+    image_height = 80
     if color_code.lower().startswith("rgb"):
         color_code = color_code[3:]
     if len(color_code) == 8 and color_code.startswith("0x"):
@@ -4121,15 +4147,18 @@ def generate_color(color_code, generate_image=True):
                 image = Image.new("RGB", (image_width, image_height), color_code)
                 image.save("images/color.png")
 
-            value = color_code.lstrip('#'); length = len(value)
+            value = color_code.lstrip('#')
+            length = len(value)
             rgb_color = tuple(int(value[i:i+length//3], 16) for i in range(0, length, length//3))
             return (color_code, rgb_color)
         except:
             return 1
     elif color_code.count(",") == 2 and "(" in color_code and ")" in color_code:
         try:
-            color_code = color_code.replace("(", ""); color_code = color_code.replace(")", "")
-            color_code = color_code.replace(", ", ","); rgb_color = tuple(map(int, color_code.split(',')))
+            color_code = color_code.replace("(", "")
+            color_code = color_code.replace(")", "")
+            color_code = color_code.replace(", ", ",")
+            rgb_color = tuple(map(int, color_code.split(',')))
             color_code = rgb_to_hex(rgb_color)
             if generate_image:
                 image = Image.new("RGB", (image_width, image_height), color_code)
