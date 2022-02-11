@@ -279,10 +279,11 @@ async def slash_command_handler(interaction):
         afk_key = f"afk.{interaction.author.id}".encode("utf-8")
         if afk_key in database.keys():
             del database[afk_key]
-            try:
-                await interaction.author.send(functions.get_text(interaction.author.id, "afk_removed"))
-            except:
-                pass
+            if functions.get_settings(interaction.author.id)["afk_messages"]:
+                try:
+                    await interaction.author.send(functions.get_text(interaction.author.id, "afk_removed"))
+                except:
+                    pass
     if interaction.data.name == "text":
         if not interaction.author.guild_permissions.administrator:
             try:
@@ -384,6 +385,30 @@ async def settings_vote_disable_command(interaction):
     settings["vote_messages"] = False
     functions.set_settings(settings, interaction.author.id)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_messages_disabled"))
+f
+@settings_command.sub_command_group(name="afk-messages", description="Whether or not you want to receive AFK messages")
+async def settings_afk_command(_):
+    pass
+
+@settings_afk_command.sub_command(name="status", description="Check if AFK messages are currently enabled or not")
+async def settings_afk_status_command(interaction):
+    settings = functions.get_settings(interaction.author.id)
+    state = f"{functions.get_text(interaction.author.id, 'enabled_lower') if settings['afk_messages'] else functions.get_text(interaction.author.id, 'disabled_lower')}"
+    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'afk_messages_status').format(state)}")
+
+@settings_afk_command.sub_command(name="enable", description="Enable AFK messages")
+async def settings_afk_enable_command(interaction):
+    settings = functions.get_settings(interaction.author.id)
+    settings["afk_messages"] = True
+    functions.set_settings(settings, interaction.author.id)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "afk_messages_enabled"))
+
+@settings_afk_command.sub_command(name="disable", description="Disable AFK messages")
+async def settings_afk_disable_command(interaction):
+    settings = functions.get_settings(interaction.author.id)
+    settings["afk_messages"] = False
+    functions.set_settings(settings, interaction.author.id)
+    await interaction.response.send_message(functions.get_text(interaction.author.id, "afk_messages_disabled"))
 
 @client.slash_command(name="embedify", description="Create a custom embed")
 async def embedify_command(
@@ -4528,10 +4553,11 @@ async def on_message(message):
     afk_key = f"afk.{message.author.id}".encode("utf-8")
     if afk_key in database.keys():
         del database[afk_key]
-        try:
-            await message.author.send(functions.get_text(message.author.id, "afk_removed"))
-        except:
-            pass
+        if functions.get_settings(message.author.id)["afk_messages"]:
+            try:
+                await message.author.send(functions.get_text(message.author.id, "afk_removed"))
+            except:
+                pass
     for mention in message.mentions:
         try:
             afk_status = json.loads(database[f"afk.{mention.id}"])

@@ -216,6 +216,9 @@ data = {
         "type": "Type",
         "normal_upper": "Normal",
         "repeated_upper": "Repeated",
+        "afk_messages_enabled": "AFK messages have been successfully **enabled**",
+        "afk_messages_disabled": "AFK messages have been successfully **disabled**",
+        "afk_messages_status": "AFK messages are currently **{}**",
     },
     "zh-cn": {
         "no_permission": "你没有权限使用这个指令!",
@@ -434,6 +437,9 @@ data = {
         "type": "类型",
         "normal_upper": "正常",
         "repeated_upper": "重复",
+        "afk_messages_enabled": "AFK消息已被成功**开启**",
+        "afk_messages_disabled": "AFK消息已被成功**关闭**",
+        "afk_messages_status": "AFK消息现在属于**{}**状态",
     },
     "de": {
         "no_permission": "Du hast keine Berechtigung diesen Befehl zu benutzen!",

@@ -53,6 +53,7 @@ unit_abbreviations = {
 default_settings = {
     "language": "en",
     "vote_messages": True,
+    "afk_messages": True,
 }
 supporters = {
     "translators": {
