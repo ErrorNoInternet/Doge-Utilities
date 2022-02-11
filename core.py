@@ -385,7 +385,7 @@ async def settings_vote_disable_command(interaction):
     settings["vote_messages"] = False
     functions.set_settings(settings, interaction.author.id)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_messages_disabled"))
-f
+
 @settings_command.sub_command_group(name="afk-messages", description="Whether or not you want to receive AFK messages")
 async def settings_afk_command(_):
     pass
