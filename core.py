@@ -2280,7 +2280,10 @@ async def pypi_command(
         return
     response = response.json()
     size_unit = "bytes"
-    size = response["urls"][len(response["urls"])-1]["size"]
+    if len(response["urls"]) > 0:
+        size = response["urls"][len(response["urls"])-1]["size"]
+    else:
+        size = 0
     if size > 1000:
         size_unit = "KB"
         size = size / 1000
