@@ -55,26 +55,6 @@ def update_counter(guild_id):
         variables.protected_guilds[guild_id] += 1
 
 @core.client.event
-async def on_member_update(before, after):
-    try:
-        current_setting = json.loads(core.database[f"{before.guild.id}.raid-protection"])
-        if not current_setting:
-            return
-    except:
-        return
-
-    if after.id in variables.updated_members:
-        variables.updated_members.remove(after.id)
-        return
-    variables.updated_members.append(after.id)
-    try:
-        await after.edit(nick=before.nick)
-        update_counter(after.guild.id)
-    except:
-        if after.id in variables.updated_members:
-            variables.updated_members.remove(after.id)
-
-@core.client.event
 async def on_guild_channel_create(channel):
     await asyncio.sleep(1)
     try:
