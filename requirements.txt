@@ -5,9 +5,9 @@ psutil
 qrcode
 pillow
 topggpy
-disnake
 requests
 simpleeval
+disnake==2.4.0
 python-dateutil
 disnake-paginator
 discord.py==1.7.3
