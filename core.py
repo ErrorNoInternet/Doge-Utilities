@@ -1810,32 +1810,6 @@ async def autocomplete_youtube(_, string):
         search_results.append(result)
     return search_results[:20]
 
-@search_command.sub_command(name="youtube", description="Look for a video on YouTube")
-async def youtube_command(
-        interaction,
-        query: str = Param(description="The search query", autocomplete=autocomplete_youtube),
-    ):
-    try:
-        ignored_channels = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
-        if interaction.channel.id not in ignored_channels["links"]:
-            if json.loads(database[f"links.toggle.{interaction.guild.id}"]):
-                await interaction.response.send_message("The YouTube command is disabled in this server!", ephemeral=True)
-    except:
-        pass
-
-    await interaction.response.defer()
-    response = requests.get(f"https://youtube.com/results?search_query={query}")
-    try:
-        search_results = re.findall(r'/watch\?v=(.{11})', response.text)
-    except:
-        await interaction.edit_original_message(content="I couldn't find that video on YouTube")
-        return
-    if not search_results:
-        await interaction.edit_original_message(content="I couldn't find that video on YouTube")
-        return
-    await interaction.edit_original_message(content=f"Here's the video I found: https://youtube.com/watch?v={search_results[0]}")
-    add_cooldown(interaction.author.id, "search", 10)
-
 @search_command.sub_command(name="stackoverflow", description="Look for something on StackOverflow")
 async def stackoverflow_command(
         interaction,
