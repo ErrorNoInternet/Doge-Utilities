@@ -38,3 +38,5 @@ python3 -OO main.py
 [Discord Server](https://discord.gg/3Tp7R8FUsC)\
 [Description](https://github.com/ErrorNoInternet/Doge-Utilities/blob/main/DESCRIPTION.md)\
 [Bot Creator](https://discord.com/users/531392146767347712)
+
+<sub>If you would like to modify or use this repository (including its code) in your own project, please be sure to credit!</sub>
