@@ -1866,6 +1866,10 @@ async def execute_command(
         codeblock: ToggleOption = Param("enable", description="Whether or not you want a codeblock"),
         ephemeral: ToggleOption = Param("disable", description="Whether or not you want the output to be ephemeral"),
     ):
+    if interaction.author.id not in variables.bot_owners:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+
     if code.startswith("```python"):
         code = code[9:]
     if code.startswith("```py"):
@@ -1924,6 +1928,10 @@ async def blacklist_command(_):
 
 @blacklist_command.sub_command(name="list", description="List all the blacklisted users")
 async def blacklist_list_command(interaction):
+    if interaction.author.id not in variables.bot_owners:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+
     blacklisted_users = []
     raw_array = json.loads(database["blacklist"])
     for user in raw_array:
@@ -1939,6 +1947,10 @@ async def blacklist_add_command(
         interaction,
         user: str = Param(description="The user you want to add to the blacklist"),
     ):
+    if interaction.author.id not in variables.bot_owners:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+
     try:
         user_id = int(functions.remove_mentions(user))
     except:
@@ -1957,6 +1969,10 @@ async def blacklist_remove_command(
         interaction,
         user: str = Param(description="The user you want to remove from the blacklist"),
     ):
+    if interaction.author.id not in variables.bot_owners:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        return
+
     try:
         user_id = int(functions.remove_mentions(user))
     except:
