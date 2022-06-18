@@ -155,13 +155,12 @@ ReminderOption = commands.option_enum(["Normal", "Repeated"])
 FilterOption = commands.option_enum(list(variables.filters.keys()))
 required_intents = disnake.Intents.default()
 required_intents.members = True
-required_intents.messages = True
+required_intents.message_content = True
 client = commands.AutoShardedBot(
     max_messages=2048,
     shard_count=variables.shard_count,
     intents=required_intents,
     test_guilds=variables.test_guilds,
-    sync_permissions=True,
 )
 database = redis.Redis(
     host=os.environ["REDIS_HOST"],
@@ -1859,7 +1858,7 @@ async def stackoverflow_command(
         return
     add_cooldown(interaction.author.id, "search", 10)
 
-@client.slash_command(name="execute", description="Execute code on Doge Utilities", default_permission=False)
+@client.slash_command(name="execute", description="Execute code on Doge Utilities")
 async def execute_command(
         interaction,
         code: str = Param(description="The code you want to execute"),
@@ -1922,7 +1921,7 @@ async def execute_command(
     else:
         await interaction.edit_original_message(content=output)
 
-@client.slash_command(name="blacklist", description="Manage Doge Utilities' blacklist", default_permission=False)
+@client.slash_command(name="blacklist", description="Manage Doge Utilities' blacklist")
 async def blacklist_command(_):
     pass
 
