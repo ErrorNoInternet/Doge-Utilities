@@ -11,5 +11,5 @@ simpleeval
 python-dateutil
 discord.py==1.7.3
 googletrans==4.0.0rc1
-disnake-paginator==1.0.6
+disnake-paginator==1.0.7
 requests-oauthlib==0.5.0
