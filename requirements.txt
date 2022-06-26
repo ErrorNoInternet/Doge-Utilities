@@ -9,7 +9,7 @@ topggpy
 requests
 simpleeval
 python-dateutil
-disnake-paginator
 discord.py==1.7.3
 googletrans==4.0.0rc1
+disnake-paginator=1.0.6
 requests-oauthlib==0.5.0
