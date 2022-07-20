@@ -691,7 +691,7 @@ async def vote_command(interaction):
     vote_view = disnake.ui.View()
     vote_view.add_item(disnake.ui.Button(label="top.gg", url="https://top.gg/bot/854965721805226005/vote"))
     vote_view.add_item(disnake.ui.Button(label="discordbotlist", url="https://discordbotlist.com/bots/doge-utilities/upvote"))
-    vote_view.add_item(disnake.ui.Button(label="discords", url="https://discords.com/bots/bot/854965721805226005/vote"))
+    vote_view.add_item(disnake.ui.Button(label="discords.com", url="https://discords.com/bots/bot/854965721805226005/vote"))
     await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_websites"), view=vote_view)
 
 @links_command.sub_command(name="source", description="Get the link to Doge's source code")
@@ -1072,7 +1072,7 @@ async def suggest_command(
                         except:
                             pass
     await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
-    add_cooldown(interaction.author.id, "suggest", 300)
+    add_cooldown(interaction.author.id, "suggest", 600)
 
 @client.slash_command(name="autorole", description="Manage automatically assigned roles")
 async def autorole_command(_):
@@ -1456,7 +1456,7 @@ async def clear_command(
 async def text_command(_):
     pass
 
-@text_command.sub_command(name="sort", description="Sort all the letters")
+@text_command.sub_command(name="sort", description="Sort the letters in alphabetical order")
 async def text_sort_command(
         interaction,
         text: str = Param(description="The text you want to manipulate"),
