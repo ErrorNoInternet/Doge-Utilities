@@ -906,6 +906,7 @@ data = {
 }
 data["zh-tw"] = data["zh-cn"]
 
+
 def get(language, key):
     language = language.lower()
     key = key.lower()
@@ -920,4 +921,3 @@ def get(language, key):
             return language_data[key]
     else:
         return language_data[key]
-

@@ -17,6 +17,7 @@ server_channels = {}
 if not os.path.exists("images"):
     os.mkdir("images")
 
+
 def update_objects():
     time.sleep(30)
 
@@ -27,6 +28,7 @@ def update_objects():
             server_channels[guild.id] = guild.channels
             server_roles[guild.id] = guild.roles
         time.sleep(5)
+
 
 async def random_status():
     idle = False
@@ -48,17 +50,20 @@ async def random_status():
             print("Error: " + str(error))
         await asyncio.sleep(1)
 
+
 def update_counter(guild_id):
     if guild_id not in variables.protected_guilds:
         variables.protected_guilds[guild_id] = 1
     else:
         variables.protected_guilds[guild_id] += 1
 
+
 @core.client.event
 async def on_guild_channel_create(channel):
     await asyncio.sleep(1)
     try:
-        current_setting = json.loads(core.database[f"{channel.guild.id}.raid-protection"])
+        current_setting = json.loads(
+            core.database[f"{channel.guild.id}.raid-protection"])
         if current_setting:
             if channel.id not in variables.updated_channels:
                 variables.updated_channels.append(channel.id)
@@ -69,10 +74,12 @@ async def on_guild_channel_create(channel):
     except:
         pass
 
-    mute_role = None; exists = False
+    mute_role = None
+    exists = False
     for role in channel.guild.roles:
         if "mute" in role.name.lower():
-            mute_role = role; exists = True
+            mute_role = role
+            exists = True
     if exists:
         try:
             try:
@@ -81,20 +88,24 @@ async def on_guild_channel_create(channel):
                 await channel.set_permissions(mute_role, connect=False)
         except:
             pass
-    ban_role = None; exists = False
+    ban_role = None
+    exists = False
     for role in channel.guild.roles:
         if "ban" in role.name.lower():
-            ban_role = role; exists = True
+            ban_role = role
+            exists = True
     if exists:
         try:
             await channel.set_permissions(ban_role, view_channel=False)
         except:
             pass
 
+
 @core.client.event
 async def on_guild_channel_update(before, after):
     try:
-        current_setting = json.loads(core.database[f"{before.guild.id}.raid-protection"])
+        current_setting = json.loads(
+            core.database[f"{before.guild.id}.raid-protection"])
         if not current_setting:
             return
     except:
@@ -112,10 +123,12 @@ async def on_guild_channel_update(before, after):
         await after.edit(name=before.name)
     update_counter(before.guild.id)
 
+
 @core.client.event
 async def on_guild_channel_delete(channel):
     try:
-        current_setting = json.loads(core.database[f"{channel.guild.id}.raid-protection"])
+        current_setting = json.loads(
+            core.database[f"{channel.guild.id}.raid-protection"])
         if not current_setting:
             return
     except:
@@ -142,11 +155,13 @@ async def on_guild_channel_delete(channel):
                 variables.updated_channels.append(new_channel.id)
     update_counter(channel.guild.id)
 
+
 @core.client.event
 async def on_guild_role_create(role):
     await asyncio.sleep(1)
     try:
-        current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
+        current_setting = json.loads(
+            core.database[f"{role.guild.id}.raid-protection"])
         if current_setting:
             if role.id not in variables.updated_roles:
                 variables.updated_roles.append(role.id)
@@ -157,10 +172,12 @@ async def on_guild_role_create(role):
     except:
         pass
 
+
 @core.client.event
 async def on_guild_role_update(before, after):
     try:
-        current_setting = json.loads(core.database[f"{before.guild.id}.raid-protection"])
+        current_setting = json.loads(
+            core.database[f"{before.guild.id}.raid-protection"])
         if not current_setting:
             return
     except:
@@ -176,10 +193,12 @@ async def on_guild_role_update(before, after):
     await after.edit(name=before.name, color=before.color, permissions=before.permissions)
     update_counter(before.guild.id)
 
+
 @core.client.event
 async def on_guild_role_delete(role):
     try:
-        current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
+        current_setting = json.loads(
+            core.database[f"{role.guild.id}.raid-protection"])
         if not current_setting:
             return
     except:
@@ -200,10 +219,12 @@ async def on_guild_role_delete(role):
             variables.updated_roles.append(new_role.id)
     update_counter(role.guild.id)
 
+
 @core.client.event
 async def on_ready():
-    print(f"Successfully logged in as {core.client.user} in {round(time.time() - initialize_time, 1)} seconds")
-    
+    print(
+        f"Successfully logged in as {core.client.user} in {round(time.time() - initialize_time, 1)} seconds")
+
     global first_run
     if not first_run:
         first_run = True
@@ -214,39 +235,48 @@ async def on_ready():
         ).start()
         core.client.add_view(core.get_vote_view())
 
+
 @core.client.event
 async def on_raw_reaction_add(payload):
     await core.on_reaction_add(payload)
     await core.cleanup_reactions(payload)
+
 
 @core.client.event
 async def on_raw_reaction_remove(payload):
     await core.on_reaction_remove(payload)
     await core.cleanup_reactions(payload)
 
+
 @core.client.event
 async def on_member_join(member):
     await core.on_member_join(member)
 
+
 @core.client.event
 async def on_member_remove(member):
     await core.on_member_remove(member)
+
 
 @core.client.event
 async def on_message(message):
     try:
         await core.on_message(message)
     except Exception as error:
-        formatted_error = str(''.join(traceback.format_exception(error, error, error.__traceback__)))
+        formatted_error = str(
+            ''.join(traceback.format_exception(error, error, error.__traceback__)))
         print(formatted_error)
+
 
 @core.client.event
 async def on_guild_join(guild):
     await core.on_guild_join(guild)
 
+
 @core.client.event
 async def on_guild_remove(guild):
     await core.on_guild_remove(guild)
+
 
 @core.client.event
 async def on_error(event, *_):
@@ -254,6 +284,7 @@ async def on_error(event, *_):
         return
     else:
         print(f"Uncaught exception in {event}: {sys.exc_info()[1]}")
+
 
 @core.client.event
 async def on_slash_command_error(interaction, error):

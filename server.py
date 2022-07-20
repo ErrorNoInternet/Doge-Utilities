@@ -51,17 +51,20 @@ ratelimits = {}
 website_views = 0
 vote_counter = 0
 
+
 def manage_cache():
     global user_cache
     while True:
         time.sleep(1800)
         user_cache = {}
 
+
 def manage_ratelimits():
     global ratelimits
     while True:
         time.sleep(60)
         ratelimits = {}
+
 
 def load_file(file_name, mimetype="text/html", binary=False, replace={}):
     html = "<p>Unable to load HTML</p>"
@@ -85,6 +88,7 @@ def load_file(file_name, mimetype="text/html", binary=False, replace={}):
     response.mimetype = mimetype
     return response
 
+
 def get_ip(request):
     try:
         ip = request.headers['X-Forwarded-For']
@@ -92,8 +96,10 @@ def get_ip(request):
         ip = request.remote_addr
     return ip
 
+
 def token_updater(token):
     flask.session['oauth2_token'] = token
+
 
 def make_session(token=None, state=None, scope=None):
     return OAuth2Session(
@@ -110,6 +116,7 @@ def make_session(token=None, state=None, scope=None):
         token_updater=token_updater,
     )
 
+
 @app.before_request
 def request_handler():
     ip_address = get_ip(flask.request)
@@ -124,7 +131,9 @@ def request_handler():
     website_views += 1
     if flask.request.endpoint not in allowed_endpoints:
         if not core.client.is_ready():
-            flask.abort(503, "Doge Utilities is getting ready. Please try again later.")
+            flask.abort(
+                503, "Doge Utilities is getting ready. Please try again later.")
+
 
 @app.route("/backend/execute", endpoint="execute-endpoint")
 def execute_code():
@@ -141,11 +150,13 @@ def execute_code():
             try:
                 with core.contextlib.redirect_stdout(stdout):
                     if "#globals" in code:
-                        exec(f"def run_code():\n{core.textwrap.indent(code, '   ')}", globals())
+                        exec(
+                            f"def run_code():\n{core.textwrap.indent(code, '   ')}", globals())
                         globals()["run_code"]()
                     else:
                         dictionary = dict(locals(), **globals())
-                        exec(f"def run_code():\n{core.textwrap.indent(code, '   ')}", dictionary, dictionary)
+                        exec(
+                            f"def run_code():\n{core.textwrap.indent(code, '   ')}", dictionary, dictionary)
                         dictionary["run_code"]()
                     output = stdout.getvalue()
             except Exception as error:
@@ -164,6 +175,7 @@ def execute_code():
         response.mimetype = "text/plain"
         return response
 
+
 @app.route("/web/authenticate")
 def web_authenticate():
     ip_address = get_ip(flask.request)
@@ -172,9 +184,11 @@ def web_authenticate():
 
     scope = flask.request.args.get('scope', "identify guilds")
     discord = make_session(scope=scope.split(' '))
-    authorization_url, state = discord.authorization_url(AUTHORIZATION_BASE_URL)
+    authorization_url, state = discord.authorization_url(
+        AUTHORIZATION_BASE_URL)
     flask.session['oauth2_state'] = state
     return flask.redirect(authorization_url)
+
 
 @app.route("/web/callback")
 def web_callback():
@@ -188,6 +202,7 @@ def web_callback():
     )
     flask.session['oauth2_token'] = token
     return flask.redirect(flask.url_for("web_dashboard", _scheme=URL_SCHEME, _external=True))
+
 
 @app.route('/web')
 def web_dashboard():
@@ -278,32 +293,38 @@ def web_dashboard():
                 users += 1
         raid_protection = 0
         try:
-            raid_protection = json.loads(core.database[f"{guild.id}.raid-protection"])
+            raid_protection = json.loads(
+                core.database[f"{guild.id}.raid-protection"])
         except:
             pass
         insults_filter = 0
         try:
-            insults_filter = json.loads(core.database[f"insults.toggle.{guild.id}"])
+            insults_filter = json.loads(
+                core.database[f"insults.toggle.{guild.id}"])
         except:
             pass
         spam_filter = 0
         try:
-            spam_filter = json.loads(core.database[f"spamming.toggle.{guild.id}"])
+            spam_filter = json.loads(
+                core.database[f"spamming.toggle.{guild.id}"])
         except:
             pass
         links_filter = 0
         try:
-            links_filter = json.loads(core.database[f"links.toggle.{guild.id}"])
+            links_filter = json.loads(
+                core.database[f"links.toggle.{guild.id}"])
         except:
             pass
         mention_filter = 0
         try:
-            mention_filter = json.loads(core.database[f"mention.toggle.{guild.id}"])
+            mention_filter = json.loads(
+                core.database[f"mention.toggle.{guild.id}"])
         except:
             pass
         newline_filter = 0
         try:
-            newline_filter = json.loads(core.database[f"newline.toggle.{guild.id}"])
+            newline_filter = json.loads(
+                core.database[f"newline.toggle.{guild.id}"])
         except:
             pass
         server_dashboard += f"<h2 class='sectionTitle' id='{guild.id}'>{guild.name}</h2>"
@@ -348,21 +369,26 @@ def web_dashboard():
         },
     )
 
+
 @app.route("/css", endpoint="css-page")
 def fetch_css():
     return load_file("index.css", mimetype="text/css")
+
 
 @app.route("/web/javascript")
 def fetch_javascript():
     return load_file("dashboard.js", mimetype="text/javascript", replace={"(website)": WEBSITE_URL})
 
+
 @app.route("/favicon.ico", endpoint="icon-endpoint")
 def fetch_favicon():
     return load_file("favicon.ico", mimetype="image/vnd.microsoft.icon", binary=True)
 
+
 @app.route("/doge", endpoint="doge-image-endpoint")
 def fetch_doge_image():
     return load_file("doge.png", mimetype="image/png", binary=True)
+
 
 @app.route("/vote", methods=["POST"])
 def handle_vote():
@@ -387,6 +413,7 @@ def handle_vote():
         response.mimetype = "text/plain"
         return response
 
+
 @app.route("/", endpoint="index-page")
 def index():
     if not core.client.is_ready():
@@ -397,25 +424,31 @@ def index():
         banner_margin = ""
     return load_file("index.html", replace={"(warning_message)": warning_message, "(banner_margin)": banner_margin})
 
+
 @app.route("/invite", endpoint="invite-page")
 def fetch_invite():
     return "<meta http-equiv=\"refresh\" content=\"0; url=" + variables.bot_invite_link + "\">"
+
 
 @app.route("/support", endpoint="support-page")
 def fetch_server_invite():
     return "<meta http-equiv=\"refresh\" content=\"0; url=" + variables.support_server_invite + "\">"
 
+
 @app.route("/donate", endpoint="donate-page")
 def fetch_donations():
     return load_file("donate.html")
+
 
 @app.route("/privacy", endpoint="privacy-page")
 def fetch_privacy_page():
     return load_file("privacy.html")
 
+
 @app.route("/terms", endpoint="terms-page")
 def fetch_terms_page():
     return load_file("terms.html")
+
 
 @app.route("/status", endpoint="status-page")
 def fetch_status():
@@ -468,6 +501,7 @@ def fetch_status():
     text += "</div>"
     return load_file("status.html", replace={"(text)": text, "(bot_status)": bot_status_text})
 
+
 @app.route("/commands", endpoint="commands-page")
 def fetch_commands():
     text = "<div class='commandsWrapper'>"
@@ -501,6 +535,7 @@ def fetch_commands():
     text += "</div>"
     return load_file("commands.html", replace={"(text)": text, "(count)": str(len(core.client.slash_commands))})
 
+
 @app.route("/api/version", endpoint="version-endpoint")
 def fetch_version():
     response = flask.make_response(
@@ -509,6 +544,7 @@ def fetch_version():
     )
     response.mimetype = "text/plain"
     return response
+
 
 @app.route("/web/api/save-language/<token>/<user>/<language>")
 def save_language(token, user, language):
@@ -525,6 +561,7 @@ def save_language(token, user, language):
     settings["language"] = language
     functions.set_settings(settings, user)
     return "OK"
+
 
 @app.route("/web/api/vote-messages/<token>/<user>")
 def toggle_vote_messages(token, user):
@@ -547,6 +584,7 @@ def toggle_vote_messages(token, user):
     settings["vote_messages"] = new_value
     functions.set_settings(settings, user)
     return str(int(new_value))
+
 
 @app.route("/web/api/raid-protection/<token>/<server>")
 def toggle_raid_protection(token, server):
@@ -576,6 +614,7 @@ def toggle_raid_protection(token, server):
         new_value = 1
     core.database[f"{server}.raid-protection"] = new_value
     return str(new_value)
+
 
 @app.route("/web/api/filter/<token>/<name>/<server>")
 def toggle_filter_settings(token, name, server):
@@ -610,8 +649,9 @@ def toggle_filter_settings(token, name, server):
     core.database[f"{filter_name}.toggle.{server}"] = new_value
     return str(new_value)
 
+
 def run():
     threading.Thread(target=manage_cache).start()
     threading.Thread(target=manage_ratelimits).start()
-    app.run("0.0.0.0", port=8080 if not os.getenv("PORT") else os.getenv("PORT"))
-
+    app.run("0.0.0.0", port=8080 if not os.getenv(
+        "PORT") else os.getenv("PORT"))

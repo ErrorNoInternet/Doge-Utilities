@@ -9,6 +9,7 @@ class Conversion:
     def __repr__(self):
         return f"<Conversion input={self.input} output={self.output} action={self.action} amount={self.amount}>"
 
+
 abbreviations = {
     "mm": "millimeter",
     "cm": "centimeter",
@@ -104,7 +105,8 @@ conversions = [
     Conversion("week", "year", "divide", 52.177457),
     Conversion("month", "year", "divide", 12),
 
-    Conversion("fahrenheit", "celcius", "custom:(x-32)*0.5556", shortened=False),
+    Conversion("fahrenheit", "celcius",
+               "custom:(x-32)*0.5556", shortened=False),
     Conversion("celcius", "fahrenheit", "custom:(x*1.8)+32", shortened=False),
 ]
 
@@ -115,8 +117,10 @@ for conversion in conversions:
     new_action = "divide"
     if conversion.action == "divide":
         new_action = "multiply"
-    reversed_conversions.append(Conversion(conversion.output, conversion.input, new_action, conversion.amount))
+    reversed_conversions.append(Conversion(
+        conversion.output, conversion.input, new_action, conversion.amount))
 [conversions.append(conversion) for conversion in reversed_conversions]
+
 
 def convert(amount, input, output):
     if input.lower() == output.lower():
@@ -183,4 +187,3 @@ def convert(amount, input, output):
                 "error": None,
             }
     return {"error": 404}
-

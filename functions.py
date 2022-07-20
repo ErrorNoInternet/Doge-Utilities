@@ -6,11 +6,13 @@ import socket
 import language
 import variables
 
+
 def parse_color(color):
     string = str(hex(color))[2:]
     while len(string) < 6:
         string = "0" + string
     return "#" + string
+
 
 def minepinger(ip):
     port = 25565
@@ -65,8 +67,10 @@ def minepinger(ip):
     finally:
         sock.close()
 
+
 async def invalid_user_function(interaction):
     await interaction.response.send_message(get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+
 
 def display_time(user_id, duration):
     unit = "seconds"
@@ -96,6 +100,7 @@ def display_time(user_id, duration):
         duration = get_text(user_id, "infinity")
     return f"{duration} {unit}"
 
+
 def shrink(text, length):
     original_length = len(text)
     text = text[:length]
@@ -103,6 +108,7 @@ def shrink(text, length):
         return text.strip()
     else:
         return text[:-3].strip() + "..."
+
 
 def parse_time(timestamp):
     timestamp = timestamp.replace(" ", "").lower()
@@ -127,6 +133,7 @@ def parse_time(timestamp):
         unit = "m"
     return float(numbers) * variables.units[unit.lower()]
 
+
 def get_filter_name(name):
     if name in variables.filters.keys():
         return variables.filters[name]
@@ -134,6 +141,7 @@ def get_filter_name(name):
         return {value: key for key, value in variables.filters.items()}[name]
     else:
         return ""
+
 
 def get_settings(user_id):
     try:
@@ -145,8 +153,10 @@ def get_settings(user_id):
             settings[key] = variables.default_settings[key]
     return settings
 
+
 def set_settings(settings, user_id):
     core.database[f"settings.{user_id}"] = json.dumps(settings)
+
 
 def get_text(user_id, key):
     user_id = str(user_id)
@@ -163,6 +173,7 @@ def get_text(user_id, key):
         variables.settings_cache[user_id] = [time.time(), settings]
     return language.get(settings['language'], key)
 
+
 def remove_mentions(user):
     user = user.replace("<", "")
     user = user.replace("@", "")
@@ -172,6 +183,6 @@ def remove_mentions(user):
         return "(no text)"
     return user
 
+
 def parse_snowflake(id):
     return round(((id >> 22) + 1420070400000) / 1000)
-
