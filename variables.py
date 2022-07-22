@@ -116,6 +116,7 @@ public_flags = {
     "65536": "Verified Bot",
     "131072": "Verified Bot Developer",
     "262144": "Discord Certified Moderator",
+    "8388608": "Supports Application Commands",
 }
 application_flags = {
     1 << 12: "Presence Intent",
@@ -139,4 +140,5 @@ badge_list = {
     "Discord Certified Moderator": "<:DiscordModerator:879666882976837654>",
     "Verified Bot": "<:VerifiedBot:879670687554498591>",
     "Team User": "<:TeamUser:890866907996127305>",
+    "Supports Application Commands": "<:SupportsApplicationCommands:999921577208594462>",
 }
