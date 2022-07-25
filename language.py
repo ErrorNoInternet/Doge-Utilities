@@ -666,7 +666,7 @@ data = {
         "number_prompt": "Ваше случайное число",
         "cpu_usage": "Использование CPU",
         "ram_usage": "Использование RAM",
-        "thread_count": "Количество треадов",
+        "thread_count": "Количество потоков",
         "active_shards": "Активные шарды",
         "member_count": "Количество участников",
         "channel_count": "Количество каналов",
