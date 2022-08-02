@@ -1305,7 +1305,7 @@ async def lookup_application_command(
             intent_name = variables.application_flags[application_flag]
             if intent_name.replace(" (unverified)", "") not in bot_intents:
                 bot_intents += f"{intent_name}, "
-    embed.add_field(name="Intents", value="None" if bot_intents ==
+    embed.add_field(name="Application Flags", value="None" if bot_intents ==
                     "" else bot_intents[:-2])
 
     bot_tags = ""
