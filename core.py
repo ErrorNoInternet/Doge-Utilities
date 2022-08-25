@@ -3061,7 +3061,7 @@ async def insults_add_command(
         await interaction.response.send_message("The specified word is too long!", ephemeral=True)
         return
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
-    await interaction.response.send_message(f'Successfully added **"{word}"** to your insults list')
+    await interaction.response.send_message(f'Successfully added **"{word}"** to the insults list')
 
 
 async def insults_remove_autocomplete(interaction, string):
