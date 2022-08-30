@@ -4308,8 +4308,8 @@ async def todo_add_command(
         todo_list = json.loads(database[f"todo.{interaction.author.id}"])
     except:
         todo_list = []
-    if len(todo_list) >= 20:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("20"), ephemeral=True)
+    if len(todo_list) >= 25:
+        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("25"), ephemeral=True)
         return
     if len(item) > 50:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
