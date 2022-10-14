@@ -8,7 +8,7 @@ Feel free to donate some Dogecoin at `DEerNph3oTdXDC8AjVzQSaWiLPAxenQW7t`!
 
 ## Installation
 - Requirements:
-  - Python 3.8+
+  - Python 3.10+ recommended
   - a Discord developer application
   - a top.gg bot token
   - a Redis database server
