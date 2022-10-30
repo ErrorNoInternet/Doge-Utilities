@@ -2801,7 +2801,7 @@ async def meme_command(interaction):
 async def joke_command(interaction):
     await interaction.response.defer()
     response = requests.get(
-        "http://yet-another-api.herokuapp.com/api/jokes/random").json()[0]
+        "https://yet-another-api.errornointernet.repl.co/api/jokes/random").json()[0]
     embed = disnake.Embed(
         description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color())
     await interaction.edit_original_message(embed=embed)
