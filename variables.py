@@ -7,7 +7,7 @@ permission_override = bot_owners
 message_managers = bot_owners
 
 
-def embed_color(): return random.choice([0xC30F16, 0x0FC362])
+def embed_color(): return 0x20c2f6
 
 
 prefix = "="
