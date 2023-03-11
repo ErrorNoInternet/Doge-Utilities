@@ -2092,74 +2092,6 @@ async def stackoverflow_command(
     add_cooldown(interaction.author.id, "search", 10)
 
 
-@client.slash_command(name="execute", description="Execute code on Doge Utilities")
-async def execute_command(
-    interaction,
-    code: str = Param(description="The code you want to execute"),
-    codeblock: ToggleOption = Param(
-        "enable", description="Whether or not you want a codeblock"),
-    ephemeral: ToggleOption = Param(
-        "disable", description="Whether or not you want the output to be ephemeral"),
-):
-    if interaction.author.id not in variables.bot_owners:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
-        return
-
-    if code.startswith("```python"):
-        code = code[9:]
-    if code.startswith("```py"):
-        code = code[5:]
-    if code.startswith("```"):
-        code = code[3:]
-    if code.endswith("```"):
-        code = code[:-3]
-    if code.startswith("`") and code.endswith("`"):
-        code = code[1:-1]
-    if codeblock == "enable":
-        codeblock = "```"
-    else:
-        codeblock = ""
-    if ephemeral == "enable":
-        ephemeral = True
-    else:
-        ephemeral = False
-    await interaction.response.defer(ephemeral=ephemeral)
-
-    stdout = io.StringIO()
-    try:
-        with contextlib.redirect_stdout(stdout):
-            if "#globals" in code:
-                exec(
-                    f"async def run_code():\n{textwrap.indent(code, '   ')}", globals())
-                await globals()["run_code"]()
-            else:
-                dictionary = dict(locals(), **globals())
-                exec(
-                    f"async def run_code():\n{textwrap.indent(code, '   ')}", dictionary, dictionary)
-                await dictionary["run_code"]()
-            output = stdout.getvalue()
-    except Exception as error:
-        output = "`" + str(error) + "`"
-    output = output.replace(os.getenv("TOKEN"), "<TOKEN>")
-
-    if len(output) > 2000:
-        output = output.replace("`", "\`")
-        segments = disnake_paginator.split(output)
-        pager = disnake_paginator.ButtonPaginator(
-            prefix=f"{codeblock}\n",
-            suffix=codeblock,
-            color=variables.embed_color(),
-            title=f"Code Output",
-            segments=segments,
-            invalid_user_function=functions.invalid_user_function,
-        )
-        await interaction.edit_original_message(view=pager.view(interaction), embed=pager.embeds[0])
-    elif len(output.strip()) == 0:
-        await interaction.edit_original_message(content=":white_check_mark:")
-    else:
-        await interaction.edit_original_message(content=output)
-
-
 @client.slash_command(name="blacklist", description="Manage Doge Utilities' blacklist")
 async def blacklist_command(_):
     pass
@@ -5128,9 +5060,11 @@ async def on_message(message):
             code = code[:-3]
         if "#python" in code:
             output_language = "py"
+        if "#rust" in code:
+            output_language = "rust"
         if "#golang" in code:
             output_language = "go"
-        if "#clang" in code:
+        if "#c-lang" in code:
             output_language = "c"
         if "#cs" in code:
             output_language = "cs"
@@ -5160,7 +5094,12 @@ async def on_message(message):
         except Exception as error:
             output = "`" + str(error) + "`"
 
-        output = output.replace(os.getenv("TOKEN"), "<TOKEN>")
+        for secret in variables.secrets:
+            value = os.getenv(secret)
+            if not value:
+                continue
+            output = output.replace(value, f"<{secret}>")
+
         segments = disnake_paginator.split(output)
         if len(output) > 2000:
             output = output.replace("`", "\`")

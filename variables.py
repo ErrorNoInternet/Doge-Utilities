@@ -10,6 +10,18 @@ message_managers = bot_owners
 def embed_color(): return 0x20c2f6
 
 
+secrets = [
+    "OAUTH_ID",
+    "OAUTH_SECRET",
+    "REDIS_HOST",
+    "REDIS_PASSWORD",
+    "REDIS_PORT",
+    "TOKEN",
+    "TOPGG_TOKEN",
+    "WEATHER_KEY",
+    "WEB_SECRET",
+    "WEBSITE_URL",
+]
 prefix = "="
 shard_count = 2
 last_command = 0
