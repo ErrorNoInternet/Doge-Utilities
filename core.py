@@ -1510,7 +1510,7 @@ async def base64_decode_command(
         embed.add_field(name="Text", value=output_text, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
-        await interaction.response.send_message("Unable to decode the specified text")
+        await interaction.response.send_message("Unable to decode the specified Base64")
     add_cooldown(interaction.author.id, "base64", 3)
 
 
@@ -1552,7 +1552,7 @@ async def binary_decode_command(
         embed.add_field(name="Text", value=output_text, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
-        await interaction.response.send_message("Unable to decode the specified text")
+        await interaction.response.send_message("Unable to decode the specified binary data")
         return
     add_cooldown(interaction.author.id, "binary", 3)
 
@@ -4905,14 +4905,14 @@ async def on_message(message):
                                 if str(guild.id) == guild_id:
                                     embed = disnake.Embed(
                                         title="Server Invite",
-                                        description="I am already in that Discord server!",
+                                        description="I have already joined that Discord server!",
                                         color=variables.embed_color(),
                                     )
                                     await message.reply(embed=embed, mention_author=False)
                                     return
                             embed = disnake.Embed(
                                 title="Server Invite",
-                                description=f'If you want me to join your server **"{guild_name}"**, please invite me with [this link]({variables.bot_invite_link + "&guild_id=" + guild_id})',
+                                description=f'You can invite me to **"{guild_name}"** using [this link]({variables.bot_invite_link + "&guild_id=" + guild_id})',
                                 color=variables.embed_color(),
                             )
                             await message.reply(embed=embed, mention_author=False)
