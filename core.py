@@ -1005,7 +1005,7 @@ async def version_command(interaction):
         except:
             pass
     embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"),
-                          description=f"{functions.get_text(interaction.author.id, 'version_upper')}: **{variables.bot_version}**\n{functions.get_text(interaction.author.id, 'last_updated_upper')}: **{variables.bot_last_updated}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**", color=variables.embed_color())
+                          description=f"{functions.get_text(interaction.author.id, 'git_commit_hash_upper')}: **{variables.bot_version}**\n{functions.get_text(interaction.author.id, 'last_updated_upper')}: **{variables.bot_last_updated}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**", color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 
