@@ -97,7 +97,7 @@ except:
     print("[WARNING] Unable to get Git commit hash")
 bot_last_updated = "unknown"
 try:
-    bot_last_updated = subprocess.check_output(["git", "log", "-1", "--format=%cs"]).decode("ascii").strip()
+    bot_last_updated = subprocess.check_output(["git", "log", "-1", "--date=short", "--format=%cd"]).decode("ascii").strip()
 except:
     print("[WARNING] Unable to get Git commit date")
 
