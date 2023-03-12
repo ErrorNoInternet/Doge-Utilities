@@ -5179,5 +5179,5 @@ async def on_slash_command_error(interaction, error):
             except:
                 await interaction.channel.send(embed=embed)
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(3)
         os.remove(f"error-{error_id}.txt")
