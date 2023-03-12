@@ -984,7 +984,7 @@ async def status_command(interaction):
     )
     embed.add_field(
         name=functions.get_text(interaction.author.id, "bot_version"),
-        value=f"```{variables.version_number}.{variables.build_number}```",
+        value=f"```{variables.bot_version}```",
     )
     embed.add_field(
         name=functions.get_text(interaction.author.id, "bot_uptime"),
@@ -1005,7 +1005,7 @@ async def version_command(interaction):
         except:
             pass
     embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"),
-                          description=f"{functions.get_text(interaction.author.id, 'version_upper')}: **{variables.version_number}**\n{functions.get_text(interaction.author.id, 'build_upper')}: **{variables.build_number}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**", color=variables.embed_color())
+                          description=f"{functions.get_text(interaction.author.id, 'version_upper')}: **{variables.bot_version}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**", color=variables.embed_color())
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 

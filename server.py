@@ -496,7 +496,7 @@ def fetch_status():
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'channel_count')}</b><br><code>{channel_count}</code></p>"
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'command_count')}</b><br><code>{len(core.client.slash_commands)}</code></p>"
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'disnake_version')}</b><br><code>{core.disnake.__version__}</code></p>"
-    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'bot_version')}</b><br><code>{variables.version_number}.{variables.build_number}</code></p>"
+    text += f"<p class='statusText'><b>{functions.get_text(user_id, 'bot_version')}</b><br><code>{variables.bot_version}</code></p>"
     text += f"<p class='statusText'><b>{functions.get_text(user_id, 'bot_uptime')}</b><br><code>{uptime.strip()}</code></p>"
     text += "</div>"
     return load_file("status.html", replace={"(text)": text, "(bot_status)": bot_status_text})
@@ -539,7 +539,7 @@ def fetch_commands():
 @app.route("/api/version", endpoint="version-endpoint")
 def fetch_version():
     response = flask.make_response(
-        f"{variables.version_number}.{variables.build_number}",
+        f"{variables.bot_version}",
         200,
     )
     response.mimetype = "text/plain"
