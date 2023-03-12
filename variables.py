@@ -1,6 +1,7 @@
 import os
 import string
 import random
+import subprocess
 
 bot_owners = [531392146767347712, 469870741165441034]
 permission_override = bot_owners
@@ -89,18 +90,11 @@ supporters = {
         507511172061200395,
     ],
 }
-version_number = 0
-build_number = 0
-for file in os.listdir():
-    try:
-        code_file = open(file, "r")
-        code = code_file.read()
-        code_file.close()
-        version_number += int(str(len(code) / 1000).split(".")[0])
-        build_number += int(str(len(code) / 1000).split(".")[1])
-    except:
-        pass
-version_number = round((version_number / 10) / 14, 2)
+bot_version = "unknown"
+try:
+    bot_version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+except:
+    print("[WARNING] Unable to get Git commit hash")
 
 bot_invite_link = "https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"
 support_server_invite = "https://discord.gg/3Tp7R8FUsC"
