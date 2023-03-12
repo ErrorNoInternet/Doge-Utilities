@@ -47,7 +47,7 @@ async def random_status():
                     cycles = 0
                     idle = False
         except Exception as error:
-            print("Error: " + str(error))
+            print("[ERROR] " + str(error))
         await asyncio.sleep(1)
 
 
