@@ -95,6 +95,11 @@ try:
     bot_version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
 except:
     print("[WARNING] Unable to get Git commit hash")
+bot_last_updated = "unknown"
+try:
+    bot_last_updated = subprocess.check_output(["git", "log", "-1", "--format=%cs"]).decode("ascii").strip()
+except:
+    print("[WARNING] Unable to get Git commit date")
 
 bot_invite_link = "https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"
 support_server_invite = "https://discord.gg/3Tp7R8FUsC"
