@@ -1,11 +1,13 @@
-import core
-import time
 import math
 import string
+import time
+
 import disnake
+import disnake_paginator
+
+import core
 import language
 import variables
-import disnake_paginator
 
 
 async def auto_count(channel_id):

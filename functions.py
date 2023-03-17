@@ -1,8 +1,9 @@
-import time
 import json
-import core
-import struct
 import socket
+import struct
+import time
+
+import core
 import language
 import variables
 

@@ -1,14 +1,16 @@
+import asyncio
+import json
 import os
 import sys
-import core
-import json
-import time
-import topgg
-import disnake
-import asyncio
-import variables
 import threading
+import time
 import traceback
+
+import disnake
+import topgg
+
+import core
+import variables
 
 initialize_time = time.time()
 first_run = False
