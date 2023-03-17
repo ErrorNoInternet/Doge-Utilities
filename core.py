@@ -4054,7 +4054,7 @@ async def message_translate_command(interaction):
         if text == "":
             if len(interaction.target.embeds) > 0:
                 text = interaction.target.embeds[0].description
-                if type(text) == disnake.embeds._EmptyEmbed:
+                if type(text) == None:
                     await interaction.edit_original_message(content="That message does not have any text!")
                     return
             else:
