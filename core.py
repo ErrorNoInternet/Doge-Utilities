@@ -1181,7 +1181,7 @@ async def suggest_command(
                     if member.id == user_id:
                         sent = True
                         try:
-                            user_string = f'{interaction.author.name}#{interaction.author.discriminator} (`{interaction.author.id}`)'
+                            user_string = f'{interaction.author.name} (`{interaction.author.id}`)'
                             original_messages.append(await member.send(f"**{functions.get_text(member.id, 'has_sent_suggestion').format(user_string)}**\n{suggestion}", view=SuggestionView()))
                         except:
                             pass
@@ -1958,10 +1958,10 @@ async def nickname_command(
                     return
         await member.edit(nick=nickname)
         nicknameString = f'**"{nickname}"**'
-        await interaction.response.send_message(f"Successfully updated **{member.name}#{member.discriminator}**'s nickname to {nicknameString}")
+        await interaction.response.send_message(f"Successfully updated **{member.name}**'s nickname to {nicknameString}")
         add_cooldown(interaction.author.id, "nickname", 3)
     except:
-        await interaction.response.send_message(f"Unable to change **{member.name}#{member.discriminator}**'s nickname", ephemeral=True)
+        await interaction.response.send_message(f"Unable to change **{member.name}**'s nickname", ephemeral=True)
         return
 
 
@@ -3636,7 +3636,7 @@ async def server_suggest_command(
     suggestion = functions.shrink(suggestion, 1500)
     await interaction.response.send_message(functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True)
     try:
-        await interaction.guild.owner.send(f"**{interaction.author.name}#{interaction.author.discriminator}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}")
+        await interaction.guild.owner.send(f"**{interaction.author.name}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}")
         await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
     except:
         await interaction.edit_original_message(content="Unable to send your suggestion")
@@ -5148,7 +5148,7 @@ async def on_slash_command_error(interaction, error):
         file = open(f"error-{error_id}.txt", "w+")
         file.write(formatted_error)
         file.close()
-        output = f"**{interaction.author.name}#{interaction.author.discriminator}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Time:**\n```\n{datetime.datetime.now()}```**Error:**\n```\n{error}```"
+        output = f"**{interaction.author.name}** (`{interaction.author.id}`) has ran into an error in **{interaction.author.guild.name}** (`{interaction.author.guild.id}`)\n\n**Command:**\n```\n{interaction_data.replace('`', escaped_character)}```**Time:**\n```\n{datetime.datetime.now()}```**Error:**\n```\n{error}```"
         report_embed = disnake.Embed(
             title="Error Report",
             description=output,
