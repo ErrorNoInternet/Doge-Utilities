@@ -965,7 +965,7 @@ data = {
         "enabled_lower": "activado",
         "disabled_lower": "desactivado",
         "vote_messages_status": "Los mensajes de votación son {} en este momento",
-        "language_update": "Tu lenguaje preferido se ha establecido a {}",
+        "language_update": "Tu lenguaje preferido se ha establecido a **{}**",
         "language_name": "Inglés",
         "website_links": "Aquí están los enlaces a mi página web",
         "website": "Página Web",
