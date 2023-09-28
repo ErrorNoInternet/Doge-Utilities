@@ -3789,10 +3789,14 @@ async def discriminator_command(
         await interaction.edit_original_message(content="That is not a valid discriminator!")
         return
 
+    count = 0
     for member in client.get_all_members():
         if member.discriminator == discriminator:
             if str(member) not in members:
+                count += 1
                 members.append(str(member))
+                if count >= 10:
+                    break
     if members == []:
         await interaction.edit_original_message(content="There are no other users with the same discriminator")
         return
