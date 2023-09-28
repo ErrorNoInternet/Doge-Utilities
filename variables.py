@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import datetime
 import subprocess
 
 bot_owners = [531392146767347712, 469870741165441034]
@@ -8,7 +9,15 @@ permission_override = bot_owners
 message_managers = bot_owners
 
 
-def embed_color(): return 0x20c2f6
+def embed_color():
+    if datetime.datetime.now().month == 6:
+        return random.choice([0xe81416, 0xffa500, 0xfaeb36, 0x79c314, 0x487de7, 0x4b369d, 0x70369d])
+    elif datetime.datetime.now().month == 10:
+        return 0xff6600
+    elif datetime.datetime.now().month == 12:
+        return random.choice([0xc30f16, 0x0fc362])
+    else:
+        return 0x20c2f6
 
 
 secrets = [
