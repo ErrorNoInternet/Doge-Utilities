@@ -25,7 +25,7 @@ async def auto_count(channel_id):
                 try:
                     number = int(number) + 1
                 except:
-                    number = 0
+                    number = "ayo where the numbers at"
                 await channel.send(number)
 
 
