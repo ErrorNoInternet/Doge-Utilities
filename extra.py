@@ -119,7 +119,7 @@ def find_user(user_id):
     print(text)
 
 
-def get_translations(languages=["en", "zh-cn", "de", "ru", "sk"]):
+def get_translations(languages=["en", "zh-cn", "de", "ru", "sk", "es"]):
     for language_name in languages:
         print(f"`{language_name}`: {len(language.data[language_name])}")
 
