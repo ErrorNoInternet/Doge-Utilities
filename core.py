@@ -4357,14 +4357,14 @@ async def remind_add_command(
         await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
         return
 
-    if len(text) > 100:
+    if len(text) > 100 and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
         return
     if type == "Repeated":
         if duration < 60:
             await interaction.response.send_message(functions.get_text(interaction.author.id, "repeated_reminders_small"), ephemeral=True)
             return
-    if duration > 10080:
+    if duration > 10080 and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
         return
     if duration < 0:
@@ -4375,7 +4375,7 @@ async def remind_add_command(
             database[f"reminders.{interaction.author.id}"])
     except:
         current_reminders = []
-    if len(current_reminders) >= 5:
+    if len(current_reminders) >= 5 and interaction.author.id not in variables.permission_override:
         await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("5"), ephemeral=True)
         return
     current_reminders.append([round(time.time()), duration*60, text, type])
