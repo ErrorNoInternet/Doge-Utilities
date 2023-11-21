@@ -4895,7 +4895,7 @@ async def on_message(message):
                         insults = json.loads(
                             database[f"insults.list.{message.guild.id}"])
                         for pattern in insults:
-                            if re.search(word, message.content, flags=re.IGNORECASE):
+                            if re.search(pattern, message.content, flags=re.IGNORECASE):
                                 try:
                                     await message.delete()
                                 except:
