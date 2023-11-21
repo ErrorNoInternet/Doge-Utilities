@@ -2335,11 +2335,19 @@ async def tictactoe_command(interaction):
     await interaction.response.send_message(functions.get_text(interaction.author.id, "join_tictactoe"), view=GameLauncher())
     add_cooldown(interaction.author.id, "game", 20)
 
+def autocomplete_trivia_categories(_, string):
+    response = list(requests.get(
+        "https://opentdb.com/api_category.php").json()["trivia_categories"])
+    return list(filter(lambda word: string.lower() in word.name.lower(), [disnake.OptionChoice(name=category['name'], value=category["id"]) for category in response]))[:20]
 
 @game_command.sub_command(name="trivia", description="Start a trivia game")
-async def trivia_command(interaction):
+async def trivia_command(
+    interaction,
+    category: int = Param(random.randint(9, 32), description="The category you want the joke to be from",
+                        autocomplete=autocomplete_trivia_categories),
+):
     await interaction.response.defer()
-    url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={random.randint(9, 32)}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
+    url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={category}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
     response = requests.get(url).json()
     description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
     answers = response['results'][0]['incorrect_answers']
