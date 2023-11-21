@@ -7,6 +7,7 @@ import subprocess
 bot_owners = [531392146767347712, 469870741165441034]
 permission_override = bot_owners
 message_managers = bot_owners
+ignore_administrators = True
 
 
 def embed_color():
