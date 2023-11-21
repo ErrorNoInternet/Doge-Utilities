@@ -29,10 +29,10 @@ def minepinger(ip):
             if not k:
                 return 0
             k = k[0]
-            i |= (k & 0x7f) << (j * 7)
+            i |= (k & 0x7F) << (j * 7)
             j += 1
             if j > 5:
-                raise ValueError('var_int too big')
+                raise ValueError("var_int too big")
             if not (k & 0x80):
                 return i
 
@@ -40,29 +40,29 @@ def minepinger(ip):
     sock.settimeout(10)
     sock.connect((ip, port))
     try:
-        host = ip.encode('utf-8')
-        data = b''
-        data += b'\x00'
-        data += b'\x04'
-        data += struct.pack('>b', len(host)) + host
-        data += struct.pack('>H', port)
-        data += b'\x01'
-        data = struct.pack('>b', len(data)) + data
-        sock.sendall(data + b'\x01\x00')
+        host = ip.encode("utf-8")
+        data = b""
+        data += b"\x00"
+        data += b"\x04"
+        data += struct.pack(">b", len(host)) + host
+        data += struct.pack(">H", port)
+        data += b"\x01"
+        data = struct.pack(">b", len(data)) + data
+        sock.sendall(data + b"\x01\x00")
         length = read_var_int()
         if length < 10:
             if length < 0:
-                raise ValueError('negative length read')
+                raise ValueError("negative length read")
             else:
-                raise ValueError('invalid response %s' % sock.read(length))
+                raise ValueError("invalid response %s" % sock.read(length))
 
         sock.recv(1)
         length = read_var_int()
-        data = b''
+        data = b""
         while len(data) != length:
             chunk = sock.recv(length - len(data))
             if not chunk:
-                raise ValueError('connection abborted')
+                raise ValueError("connection abborted")
             data += chunk
         return json.loads(data)
     finally:
@@ -70,7 +70,9 @@ def minepinger(ip):
 
 
 async def invalid_user_function(interaction):
-    await interaction.response.send_message(get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+    await interaction.response.send_message(
+        get_text(interaction.author.id, "not_command_sender"), ephemeral=True
+    )
 
 
 def display_time(user_id, duration):
@@ -172,7 +174,7 @@ def get_text(user_id, key):
     else:
         settings = get_settings(user_id)
         variables.settings_cache[user_id] = [time.time(), settings]
-    return language.get(settings['language'], key)
+    return language.get(settings["language"], key)
 
 
 def remove_mentions(user):

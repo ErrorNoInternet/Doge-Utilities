@@ -38,17 +38,22 @@ async def post_update(message, items):
                     for item in items:
                         description += f"**-** {item}\n"
                     embed = disnake.Embed(
-                        description=description, color=variables.embed_color())
+                        description=description, color=variables.embed_color()
+                    )
 
                     class CommandView(disnake.ui.View):
                         def __init__(self, channel):
                             super().__init__()
                             self.channel = channel
 
-                        @disnake.ui.button(label="Post Update", style=disnake.ButtonStyle.green)
+                        @disnake.ui.button(
+                            label="Post Update", style=disnake.ButtonStyle.green
+                        )
                         async def post_update(self, _, interaction):
                             if interaction.author != message.author:
-                                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                                await interaction.response.send_message(
+                                    variables.not_command_owner_text, ephemeral=True
+                                )
                                 return
 
                             await old_message.edit(view=None)
@@ -56,16 +61,25 @@ async def post_update(message, items):
                             await announcement.publish()
                             self.stop()
 
-                        @disnake.ui.button(label="Cancel", style=disnake.ButtonStyle.red)
+                        @disnake.ui.button(
+                            label="Cancel", style=disnake.ButtonStyle.red
+                        )
                         async def cancel(self, _, interaction):
                             if interaction.author != message.author:
-                                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                                await interaction.response.send_message(
+                                    variables.not_command_owner_text, ephemeral=True
+                                )
                                 return
 
                             await old_message.edit(view=None)
-                            await interaction.response.send_message("Successfully cancelled update", ephemeral=True)
+                            await interaction.response.send_message(
+                                "Successfully cancelled update", ephemeral=True
+                            )
                             self.stop()
-                    old_message = await message.channel.send(view=CommandView(channel), embed=embed)
+
+                    old_message = await message.channel.send(
+                        view=CommandView(channel), embed=embed
+                    )
 
 
 async def post_announcement(message, title, text, mention=False):
@@ -74,34 +88,50 @@ async def post_announcement(message, title, text, mention=False):
             for channel in guild.channels:
                 if channel.id == 879665441545519134:
                     embed = disnake.Embed(
-                        title=title, description=text, color=variables.embed_color())
+                        title=title, description=text, color=variables.embed_color()
+                    )
 
                     class CommandView(disnake.ui.View):
                         def __init__(self, channel):
                             super().__init__()
                             self.channel = channel
 
-                        @disnake.ui.button(label="Post Announcement", style=disnake.ButtonStyle.green)
+                        @disnake.ui.button(
+                            label="Post Announcement", style=disnake.ButtonStyle.green
+                        )
                         async def post_announcement(self, _, interaction):
                             if interaction.author != message.author:
-                                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                                await interaction.response.send_message(
+                                    variables.not_command_owner_text, ephemeral=True
+                                )
                                 return
 
                             await old_message.edit(view=None)
-                            announcement = await self.channel.send("<@&879665075642835006>" if mention else "", embed=embed)
+                            announcement = await self.channel.send(
+                                "<@&879665075642835006>" if mention else "", embed=embed
+                            )
                             await announcement.publish()
                             self.stop()
 
-                        @disnake.ui.button(label="Cancel", style=disnake.ButtonStyle.red)
+                        @disnake.ui.button(
+                            label="Cancel", style=disnake.ButtonStyle.red
+                        )
                         async def cancel(self, _, interaction):
                             if interaction.author != message.author:
-                                await interaction.response.send_message(variables.not_command_owner_text, ephemeral=True)
+                                await interaction.response.send_message(
+                                    variables.not_command_owner_text, ephemeral=True
+                                )
                                 return
 
                             await old_message.edit(view=None)
-                            await interaction.response.send_message("Successfully cancelled announcement", ephemeral=True)
+                            await interaction.response.send_message(
+                                "Successfully cancelled announcement", ephemeral=True
+                            )
                             self.stop()
-                    old_message = await message.channel.send(view=CommandView(channel), embed=embed)
+
+                    old_message = await message.channel.send(
+                        view=CommandView(channel), embed=embed
+                    )
 
 
 def find_user(user_id):
@@ -134,7 +164,9 @@ async def ask_translations(message, user_id, target_language):
         return
 
     def check(result):
-        return result.author.id == target_user.id and str(result.channel.type) == "private"
+        return (
+            result.author.id == target_user.id and str(result.channel.type) == "private"
+        )
 
     def get_language(code):
         return core.googletrans.LANGUAGES[code]
@@ -148,14 +180,19 @@ async def ask_translations(message, user_id, target_language):
             questions.append(key)
     if len(questions) == 0:
         print(
-            f"There is nothing missing for **{get_language(target_language).title()}**")
+            f"There is nothing missing for **{get_language(target_language).title()}**"
+        )
         return
-    await target_user.send('Hello! I am here to ask you for some translations... If you want to stop, simply reply with "cancel" or "stop".')
+    await target_user.send(
+        'Hello! I am here to ask you for some translations... If you want to stop, simply reply with "cancel" or "stop".'
+    )
     counter = 0
     stopped = False
     for question in questions:
         counter += 1
-        await target_user.send(f'({counter}/{len(questions)}) What is **{get_language(target_language).title()}** for "{language.data["en"][question]}"?')
+        await target_user.send(
+            f'({counter}/{len(questions)}) What is **{get_language(target_language).title()}** for "{language.data["en"][question]}"?'
+        )
         msg = await core.client.wait_for("message", check=check)
         if msg.content.lower() == "cancel" or msg.content.lower() == "stop":
             await target_user.send("Okay! Thanks for participating!")
@@ -164,15 +201,24 @@ async def ask_translations(message, user_id, target_language):
         results.append(f'`{question}`: "{msg.content}"')
         language.data[target_language][question] = msg.content
     if not stopped:
-        await target_user.send("Looks like we are done! Thank you for all your translations!")
-        await target_user.send("Do you have anything extra to say? If you do, please send them. If you don't, please send \"no\".")
+        await target_user.send(
+            "Looks like we are done! Thank you for all your translations!"
+        )
+        await target_user.send(
+            'Do you have anything extra to say? If you do, please send them. If you don\'t, please send "no".'
+        )
         msg = await core.client.wait_for("message", check=check)
         results.append("\n**Additional text:** " + msg.content)
         await msg.reply("Got it! Thanks!", mention_author=False)
-    output = f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n" + \
-        "\n".join(results)
+    output = (
+        f"Translations for **{get_language(target_language).title()}** from **{target_user}**\n\n"
+        + "\n".join(results)
+    )
     pager = disnake_paginator.ButtonPaginator(
-        title="Translations", segments=disnake_paginator.split(output), color=variables.embed_color())
+        title="Translations",
+        segments=disnake_paginator.split(output),
+        color=variables.embed_color(),
+    )
     await pager.start(disnake_paginator.wrappers.UserInteractionWrapper(message.author))
 
 
@@ -195,7 +241,9 @@ def messages_per_second():
             counter = 0
         else:
             counter += 1
-    average = round(sum(differences)/len(differences), 2)
+    average = round(sum(differences) / len(differences), 2)
     if average == 1.0:
         average = 1
-    print(f"I am receiving **{average} {'message' if average == 1 else 'messages'}/s** from **{len(members)} {'member' if len(members) == 1 else 'members'}** across **{len(guilds)} {'guild' if len(guilds) == 1 else 'guilds'}**")
+    print(
+        f"I am receiving **{average} {'message' if average == 1 else 'messages'}/s** from **{len(members)} {'member' if len(members) == 1 else 'members'}** across **{len(guilds)} {'guild' if len(guilds) == 1 else 'guilds'}**"
+    )

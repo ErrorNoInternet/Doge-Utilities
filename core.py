@@ -46,13 +46,18 @@ def get_vote_view(text="Add a reminder"):
             super().__init__()
             self.timeout = None
 
-        @disnake.ui.button(label=text, style=disnake.ButtonStyle.green, custom_id="vote-reminder-button")
+        @disnake.ui.button(
+            label=text,
+            style=disnake.ButtonStyle.green,
+            custom_id="vote-reminder-button",
+        )
         async def add_reminder(self, button, interaction):
             duration = 43200
             text = functions.get_text(interaction.author.id, "vote_again")
             try:
                 current_reminders = json.loads(
-                    database[f"reminders.{interaction.author.id}"])
+                    database[f"reminders.{interaction.author.id}"]
+                )
             except:
                 current_reminders = []
             exists = False
@@ -60,18 +65,25 @@ def get_vote_view(text="Add a reminder"):
                 if reminder[1] == duration and reminder[2] == text:
                     exists = True
             if exists:
-                await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_reminder_exists"))
+                await interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "vote_reminder_exists")
+                )
                 return
             if len(current_reminders) >= 5:
-                await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("5"))
+                await interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "item_limit").format("5")
+                )
                 return
-            current_reminders.append(
-                [round(time.time()), duration, text, "Normal"])
+            current_reminders.append([round(time.time()), duration, text, "Normal"])
             database[f"reminders.{interaction.author.id}"] = json.dumps(
-                current_reminders)
+                current_reminders
+            )
             button.disabled = True
             await interaction.message.edit(view=self)
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_reminder_added"))
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "vote_reminder_added")
+            )
+
     return VoteView()
 
 
@@ -114,7 +126,9 @@ async def manage_reminders():
                                         if member.id == user_id:
                                             if not sent:
                                                 sent = True
-                                                await member.send(f"**{functions.get_text(member.id, 'reminder')}:** {text}")
+                                                await member.send(
+                                                    f"**{functions.get_text(member.id, 'reminder')}:** {text}"
+                                                )
                                 if type == "Normal":
                                     reminder_data = json.loads(database[key])
                                     reminder_data.remove(value)
@@ -179,7 +193,10 @@ database = redis.Redis(
 threading.Thread(
     name="manage_reminders",
     target=asyncio.run_coroutine_threadsafe,
-    args=(manage_reminders(), client.loop, ),
+    args=(
+        manage_reminders(),
+        client.loop,
+    ),
 ).start()
 threading.Thread(name="reset_strikes", target=reset_strikes).start()
 threading.Thread(name="blacklist_manager", target=manage_blacklist).start()
@@ -188,8 +205,10 @@ help_paginator = disnake_paginator.ButtonPaginator(
     title="Getting Started",
     color=variables.embed_color(),
     timeout=600,
-    segments=[variables.help_text[i: i + 1000]
-              for i in range(0, len(variables.help_text), 1000)],
+    segments=[
+        variables.help_text[i : i + 1000]
+        for i in range(0, len(variables.help_text), 1000)
+    ],
     invalid_user_function=functions.invalid_user_function,
 )
 
@@ -205,16 +224,36 @@ async def select_status():
     status_type = random.choice(variables.status_types)
     if status_type == "Playing":
         status_text = parse_status_variables(random.choice(variables.status1))
-        await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.playing, name=status_text))
+        await client.change_presence(
+            status=client_status,
+            activity=disnake.Activity(
+                type=disnake.ActivityType.playing, name=status_text
+            ),
+        )
     elif status_type == "Watching":
         status_text = parse_status_variables(random.choice(variables.status2))
-        await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.watching, name=status_text))
+        await client.change_presence(
+            status=client_status,
+            activity=disnake.Activity(
+                type=disnake.ActivityType.watching, name=status_text
+            ),
+        )
     elif status_type == "Listening":
         status_text = parse_status_variables(random.choice(variables.status3))
-        await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.listening, name=status_text))
+        await client.change_presence(
+            status=client_status,
+            activity=disnake.Activity(
+                type=disnake.ActivityType.listening, name=status_text
+            ),
+        )
     elif status_type == "Competing":
         status_text = parse_status_variables(random.choice(variables.status4))
-        await client.change_presence(status=client_status, activity=disnake.Activity(type=disnake.ActivityType.competing, name=status_text))
+        await client.change_presence(
+            status=client_status,
+            activity=disnake.Activity(
+                type=disnake.ActivityType.competing, name=status_text
+            ),
+        )
 
 
 def get_cooldown(id, command):
@@ -235,28 +274,38 @@ def add_cooldown(id, command, cooldown_time):
 
 def generate_cooldown(user_id, command, cooldown_time):
     cooldown_text = functions.display_time(user_id, cooldown_time)
-    return functions.get_text(user_id, "command_cooldown_description").format(cooldown_text, command)
+    return functions.get_text(user_id, "command_cooldown_description").format(
+        cooldown_text, command
+    )
 
 
 @client.before_message_command_invoke
 async def message_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "banned_message"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "banned_message"), ephemeral=True
+        )
         raise Exception("no permission")
 
     if not interaction.guild:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "use_in_server"))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "use_in_server")
+        )
         raise Exception("no permission")
 
 
 @client.before_user_command_invoke
 async def user_command_handler(interaction):
     if interaction.author.id in blacklisted_users:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "banned_message"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "banned_message"), ephemeral=True
+        )
         raise Exception("no permission")
 
     if not interaction.guild:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "use_in_server"))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "use_in_server")
+        )
         raise Exception("no permission")
 
 
@@ -266,19 +315,28 @@ async def slash_command_handler(interaction):
     if used_commands == []:
         used_commands.append(parse_interaction(interaction))
     else:
-        if used_commands[len(used_commands)-1] != interaction_data:
+        if used_commands[len(used_commands) - 1] != interaction_data:
             used_commands.append(parse_interaction(interaction))
 
     if interaction.author.id in blacklisted_users:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "banned_message"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "banned_message"), ephemeral=True
+        )
         raise Exception("no permission")
 
     if not interaction.guild:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "use_in_server"))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "use_in_server")
+        )
         raise Exception("no permission")
 
-    if interaction.data.name in variables.owner_commands and interaction.author.id not in variables.bot_owners:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "not_bot_owner"), ephemeral=True)
+    if (
+        interaction.data.name in variables.owner_commands
+        and interaction.author.id not in variables.bot_owners
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "not_bot_owner"), ephemeral=True
+        )
         raise Exception("no permission")
 
     if get_cooldown(interaction.author.id, interaction.data.name) > 0:
@@ -287,8 +345,11 @@ async def slash_command_handler(interaction):
             interaction.data.name,
             get_cooldown(interaction.author.id, interaction.data.name),
         )
-        embed = disnake.Embed(title=functions.get_text(
-            interaction.author.id, "command_cooldown"), description=cooldown_string, color=variables.embed_color())
+        embed = disnake.Embed(
+            title=functions.get_text(interaction.author.id, "command_cooldown"),
+            description=cooldown_string,
+            color=variables.embed_color(),
+        )
         await interaction.response.send_message(embed=embed, ephemeral=True)
         raise Exception("no permission")
 
@@ -299,7 +360,9 @@ async def slash_command_handler(interaction):
             del database[afk_key]
             if functions.get_settings(interaction.author.id)["afk_messages"]:
                 try:
-                    await interaction.author.send(functions.get_text(interaction.author.id, "afk_removed"))
+                    await interaction.author.send(
+                        functions.get_text(interaction.author.id, "afk_removed")
+                    )
                 except:
                     pass
     if interaction.data.name == "text":
@@ -307,18 +370,27 @@ async def slash_command_handler(interaction):
             try:
                 try:
                     ignored_channels = json.loads(
-                        database[f"filter-ignore.{interaction.guild.id}"])
+                        database[f"filter-ignore.{interaction.guild.id}"]
+                    )
                 except:
                     ignored_channels = {"insults": []}
                 if interaction.channel.id not in ignored_channels["insults"]:
                     if json.loads(database[f"insults.toggle.{interaction.guild.id}"]):
                         insults = json.loads(
-                            database[f"insults.list.{interaction.guild.id}"])
+                            database[f"insults.list.{interaction.guild.id}"]
+                        )
                         for word in insults:
-                            if word.lower() in interaction.data.options[0].options[0].value.replace(" ", "").lower():
+                            if (
+                                word.lower()
+                                in interaction.data.options[0]
+                                .options[0]
+                                .value.replace(" ", "")
+                                .lower()
+                            ):
                                 await interaction.response.send_message(
                                     functions.get_text(
-                                        interaction.author.id, "banned_word").format(word.lower()),
+                                        interaction.author.id, "banned_word"
+                                    ).format(word.lower()),
                                     ephemeral=True,
                                 )
                                 raise Exception("no permission")
@@ -337,36 +409,55 @@ async def settings_command(_):
     pass
 
 
-@settings_command.sub_command_group(name="language", description="Set your preferred language (translate, definition, etc)")
+@settings_command.sub_command_group(
+    name="language",
+    description="Set your preferred language (translate, definition, etc)",
+)
 async def settings_language_command(_):
     pass
 
 
-@settings_language_command.sub_command(name="get", description="Get your preferred language")
+@settings_language_command.sub_command(
+    name="get", description="Get your preferred language"
+)
 async def settings_language_get_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     language = settings["language"]
     if language in googletrans.LANGUAGES:
         language = googletrans.LANGUAGES[language]
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "current_language_description").format(functions.get_text(interaction.author.id, "language_name")))
+    await interaction.response.send_message(
+        functions.get_text(
+            interaction.author.id, "current_language_description"
+        ).format(functions.get_text(interaction.author.id, "language_name"))
+    )
 
 
 async def autocomplete_languages(_, string):
     languages = []
     for language in googletrans.LANGUAGES.values():
         languages.append(language.title())
-    return list(filter(lambda language: string.lower() in language.lower(), languages))[:20]
+    return list(filter(lambda language: string.lower() in language.lower(), languages))[
+        :20
+    ]
 
 
-@settings_language_command.sub_command(name="set", description="Set your preferred language")
+@settings_language_command.sub_command(
+    name="set", description="Set your preferred language"
+)
 async def settings_language_set_command(
     interaction,
     language: str = Param(
-        description="Your new preferred language", autocomplete=autocomplete_languages),
+        description="Your new preferred language", autocomplete=autocomplete_languages
+    ),
 ):
     language = language.lower()
-    if language not in googletrans.LANGUAGES.keys() and language not in googletrans.LANGUAGES.values():
-        await interaction.response.send_message("The specified language wasn't found!", ephemeral=True)
+    if (
+        language not in googletrans.LANGUAGES.keys()
+        and language not in googletrans.LANGUAGES.values()
+    ):
+        await interaction.response.send_message(
+            "The specified language wasn't found!", ephemeral=True
+        )
         return
     language_name = ""
     language_code = ""
@@ -383,26 +474,34 @@ async def settings_language_set_command(
         del variables.settings_cache[str(interaction.author.id)]
     except:
         pass
-    default_text = functions.get_text(
-        interaction.author.id, "language_update").format(language_name.title())
+    default_text = functions.get_text(interaction.author.id, "language_update").format(
+        language_name.title()
+    )
     language_text = default_text
     language_name = functions.get_text(interaction.author.id, "language_name")
     if language_name != "English":
         language_text = functions.get_text(
-            interaction.author.id, "language_update").format(language_name)
+            interaction.author.id, "language_update"
+        ).format(language_name)
     await interaction.response.send_message(language_text)
 
 
-@settings_command.sub_command_group(name="vote-messages", description="Whether or not you want to receive vote messages")
+@settings_command.sub_command_group(
+    name="vote-messages", description="Whether or not you want to receive vote messages"
+)
 async def settings_vote_command(_):
     pass
 
 
-@settings_vote_command.sub_command(name="status", description="Check if vote messages are currently enabled or not")
+@settings_vote_command.sub_command(
+    name="status", description="Check if vote messages are currently enabled or not"
+)
 async def settings_vote_status_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     state = f"{functions.get_text(interaction.author.id, 'enabled_lower') if settings['vote_messages'] else functions.get_text(interaction.author.id, 'disabled_lower')}"
-    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'vote_messages_status').format(state)}")
+    await interaction.response.send_message(
+        f"{functions.get_text(interaction.author.id, 'vote_messages_status').format(state)}"
+    )
 
 
 @settings_vote_command.sub_command(name="enable", description="Enable vote messages")
@@ -410,7 +509,9 @@ async def settings_vote_enable_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     settings["vote_messages"] = True
     functions.set_settings(settings, interaction.author.id)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_messages_enabled"))
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "vote_messages_enabled")
+    )
 
 
 @settings_vote_command.sub_command(name="disable", description="Disable vote messages")
@@ -418,19 +519,27 @@ async def settings_vote_disable_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     settings["vote_messages"] = False
     functions.set_settings(settings, interaction.author.id)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_messages_disabled"))
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "vote_messages_disabled")
+    )
 
 
-@settings_command.sub_command_group(name="afk-messages", description="Whether or not you want to receive AFK messages")
+@settings_command.sub_command_group(
+    name="afk-messages", description="Whether or not you want to receive AFK messages"
+)
 async def settings_afk_command(_):
     pass
 
 
-@settings_afk_command.sub_command(name="status", description="Check if AFK messages are currently enabled or not")
+@settings_afk_command.sub_command(
+    name="status", description="Check if AFK messages are currently enabled or not"
+)
 async def settings_afk_status_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     state = f"{functions.get_text(interaction.author.id, 'enabled_lower') if settings['afk_messages'] else functions.get_text(interaction.author.id, 'disabled_lower')}"
-    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'afk_messages_status').format(state)}")
+    await interaction.response.send_message(
+        f"{functions.get_text(interaction.author.id, 'afk_messages_status').format(state)}"
+    )
 
 
 @settings_afk_command.sub_command(name="enable", description="Enable AFK messages")
@@ -438,7 +547,9 @@ async def settings_afk_enable_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     settings["afk_messages"] = True
     functions.set_settings(settings, interaction.author.id)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "afk_messages_enabled"))
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "afk_messages_enabled")
+    )
 
 
 @settings_afk_command.sub_command(name="disable", description="Disable AFK messages")
@@ -446,7 +557,9 @@ async def settings_afk_disable_command(interaction):
     settings = functions.get_settings(interaction.author.id)
     settings["afk_messages"] = False
     functions.set_settings(settings, interaction.author.id)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "afk_messages_disabled"))
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "afk_messages_disabled")
+    )
 
 
 @client.slash_command(name="embedify", description="Create a custom embed")
@@ -454,17 +567,21 @@ async def embedify_command(
     interaction,
     title: str = Param(description="The title of the embed"),
     description: str = Param(description="The description of the embed"),
-    color: str = Param(functions.parse_color(
-        variables.embed_color()), description="The color of the embed"),
+    color: str = Param(
+        functions.parse_color(variables.embed_color()),
+        description="The color of the embed",
+    ),
 ):
     embed_color = variables.embed_color()
     colors = generate_color(color, generate_image=False)
     if colors != 1:
         embed_color = int(colors[0][1:], 16)
-    embed = disnake.Embed(
-        title=title, description=description, color=embed_color)
+    embed = disnake.Embed(title=title, description=description, color=embed_color)
     await interaction.channel.send(embed=embed)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "custom_embed_generated"), ephemeral=True)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "custom_embed_generated"),
+        ephemeral=True,
+    )
 
 
 @client.slash_command(name="reaction-roles", description="Manage the reaction roles")
@@ -476,52 +593,78 @@ async def reaction_command(_):
 async def reaction_create_command(
     interaction,
     message_id: str = Param(
-        name="message-id", description="The ID of the message you want to add reaction roles to"),
+        name="message-id",
+        description="The ID of the message you want to add reaction roles to",
+    ),
     emoji: str = Param(description="The emoji you want to add to the message"),
     role: disnake.Role = Param(
-        description="The role you want to add to users when they add a reaction"),
+        description="The role you want to add to users when they add a reaction"
+    ),
 ):
-    if not interaction.author.guild_permissions.manage_roles and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_roles
+        and not interaction.author.guild_permissions.administrator
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     if role.position >= interaction.author.top_role.position:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_manage_role"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission_manage_role"),
+            ephemeral=True,
+        )
         return
 
     if message_id.endswith("/"):
         message_id = message_id[:-1]
     if "discord.com/channels" in message_id:
         segments = message_id.split("/")
-        message_id = segments[len(segments)-1]
+        message_id = segments[len(segments) - 1]
     try:
         message = await interaction.channel.fetch_message(int(message_id))
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "enter_valid_message_id"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "enter_valid_message_id"),
+            ephemeral=True,
+        )
         return
     try:
         await message.add_reaction(emoji)
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_add_emoji"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "unable_to_add_emoji"),
+            ephemeral=True,
+        )
         return
     try:
-        reaction_roles = json.loads(
-            database[f"reaction-roles.{interaction.guild.id}"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     if len(reaction_roles) >= 20:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("20"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "item_limit").format("20"),
+            ephemeral=True,
+        )
         return
-    reaction_roles.append({"message": message_id, "emoji": emoji,
-                          "role": role.id, "channel": interaction.channel.id})
-    database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(
-        reaction_roles)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "reaction_role_created"), ephemeral=True)
+    reaction_roles.append(
+        {
+            "message": message_id,
+            "emoji": emoji,
+            "role": role.id,
+            "channel": interaction.channel.id,
+        }
+    )
+    database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(reaction_roles)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "reaction_role_created"),
+        ephemeral=True,
+    )
 
 
 def autocomplete_reaction_roles(interaction, string):
     try:
-        reaction_roles = json.loads(
-            database[f"reaction-roles.{interaction.guild.id}"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     roles = []
@@ -530,7 +673,9 @@ def autocomplete_reaction_roles(interaction, string):
     return list(filter(lambda id: string in id, roles))[:20]
 
 
-@reaction_command.sub_command(name="remove", description="Remove a reaction role from this server")
+@reaction_command.sub_command(
+    name="remove", description="Remove a reaction role from this server"
+)
 async def reaction_delete_command(
     interaction,
     message_id: str = Param(
@@ -541,15 +686,19 @@ async def reaction_delete_command(
     emoji: str = Param(
         None,
         description="The emoji on the message you want to remove",
-    )
+    ),
 ):
-    if not interaction.author.guild_permissions.manage_roles and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_roles
+        and not interaction.author.guild_permissions.administrator
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
-        reaction_roles = json.loads(
-            database[f"reaction-roles.{interaction.guild.id}"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     exists = False
@@ -561,36 +710,53 @@ async def reaction_delete_command(
             else:
                 new_reaction_roles.append(reaction_role)
         else:
-            if str(reaction_role["message"]) == message_id and reaction_role["emoji"] == emoji:
+            if (
+                str(reaction_role["message"]) == message_id
+                and reaction_role["emoji"] == emoji
+            ):
                 exists = True
             else:
                 new_reaction_roles.append(reaction_role)
-    database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(
-        new_reaction_roles)
+    database[f"reaction-roles.{interaction.guild.id}"] = json.dumps(new_reaction_roles)
     if not exists:
-        await interaction.response.send_message("That reaction role wasn't found!", ephemeral=True)
+        await interaction.response.send_message(
+            "That reaction role wasn't found!", ephemeral=True
+        )
         return
     else:
-        await interaction.response.send_message("That reaction role has been successfully deleted!", ephemeral=True)
+        await interaction.response.send_message(
+            "That reaction role has been successfully deleted!", ephemeral=True
+        )
         return
 
 
-@reaction_command.sub_command(name="list", description="List all the reaction roles in this server")
+@reaction_command.sub_command(
+    name="list", description="List all the reaction roles in this server"
+)
 async def reaction_list_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_roles
+        and not interaction.author.guild_permissions.administrator
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
-        reaction_roles = json.loads(
-            database[f"reaction-roles.{interaction.guild.id}"])
+        reaction_roles = json.loads(database[f"reaction-roles.{interaction.guild.id}"])
     except:
         reaction_roles = []
     description = ""
     for role in reaction_roles:
         description += f"{role['emoji']} - <@&{role['role']}>: {role['message']} ([{functions.get_text(interaction.author.id, 'message_lower')}](https://discord.com/channels/{interaction.guild.id}/{role['channel']}/{role['message']}))\n"
-    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "reaction_roles"), description=description if description !=
-                          '' else functions.get_text(interaction.author.id, "no_reaction_roles"), color=variables.embed_color())
+    embed = disnake.Embed(
+        title=functions.get_text(interaction.author.id, "reaction_roles"),
+        description=description
+        if description != ""
+        else functions.get_text(interaction.author.id, "no_reaction_roles"),
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed)
 
 
@@ -599,29 +765,34 @@ async def qr_command(
     interaction,
     data: str = Param(description="The data you want to encode"),
     border: int = Param(3, description="The size of the QR code's border"),
-    foreground: str = Param(
-        "black", description="The foreground color of the QR code"),
-    background: str = Param(
-        "white", description="The background color of the QR code"),
+    foreground: str = Param("black", description="The foreground color of the QR code"),
+    background: str = Param("white", description="The background color of the QR code"),
 ):
     await interaction.response.defer()
     if border > 32:
-        await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "border_size_too_big"))
+        await interaction.edit_original_message(
+            content=functions.get_text(interaction.author.id, "border_size_too_big")
+        )
         return
     try:
         qr_code = qrcode.QRCode(border=border)
         qr_code.add_data(data)
-        image = qr_code.make_image(
-            fill_color=foreground, back_color=background)
+        image = qr_code.make_image(fill_color=foreground, back_color=background)
         image.save("images/qr.png")
 
-        embed = disnake.Embed(title=functions.get_text(
-            interaction.author.id, "qr_code"), color=variables.embed_color())
+        embed = disnake.Embed(
+            title=functions.get_text(interaction.author.id, "qr_code"),
+            color=variables.embed_color(),
+        )
         embed.set_image(url="attachment://qr.png")
-        await interaction.edit_original_message(embed=embed, file=disnake.File("images/qr.png"))
+        await interaction.edit_original_message(
+            embed=embed, file=disnake.File("images/qr.png")
+        )
         add_cooldown(interaction.author.id, "qr", 10)
     except:
-        await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "qr_create_failed"))
+        await interaction.edit_original_message(
+            content=functions.get_text(interaction.author.id, "qr_create_failed")
+        )
 
 
 @client.slash_command(name="currency", description="Convert currencies")
@@ -630,19 +801,37 @@ async def currency_command(_):
 
 
 def autocomplete_currencies(_, string):
-    currencies = [item.upper() for item in list(requests.get(
-        "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json").json().keys())]
-    return list(filter(lambda currency: string.lower() in currency.lower(), currencies))[:20]
+    currencies = [
+        item.upper()
+        for item in list(
+            requests.get(
+                "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json"
+            )
+            .json()
+            .keys()
+        )
+    ]
+    return list(
+        filter(lambda currency: string.lower() in currency.lower(), currencies)
+    )[:20]
 
 
-@currency_command.sub_command(name="convert", description="Convert amounts from one currency to another")
+@currency_command.sub_command(
+    name="convert", description="Convert amounts from one currency to another"
+)
 async def currency_convert_command(
     interaction,
     amount: float = Param(description="The amount (for the input currency)"),
     input_currency: str = Param(
-        name="input-currency", description="The input currency", autocomplete=autocomplete_currencies),
+        name="input-currency",
+        description="The input currency",
+        autocomplete=autocomplete_currencies,
+    ),
     output_currency: str = Param(
-        name="output-currency", description="The output currency", autocomplete=autocomplete_currencies),
+        name="output-currency",
+        description="The output currency",
+        autocomplete=autocomplete_currencies,
+    ),
 ):
     try:
         input_currency = input_currency.lower().strip()
@@ -650,24 +839,36 @@ async def currency_convert_command(
         url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/{input_currency}/{output_currency}.json"
         response = requests.get(url).json()
         value = response[output_currency] * amount
-        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "currency_conversion"),
-                              description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**", color=variables.embed_color())
+        embed = disnake.Embed(
+            title=functions.get_text(interaction.author.id, "currency_conversion"),
+            description=f"**{round(amount, 6):,} {input_currency.upper()}** = **{round(value, 6):,} {output_currency.upper()}**",
+            color=variables.embed_color(),
+        )
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "currency", 5)
     except:
-        await interaction.response.send_message("Unable to convert currency", ephemeral=True)
+        await interaction.response.send_message(
+            "Unable to convert currency", ephemeral=True
+        )
 
 
-@currency_command.sub_command(name="list", description="List all the available currencies")
+@currency_command.sub_command(
+    name="list", description="List all the available currencies"
+)
 async def currency_list_command(interaction):
     response = requests.get(
-        "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json").json()
+        "https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies.json"
+    ).json()
     output = ""
     for key in response.keys():
         output += f"{key.upper()}: {response[key]}\n"
-    segments = [output[i: i + 1000] for i in range(0, len(output), 1000)]
+    segments = [output[i : i + 1000] for i in range(0, len(output), 1000)]
     pager = disnake_paginator.ButtonPaginator(
-        prefix=f"```\n", suffix="```", color=variables.embed_color(), title=functions.get_text(interaction.author.id, "currency_list"), segments=segments,
+        prefix=f"```\n",
+        suffix="```",
+        color=variables.embed_color(),
+        title=functions.get_text(interaction.author.id, "currency_list"),
+        segments=segments,
         invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction)
@@ -684,7 +885,9 @@ async def ping_command(interaction):
     await interaction.response.send_message(embed=embed)
 
 
-@client.slash_command(name="afk", description="Tell other users that you're currently AFK")
+@client.slash_command(
+    name="afk", description="Tell other users that you're currently AFK"
+)
 async def afk_command(
     interaction,
     message: str = Param(0, description="The reason why you are AFK"),
@@ -698,16 +901,26 @@ async def afk_command(
         current_status = None
 
     if current_status:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "already_afk"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "already_afk"), ephemeral=True
+        )
         return
     else:
         if len(message) > 1000:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "text_too_long"),
+                ephemeral=True,
+            )
             return
 
         database[f"afk.{interaction.author.id}"] = json.dumps(
-            [round(time.time()), message])
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "afk_set").format(functions.remove_mentions(message)))
+            [round(time.time()), message]
+        )
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "afk_set").format(
+                functions.remove_mentions(message)
+            )
+        )
 
 
 @client.slash_command(name="links", description="Get links for Doge Utilities")
@@ -715,12 +928,18 @@ async def links_command(_):
     pass
 
 
-@links_command.sub_command(name="support", description="Display the official support server for Doge")
+@links_command.sub_command(
+    name="support", description="Display the official support server for Doge"
+)
 async def support_command(interaction):
-    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'support_server')}: {variables.support_server_invite}")
+    await interaction.response.send_message(
+        f"{functions.get_text(interaction.author.id, 'support_server')}: {variables.support_server_invite}"
+    )
 
 
-@links_command.sub_command(name="invite", description="Invite this bot to another server")
+@links_command.sub_command(
+    name="invite", description="Invite this bot to another server"
+)
 async def invite_command(interaction):
     guild_member = True
     if interaction.author.id == interaction.guild.owner_id:
@@ -733,8 +952,7 @@ async def invite_command(interaction):
             self.clicked = False
             self.add_item(
                 disnake.ui.Button(
-                    label=functions.get_text(
-                        interaction.author.id, "invite_link"),
+                    label=functions.get_text(interaction.author.id, "invite_link"),
                     url=variables.bot_invite_link,
                 ),
             )
@@ -745,13 +963,18 @@ async def invite_command(interaction):
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
-        @disnake.ui.button(label=functions.get_text(interaction.author.id, "leave_server"), style=disnake.ButtonStyle.red, disabled=guild_member)
+        @disnake.ui.button(
+            label=functions.get_text(interaction.author.id, "leave_server"),
+            style=disnake.ButtonStyle.red,
+            disabled=guild_member,
+        )
         async def leave_server(self, _, button_interaction):
             if button_interaction.author == interaction.author:
                 if self.clicked:
                     await button_interaction.response.send_message(
                         functions.get_text(
-                            button_interaction.author.id, "leaving_server"),
+                            button_interaction.author.id, "leaving_server"
+                        ),
                         ephemeral=True,
                     )
                     await button_interaction.guild.leave()
@@ -759,38 +982,68 @@ async def invite_command(interaction):
                     self.clicked = True
                     await button_interaction.response.send_message(
                         functions.get_text(
-                            button_interaction.author.id, "leave_server_confirm"),
+                            button_interaction.author.id, "leave_server_confirm"
+                        ),
                         ephemeral=True,
                     )
             else:
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_command_sender"), ephemeral=True)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "here_is_invite_link"), view=CommandView())
+                await button_interaction.response.send_message(
+                    functions.get_text(
+                        button_interaction.author.id, "not_command_sender"
+                    ),
+                    ephemeral=True,
+                )
+
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "here_is_invite_link"),
+        view=CommandView(),
+    )
 
 
 @links_command.sub_command(name="vote", description="Get links to vote for the bot")
 async def vote_command(interaction):
     vote_view = disnake.ui.View()
-    vote_view.add_item(disnake.ui.Button(
-        label="top.gg", url="https://top.gg/bot/854965721805226005/vote"))
-    vote_view.add_item(disnake.ui.Button(label="discordbotlist",
-                       url="https://discordbotlist.com/bots/doge-utilities/upvote"))
-    vote_view.add_item(disnake.ui.Button(label="discords.com",
-                       url="https://discords.com/bots/bot/854965721805226005/vote"))
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "vote_websites"), view=vote_view)
+    vote_view.add_item(
+        disnake.ui.Button(
+            label="top.gg", url="https://top.gg/bot/854965721805226005/vote"
+        )
+    )
+    vote_view.add_item(
+        disnake.ui.Button(
+            label="discordbotlist",
+            url="https://discordbotlist.com/bots/doge-utilities/upvote",
+        )
+    )
+    vote_view.add_item(
+        disnake.ui.Button(
+            label="discords.com",
+            url="https://discords.com/bots/bot/854965721805226005/vote",
+        )
+    )
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "vote_websites"), view=vote_view
+    )
 
 
-@links_command.sub_command(name="source", description="Get the link to Doge's source code")
+@links_command.sub_command(
+    name="source", description="Get the link to Doge's source code"
+)
 async def source_command(interaction):
     description = functions.get_text(interaction.author.id, "source_code_here").format(
-        "https://github.com/ErrorNoInternet/Doge-Utilities")
+        "https://github.com/ErrorNoInternet/Doge-Utilities"
+    )
     try:
         response = requests.get(
-            "https://api.github.com/repos/ErrorNoInternet/Doge-Utilities").json()
+            "https://api.github.com/repos/ErrorNoInternet/Doge-Utilities"
+        ).json()
         description += f"\n{functions.get_text(interaction.author.id, 'active_issues')}: **{response['open_issues']}**, {functions.get_text(interaction.author.id, 'forks')}: **{response['forks']}**\n{functions.get_text(interaction.author.id, 'stargazers')}: **{response['stargazers_count']}**, {functions.get_text(interaction.author.id, 'watchers')}: **{response['subscribers_count']}**"
     except:
         pass
-    embed = disnake.Embed(title=functions.get_text(
-        interaction.author.id, "source_code"), description=description, color=variables.embed_color())
+    embed = disnake.Embed(
+        title=functions.get_text(interaction.author.id, "source_code"),
+        description=description,
+        color=variables.embed_color(),
+    )
     embed.set_thumbnail(url=client.user.avatar)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "source", 10)
@@ -799,11 +1052,21 @@ async def source_command(interaction):
 @links_command.sub_command(name="website", description="Get links to the bot's website")
 async def website_command(interaction):
     view = disnake.ui.View()
-    view.add_item(disnake.ui.Button(label=functions.get_text(
-        interaction.author.id, "website"), url=os.environ["WEBSITE_URL"]))
-    view.add_item(disnake.ui.Button(label=functions.get_text(
-        interaction.author.id, "dashboard"), url=os.environ["WEBSITE_URL"] + "/web/authenticate"))
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "website_links"), view=view)
+    view.add_item(
+        disnake.ui.Button(
+            label=functions.get_text(interaction.author.id, "website"),
+            url=os.environ["WEBSITE_URL"],
+        )
+    )
+    view.add_item(
+        disnake.ui.Button(
+            label=functions.get_text(interaction.author.id, "dashboard"),
+            url=os.environ["WEBSITE_URL"] + "/web/authenticate",
+        )
+    )
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "website_links"), view=view
+    )
 
 
 @client.slash_command(name="get", description="Get information about the bot")
@@ -811,7 +1074,9 @@ async def get_command(_):
     pass
 
 
-@get_command.sub_command(name="supporters", description="Get information about Doge Utilities' supporters")
+@get_command.sub_command(
+    name="supporters", description="Get information about Doge Utilities' supporters"
+)
 async def supporters_command(interaction):
     users = []
     added = []
@@ -832,26 +1097,29 @@ async def supporters_command(interaction):
             if user.id not in added:
                 users_string += f"**{user.name}**, "
                 added.append(user.id)
-    description = functions.get_text(
-        interaction.author.id, "big_thanks_to").format(users_string[:-2])
-    embed = disnake.Embed(description=description,
-                          color=variables.embed_color())
+    description = functions.get_text(interaction.author.id, "big_thanks_to").format(
+        users_string[:-2]
+    )
+    embed = disnake.Embed(description=description, color=variables.embed_color())
 
     developers = []
     for developer in variables.supporters["developers"]:
         user = await client.getch_user(developer)
         if user:
             developers.append(user.name)
-    embed.add_field(name=functions.get_text(
-        interaction.author.id, "developers"), value="\n".join(developers))
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "developers"),
+        value="\n".join(developers),
+    )
 
     ideas = []
     for idea in variables.supporters["ideas"]:
         user = await client.getch_user(idea)
         if user:
             ideas.append(user.name)
-    embed.add_field(name=functions.get_text(
-        interaction.author.id, "ideas"), value="\n".join(ideas))
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "ideas"), value="\n".join(ideas)
+    )
 
     translators = []
     for language, translator in variables.supporters["translators"].items():
@@ -866,13 +1134,17 @@ async def supporters_command(interaction):
         if flag == "en":
             flag = "us"
         translators.append(f":flag_{flag}: {', '.join(translator_users)}")
-    embed.add_field(name=functions.get_text(
-        interaction.author.id, "translators"), value="\n".join(translators))
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "translators"),
+        value="\n".join(translators),
+    )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 
 
-@get_command.sub_command(name="shards", description="Get information about Doge Utilities' shards")
+@get_command.sub_command(
+    name="shards", description="Get information about Doge Utilities' shards"
+)
 async def shards_command(interaction):
     pages = {}
     current_page = 1
@@ -896,7 +1168,9 @@ async def shards_command(interaction):
         try:
             pages[current_item] += temporary_text
         except:
-            pages[current_item] = f"{functions.get_text(interaction.author.id, 'shard_count')}: `{len(client.shards)}`, {functions.get_text(interaction.author.id, 'current_shard')}: `{interaction.guild.shard_id}`\n\n"
+            pages[
+                current_item
+            ] = f"{functions.get_text(interaction.author.id, 'shard_count')}: `{len(client.shards)}`, {functions.get_text(interaction.author.id, 'current_shard')}: `{interaction.guild.shard_id}`\n\n"
             pages[current_item] += temporary_text
         index += 1
     pager = disnake_paginator.ButtonPaginator(
@@ -910,7 +1184,9 @@ async def shards_command(interaction):
     add_cooldown(interaction.author.id, "get", 3)
 
 
-@get_command.sub_command(name="status", description="Display the bot's current statistics")
+@get_command.sub_command(
+    name="status", description="Display the bot's current statistics"
+)
 async def status_command(interaction):
     member_count = 0
     channel_count = 0
@@ -944,8 +1220,9 @@ async def status_command(interaction):
     embed = disnake.Embed(color=variables.embed_color())
     embed.add_field(
         name=functions.get_text(interaction.author.id, "latency"),
-        value="```" +
-        f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms" + "```",
+        value="```"
+        + f"{round(client.get_shard(interaction.guild.shard_id).latency * 1000, 1)} ms"
+        + "```",
     )
     embed.add_field(
         name=functions.get_text(interaction.author.id, "cpu_usage"),
@@ -995,7 +1272,9 @@ async def status_command(interaction):
     add_cooldown(interaction.author.id, "get", 3)
 
 
-@get_command.sub_command(name="version", description="Display the bot's current version")
+@get_command.sub_command(
+    name="version", description="Display the bot's current version"
+)
 async def version_command(interaction):
     file_size = 0
     for object in os.listdir():
@@ -1005,13 +1284,18 @@ async def version_command(interaction):
             file.close()
         except:
             pass
-    embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_version"),
-                          description=f"{functions.get_text(interaction.author.id, 'git_commit_hash_upper')}: **{variables.bot_version}**\n{functions.get_text(interaction.author.id, 'last_updated_upper')}: **{variables.bot_last_updated}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**", color=variables.embed_color())
+    embed = disnake.Embed(
+        title=functions.get_text(interaction.author.id, "bot_version"),
+        description=f"{functions.get_text(interaction.author.id, 'git_commit_hash_upper')}: **{variables.bot_version}**\n{functions.get_text(interaction.author.id, 'last_updated_upper')}: **{variables.bot_last_updated}**\n{functions.get_text(interaction.author.id, 'size_upper')}: **{round(file_size / 1000)} KB**\nPython: **{sys.version.split(' ')[0]}**\nDisnake: **{disnake.__version__}**",
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "get", 3)
 
 
-@get_command.sub_command(name="uptime", description="Get Doge Utilities' current uptime")
+@get_command.sub_command(
+    name="uptime", description="Get Doge Utilities' current uptime"
+)
 async def uptime_command(interaction):
     seconds_time = time.time() - start_time
     minutes_time = seconds_time / 60
@@ -1039,12 +1323,13 @@ async def uptime_command(interaction):
     await interaction.response.send_message(embed=embed)
 
 
-@client.slash_command(name="random", description="Generate a random number between the range")
+@client.slash_command(
+    name="random", description="Generate a random number between the range"
+)
 async def random_command(
     interaction,
     low_number: float = Param(name="low", description="The lower number"),
-    high_number: float = Param(
-        0, name="high", description="The higher number"),
+    high_number: float = Param(0, name="high", description="The higher number"),
 ):
     if low_number != 0 and high_number == 0:
         high_number = low_number
@@ -1066,33 +1351,51 @@ async def random_command(
         @disnake.ui.button(label=button_text, style=disnake.ButtonStyle.gray)
         async def generate_number(self, _, button_interaction):
             if button_interaction.author != interaction.author:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "not_command_sender"),
+                    ephemeral=True,
+                )
                 return
 
             if self.uses < 5:
                 self.uses += 1
-                random_number = round(
-                    random.uniform(low_number, high_number), 2)
-                await button_interaction.response.edit_message(content=f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**")
+                random_number = round(random.uniform(low_number, high_number), 2)
+                await button_interaction.response.edit_message(
+                    content=f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**"
+                )
             else:
                 new_view = disnake.ui.View()
-                new_view.add_item(disnake.ui.Button(
-                    label=button_text, style=disnake.ButtonStyle.gray, disabled=True))
+                new_view.add_item(
+                    disnake.ui.Button(
+                        label=button_text, style=disnake.ButtonStyle.gray, disabled=True
+                    )
+                )
                 await interaction.edit_original_message(view=new_view)
                 await button_interaction.response.send_message(
-                    functions.get_text(interaction.author.id,
-                                       "generate_number_limit"),
+                    functions.get_text(interaction.author.id, "generate_number_limit"),
                     ephemeral=True,
                 )
                 self.stop()
-    await interaction.response.send_message(f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**", view=CommandView())
+
+    await interaction.response.send_message(
+        f"{functions.get_text(interaction.author.id, 'number_prompt')}: **{random_number}**",
+        view=CommandView(),
+    )
     add_cooldown(interaction.author.id, "random", 10)
 
 
-@client.slash_command(name="disconnect-members", description="Disconnect all members from all voice channels")
+@client.slash_command(
+    name="disconnect-members",
+    description="Disconnect all members from all voice channels",
+)
 async def disconnect_members_command(interaction):
-    if interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
-        await interaction.response.send_message("Disconnecting all members from voice channels...")
+    if (
+        interaction.author.guild_permissions.administrator
+        or interaction.author.id in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            "Disconnecting all members from voice channels..."
+        )
         members = 0
         failed = 0
 
@@ -1104,19 +1407,27 @@ async def disconnect_members_command(interaction):
                         members += 1
                     except:
                         failed += 1
-        await interaction.edit_original_message(content=f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels")
+        await interaction.edit_original_message(
+            content=f"Successfully disconnected **{members}/{members + failed} {'member' if members == 1 else 'members'}** from voice channels"
+        )
         add_cooldown(interaction.author.id, "disconnect-members", 20)
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
 
 
-@client.slash_command(name="suggest", description="Send a suggestion to the bot creators")
+@client.slash_command(
+    name="suggest", description="Send a suggestion to the bot creators"
+)
 async def suggest_command(
     interaction,
     suggestion: str = Param(description="The suggestion you want to send"),
 ):
     suggestion = functions.shrink(suggestion, 1500)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True
+    )
 
     class SuggestionView(disnake.ui.View):
         def __init__(self):
@@ -1133,13 +1444,22 @@ async def suggest_command(
         async def accept_button(self, _, button_interaction):
             try:
                 await interaction.author.send(
-                    functions.get_text(interaction.author.id, "suggestion_accepted").format(
-                        functions.shrink(suggestion, 20), button_interaction.author),
+                    functions.get_text(
+                        interaction.author.id, "suggestion_accepted"
+                    ).format(
+                        functions.shrink(suggestion, 20), button_interaction.author
+                    ),
                 )
             except:
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "unable_to_accept"))
+                await button_interaction.response.send_message(
+                    functions.get_text(button_interaction.author.id, "unable_to_accept")
+                )
                 return
-            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "accepted_successfully"))
+            await button_interaction.response.send_message(
+                functions.get_text(
+                    button_interaction.author.id, "accepted_successfully"
+                )
+            )
             for button in self.children:
                 button.disabled = True
             for original_message in original_messages:
@@ -1150,13 +1470,22 @@ async def suggest_command(
         async def reject_button(self, _, button_interaction):
             try:
                 await interaction.author.send(
-                    functions.get_text(interaction.author.id, "suggestion_rejected").format(
-                        functions.shrink(suggestion, 20), button_interaction.author),
+                    functions.get_text(
+                        interaction.author.id, "suggestion_rejected"
+                    ).format(
+                        functions.shrink(suggestion, 20), button_interaction.author
+                    ),
                 )
             except:
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "unable_to_reject"))
+                await button_interaction.response.send_message(
+                    functions.get_text(button_interaction.author.id, "unable_to_reject")
+                )
                 return
-            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "rejected_successfully"))
+            await button_interaction.response.send_message(
+                functions.get_text(
+                    button_interaction.author.id, "rejected_successfully"
+                )
+            )
             for button in self.children:
                 button.disabled = True
             for original_message in original_messages:
@@ -1165,7 +1494,9 @@ async def suggest_command(
 
         @disnake.ui.button(emoji="🤷", style=disnake.ButtonStyle.gray)
         async def ignore_button(self, _, button_interaction):
-            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "ignored_successfully"))
+            await button_interaction.response.send_message(
+                functions.get_text(button_interaction.author.id, "ignored_successfully")
+            )
             for button in self.children:
                 button.disabled = True
             for original_message in original_messages:
@@ -1181,33 +1512,62 @@ async def suggest_command(
                     if member.id == user_id:
                         sent = True
                         try:
-                            user_string = f'{interaction.author.name} (`{interaction.author.id}`)'
-                            original_messages.append(await member.send(f"**{functions.get_text(member.id, 'has_sent_suggestion').format(user_string)}**\n{suggestion}", view=SuggestionView()))
+                            user_string = (
+                                f"{interaction.author.name} (`{interaction.author.id}`)"
+                            )
+                            original_messages.append(
+                                await member.send(
+                                    f"**{functions.get_text(member.id, 'has_sent_suggestion').format(user_string)}**\n{suggestion}",
+                                    view=SuggestionView(),
+                                )
+                            )
                         except:
                             pass
-    await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
+    await interaction.edit_original_message(
+        content=functions.get_text(interaction.author.id, "suggestion_sent")
+    )
     add_cooldown(interaction.author.id, "suggest", 600)
 
 
-@client.slash_command(name="autorole", description="Manage automatically assigned roles")
+@client.slash_command(
+    name="autorole", description="Manage automatically assigned roles"
+)
 async def autorole_command(_):
     pass
 
 
-@autorole_command.sub_command(name="disable", description="Disable autorole in your server")
+@autorole_command.sub_command(
+    name="disable", description="Disable autorole in your server"
+)
 async def disable_autorole_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_roles
+        and interaction.author.id not in variables.permission_override
+        and not interaction.author.guild_permissions.administrator
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     del database[f"autorole.{interaction.guild.id}"]
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "autorole_disabled"))
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "autorole_disabled")
+    )
 
 
-@autorole_command.sub_command(name="list", description="List all the automatically assigned roles")
+@autorole_command.sub_command(
+    name="list", description="List all the automatically assigned roles"
+)
 async def list_autorole_command(interaction):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_roles
+        and interaction.author.id not in variables.permission_override
+        and not interaction.author.guild_permissions.administrator
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
@@ -1215,27 +1575,48 @@ async def list_autorole_command(interaction):
         role_string = ""
         for role in role_list:
             role_string += "<@&" + role + "> "
-        await interaction.response.send_message(embed=disnake.Embed(title=functions.get_text(interaction.author.id, "autorole_upper"), description=functions.get_text(interaction.author.id, "autorole_description").format(role_string), color=variables.embed_color()))
+        await interaction.response.send_message(
+            embed=disnake.Embed(
+                title=functions.get_text(interaction.author.id, "autorole_upper"),
+                description=functions.get_text(
+                    interaction.author.id, "autorole_description"
+                ).format(role_string),
+                color=variables.embed_color(),
+            )
+        )
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_autorole"))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_autorole")
+        )
 
 
-@autorole_command.sub_command(name="set", description="Change the automatically assigned roles")
+@autorole_command.sub_command(
+    name="set", description="Change the automatically assigned roles"
+)
 async def set_autorole_command(
     interaction,
-    role1: disnake.Role = Param(
-        description="A role you want to automatically assign"),
+    role1: disnake.Role = Param(description="A role you want to automatically assign"),
     role2: disnake.Role = Param(
-        0, description="A role you want to automatically assign"),
+        0, description="A role you want to automatically assign"
+    ),
     role3: disnake.Role = Param(
-        0, description="A role you want to automatically assign"),
+        0, description="A role you want to automatically assign"
+    ),
     role4: disnake.Role = Param(
-        0, description="A role you want to automatically assign"),
+        0, description="A role you want to automatically assign"
+    ),
     role5: disnake.Role = Param(
-        0, description="A role you want to automatically assign"),
+        0, description="A role you want to automatically assign"
+    ),
 ):
-    if not interaction.author.guild_permissions.manage_roles and interaction.author.id not in variables.permission_override and not interaction.author.guild_permissions.administrator:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_roles
+        and interaction.author.id not in variables.permission_override
+        and not interaction.author.guild_permissions.administrator
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     role_list = []
@@ -1257,64 +1638,98 @@ async def set_autorole_command(
         embed=disnake.Embed(
             title=functions.get_text(interaction.author.id, "autorole_upper"),
             description=functions.get_text(
-                interaction.author.id, "autorole_set").format(role_string),
+                interaction.author.id, "autorole_set"
+            ).format(role_string),
             color=variables.embed_color(),
         ),
     )
 
 
-@client.slash_command(name="lookup", description="Find a user or application on Discord")
+@client.slash_command(
+    name="lookup", description="Find a user or application on Discord"
+)
 async def lookup_command(_):
     pass
 
 
-@lookup_command.sub_command(name="application", description="Find an application on Discord")
+@lookup_command.sub_command(
+    name="application", description="Find an application on Discord"
+)
 async def lookup_application_command(
     interaction,
     application_id: str = Param(
-        name="application-id", description="The ID of the target application"),
+        name="application-id", description="The ID of the target application"
+    ),
 ):
     response = requests.get(
-        f"https://discord.com/api/v9/applications/{application_id}/rpc").json()
+        f"https://discord.com/api/v9/applications/{application_id}/rpc"
+    ).json()
     if "code" in response.keys():
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "application_not_found"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "application_not_found"),
+            ephemeral=True,
+        )
         return
     embed = disnake.Embed(
-        description=response["description"], color=variables.embed_color())
+        description=response["description"], color=variables.embed_color()
+    )
     embed.set_thumbnail(
-        url=f"https://cdn.discordapp.com/app-icons/{response['id']}/{response['icon']}.webp")
+        url=f"https://cdn.discordapp.com/app-icons/{response['id']}/{response['icon']}.webp"
+    )
     embed.add_field(name="Application Name", value=response["name"])
     embed.add_field(name="Application ID", value="`" + response["id"] + "`")
-    embed.add_field(name="Public Bot",
-                    value=f"{'`'+str(response['bot_public'])+'`' if 'bot_public' in response.keys() != None else 'No bot'}")
-    embed.add_field(name="Public Flags", value="`" +
-                    str(response["flags"]) + "`")
-    embed.add_field(name="Terms of Service", value="None" if "terms_of_service_url" not in response.keys(
-    ) else f"[Link]({response['terms_of_service_url']})")
-    embed.add_field(name="Privacy Policy", value="None" if "privacy_policy_url" not in response.keys(
-    ) else f"[Link]({response['privacy_policy_url']})")
-    embed.add_field(name="Creation Time",
-                    value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>")
-    embed.add_field(name="Default Invite URL", value="None" if "install_params" not in response.keys(
-    ) else f"[Link](https://discord.com/oauth2/authorize?client_id={response['id']}&permissions={response['install_params']['permissions']}&scope={'%20'.join(response['install_params']['scopes'])})")
-    embed.add_field(name="Custom Invite URL", value="None" if "custom_install_url" not in response.keys(
-    ) else f"[Link]({response['custom_install_url']})")
+    embed.add_field(
+        name="Public Bot",
+        value=f"{'`'+str(response['bot_public'])+'`' if 'bot_public' in response.keys() != None else 'No bot'}",
+    )
+    embed.add_field(name="Public Flags", value="`" + str(response["flags"]) + "`")
+    embed.add_field(
+        name="Terms of Service",
+        value="None"
+        if "terms_of_service_url" not in response.keys()
+        else f"[Link]({response['terms_of_service_url']})",
+    )
+    embed.add_field(
+        name="Privacy Policy",
+        value="None"
+        if "privacy_policy_url" not in response.keys()
+        else f"[Link]({response['privacy_policy_url']})",
+    )
+    embed.add_field(
+        name="Creation Time",
+        value=f"<t:{functions.parse_snowflake(int(response['id']))}:R>",
+    )
+    embed.add_field(
+        name="Default Invite URL",
+        value="None"
+        if "install_params" not in response.keys()
+        else f"[Link](https://discord.com/oauth2/authorize?client_id={response['id']}&permissions={response['install_params']['permissions']}&scope={'%20'.join(response['install_params']['scopes'])})",
+    )
+    embed.add_field(
+        name="Custom Invite URL",
+        value="None"
+        if "custom_install_url" not in response.keys()
+        else f"[Link]({response['custom_install_url']})",
+    )
 
     bot_intents = ""
     for application_flag in variables.application_flags:
-        if response['flags'] & application_flag == application_flag:
+        if response["flags"] & application_flag == application_flag:
             intent_name = variables.application_flags[application_flag]
             if intent_name.replace(" (unverified)", "") not in bot_intents:
                 bot_intents += f"{intent_name}, "
-    embed.add_field(name="Application Flags", value="None" if bot_intents ==
-                    "" else bot_intents[:-2])
+    embed.add_field(
+        name="Application Flags",
+        value="None" if bot_intents == "" else bot_intents[:-2],
+    )
 
     bot_tags = ""
     if "tags" in response.keys():
-        for tag in response['tags']:
+        for tag in response["tags"]:
             bot_tags += tag + ", "
-    embed.add_field(name="Tags", value="None" if bot_tags ==
-                    "" else bot_tags[:-2], inline=False)
+    embed.add_field(
+        name="Tags", value="None" if bot_tags == "" else bot_tags[:-2], inline=False
+    )
 
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "lookup", 5)
@@ -1324,7 +1739,9 @@ async def lookup_application_command(
 async def lookup_user_command(
     interaction,
     user: disnake.User = Param(
-        default=lambda interaction: interaction.author, description="The ID of the target user"),
+        default=lambda interaction: interaction.author,
+        description="The ID of the target user",
+    ),
 ):
     badges = ""
     for flag in variables.public_flags:
@@ -1334,26 +1751,37 @@ async def lookup_user_command(
                     badges += variables.badge_list[variables.public_flags[flag]]
                 except:
                     raise Exception(
-                        f"unable to find badge: {variables.public_flags[flag]}")
+                        f"unable to find badge: {variables.public_flags[flag]}"
+                    )
     accent_color = 0x000000
     user_object = await client.fetch_user(user.id)
     if user_object.accent_color != None:
         accent_color = user_object.accent_color
     embed = disnake.Embed(color=accent_color)
-    embed.add_field(name=functions.get_text(
-        interaction.author.id, "user_id"), value=f"`{user.id}`")
-    embed.add_field(name=functions.get_text(interaction.author.id,
-                    "user_tag"), value=f"`{user.name}#{user.discriminator}`")
-    embed.add_field(name=functions.get_text(interaction.author.id, "creation_time"),
-                    value=f"<t:{functions.parse_snowflake(int(user.id))}:R>")
-    embed.add_field(name=functions.get_text(interaction.author.id,
-                    "public_flags"), value=f"`{user.public_flags.value}` {badges}")
-    embed.add_field(name=functions.get_text(
-        interaction.author.id, "bot_user"), value=f"`{user.bot}`")
-    embed.add_field(name=functions.get_text(
-        interaction.author.id, "system_user"), value=f"`{user.system}`")
-    embed.set_thumbnail(
-        url=user.avatar if user.avatar else user.default_avatar)
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "user_id"), value=f"`{user.id}`"
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "user_tag"),
+        value=f"`{user.name}#{user.discriminator}`",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "creation_time"),
+        value=f"<t:{functions.parse_snowflake(int(user.id))}:R>",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "public_flags"),
+        value=f"`{user.public_flags.value}` {badges}",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "bot_user"),
+        value=f"`{user.bot}`",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "system_user"),
+        value=f"`{user.system}`",
+    )
+    embed.set_thumbnail(url=user.avatar if user.avatar else user.default_avatar)
     if user_object.banner:
         embed.set_image(url=user_object.banner)
     await interaction.response.send_message(embed=embed)
@@ -1365,33 +1793,48 @@ async def user_lookup_command(interaction):
     await lookup_command(interaction, str(interaction.target.id))
 
 
-@client.slash_command(name="permissions", description="Check the permissions of a member or role")
+@client.slash_command(
+    name="permissions", description="Check the permissions of a member or role"
+)
 async def permissions_command(_):
     pass
 
 
-@permissions_command.sub_command(name="member", description="Check the permissions of a member")
+@permissions_command.sub_command(
+    name="member", description="Check the permissions of a member"
+)
 async def permissions_member_command(
     interaction,
-    member: disnake.Member = Param(default=lambda interaction: interaction.author,
-                                   description="The member you want to check permissions for"),
+    member: disnake.Member = Param(
+        default=lambda interaction: interaction.author,
+        description="The member you want to check permissions for",
+    ),
 ):
     permission_list = build_member_permissions(member)
-    embed = disnake.Embed(title="User Permissions",
-                          description=f"Permissions for <@{member.id}>\n\n" + permission_list, color=variables.embed_color())
+    embed = disnake.Embed(
+        title="User Permissions",
+        description=f"Permissions for <@{member.id}>\n\n" + permission_list,
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
 
 
-@permissions_command.sub_command(name="role", description="Check the permissions of a role")
+@permissions_command.sub_command(
+    name="role", description="Check the permissions of a role"
+)
 async def permissions_role_command(
     interaction,
     role: disnake.Role = Param(
-        description="The role you want to check permissions for"),
+        description="The role you want to check permissions for"
+    ),
 ):
     permission_list = build_role_permissions(role)
-    embed = disnake.Embed(title="Role Permissions",
-                          description=f"Permissions for <@&{role.id}>\n\n" + permission_list, color=variables.embed_color())
+    embed = disnake.Embed(
+        title="Role Permissions",
+        description=f"Permissions for <@&{role.id}>\n\n" + permission_list,
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "permissions", 3)
 
@@ -1399,68 +1842,115 @@ async def permissions_role_command(
 @client.user_command(name="View Permissions")
 async def user_permissions_command(interaction):
     permission_list = build_member_permissions(interaction.target)
-    embed = disnake.Embed(title="User Permissions",
-                          description=f"Permissions for <@{interaction.target.id}>\n\n" + permission_list, color=variables.embed_color())
+    embed = disnake.Embed(
+        title="User Permissions",
+        description=f"Permissions for <@{interaction.target.id}>\n\n" + permission_list,
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed)
 
 
-@client.slash_command(name="raid-protection", description="Change the raid protection settings")
+@client.slash_command(
+    name="raid-protection", description="Change the raid protection settings"
+)
 async def raid_protection_command(_):
     pass
 
 
-@raid_protection_command.sub_command(name="status", description="See the current setting for raid protection")
+@raid_protection_command.sub_command(
+    name="status", description="See the current setting for raid protection"
+)
 async def raid_protection_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
         current_setting = json.loads(
-            database[f"{interaction.guild.id}.raid-protection"])
+            database[f"{interaction.guild.id}.raid-protection"]
+        )
         if current_setting:
             counter = 0
             if interaction.guild.id in variables.protected_guilds:
                 counter = variables.protected_guilds[interaction.guild.id]
-            await interaction.response.send_message(f"This server's raid protection is turned **on**\nRaid Protection has saved **{counter} {'object' if counter == 1 else 'objects'}** so far")
+            await interaction.response.send_message(
+                f"This server's raid protection is turned **on**\nRaid Protection has saved **{counter} {'object' if counter == 1 else 'objects'}** so far"
+            )
         else:
-            await interaction.response.send_message("This server's raid protection is turned **off**")
+            await interaction.response.send_message(
+                "This server's raid protection is turned **off**"
+            )
     except:
-        await interaction.response.send_message("This server's raid protection is turned **off**")
+        await interaction.response.send_message(
+            "This server's raid protection is turned **off**"
+        )
 
 
-@raid_protection_command.sub_command(name="enable", description="Enable raid protection for this server")
+@raid_protection_command.sub_command(
+    name="enable", description="Enable raid protection for this server"
+)
 async def raid_protection_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     database[f"{interaction.guild.id}.raid-protection"] = 1
-    await interaction.response.send_message("This server's raid protection has been turned **on**")
+    await interaction.response.send_message(
+        "This server's raid protection has been turned **on**"
+    )
 
 
-@raid_protection_command.sub_command(name="disable", description="Disable raid protection for this server")
+@raid_protection_command.sub_command(
+    name="disable", description="Disable raid protection for this server"
+)
 async def raid_protection_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     database[f"{interaction.guild.id}.raid-protection"] = 0
-    await interaction.response.send_message("This server's raid protection has been turned **off**")
+    await interaction.response.send_message(
+        "This server's raid protection has been turned **off**"
+    )
 
 
 async def autocomplete_algorithms(_, string):
-    return list(filter(lambda algorithm: string.lower() in algorithm.lower(), list(hashlib.algorithms_available)))[:20]
+    return list(
+        filter(
+            lambda algorithm: string.lower() in algorithm.lower(),
+            list(hashlib.algorithms_available),
+        )
+    )[:20]
 
 
 @client.slash_command(name="hash", description="Hash text using different algorithms")
 async def hash_command(
     interaction,
     hash_type: str = Param(
-        name="algorithm", description="The type of the output hash (md5, sha256, etc)", autocomplete=autocomplete_algorithms),
+        name="algorithm",
+        description="The type of the output hash (md5, sha256, etc)",
+        autocomplete=autocomplete_algorithms,
+    ),
     text: str = Param(description="The text you want to hash"),
     length: int = Param(
-        None, description="The length of the output hash (for shake_128, shake_256, etc)"),
+        None,
+        description="The length of the output hash (for shake_128, shake_256, etc)",
+    ),
 ):
     try:
         hash_type = hash_type.strip()
@@ -1468,12 +1958,15 @@ async def hash_command(
         output_hash = hash_text(hash_type, text, length=length)
         embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Text", value=text)
-        embed.add_field(name=f"Hash ({hash_type})",
-                        value="`" + output_hash + "`", inline=False)
+        embed.add_field(
+            name=f"Hash ({hash_type})", value="`" + output_hash + "`", inline=False
+        )
         await interaction.response.send_message(embed=embed)
         add_cooldown(interaction.author.id, "hash", 3)
     except:
-        await interaction.response.send_message("Invalid hash algorithm (or no length specified)", ephemeral=True)
+        await interaction.response.send_message(
+            "Invalid hash algorithm (or no length specified)", ephemeral=True
+        )
         return
 
 
@@ -1491,8 +1984,7 @@ async def base64_encode_command(
         output_code = base64.b64encode(text.encode("utf-8")).decode("utf-8")
         embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Text", value=text)
-        embed.add_field(name="Base64", value="`" +
-                        output_code + "`", inline=False)
+        embed.add_field(name="Base64", value="`" + output_code + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Unable to encode the specified text")
@@ -1526,11 +2018,10 @@ async def binary_encode_command(
     text: str = Param(description="The text you want to encode"),
 ):
     try:
-        output_code = ' '.join(format(ord(letter), '08b') for letter in text)
+        output_code = " ".join(format(ord(letter), "08b") for letter in text)
         embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Text", value=text)
-        embed.add_field(name="Binary", value="`" +
-                        output_code + "`", inline=False)
+        embed.add_field(name="Binary", value="`" + output_code + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Unable to encode the specified text")
@@ -1553,7 +2044,9 @@ async def binary_decode_command(
         embed.add_field(name="Text", value=output_text, inline=False)
         await interaction.response.send_message(embed=embed)
     except:
-        await interaction.response.send_message("Unable to decode the specified binary data")
+        await interaction.response.send_message(
+            "Unable to decode the specified binary data"
+        )
         return
     add_cooldown(interaction.author.id, "binary", 3)
 
@@ -1561,8 +2054,7 @@ async def binary_decode_command(
 @client.slash_command(name="calculate", description="Evaluate a math expression")
 async def calculate_command(
     interaction,
-    expression: str = Param(
-        description="The math expression you want to evaluate"),
+    expression: str = Param(description="The math expression you want to evaluate"),
 ):
     if expression.startswith("`"):
         expression = expression[1:]
@@ -1572,32 +2064,45 @@ async def calculate_command(
     if answer == None:
         answer = functions.get_text(interaction.author.id, "unknown_answer")
     embed = disnake.Embed(color=variables.embed_color())
-    embed.add_field(name=functions.get_text(
-        interaction.author.id, "expression"), value="`" + expression + "`")
-    embed.add_field(name=functions.get_text(interaction.author.id,
-                    "result"), value="`" + answer + "`", inline=False)
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "expression"),
+        value="`" + expression + "`",
+    )
+    embed.add_field(
+        name=functions.get_text(interaction.author.id, "result"),
+        value="`" + answer + "`",
+        inline=False,
+    )
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "calculate", 3)
 
 
-@client.slash_command(name="clear", description="Delete the specified amount of messages")
+@client.slash_command(
+    name="clear", description="Delete the specified amount of messages"
+)
 async def clear_command(
     interaction,
-    count: int = Param(
-        description="The amount of messages you want to delete"),
+    count: int = Param(description="The amount of messages you want to delete"),
     member: disnake.Member = Param(
-        0, description="The member you want to delete messages for"),
-    contains: str = Param(
-        "", description="Only clear the messages that contain this"),
+        0, description="The member you want to delete messages for"
+    ),
+    contains: str = Param("", description="Only clear the messages that contain this"),
 ):
-    if interaction.author.guild_permissions.manage_messages or interaction.author.id in variables.permission_override:
+    if (
+        interaction.author.guild_permissions.manage_messages
+        or interaction.author.id in variables.permission_override
+    ):
         await interaction.response.defer(ephemeral=True)
 
         if count > 1000:
-            await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "max_clear_messages"))
+            await interaction.edit_original_message(
+                content=functions.get_text(interaction.author.id, "max_clear_messages")
+            )
             return
         elif count < 0:
-            await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "no_negative_numbers"))
+            await interaction.edit_original_message(
+                content=functions.get_text(interaction.author.id, "no_negative_numbers")
+            )
             return
 
         def contains_check(target_message):
@@ -1605,6 +2110,7 @@ async def clear_command(
 
         def member_check(target_message):
             return target_message.author.id == member.id
+
         contains = contains.strip()
         user_text = None
         contains_text = None
@@ -1613,7 +2119,9 @@ async def clear_command(
                 contains_text = contains
 
             if member == 0:
-                messages = len(await interaction.channel.purge(limit=count, check=contains_check))
+                messages = len(
+                    await interaction.channel.purge(limit=count, check=contains_check)
+                )
             else:
                 user_text = member
 
@@ -1622,28 +2130,42 @@ async def clear_command(
                         return True
                     else:
                         return False
-                messages = len(await interaction.channel.purge(limit=count, check=check))
+
+                messages = len(
+                    await interaction.channel.purge(limit=count, check=check)
+                )
         except:
-            await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "unable_to_clear"))
+            await interaction.edit_original_message(
+                content=functions.get_text(interaction.author.id, "unable_to_clear")
+            )
             return
         text = ""
-        message_label = functions.get_text(interaction.author.id, 'message_lower') if messages == 1 else functions.get_text(
-            interaction.author.id, 'messages_lower')
+        message_label = (
+            functions.get_text(interaction.author.id, "message_lower")
+            if messages == 1
+            else functions.get_text(interaction.author.id, "messages_lower")
+        )
         if user_text and contains_text:
-            text = functions.get_text(interaction.author.id, "cleared_from_contains").format(
-                messages, message_label, member, contains)
+            text = functions.get_text(
+                interaction.author.id, "cleared_from_contains"
+            ).format(messages, message_label, member, contains)
         elif user_text:
             text = functions.get_text(interaction.author.id, "cleared_from").format(
-                messages, message_label, member)
+                messages, message_label, member
+            )
         elif contains_text:
             text = functions.get_text(interaction.author.id, "cleared_contains").format(
-                messages, message_label, contains)
+                messages, message_label, contains
+            )
         else:
             text = functions.get_text(interaction.author.id, "cleared").format(
-                messages, message_label)
+                messages, message_label
+            )
         await interaction.edit_original_message(content=text)
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
     add_cooldown(interaction.author.id, "clear", 5)
 
 
@@ -1652,12 +2174,16 @@ async def text_command(_):
     pass
 
 
-@text_command.sub_command(name="sort", description="Sort the letters in alphabetical order")
+@text_command.sub_command(
+    name="sort", description="Sort the letters in alphabetical order"
+)
 async def text_sort_command(
     interaction,
     text: str = Param(description="The text you want to manipulate"),
 ):
-    await interaction.response.send_message(functions.remove_mentions("".join(sorted(text))))
+    await interaction.response.send_message(
+        functions.remove_mentions("".join(sorted(text)))
+    )
     add_cooldown(interaction.author.id, "text", 3)
 
 
@@ -1669,11 +2195,14 @@ async def italic_command(
     output = ""
     for letter in text:
         if letter in variables.ascii_characters:
-            output += variables.italic_characters[variables.ascii_characters.index(
-                letter)]
+            output += variables.italic_characters[
+                variables.ascii_characters.index(letter)
+            ]
     output = functions.remove_mentions(output)
     if output.strip() == "":
-        await interaction.response.send_message("I couldn't make your text italic!", ephemeral=True)
+        await interaction.response.send_message(
+            "I couldn't make your text italic!", ephemeral=True
+        )
     else:
         await interaction.response.send_message(output)
     add_cooldown(interaction.author.id, "text", 3)
@@ -1687,17 +2216,22 @@ async def bold_command(
     output = ""
     for letter in text:
         if letter in variables.ascii_characters:
-            output += variables.bold_characters[variables.ascii_characters.index(
-                letter)]
+            output += variables.bold_characters[
+                variables.ascii_characters.index(letter)
+            ]
     output = functions.remove_mentions(output)
     if output.strip() == "":
-        await interaction.response.send_message("I couldn't make your text bold!", ephemeral=True)
+        await interaction.response.send_message(
+            "I couldn't make your text bold!", ephemeral=True
+        )
     else:
         await interaction.response.send_message(output)
     add_cooldown(interaction.author.id, "text", 3)
 
 
-@text_command.sub_command(name="scramble", description="Scramble the letters in a sentence")
+@text_command.sub_command(
+    name="scramble", description="Scramble the letters in a sentence"
+)
 async def scramble_command(
     interaction,
     text: str = Param(description="The text you want to manipulate"),
@@ -1745,7 +2279,9 @@ async def unwide_command(
     add_cooldown(interaction.author.id, "text", 3)
 
 
-@text_command.sub_command(name="spoiler", description="Add spoilers to every single character")
+@text_command.sub_command(
+    name="spoiler", description="Add spoilers to every single character"
+)
 async def spoiler_command(
     interaction,
     text: str = Param(description="The text you want to manipulate"),
@@ -1789,7 +2325,9 @@ async def reverse_command(
     add_cooldown(interaction.author.id, "text", 3)
 
 
-@text_command.sub_command(name="corrupt", description="Make the text appear to be corrupted")
+@text_command.sub_command(
+    name="corrupt", description="Make the text appear to be corrupted"
+)
 async def corrupt_command(
     interaction,
     text: str = Param(description="The text you want to manipulate"),
@@ -1807,8 +2345,9 @@ async def corrupt_command(
                 new_text += letter
                 punctuation = random.choice([True, False, False, False, False])
                 if punctuation:
-                    new_text += string.punctuation[random.randint(
-                        0, len(string.punctuation) - 1)]
+                    new_text += string.punctuation[
+                        random.randint(0, len(string.punctuation) - 1)
+                    ]
     await interaction.response.send_message(functions.remove_mentions(new_text))
     add_cooldown(interaction.author.id, "text", 3)
 
@@ -1817,11 +2356,14 @@ async def corrupt_command(
 async def color_command(
     interaction,
     color_code: str = Param(
-        name="color", description="The color code you want to visualize"),
+        name="color", description="The color code you want to visualize"
+    ),
 ):
     colors = generate_color(color_code.lower())
     if colors == 1:
-        await interaction.response.send_message(f"`{color_code.lower()}` is not a valid color code!")
+        await interaction.response.send_message(
+            f"`{color_code.lower()}` is not a valid color code!"
+        )
         return
     else:
         hex_color = colors[0]
@@ -1830,7 +2372,9 @@ async def color_command(
         embed.set_image(url="attachment://color.png")
         embed.add_field(name="Hex", value=hex_color)
         embed.add_field(name="RGB", value=str(rgb_color), inline=True)
-    await interaction.response.send_message(embed=embed, file=disnake.File("images/color.png"))
+    await interaction.response.send_message(
+        embed=embed, file=disnake.File("images/color.png")
+    )
     add_cooldown(interaction.author.id, "color", 3)
 
 
@@ -1839,15 +2383,21 @@ async def autocomplete_timezones(_, string):
     for timezone in pytz.all_timezones:
         timezone = timezone.replace("_", " ")
         timezones.append(timezone)
-    return list(filter(lambda timezone: string.lower() in timezone.lower(), timezones))[:20]
+    return list(filter(lambda timezone: string.lower() in timezone.lower(), timezones))[
+        :20
+    ]
 
 
-@client.slash_command(name="time", description="Convert unit timestamps and get time information")
+@client.slash_command(
+    name="time", description="Convert unit timestamps and get time information"
+)
 async def time_command(_):
     pass
 
 
-@time_command.sub_command(name="epoch-date", description="Convert unix timestamps to dates")
+@time_command.sub_command(
+    name="epoch-date", description="Convert unix timestamps to dates"
+)
 async def epoch_date_command(
     interaction,
     text: str = Param(name="timestamp", description="The unix timestamp"),
@@ -1863,7 +2413,9 @@ async def epoch_date_command(
         return
 
 
-@time_command.sub_command(name="date-epoch", description="Convert dates to unix timestamps")
+@time_command.sub_command(
+    name="date-epoch", description="Convert dates to unix timestamps"
+)
 async def date_epoch_command(
     interaction,
     text: str = Param(name="date", description="The date"),
@@ -1872,19 +2424,22 @@ async def date_epoch_command(
         epoch = date_to_epoch(text)
         embed = disnake.Embed(color=variables.embed_color())
         embed.add_field(name="Date", value=text)
-        embed.add_field(name="Epoch", value="`" +
-                        str(epoch) + "`", inline=False)
+        embed.add_field(name="Epoch", value="`" + str(epoch) + "`", inline=False)
         await interaction.response.send_message(embed=embed)
     except:
         await interaction.response.send_message("Invalid date")
         return
 
 
-@time_command.sub_command(name="get", description="Get the time information about a specific region")
+@time_command.sub_command(
+    name="get", description="Get the time information about a specific region"
+)
 async def time_get_command(
     interaction,
-    region: str = Param(description="The region you want to check the time for",
-                        autocomplete=autocomplete_timezones),
+    region: str = Param(
+        description="The region you want to check the time for",
+        autocomplete=autocomplete_timezones,
+    ),
 ):
     region = region.strip()
     try:
@@ -1895,14 +2450,19 @@ async def time_get_command(
             segments = disnake_paginator.split(output, 1000)
             pager = disnake_paginator.ButtonPaginator(
                 color=variables.embed_color(),
-                prefix="```\n", suffix="```",
-                title=f"Timezone List", segments=segments,
+                prefix="```\n",
+                suffix="```",
+                title=f"Timezone List",
+                segments=segments,
                 invalid_user_function=functions.invalid_user_function,
             )
             await pager.start(interaction)
         elif region.lower() == "epoch" or region.lower() == "unix":
             embed = disnake.Embed(
-                title="Time", description=f"Current epoch time: **{round(time.time())}**", color=variables.embed_color())
+                title="Time",
+                description=f"Current epoch time: **{round(time.time())}**",
+                color=variables.embed_color(),
+            )
             await interaction.response.send_message(embed=embed)
         else:
             user_timezone = pytz.timezone(region.replace(" ", "_"))
@@ -1911,8 +2471,11 @@ async def time_get_command(
             for timezone in pytz.all_timezones:
                 if timezone.lower().replace("_", " ") == region_name.lower():
                     region_name = timezone.replace("_", " ")
-            embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'),
-                                  description=f"{functions.get_text(interaction.author.id, 'time_description')} **{region_name}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color())
+            embed = disnake.Embed(
+                title=functions.get_text(interaction.author.id, "current_time"),
+                description=f"{functions.get_text(interaction.author.id, 'time_description')} **{region_name}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**",
+                color=variables.embed_color(),
+            )
             await interaction.response.send_message(embed=embed)
     except KeyError:
         for timezone in pytz.all_timezones:
@@ -1921,14 +2484,20 @@ async def time_get_command(
                 if region.replace(" ", "_").lower() == city.lower():
                     user_timezone = pytz.timezone(timezone)
                     now = datetime.datetime.now(user_timezone)
-                    embed = disnake.Embed(title=functions.get_text(interaction.author.id, 'current_time'),
-                                          description=f"{functions.get_text(interaction.author.id, 'time_description')} **{timezone.replace('_', ' ')}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**", color=variables.embed_color())
+                    embed = disnake.Embed(
+                        title=functions.get_text(interaction.author.id, "current_time"),
+                        description=f"{functions.get_text(interaction.author.id, 'time_description')} **{timezone.replace('_', ' ')}**\n\n{functions.get_text(interaction.author.id, 'current_time')}: **{str(now.time()).split('.')[0]}**\n{functions.get_text(interaction.author.id, 'current_date')}: **{now.date()}**\n{functions.get_text(interaction.author.id, 'weekday')}: **{functions.get_text(interaction.author.id, 'weekdays')[now.weekday()]}**",
+                        color=variables.embed_color(),
+                    )
                     await interaction.response.send_message(embed=embed)
                     return
             except:
                 pass
         embed = disnake.Embed(
-            title="Time", description=f"That timezone was not found", color=variables.embed_color())
+            title="Time",
+            description=f"That timezone was not found",
+            color=variables.embed_color(),
+        )
         await interaction.response.send_message(embed=embed)
         return
     add_cooldown(interaction.author.id, "time", 3)
@@ -1939,29 +2508,46 @@ async def nickname_command(
     interaction,
     nickname: str = Param(description="The new nickname"),
     member: disnake.Member = Param(
-        default=lambda interaction: interaction.author, description="The target member"),
+        default=lambda interaction: interaction.author, description="The target member"
+    ),
 ):
     if member.id != interaction.author.id:
-        if not interaction.author.guild_permissions.manage_nicknames and interaction.author.id not in variables.permission_override:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        if (
+            not interaction.author.guild_permissions.manage_nicknames
+            and interaction.author.id not in variables.permission_override
+        ):
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "no_permission"),
+                ephemeral=True,
+            )
             return
 
     try:
         if interaction.author.id not in variables.permission_override:
             if member.id == interaction.author.id:
                 if not member.guild_permissions.change_nickname:
-                    await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+                    await interaction.response.send_message(
+                        functions.get_text(interaction.author.id, "no_permission"),
+                        ephemeral=True,
+                    )
                     return
             else:
                 if member.top_role.position >= interaction.author.top_role.position:
-                    await interaction.response.send_message(f"You do not have permission to edit **{member}**'s nickname!", ephemeral=True)
+                    await interaction.response.send_message(
+                        f"You do not have permission to edit **{member}**'s nickname!",
+                        ephemeral=True,
+                    )
                     return
         await member.edit(nick=nickname)
         nicknameString = f'**"{nickname}"**'
-        await interaction.response.send_message(f"Successfully updated **{member.name}**'s nickname to {nicknameString}")
+        await interaction.response.send_message(
+            f"Successfully updated **{member.name}**'s nickname to {nicknameString}"
+        )
         add_cooldown(interaction.author.id, "nickname", 3)
     except:
-        await interaction.response.send_message(f"Unable to change **{member.name}**'s nickname", ephemeral=True)
+        await interaction.response.send_message(
+            f"Unable to change **{member.name}**'s nickname", ephemeral=True
+        )
         return
 
 
@@ -1972,50 +2558,98 @@ async def channel_command(_):
 
 @channel_command.sub_command(name="lock", description="Lock the current channel")
 async def channel_lock_command(interaction):
-    if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_channels
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
-        await interaction.channel.set_permissions(interaction.guild.default_role, send_messages=False)
+        await interaction.channel.set_permissions(
+            interaction.guild.default_role, send_messages=False
+        )
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_lock").format(interaction.channel.mention), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "unable_to_lock").format(
+                interaction.channel.mention
+            ),
+            ephemeral=True,
+        )
         return
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "channel_locked").format(interaction.channel.mention), ephemeral=True)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "channel_locked").format(
+            interaction.channel.mention
+        ),
+        ephemeral=True,
+    )
 
 
 @channel_command.sub_command(name="unlock", description="Unlock the current channel")
 async def channel_unlock_command(interaction):
-    if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_channels
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
-        await interaction.channel.set_permissions(interaction.guild.default_role, send_messages=True)
+        await interaction.channel.set_permissions(
+            interaction.guild.default_role, send_messages=True
+        )
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unlock").format(interaction.channel.mention), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "unable_to_unlock").format(
+                interaction.channel.mention
+            ),
+            ephemeral=True,
+        )
         return
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "channel_unlocked").format(interaction.channel.mention), ephemeral=True)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "channel_unlocked").format(
+            interaction.channel.mention
+        ),
+        ephemeral=True,
+    )
 
 
-@channel_command.sub_command(name="slowmode", description="Change this channel's slowmode")
+@channel_command.sub_command(
+    name="slowmode", description="Change this channel's slowmode"
+)
 async def channel_slowmode_command(
     interaction,
     seconds: int = Param(description="The new slowmode of this channel"),
 ):
-    if not interaction.author.guild_permissions.manage_channels and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.manage_channels
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     if seconds > 21600 or seconds < 0:
-        await interaction.response.send_message("Please enter a valid slowmode between **0** (no slowmode) and **21600** (6 hours)", ephemeral=True)
+        await interaction.response.send_message(
+            "Please enter a valid slowmode between **0** (no slowmode) and **21600** (6 hours)",
+            ephemeral=True,
+        )
         return
     try:
         variables.updated_channels.append(interaction.channel.id)
         await interaction.channel.edit(slowmode_delay=seconds)
-        await interaction.response.send_message(f"This channel's slowmode has been set to **{seconds} {'second' if seconds == 1 else 'seconds'}**")
+        await interaction.response.send_message(
+            f"This channel's slowmode has been set to **{seconds} {'second' if seconds == 1 else 'seconds'}**"
+        )
     except:
-        await interaction.response.send_message("I was unable to change this channel's slowmode", ephemeral=True)
+        await interaction.response.send_message(
+            "I was unable to change this channel's slowmode", ephemeral=True
+        )
 
 
 @client.slash_command(name="search", description="Search for something on the internet")
@@ -2024,24 +2658,26 @@ async def search_command(_):
 
 
 async def autocomplete_youtube(_, string):
-    response = requests.get(
-        f"https://youtube.com/results?search_query={string}")
+    response = requests.get(f"https://youtube.com/results?search_query={string}")
     raw_results = []
     items = response.content.decode("utf-8").split(",")
     for item in items:
         if item.startswith('"title":{"runs":[{"text":') and item.endswith('"}]'):
-            raw_results.append(item.split(
-                '"title":{"runs":[{"text":"')[1].split('"}]')[0])
+            raw_results.append(
+                item.split('"title":{"runs":[{"text":"')[1].split('"}]')[0]
+            )
     search_results = []
     for result in raw_results:
-        result = result.replace('\\"', "\"")
+        result = result.replace('\\"', '"')
         if len(result) > 100:
             result = functions.shrink(result, 100)
         search_results.append(result)
     return search_results[:20]
 
 
-@search_command.sub_command(name="stackoverflow", description="Look for something on StackOverflow")
+@search_command.sub_command(
+    name="stackoverflow", description="Look for something on StackOverflow"
+)
 async def stackoverflow_command(
     interaction,
     text: str = Param(name="query", description="The search query"),
@@ -2051,15 +2687,19 @@ async def stackoverflow_command(
         stackoverflow_parameters = {
             "order": "desc",
             "sort": "activity",
-            "site": "stackoverflow"
+            "site": "stackoverflow",
         }
         stackoverflow_parameters["q"] = text
         parameters = stackoverflow_parameters
         response = requests.get(
-            url="https://api.stackexchange.com/2.2/search/advanced", params=parameters).json()
+            url="https://api.stackexchange.com/2.2/search/advanced", params=parameters
+        ).json()
         if not response["items"]:
             embed = disnake.Embed(
-                title="StackOverflow", description=f'No search results found for **"{text}"**', color=disnake.Color.red())
+                title="StackOverflow",
+                description=f'No search results found for **"{text}"**',
+                color=disnake.Color.red(),
+            )
             await interaction.edit_original_message(embed=embed)
             return
         final_results = response["items"][:5]
@@ -2070,7 +2710,7 @@ async def stackoverflow_command(
         )
         for result in final_results:
             tags = ""
-            for tag in result['tags'][:4]:
+            for tag in result["tags"][:4]:
                 tags += f"`{tag}`, "
             embed.add_field(
                 name=html.unescape(result["title"]),
@@ -2085,10 +2725,14 @@ async def stackoverflow_command(
             )
         await interaction.edit_original_message(embed=embed)
     except disnake.HTTPException:
-        await interaction.edit_original_message(content="The search result is too long!", ephemeral=True)
+        await interaction.edit_original_message(
+            content="The search result is too long!", ephemeral=True
+        )
         return
     except:
-        await interaction.edit_original_message(content="Unable to search for item", ephemeral=True)
+        await interaction.edit_original_message(
+            content="Unable to search for item", ephemeral=True
+        )
         return
     add_cooldown(interaction.author.id, "search", 10)
 
@@ -2098,10 +2742,14 @@ async def blacklist_command(_):
     pass
 
 
-@blacklist_command.sub_command(name="list", description="List all the blacklisted users")
+@blacklist_command.sub_command(
+    name="list", description="List all the blacklisted users"
+)
 async def blacklist_list_command(interaction):
     if interaction.author.id not in variables.bot_owners:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     blacklisted_users = []
@@ -2111,8 +2759,13 @@ async def blacklist_list_command(interaction):
         if user_tag == None:
             user_tag = "unknown"
         blacklisted_users.append(f"{user} (**{user_tag}**)")
-    embed = disnake.Embed(title="Blacklisted Users", description="\n".join(blacklisted_users) if "\n".join(
-        blacklisted_users) != "" else "There are no blacklisted users", color=variables.embed_color())
+    embed = disnake.Embed(
+        title="Blacklisted Users",
+        description="\n".join(blacklisted_users)
+        if "\n".join(blacklisted_users) != ""
+        else "There are no blacklisted users",
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
@@ -2122,45 +2775,64 @@ async def blacklist_add_command(
     user: str = Param(description="The user you want to add to the blacklist"),
 ):
     if interaction.author.id not in variables.bot_owners:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
         user_id = int(functions.remove_mentions(user))
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "mention_valid_user"),
+            ephemeral=True,
+        )
         return
     current_users = json.loads(database["blacklist"])
     if user_id in current_users:
-        await interaction.response.send_message("That user is already in the blacklist!", ephemeral=True)
+        await interaction.response.send_message(
+            "That user is already in the blacklist!", ephemeral=True
+        )
         return
     current_users.append(user_id)
     database["blacklist"] = json.dumps(current_users)
-    await interaction.response.send_message(f"Successfully added `{user_id}` to the blacklist", ephemeral=True)
+    await interaction.response.send_message(
+        f"Successfully added `{user_id}` to the blacklist", ephemeral=True
+    )
 
 
-@blacklist_command.sub_command(name="remove", description="Remove a user from the blacklist")
+@blacklist_command.sub_command(
+    name="remove", description="Remove a user from the blacklist"
+)
 async def blacklist_remove_command(
     interaction,
-    user: str = Param(
-        description="The user you want to remove from the blacklist"),
+    user: str = Param(description="The user you want to remove from the blacklist"),
 ):
     if interaction.author.id not in variables.bot_owners:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
         user_id = int(functions.remove_mentions(user))
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "mention_valid_user"),
+            ephemeral=True,
+        )
         return
     current_users = json.loads(database["blacklist"])
     if user_id not in current_users:
-        await interaction.response.send_message("That user is not in the blacklist!", ephemeral=True)
+        await interaction.response.send_message(
+            "That user is not in the blacklist!", ephemeral=True
+        )
         return
     current_users.remove(user_id)
     database["blacklist"] = json.dumps(current_users)
-    await interaction.response.send_message(f"Successfully removed `{user_id}` from the blacklist", ephemeral=True)
+    await interaction.response.send_message(
+        f"Successfully removed `{user_id}` from the blacklist", ephemeral=True
+    )
 
 
 @client.slash_command(name="game", description="Start a fun game")
@@ -2170,9 +2842,9 @@ async def game_command(_):
 
 @game_command.sub_command(name="tictactoe", description="Start a TicTacToe game")
 async def tictactoe_command(interaction):
-    class TicTacToeButton(disnake.ui.Button['TicTacToe']):
+    class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
         def __init__(self, x: int, y: int):
-            super().__init__(style=disnake.ButtonStyle.secondary, label='\u200b', row=y)
+            super().__init__(style=disnake.ButtonStyle.secondary, label="\u200b", row=y)
             self.x = x
             self.y = y
 
@@ -2184,27 +2856,36 @@ async def tictactoe_command(interaction):
                 return
 
             if button_interaction.author.id not in players:
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "not_in_game"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(button_interaction.author.id, "not_in_game"),
+                    ephemeral=True,
+                )
                 return
 
             if view.current_player == view.X:
                 if button_interaction.author.id != players[0]:
-                    await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "wrong_turn"), ephemeral=True)
+                    await button_interaction.response.send_message(
+                        functions.get_text(button_interaction.author.id, "wrong_turn"),
+                        ephemeral=True,
+                    )
                     return
 
                 self.style = disnake.ButtonStyle.danger
-                self.label = 'X'
+                self.label = "X"
                 self.disabled = True
                 view.board[self.y][self.x] = view.X
                 view.current_player = view.O
                 content = f"It is now <@{players[1]}>'s (O) turn"
             else:
                 if button_interaction.author.id != players[1]:
-                    await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "wrong_turn"), ephemeral=True)
+                    await button_interaction.response.send_message(
+                        functions.get_text(button_interaction.author.id, "wrong_turn"),
+                        ephemeral=True,
+                    )
                     return
 
                 self.style = disnake.ButtonStyle.success
-                self.label = 'O'
+                self.label = "O"
                 self.disabled = True
                 view.board[self.y][self.x] = view.O
                 view.current_player = view.X
@@ -2213,9 +2894,9 @@ async def tictactoe_command(interaction):
             winner = view.check_board_winner()
             if winner is not None:
                 if winner == view.X:
-                    content = f'<@{players[0]}> (X) won!'
+                    content = f"<@{players[0]}> (X) won!"
                 elif winner == view.O:
-                    content = f'<@{players[1]}> (O) won!'
+                    content = f"<@{players[1]}> (O) won!"
                 else:
                     content = "It's a tie!"
 
@@ -2258,8 +2939,7 @@ async def tictactoe_command(interaction):
                     return self.X
 
             for line in range(3):
-                value = self.board[0][line] + \
-                    self.board[1][line] + self.board[2][line]
+                value = self.board[0][line] + self.board[1][line] + self.board[2][line]
                 if value == 3:
                     return self.O
                 elif value == -3:
@@ -2294,65 +2974,113 @@ async def tictactoe_command(interaction):
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
-        @disnake.ui.button(label=functions.get_text(interaction.author.id, "player_one"), style=disnake.ButtonStyle.blurple)
+        @disnake.ui.button(
+            label=functions.get_text(interaction.author.id, "player_one"),
+            style=disnake.ButtonStyle.blurple,
+        )
         async def player_one(self, button, button_interaction):
             button.label = button_interaction.author.name
             button.disabled = True
 
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "joined_game"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(button_interaction.author.id, "joined_game"),
+                    ephemeral=True,
+                )
             else:
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "already_joined"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(button_interaction.author.id, "already_joined"),
+                    ephemeral=True,
+                )
                 return
             if len(players) == 2:
-                await interaction.edit_original_message(view=self, content=functions.get_text(interaction.author.id, "game_starts_in_three"))
+                await interaction.edit_original_message(
+                    view=self,
+                    content=functions.get_text(
+                        interaction.author.id, "game_starts_in_three"
+                    ),
+                )
                 await asyncio.sleep(3)
-                await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
+                await interaction.edit_original_message(
+                    content=f"It's your turn, <@{players[0]}>!", view=TicTacToe()
+                )
                 self.stop()
                 return
             await interaction.edit_original_message(view=self)
 
-        @disnake.ui.button(label=functions.get_text(interaction.author.id, "player_two"), style=disnake.ButtonStyle.blurple)
+        @disnake.ui.button(
+            label=functions.get_text(interaction.author.id, "player_two"),
+            style=disnake.ButtonStyle.blurple,
+        )
         async def player_two(self, button, button_interaction):
             button.label = button_interaction.author.name
             button.disabled = True
 
             if button_interaction.author.id not in players:
                 players.append(button_interaction.author.id)
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "joined_game"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(button_interaction.author.id, "joined_game"),
+                    ephemeral=True,
+                )
             else:
-                await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "already_joined"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(button_interaction.author.id, "already_joined"),
+                    ephemeral=True,
+                )
                 return
             if len(players) == 2:
-                await interaction.edit_original_message(view=self, content=functions.get_text(interaction.author.id, "game_starts_in_three"))
+                await interaction.edit_original_message(
+                    view=self,
+                    content=functions.get_text(
+                        interaction.author.id, "game_starts_in_three"
+                    ),
+                )
                 await asyncio.sleep(3)
-                await interaction.edit_original_message(content=f"It's your turn, <@{players[0]}>!", view=TicTacToe())
+                await interaction.edit_original_message(
+                    content=f"It's your turn, <@{players[0]}>!", view=TicTacToe()
+                )
                 self.stop()
                 return
             await interaction.edit_original_message(view=self)
 
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "join_tictactoe"), view=GameLauncher())
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "join_tictactoe"), view=GameLauncher()
+    )
     add_cooldown(interaction.author.id, "game", 20)
 
+
 def autocomplete_trivia_categories(_, string):
-    response = list(requests.get(
-        "https://opentdb.com/api_category.php").json()["trivia_categories"])
-    return list(filter(lambda word: string.lower() in word.name.lower(), [disnake.OptionChoice(name=category['name'], value=category["id"]) for category in response]))[:20]
+    response = list(
+        requests.get("https://opentdb.com/api_category.php").json()["trivia_categories"]
+    )
+    return list(
+        filter(
+            lambda word: string.lower() in word.name.lower(),
+            [
+                disnake.OptionChoice(name=category["name"], value=category["id"])
+                for category in response
+            ],
+        )
+    )[:20]
+
 
 @game_command.sub_command(name="trivia", description="Start a trivia game")
 async def trivia_command(
     interaction,
-    category: int = Param(random.randint(9, 32), description="The category you want the joke to be from",
-                        autocomplete=autocomplete_trivia_categories),
+    category: int = Param(
+        random.randint(9, 32),
+        description="The category you want the joke to be from",
+        autocomplete=autocomplete_trivia_categories,
+    ),
 ):
     await interaction.response.defer()
     url = f"https://opentdb.com/api.php?amount=1&type=multiple&category={category}&difficulty={random.choice(['easy', 'medium', 'hard'])}"
     response = requests.get(url).json()
     description = f"**{html.unescape(response['results'][0]['question'])}**\nCategory: `{response['results'][0]['category']}` (**{response['results'][0]['difficulty']}** difficulty)"
-    answers = response['results'][0]['incorrect_answers']
-    answers.append(response['results'][0]['correct_answer'])
-    correct_answer = html.unescape(response['results'][0]['correct_answer'])
+    answers = response["results"][0]["incorrect_answers"]
+    answers.append(response["results"][0]["correct_answer"])
+    correct_answer = html.unescape(response["results"][0]["correct_answer"])
 
     class CommandView(disnake.ui.View):
         def __init__(self):
@@ -2373,8 +3101,9 @@ async def trivia_command(
                     style = disnake.ButtonStyle.gray
                 if correct_answer == button.label:
                     style = disnake.ButtonStyle.green
-                new_view.add_item(disnake.ui.Button(
-                    label=button.label, style=style, disabled=True))
+                new_view.add_item(
+                    disnake.ui.Button(label=button.label, style=style, disabled=True)
+                )
             await interaction.edit_original_message(view=new_view)
             self.stop()
 
@@ -2384,13 +3113,24 @@ async def trivia_command(
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_1(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "not_command_sender"),
+                    ephemeral=True,
+                )
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "correct_answer"),
+                    ephemeral=True,
+                )
             else:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "wrong_answer").format(
+                        correct_answer
+                    ),
+                    ephemeral=True,
+                )
             await self.close(button.label)
 
         answer = random.choice(answers)
@@ -2399,13 +3139,24 @@ async def trivia_command(
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_2(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "not_command_sender"),
+                    ephemeral=True,
+                )
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "correct_answer"),
+                    ephemeral=True,
+                )
             else:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "wrong_answer").format(
+                        correct_answer
+                    ),
+                    ephemeral=True,
+                )
             await self.close(button.label)
 
         answer = random.choice(answers)
@@ -2414,13 +3165,24 @@ async def trivia_command(
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_3(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "not_command_sender"),
+                    ephemeral=True,
+                )
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "correct_answer"),
+                    ephemeral=True,
+                )
             else:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "wrong_answer").format(
+                        correct_answer
+                    ),
+                    ephemeral=True,
+                )
             await self.close(button.label)
 
         answer = random.choice(answers)
@@ -2429,13 +3191,24 @@ async def trivia_command(
         @disnake.ui.button(label=html.unescape(answer), style=disnake.ButtonStyle.gray)
         async def trivia_response_4(self, button, button_interaction):
             if interaction.author != button_interaction.author:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "not_command_sender"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "not_command_sender"),
+                    ephemeral=True,
+                )
                 return
 
             if button.label == correct_answer:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "correct_answer"), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "correct_answer"),
+                    ephemeral=True,
+                )
             else:
-                await button_interaction.response.send_message(functions.get_text(interaction.author.id, "wrong_answer").format(correct_answer), ephemeral=True)
+                await button_interaction.response.send_message(
+                    functions.get_text(interaction.author.id, "wrong_answer").format(
+                        correct_answer
+                    ),
+                    ephemeral=True,
+                )
             await self.close(button.label)
 
     embed = disnake.Embed(
@@ -2454,19 +3227,20 @@ async def fetch_command(_):
 @fetch_command.sub_command(name="pypi", description="Fetch a project on PyPi")
 async def pypi_command(
     interaction,
-    project: str = Param(
-        description="The PyPi project that you want to search"),
+    project: str = Param(description="The PyPi project that you want to search"),
 ):
     await interaction.response.defer()
     response = requests.get(f"https://pypi.org/pypi/{project.strip()}/json")
     if response.status_code == 404:
-        await interaction.edit_original_message(content="That PyPi package was not found")
+        await interaction.edit_original_message(
+            content="That PyPi package was not found"
+        )
         return
     response = response.json()
     size_unit = "bytes"
     size = 0
     if len(response["urls"]) > 0:
-        size = response["urls"][len(response["urls"])-1]["size"]
+        size = response["urls"][len(response["urls"]) - 1]["size"]
     updated = "Never"
     if len(response["urls"]) > 0:
         updated = f"<t:{str(parser.isoparse(response['urls'][len(response['urls'])-1]['upload_time_iso_8601']).timestamp()).split('.')[0]}:d>"
@@ -2477,23 +3251,34 @@ async def pypi_command(
             size_unit = "MB"
             size = size / 1000
     embed = disnake.Embed(color=variables.embed_color())
+    embed.add_field(name="Project", value=f"[URL]({response['info']['package_url']})")
+    embed.add_field(name="Homepage", value=f"[URL]({response['info']['home_page']})")
     embed.add_field(
-        name="Project", value=f"[URL]({response['info']['package_url']})")
-    embed.add_field(name="Homepage",
-                    value=f"[URL]({response['info']['home_page']})")
-    embed.add_field(
-        name="Owner", value=response["info"]["author"] if response["info"]["author"] != "" else "None")
+        name="Owner",
+        value=response["info"]["author"]
+        if response["info"]["author"] != ""
+        else "None",
+    )
     embed.add_field(name="Name", value=response["info"]["name"])
     embed.add_field(name="Version", value=response["info"]["version"])
     embed.add_field(
-        name="License", value=response["info"]["license"] if response["info"]["license"] != "" else "None")
+        name="License",
+        value=response["info"]["license"]
+        if response["info"]["license"] != ""
+        else "None",
+    )
     embed.add_field(name="Yanked", value=response["info"]["yanked"])
     embed.add_field(name="Size", value=f"{round(size, 2)} {size_unit}")
     embed.add_field(name="Updated", value=updated)
     embed.add_field(
-        name="Summary", value=response["info"]["summary"] if response["info"]["summary"] != "" else "None")
+        name="Summary",
+        value=response["info"]["summary"]
+        if response["info"]["summary"] != ""
+        else "None",
+    )
     embed.set_thumbnail(
-        url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100")
+        url="https://images-ext-2.discordapp.net/external/oQNoEyWKGK4hHgW0x-sijvshBVYPzZ8g7zrARhLbHJU/https/cdn.discordapp.com/emojis/766274397257334814.png?width=115&height=100"
+    )
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 5)
 
@@ -2504,11 +3289,12 @@ async def github_command(
     repository: str = Param(description="The repository you want to fetch"),
 ):
     await interaction.response.defer()
-    response = requests.get(
-        f"https://api.github.com/repos/{repository.strip()}").json()
+    response = requests.get(f"https://api.github.com/repos/{repository.strip()}").json()
     try:
         if response["message"] == "Not Found":
-            await interaction.edit_original_message(content="That GitHub repository was not found")
+            await interaction.edit_original_message(
+                content="That GitHub repository was not found"
+            )
             return
     except:
         pass
@@ -2518,32 +3304,39 @@ async def github_command(
     embed.add_field(name="Name", value=f"{response['name']}")
     embed.add_field(name="Language", value=f"{response['language']}")
     embed.add_field(name="Issues", value=f"{response['open_issues']:,}")
-    embed.add_field(name="Watchers",
-                    value=f"{response['subscribers_count']:,}")
+    embed.add_field(name="Watchers", value=f"{response['subscribers_count']:,}")
     embed.add_field(name="Stars", value=f"{response['stargazers_count']:,}")
     embed.add_field(name="Forks", value=f"{response['forks']:,}")
     embed.add_field(
-        name="License", value=f"{response['license']['name'] if response['license'] != None else 'None'}")
-    embed.add_field(
-        name="Size", value=f"{round(response['size']/1000, 2):,} MB")
+        name="License",
+        value=f"{response['license']['name'] if response['license'] != None else 'None'}",
+    )
+    embed.add_field(name="Size", value=f"{round(response['size']/1000, 2):,} MB")
     embed.add_field(name="Branch", value=f"{response['default_branch']}")
     embed.add_field(name="Forked", value=f"{response['fork']}")
     embed.add_field(name="Archived", value=f"{response['archived']}")
     embed.add_field(
-        name="Created", value=f"<t:{str(parser.isoparse(response['created_at']).timestamp()).split('.')[0]}:d>")
+        name="Created",
+        value=f"<t:{str(parser.isoparse(response['created_at']).timestamp()).split('.')[0]}:d>",
+    )
     embed.add_field(
-        name="Updated", value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>")
+        name="Updated",
+        value=f"<t:{str(parser.isoparse(response['updated_at']).timestamp()).split('.')[0]}:d>",
+    )
     embed.add_field(name="Description", value=f"{response['description']}")
     embed.set_thumbnail(url=response["owner"]["avatar_url"])
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "github", 5)
 
 
-@fetch_command.sub_command(name="minecraft-server", description="Fetch a Minecraft server")
+@fetch_command.sub_command(
+    name="minecraft-server", description="Fetch a Minecraft server"
+)
 async def fetch_minecraft_server_command(
     interaction,
     server_ip: str = Param(
-        name="server-ip", description="The IP of the Minecraft server"),
+        name="server-ip", description="The IP of the Minecraft server"
+    ),
 ):
     await interaction.response.defer()
     try:
@@ -2560,32 +3353,38 @@ async def fetch_minecraft_server_command(
             error = "No address associated with hostname"
         elif error == "timed out":
             error = "Connection timed out"
-        elif error == "'socket' object has no attribute 'read'" or error == "Expecting value: line 1 column 1 (char 0)":
+        elif (
+            error == "'socket' object has no attribute 'read'"
+            or error == "Expecting value: line 1 column 1 (char 0)"
+        ):
             error = "Not a valid Minecraft server"
         elif error == "connect(): port must be 0-65535.":
             error = "Port must be from 0 to 65535"
         elif "invalid literal" in error:
             error = "Invalid port specified"
-        embed = disnake.Embed(title=functions.get_text(
-            interaction.author.id, "unable_to_connect"), description=error, color=disnake.Color.red())
+        embed = disnake.Embed(
+            title=functions.get_text(interaction.author.id, "unable_to_connect"),
+            description=error,
+            color=disnake.Color.red(),
+        )
         await interaction.edit_original_message(embed=embed)
         return
 
-    if type(server['description']) == str:
-        server_description = server['description']
+    if type(server["description"]) == str:
+        server_description = server["description"]
     else:
-        server_description = server['description']['text']
+        server_description = server["description"]["text"]
         try:
-            for segment in server['description']['extra']:
+            for segment in server["description"]["extra"]:
                 bold = False
                 if "bold" in segment.keys():
-                    bold = segment['bold']
+                    bold = segment["bold"]
                 italic = False
                 if "italic" in segment.keys():
-                    italic = segment['italic']
+                    italic = segment["italic"]
                 underlined = False
                 if "underlined" in segment.keys():
-                    underlined = segment['underlined']
+                    underlined = segment["underlined"]
                 text = segment["text"]
                 if bold:
                     text = "**" + text + "**"
@@ -2599,13 +3398,12 @@ async def fetch_minecraft_server_command(
             pass
     server_players = ""
     try:
-        for player in server['players']['sample']:
+        for player in server["players"]["sample"]:
             server_players += f"**{player['name']}**, "
     except:
         pass
     if server_players == "":
-        server_players = functions.get_text(
-            interaction.author.id, "unknown_upper")
+        server_players = functions.get_text(interaction.author.id, "unknown_upper")
     else:
         server_players = server_players[:-2]
 
@@ -2614,45 +3412,61 @@ async def fetch_minecraft_server_command(
     if "favicon" in server.keys():
         try:
             file = open("images/icon.png", "wb+")
-            file.write(base64.b64decode(server['favicon'][22:]))
+            file.write(base64.b64decode(server["favicon"][22:]))
             file.close()
             image = True
         except:
             pass
-    embed = disnake.Embed(title=functions.get_text(
-        interaction.author.id, "minecraft_server"), description=description, color=disnake.Color.green())
+    embed = disnake.Embed(
+        title=functions.get_text(interaction.author.id, "minecraft_server"),
+        description=description,
+        color=disnake.Color.green(),
+    )
     if image:
         embed.set_thumbnail(url="attachment://icon.png")
-    await interaction.edit_original_message(embed=embed, file=disnake.File("images/icon.png") if image else None)
+    await interaction.edit_original_message(
+        embed=embed, file=disnake.File("images/icon.png") if image else None
+    )
     add_cooldown(interaction.author.id, "fetch", 5)
 
 
 @fetch_command.sub_command(name="weather", description="Fetch the weather in a region")
 async def fetch_weather_command(
     interaction,
-    region: str = Param(
-        description="The region you want to check the weather for"),
+    region: str = Param(description="The region you want to check the weather for"),
 ):
     await interaction.response.defer()
     try:
         response = requests.get(
-            f"http://api.openweathermap.org/data/2.5/weather?q={region}&appid={os.environ['WEATHER_KEY']}&units=metric").json()
+            f"http://api.openweathermap.org/data/2.5/weather?q={region}&appid={os.environ['WEATHER_KEY']}&units=metric"
+        ).json()
     except:
-        await interaction.edit_original_message(content=f'I was unable to fetch the weather for **"{region}"**')
+        await interaction.edit_original_message(
+            content=f'I was unable to fetch the weather for **"{region}"**'
+        )
         return
     try:
-        if response['cod'] == '404':
-            await interaction.edit_original_message(content="The specified region wasn't found!")
+        if response["cod"] == "404":
+            await interaction.edit_original_message(
+                content="The specified region wasn't found!"
+            )
             return
     except:
         pass
-    time_offset = datetime.timedelta(0, response['timezone'])
-    current_time = str(datetime.datetime.now() +
-                       time_offset).split(" ")[1].split(".")[0]
-    sunrise_time = str(datetime.datetime.fromtimestamp(
-        response['sys']['sunrise']) + time_offset).split(" ")[1].split(".")[0]
-    sunset_time = str(datetime.datetime.fromtimestamp(
-        response['sys']['sunset']) + time_offset).split(" ")[1].split(".")[0]
+    time_offset = datetime.timedelta(0, response["timezone"])
+    current_time = (
+        str(datetime.datetime.now() + time_offset).split(" ")[1].split(".")[0]
+    )
+    sunrise_time = (
+        str(datetime.datetime.fromtimestamp(response["sys"]["sunrise"]) + time_offset)
+        .split(" ")[1]
+        .split(".")[0]
+    )
+    sunset_time = (
+        str(datetime.datetime.fromtimestamp(response["sys"]["sunset"]) + time_offset)
+        .split(" ")[1]
+        .split(".")[0]
+    )
     precipitation = "None"
     if "rain" in response.keys():
         precipitation = f"Rain: {response['rain']['1h']} mm"
@@ -2665,29 +3479,22 @@ async def fetch_weather_command(
 
     embed = disnake.Embed(color=variables.embed_color())
     embed.set_thumbnail(
-        url=f"https://openweathermap.org/img/wn/{response['weather'][0]['icon']}@2x.png")
-    embed.add_field(name=f"Location{country}", value=response['name'])
-    embed.add_field(name="Current Weather",
-                    value=response['weather'][0]['main'])
-    embed.add_field(name="Description",
-                    value=response['weather'][0]['description'].title())
-    embed.add_field(name="Temperature", value=str(
-        response['main']['temp'])+"°C")
-    embed.add_field(name="Coldest", value=str(
-        response['main']['temp_min'])+"°C")
-    embed.add_field(name="Hottest", value=str(
-        response['main']['temp_max'])+"°C")
-    embed.add_field(name="Feels Like", value=str(
-        response['main']['feels_like'])+"°C")
-    embed.add_field(name="Pressure", value=str(
-        response['main']['pressure'])+" hPa")
-    embed.add_field(name="Humidity", value=str(
-        response['main']['humidity'])+"%")
+        url=f"https://openweathermap.org/img/wn/{response['weather'][0]['icon']}@2x.png"
+    )
+    embed.add_field(name=f"Location{country}", value=response["name"])
+    embed.add_field(name="Current Weather", value=response["weather"][0]["main"])
+    embed.add_field(
+        name="Description", value=response["weather"][0]["description"].title()
+    )
+    embed.add_field(name="Temperature", value=str(response["main"]["temp"]) + "°C")
+    embed.add_field(name="Coldest", value=str(response["main"]["temp_min"]) + "°C")
+    embed.add_field(name="Hottest", value=str(response["main"]["temp_max"]) + "°C")
+    embed.add_field(name="Feels Like", value=str(response["main"]["feels_like"]) + "°C")
+    embed.add_field(name="Pressure", value=str(response["main"]["pressure"]) + " hPa")
+    embed.add_field(name="Humidity", value=str(response["main"]["humidity"]) + "%")
     embed.add_field(name="Precipitation (1h)", value=precipitation)
-    embed.add_field(name="Cloudiness", value=str(
-        response['clouds']['all'])+"%")
-    embed.add_field(name="Wind Speed", value=str(
-        response['wind']['speed'])+" m/s")
+    embed.add_field(name="Cloudiness", value=str(response["clouds"]["all"]) + "%")
+    embed.add_field(name="Wind Speed", value=str(response["wind"]["speed"]) + " m/s")
     embed.add_field(name="Current Time", value=current_time)
     embed.add_field(name="Sunrise Time", value=sunrise_time)
     embed.add_field(name="Sunset Time", value=sunset_time)
@@ -2695,14 +3502,17 @@ async def fetch_weather_command(
     add_cooldown(interaction.author.id, "fetch", 3)
 
 
-@fetch_command.sub_command(name="astronauts", description="Fetch the people that are currently in space")
+@fetch_command.sub_command(
+    name="astronauts", description="Fetch the people that are currently in space"
+)
 async def fetch_astronauts_command(interaction):
     await interaction.response.defer()
     try:
-        response = requests.get(
-            "http://api.open-notify.org/astros.json").json()
+        response = requests.get("http://api.open-notify.org/astros.json").json()
     except:
-        await interaction.edit_original_message(content="I was unable to fetch the people in space")
+        await interaction.edit_original_message(
+            content="I was unable to fetch the people in space"
+        )
         return
     embed = disnake.Embed(color=variables.embed_color())
     stations = []
@@ -2715,9 +3525,10 @@ async def fetch_astronauts_command(interaction):
             if person["craft"] == station:
                 value += f"\n{person['name']}"
         embed.add_field(name=station, value=value)
-    number = response['number']
+    number = response["number"]
     embed.set_footer(
-        text=f"There {'is' if number == 1 else 'are'} currently {number} {'person' if number == 1 else 'people'} in space")
+        text=f"There {'is' if number == 1 else 'are'} currently {number} {'person' if number == 1 else 'people'} in space"
+    )
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 3)
 
@@ -2728,11 +3539,17 @@ async def meme_command(interaction):
     try:
         response = requests.get("https://meme-api.herokuapp.com/gimme").json()
     except:
-        await interaction.edit_original_message(content="I was unable to fetch a meme from Reddit")
+        await interaction.edit_original_message(
+            content="I was unable to fetch a meme from Reddit"
+        )
         return
     description = f"Posted by **{response['author']}** in **{response['subreddit']}** (**{response['ups']}** upvotes)"
-    embed = disnake.Embed(title=response["title"], url=response["postLink"],
-                          description=description, color=variables.embed_color())
+    embed = disnake.Embed(
+        title=response["title"],
+        url=response["postLink"],
+        description=description,
+        color=variables.embed_color(),
+    )
     embed.set_image(url=response["url"])
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 3)
@@ -2742,9 +3559,12 @@ async def meme_command(interaction):
 async def joke_command(interaction):
     await interaction.response.defer()
     response = requests.get(
-        "https://yet-another-api.errornointernet.repl.co/api/jokes/random").json()[0]
+        "https://yet-another-api.errornointernet.repl.co/api/jokes/random"
+    ).json()[0]
     embed = disnake.Embed(
-        description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**", color=variables.embed_color())
+        description=f"Here's a `{response['type']}` joke:\n{response['setup']} **{response['punchline']}**",
+        color=variables.embed_color(),
+    )
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "fetch", 3)
 
@@ -2753,9 +3573,12 @@ async def joke_command(interaction):
 async def quote_command(interaction):
     await interaction.response.defer()
     try:
-        response = json.loads(requests.get(
-            "https://zenquotes.io/api/random").content)[0]
-        await interaction.edit_original_message(content=f'"{response["q"]}"\n\n\t\t\t\t**- {response["a"]}**')
+        response = json.loads(requests.get("https://zenquotes.io/api/random").content)[
+            0
+        ]
+        await interaction.edit_original_message(
+            content=f'"{response["q"]}"\n\n\t\t\t\t**- {response["a"]}**'
+        )
         add_cooldown(interaction.author.id, "fetch", 3)
     except:
         await interaction.edit_original_message(content="Unable to fetch quote")
@@ -2764,23 +3587,37 @@ async def quote_command(interaction):
 @client.slash_command(name="unmute", description="Unmute the specified member")
 async def unmute_command(
     interaction,
-    member: disnake.Member = Param(
-        description="The member you want to unmute"),
+    member: disnake.Member = Param(description="The member you want to unmute"),
 ):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
+    if (
+        interaction.author.guild_permissions.manage_roles
+        or interaction.author.guild_permissions.administrator
+        or interaction.author.id in variables.permission_override
+    ):
         pass
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     if member.top_role.position >= interaction.author.top_role.position:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_unmute").format(member), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission_unmute").format(
+                member
+            ),
+            ephemeral=True,
+        )
         return
 
     try:
         await member.timeout(duration=None)
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_unmuted").format(member))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "user_unmuted").format(member)
+        )
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_unmute").format(member))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "unable_to_unmute").format(member)
+        )
 
 
 @client.slash_command(name="mute", description="Mute a specified member on your server")
@@ -2788,36 +3625,65 @@ async def mute_command(
     interaction,
     member: disnake.Member = Param(description="The member you want to mute"),
     duration: str = Param(description="The target duration"),
-    reason: str = Param(
-        None, description="The reason you are muting the member for"),
+    reason: str = Param(None, description="The reason you are muting the member for"),
 ):
-    if interaction.author.guild_permissions.manage_roles or interaction.author.guild_permissions.administrator or interaction.author.id in variables.permission_override:
+    if (
+        interaction.author.guild_permissions.manage_roles
+        or interaction.author.guild_permissions.administrator
+        or interaction.author.id in variables.permission_override
+    ):
         pass
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     if member.top_role.position >= interaction.author.top_role.position:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_mute").format(member), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission_mute").format(
+                member
+            ),
+            ephemeral=True,
+        )
         return
 
     original_duration = duration
     try:
         duration = functions.parse_time(duration)
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "invalid_duration"),
+            ephemeral=True,
+        )
         return
 
     if duration > 2419200:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "duration_too_long"),
+            ephemeral=True,
+        )
         return
     if duration < 0:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_negative_numbers"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_negative_numbers"),
+            ephemeral=True,
+        )
         return
     try:
         await member.timeout(duration=duration, reason=reason)
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "user_muted").format(member, functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "user_muted").format(
+                member,
+                functions.display_time(
+                    interaction.author.id, functions.parse_time(original_duration)
+                ),
+            )
+        )
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "unable_to_mute").format(member), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "unable_to_mute").format(member),
+            ephemeral=True,
+        )
 
 
 @client.slash_command(name="filter", description="Manage the auto-moderation filters")
@@ -2825,73 +3691,97 @@ async def filter_command(_):
     pass
 
 
-@filter_command.sub_command_group(name="ignore", description="Make a specific filter ignore messages from a specific channel")
+@filter_command.sub_command_group(
+    name="ignore",
+    description="Make a specific filter ignore messages from a specific channel",
+)
 async def filter_ignore_command(_):
     pass
 
 
-@filter_ignore_command.sub_command(name="add", description="Add a channel to the filter ignore list")
+@filter_ignore_command.sub_command(
+    name="add", description="Add a channel to the filter ignore list"
+)
 async def filter_ignore_add_command(
     interaction,
     filter: FilterOption = Param(description="The filter you want to add"),
-    channel: disnake.TextChannel = Param(
-        description="The channel you want to add"),
+    channel: disnake.TextChannel = Param(description="The channel you want to add"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     filter_name = functions.get_filter_name(filter)
     try:
-        current_values = json.loads(
-            database[f"filter-ignore.{interaction.guild.id}"])
+        current_values = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
     except:
         current_values = {}
     if filter_name not in current_values:
         current_values[filter_name] = []
     if len(current_values[filter_name]) >= 10:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("10"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "item_limit").format("10"),
+            ephemeral=True,
+        )
         return
     current_values[filter_name].append(channel.id)
-    database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(
-        current_values)
-    await interaction.response.send_message(f"<#{channel.id}> has been added to the **{filter}** filter's ignore list")
+    database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
+    await interaction.response.send_message(
+        f"<#{channel.id}> has been added to the **{filter}** filter's ignore list"
+    )
 
 
-@filter_ignore_command.sub_command(name="remove", description="Remove a channel from the filter ignore list")
+@filter_ignore_command.sub_command(
+    name="remove", description="Remove a channel from the filter ignore list"
+)
 async def filter_ignore_remove_command(
     interaction,
     filter: FilterOption = Param(description="The filter you want to add"),
-    channel: disnake.TextChannel = Param(
-        description="The channel you want to add"),
+    channel: disnake.TextChannel = Param(description="The channel you want to add"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     filter_name = functions.get_filter_name(filter)
     try:
-        current_values = json.loads(
-            database[f"filter-ignore.{interaction.guild.id}"])
+        current_values = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
     except:
         current_values = {}
     if filter_name not in current_values:
         current_values[filter_name] = []
     if channel.id in current_values[filter_name]:
         current_values[filter_name].remove(channel.id)
-        database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(
-            current_values)
-        await interaction.response.send_message(f"<#{channel.id}> has been removed from the **{filter}** filter's ignore list")
+        database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
+        await interaction.response.send_message(
+            f"<#{channel.id}> has been removed from the **{filter}** filter's ignore list"
+        )
     else:
-        await interaction.response.send_message(f"<#{channel.id}> is not in the **{filter}** filter's ignore list")
+        await interaction.response.send_message(
+            f"<#{channel.id}> is not in the **{filter}** filter's ignore list"
+        )
 
 
 @filter_ignore_command.sub_command(name="list", description="List the ignored channels")
 async def filter_ignore_list_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
-        current_values = json.loads(
-            database[f"filter-ignore.{interaction.guild.id}"])
+        current_values = json.loads(database[f"filter-ignore.{interaction.guild.id}"])
     except:
         current_values = {}
     description = ""
@@ -2912,30 +3802,41 @@ async def filter_ignore_list_command(interaction):
             values.remove(channel)
             current_values[value] = values
         if channels != []:
-            description += f"{functions.get_filter_name(value).title()}: {' '.join(channels)}\n"
-    database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(
-        current_values)
+            description += (
+                f"{functions.get_filter_name(value).title()}: {' '.join(channels)}\n"
+            )
+    database[f"filter-ignore.{interaction.guild.id}"] = json.dumps(current_values)
     embed = disnake.Embed(
         title="Ignored Channels",
-        description=description if description != "" else "There are no ignored channels",
+        description=description
+        if description != ""
+        else "There are no ignored channels",
         color=variables.embed_color(),
     )
     await interaction.response.send_message(embed=embed)
 
 
-@filter_command.sub_command_group(name="insults", description="Manage the insults filter")
+@filter_command.sub_command_group(
+    name="insults", description="Manage the insults filter"
+)
 async def insults_command(_):
     pass
 
 
-@insults_command.sub_command(name="list", description="List all the words in the insults filter")
+@insults_command.sub_command(
+    name="list", description="List all the words in the insults filter"
+)
 async def insults_list_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
-        insults_data = json.loads(
-            database[f"insults.list.{interaction.guild.id}"])
+        insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
     except:
         insults_data = []
     insults = []
@@ -2943,40 +3844,67 @@ async def insults_list_command(interaction):
     for insult in insults_data:
         counter += 1
         insults.append(f"**{counter}.** {insult}")
-    embed = disnake.Embed(title="Insults List", description="There are no insults configured for this server" if insults == [
-    ] else '\n'.join(insults), color=variables.embed_color())
+    embed = disnake.Embed(
+        title="Insults List",
+        description="There are no insults configured for this server"
+        if insults == []
+        else "\n".join(insults),
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed)
 
 
-@insults_command.sub_command(name="status", description="See the current status of the insults filter")
+@insults_command.sub_command(
+    name="status", description="See the current status of the insults filter"
+)
 async def insults_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
-        current_status = json.loads(
-            database[f"insults.toggle.{interaction.guild.id}"])
+        current_status = json.loads(database[f"insults.toggle.{interaction.guild.id}"])
     except:
         current_status = False
-    await interaction.response.send_message(f"The insults filter is currently **{'enabled' if current_status else 'disabled'}**")
+    await interaction.response.send_message(
+        f"The insults filter is currently **{'enabled' if current_status else 'disabled'}**"
+    )
 
 
 @insults_command.sub_command(name="enable", description="Enable the insults filter")
 async def insults_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"insults.toggle.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("The insults filter has been successfully **enabled**")
+    await interaction.response.send_message(
+        "The insults filter has been successfully **enabled**"
+    )
 
 
 @insults_command.sub_command(name="disable", description="Disable the insults filter")
 async def insults_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"insults.toggle.{interaction.guild.id}"] = 0
-    await interaction.response.send_message("The insults filter has been successfully **disabled**")
+    await interaction.response.send_message(
+        "The insults filter has been successfully **disabled**"
+    )
 
 
 @insults_command.sub_command(name="add", description="Add a word to the insults filter")
@@ -2984,25 +3912,35 @@ async def insults_add_command(
     interaction,
     word: str = Param(description="The word you want to add"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
-        insults_data = json.loads(
-            database[f"insults.list.{interaction.guild.id}"])
+        insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
     except:
         insults_data = []
         database[f"insults.list.{interaction.guild.id}"] = json.dumps([])
     if len(insults_data) >= 20:
-        await interaction.response.send_message("You can only add up to **20 words**!", ephemeral=True)
+        await interaction.response.send_message(
+            "You can only add up to **20 words**!", ephemeral=True
+        )
         return
     if len(word) <= 50:
         insults_data.append(word)
     else:
-        await interaction.response.send_message("The specified word is too long!", ephemeral=True)
+        await interaction.response.send_message(
+            "The specified word is too long!", ephemeral=True
+        )
         return
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
-    await interaction.response.send_message(f'Successfully added **"{word}"** to the insults list')
+    await interaction.response.send_message(
+        f'Successfully added **"{word}"** to the insults list'
+    )
 
 
 async def insults_remove_autocomplete(interaction, string):
@@ -3013,28 +3951,40 @@ async def insults_remove_autocomplete(interaction, string):
     return list(filter(lambda word: string.lower() in word.lower(), words))[:20]
 
 
-@insults_command.sub_command(name="remove", description="Remove a word from the insults filter")
+@insults_command.sub_command(
+    name="remove", description="Remove a word from the insults filter"
+)
 async def insults_remove_command(
     interaction,
-    word: str = Param(description="The word you want to remove",
-                      autocomplete=insults_remove_autocomplete),
+    word: str = Param(
+        description="The word you want to remove",
+        autocomplete=insults_remove_autocomplete,
+    ),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
-        insults_data = json.loads(
-            database[f"insults.list.{interaction.guild.id}"])
+        insults_data = json.loads(database[f"insults.list.{interaction.guild.id}"])
     except:
         insults_data = []
         database[f"insults.list.{interaction.guild.id}"] = json.dumps([])
     try:
         insults_data.remove(word)
     except:
-        await interaction.response.send_message("That word does not exist in the insults filter!", ephemeral=True)
+        await interaction.response.send_message(
+            "That word does not exist in the insults filter!", ephemeral=True
+        )
         return
     database[f"insults.list.{interaction.guild.id}"] = json.dumps(insults_data)
-    await interaction.response.send_message(f'Successfully removed **"{word}"** from the insults list')
+    await interaction.response.send_message(
+        f'Successfully removed **"{word}"** from the insults list'
+    )
 
 
 @filter_command.sub_command_group(name="links", description="Manage the links filter")
@@ -3044,78 +3994,135 @@ async def links_filter_command(_):
 
 @links_filter_command.sub_command(name="enable", description="Enable the links filter")
 async def links_filter_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"links.toggle.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("The links filter has been successfully **enabled**")
+    await interaction.response.send_message(
+        "The links filter has been successfully **enabled**"
+    )
 
 
-@links_filter_command.sub_command(name="disable", description="Disable the links filter")
+@links_filter_command.sub_command(
+    name="disable", description="Disable the links filter"
+)
 async def links_filter_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"links.toggle.{interaction.guild.id}"] = 0
-    await interaction.response.send_message("The links filter has been successfully **disabled**")
+    await interaction.response.send_message(
+        "The links filter has been successfully **disabled**"
+    )
 
 
-@links_filter_command.sub_command(name="status", description="See the current status of the links filter")
+@links_filter_command.sub_command(
+    name="status", description="See the current status of the links filter"
+)
 async def links_filter_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     value = False
     try:
         value = json.loads(database[f"links.toggle.{interaction.guild.id}"])
     except:
         pass
-    await interaction.response.send_message(f"The links filter is currently **{'enabled' if value else 'disabled'}**")
+    await interaction.response.send_message(
+        f"The links filter is currently **{'enabled' if value else 'disabled'}**"
+    )
 
 
-@filter_command.sub_command_group(name="newline", description="Manage the newline filter")
+@filter_command.sub_command_group(
+    name="newline", description="Manage the newline filter"
+)
 async def newline_command(_):
     pass
 
 
 @newline_command.sub_command(name="enable", description="Enable the newline filter")
 async def newline_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"newline.toggle.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("The newline filter has been successfully **enabled**")
+    await interaction.response.send_message(
+        "The newline filter has been successfully **enabled**"
+    )
 
 
 @newline_command.sub_command(name="disable", description="Disable the newline filter")
 async def newline_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"newline.toggle.{interaction.guild.id}"] = 0
-    await interaction.response.send_message("The newline filter has been successfully **disabled**")
+    await interaction.response.send_message(
+        "The newline filter has been successfully **disabled**"
+    )
 
 
-@newline_command.sub_command(name="set", description="Set the limit for the newline filter")
+@newline_command.sub_command(
+    name="set", description="Set the limit for the newline filter"
+)
 async def newline_set_command(
     interaction,
     limit: int = Param(description="The limit you want to set"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     if limit < 1:
         limit = 1
     if limit > 800:
         limit = 800
     database[f"newline.limit.{interaction.guild.id}"] = limit
-    await interaction.response.send_message(f"The newline filter limit has been set to **{limit} {'newline' if limit == 1 else 'newlines'}** per message")
+    await interaction.response.send_message(
+        f"The newline filter limit has been set to **{limit} {'newline' if limit == 1 else 'newlines'}** per message"
+    )
 
 
-@newline_command.sub_command(name="status", description="See the current status for the newline filter")
+@newline_command.sub_command(
+    name="status", description="See the current status for the newline filter"
+)
 async def newline_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     value = 0
     try:
@@ -3127,52 +4134,90 @@ async def newline_status_command(interaction):
         limit = json.loads(database[f"newline.limit.{interaction.guild.id}"])
     except:
         pass
-    await interaction.response.send_message(f"The newline filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
+    await interaction.response.send_message(
+        f"The newline filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)"
+    )
 
 
-@filter_command.sub_command_group(name="mention", description="Manage the mention spam filter")
+@filter_command.sub_command_group(
+    name="mention", description="Manage the mention spam filter"
+)
 async def mention_command(_):
     pass
 
 
-@mention_command.sub_command(name="enable", description="Enable the mention spam filter")
+@mention_command.sub_command(
+    name="enable", description="Enable the mention spam filter"
+)
 async def mention_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"mention.toggle.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("The mention filter has been successfully **enabled**")
+    await interaction.response.send_message(
+        "The mention filter has been successfully **enabled**"
+    )
 
 
-@mention_command.sub_command(name="disable", description="Disable the mention spam filter")
+@mention_command.sub_command(
+    name="disable", description="Disable the mention spam filter"
+)
 async def mention_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"mention.toggle.{interaction.guild.id}"] = 0
-    await interaction.response.send_message("The mention filter has been successfully **disabled**")
+    await interaction.response.send_message(
+        "The mention filter has been successfully **disabled**"
+    )
 
 
-@mention_command.sub_command(name="set", description="Set the limit for the mention spam filter")
+@mention_command.sub_command(
+    name="set", description="Set the limit for the mention spam filter"
+)
 async def mention_set_command(
     interaction,
     limit: int = Param(description="The limit you want to set"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     if limit < 1:
         limit = 1
     if limit > 200:
         limit = 200
     database[f"mention.limit.{interaction.guild.id}"] = limit
-    await interaction.response.send_message(f"The mention filter limit has been set to **{limit} {'mention' if limit == 1 else 'mentions'}** per message")
+    await interaction.response.send_message(
+        f"The mention filter limit has been set to **{limit} {'mention' if limit == 1 else 'mentions'}** per message"
+    )
 
 
-@mention_command.sub_command(name="status", description="See the current status for the mention spam filter")
+@mention_command.sub_command(
+    name="status", description="See the current status for the mention spam filter"
+)
 async def mention_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     value = 0
     try:
@@ -3184,7 +4229,9 @@ async def mention_status_command(interaction):
         limit = json.loads(database[f"mention.limit.{interaction.guild.id}"])
     except:
         pass
-    await interaction.response.send_message(f"The mention spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
+    await interaction.response.send_message(
+        f"The mention spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)"
+    )
 
 
 @filter_command.sub_command_group(name="spam", description="Manage the spam filter")
@@ -3194,20 +4241,34 @@ async def spam_command(_):
 
 @spam_command.sub_command(name="enable", description="Enable the spam filter")
 async def spam_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"spamming.toggle.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("The spam filter has been successfully **enabled**")
+    await interaction.response.send_message(
+        "The spam filter has been successfully **enabled**"
+    )
 
 
 @spam_command.sub_command(name="disable", description="Disable the spam filter")
 async def spam_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"spamming.toggle.{interaction.guild.id}"] = 0
-    await interaction.response.send_message("The spam filter has been successfully **disabled**")
+    await interaction.response.send_message(
+        "The spam filter has been successfully **disabled**"
+    )
 
 
 @spam_command.sub_command(name="set", description="Set the limit for the spam filter")
@@ -3215,21 +4276,35 @@ async def spam_set_command(
     interaction,
     limit: int = Param(description="The limit you want to set"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     if limit < 1:
         limit = 1
     if limit > 25:
         limit = 25
     database[f"spamming.limit.{interaction.guild.id}"] = limit
-    await interaction.response.send_message(f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**")
+    await interaction.response.send_message(
+        f"The spam filter limit has been set to **{limit} {'message' if limit == 1 else 'messages'}** per **15 seconds**"
+    )
 
 
-@spam_command.sub_command(name="status", description="See the current status for the spam filter")
+@spam_command.sub_command(
+    name="status", description="See the current status for the spam filter"
+)
 async def spam_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     value = 0
     try:
@@ -3241,7 +4316,9 @@ async def spam_status_command(interaction):
         limit = json.loads(database[f"spamming.limit.{interaction.guild.id}"])
     except:
         pass
-    await interaction.response.send_message(f"The spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)")
+    await interaction.response.send_message(
+        f"The spam filter is currently **{'enabled' if value else 'disabled'}** (limit is **{limit}**)"
+    )
 
 
 @client.slash_command(name="greetings", description="Manage welcome and leave messages")
@@ -3256,17 +4333,23 @@ async def leave_command(_):
 
 @leave_command.sub_command(name="enable", description="Enable leave messages")
 async def leave_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
         database[f"leave.text.{interaction.guild.id}"]
     except:
-        await interaction.response.send_message(f"Please set a leave channel and message first", ephemeral=True)
+        await interaction.response.send_message(
+            f"Please set a leave channel and message first", ephemeral=True
+        )
         return
     try:
-        channel_id = json.loads(
-            database[f"leave.channel.{interaction.guild.id}"])
+        channel_id = json.loads(database[f"leave.channel.{interaction.guild.id}"])
         found = False
         for channel in interaction.guild.channels:
             if channel.id == channel_id:
@@ -3274,20 +4357,31 @@ async def leave_enable_command(interaction):
         if not found:
             raise Exception("unable to find channel")
     except:
-        await interaction.response.send_message(f"Please set a leave channel and message first", ephemeral=True)
+        await interaction.response.send_message(
+            f"Please set a leave channel and message first", ephemeral=True
+        )
         return
 
     database[f"leave.toggle.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("Leave messages have been successfully **enabled**")
+    await interaction.response.send_message(
+        "Leave messages have been successfully **enabled**"
+    )
 
 
 @leave_command.sub_command(name="disable", description="Disable leave messages")
 async def leave_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"leave.toggle.{interaction.guild.id}"] = 0
-    await interaction.response.send_message("Leave messages have been successfully **disabled**")
+    await interaction.response.send_message(
+        "Leave messages have been successfully **disabled**"
+    )
 
 
 @leave_command.sub_command(name="text", description="Change the leave message text")
@@ -3295,11 +4389,19 @@ async def leave_text_command(
     interaction,
     text: str = Param(description="The leave message text"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"leave.text.{interaction.guild.id}"] = text
-    await interaction.response.send_message(f"The leave message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
+    await interaction.response.send_message(
+        f"The leave message has been set to\n```\n{text}```\n"
+        + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!"
+    )
     try:
         database[f"leave.text.{interaction.guild.id}"]
         database[f"leave.channel.{interaction.guild.id}"]
@@ -3308,17 +4410,25 @@ async def leave_text_command(
         pass
 
 
-@leave_command.sub_command(name="channel", description="Change the leave message channel")
+@leave_command.sub_command(
+    name="channel", description="Change the leave message channel"
+)
 async def leave_channel_command(
     interaction,
-    channel: disnake.channel.TextChannel = Param(
-        description="The leave channel"),
+    channel: disnake.channel.TextChannel = Param(description="The leave channel"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"leave.channel.{interaction.guild.id}"] = channel.id
-    await interaction.response.send_message(f"The leave channel for this server has been set to <#{channel.id}>")
+    await interaction.response.send_message(
+        f"The leave channel for this server has been set to <#{channel.id}>"
+    )
     try:
         database[f"leave.text.{interaction.guild.id}"]
         database[f"leave.channel.{interaction.guild.id}"]
@@ -3327,10 +4437,17 @@ async def leave_channel_command(
         pass
 
 
-@leave_command.sub_command(name="status", description="See the current status of the leave message")
+@leave_command.sub_command(
+    name="status", description="See the current status of the leave message"
+)
 async def leave_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     value = False
     try:
@@ -3344,32 +4461,44 @@ async def leave_status_command(interaction):
         pass
     channel_id = "**#unknown-channel**"
     try:
-        channel_id = "<#" + \
-            database[f"leave.channel.{interaction.guild.id}"].decode(
-                "utf-8") + ">"
+        channel_id = (
+            "<#"
+            + database[f"leave.channel.{interaction.guild.id}"].decode("utf-8")
+            + ">"
+        )
     except:
         pass
-    await interaction.response.send_message(f"Leave messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
+    await interaction.response.send_message(
+        f"Leave messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```"
+    )
 
 
-@greetings_command.sub_command_group(name="welcome", description="Manage welcome messages")
+@greetings_command.sub_command_group(
+    name="welcome", description="Manage welcome messages"
+)
 async def welcome_command(_):
     pass
 
 
 @welcome_command.sub_command(name="enable", description="Enable welcome messages")
 async def welcome_enable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
         database[f"welcome.text.{interaction.guild.id}"]
     except:
-        await interaction.response.send_message(f"Please set a welcome channel and message first", ephemeral=True)
+        await interaction.response.send_message(
+            f"Please set a welcome channel and message first", ephemeral=True
+        )
         return
     try:
-        channel_id = json.loads(
-            database[f"welcome.channel.{interaction.guild.id}"])
+        channel_id = json.loads(database[f"welcome.channel.{interaction.guild.id}"])
         found = False
         for channel in interaction.guild.channels:
             if channel.id == channel_id:
@@ -3377,20 +4506,31 @@ async def welcome_enable_command(interaction):
         if not found:
             raise Exception("unable to find channel")
     except:
-        await interaction.response.send_message(f"Please set a welcome channel and message first", ephemeral=True)
+        await interaction.response.send_message(
+            f"Please set a welcome channel and message first", ephemeral=True
+        )
         return
 
     database[f"welcome.toggle.{interaction.guild.id}"] = 1
-    await interaction.response.send_message("Welcome messages have been successfully **enabled**")
+    await interaction.response.send_message(
+        "Welcome messages have been successfully **enabled**"
+    )
 
 
 @welcome_command.sub_command(name="disable", description="Disable welcome messages")
 async def welcome_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"welcome.toggle.{interaction.guild.id}"] = 0
-    await interaction.response.send_message("Welcome messages have been successfully **disabled**")
+    await interaction.response.send_message(
+        "Welcome messages have been successfully **disabled**"
+    )
 
 
 @welcome_command.sub_command(name="text", description="Change the welcome message text")
@@ -3398,11 +4538,19 @@ async def welcome_text_command(
     interaction,
     text: str = Param(description="The welcome message text"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"welcome.text.{interaction.guild.id}"] = text
-    await interaction.response.send_message(f"The welcome message has been set to\n```\n{text}```\n" + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!")
+    await interaction.response.send_message(
+        f"The welcome message has been set to\n```\n{text}```\n"
+        + "Variables like `{user}`, `{user_id}`, `{discriminator}`, and `{members}` are also supported!"
+    )
     try:
         database[f"welcome.text.{interaction.guild.id}"]
         database[f"welcome.channel.{interaction.guild.id}"]
@@ -3411,17 +4559,25 @@ async def welcome_text_command(
         pass
 
 
-@welcome_command.sub_command(name="channel", description="Change the welcome message channel")
+@welcome_command.sub_command(
+    name="channel", description="Change the welcome message channel"
+)
 async def welcome_channel_command(
     interaction,
-    channel: disnake.channel.TextChannel = Param(
-        description="The welcome channel"),
+    channel: disnake.channel.TextChannel = Param(description="The welcome channel"),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"welcome.channel.{interaction.guild.id}"] = channel.id
-    await interaction.response.send_message(f"The welcome channel for this server has been set to <#{channel.id}>")
+    await interaction.response.send_message(
+        f"The welcome channel for this server has been set to <#{channel.id}>"
+    )
     try:
         database[f"welcome.text.{interaction.guild.id}"]
         database[f"welcome.channel.{interaction.guild.id}"]
@@ -3430,10 +4586,17 @@ async def welcome_channel_command(
         pass
 
 
-@welcome_command.sub_command(name="status", description="See the current status of the welcome message")
+@welcome_command.sub_command(
+    name="status", description="See the current status of the welcome message"
+)
 async def welcome_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     value = False
     try:
@@ -3447,12 +4610,16 @@ async def welcome_status_command(interaction):
         pass
     channel_id = "**#unknown-channel**"
     try:
-        channel_id = "<#" + \
-            database[f"welcome.channel.{interaction.guild.id}"].decode(
-                "utf-8") + ">"
+        channel_id = (
+            "<#"
+            + database[f"welcome.channel.{interaction.guild.id}"].decode("utf-8")
+            + ">"
+        )
     except:
         pass
-    await interaction.response.send_message(f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```")
+    await interaction.response.send_message(
+        f"Welcome messages are currently **{'enabled' if value else 'disabled'}** and set to {channel_id}\n```\n{text}```"
+    )
 
 
 @client.slash_command(name="server", description="View information about this server")
@@ -3460,88 +4627,115 @@ async def server_command(_):
     pass
 
 
-@server_command.sub_command_group(name="auto-mute", description="Manage this server's auto-mute settings")
+@server_command.sub_command_group(
+    name="auto-mute", description="Manage this server's auto-mute settings"
+)
 async def auto_mute_command(_):
     pass
 
 
-@auto_mute_command.sub_command(name="set", description="Change this server's auto-mute duration")
+@auto_mute_command.sub_command(
+    name="set", description="Change this server's auto-mute duration"
+)
 async def auto_mute_set_command(
     interaction,
     duration: str = Param(
-        description="The duration the user will muted for when they trigger a filter"),
+        description="The duration the user will muted for when they trigger a filter"
+    ),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     original_duration = duration
     try:
         duration = functions.parse_time(duration)
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "invalid_duration"),
+            ephemeral=True,
+        )
         return
     database[f"auto-mute.{interaction.guild.id}"] = json.dumps(duration)
 
-    await interaction.response.send_message(f"This server's auto-mute duration has been set to **{functions.display_time(interaction.author.id, functions.parse_time(original_duration))}**")
+    await interaction.response.send_message(
+        f"This server's auto-mute duration has been set to **{functions.display_time(interaction.author.id, functions.parse_time(original_duration))}**"
+    )
     add_cooldown(interaction.author.id, "server", 5)
 
 
-@auto_mute_command.sub_command(name="get", description="Get this server's current auto-mute setting")
+@auto_mute_command.sub_command(
+    name="get", description="Get this server's current auto-mute setting"
+)
 async def auto_mute_get_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
         duration = json.loads(database[f"auto-mute.{interaction.guild.id}"])
     except:
         duration = 10
-    await interaction.response.send_message(f"This server's auto-mute duration is currently set to **{functions.display_time(interaction.author.id, duration)}**")
+    await interaction.response.send_message(
+        f"This server's auto-mute duration is currently set to **{functions.display_time(interaction.author.id, duration)}**"
+    )
     add_cooldown(interaction.author.id, "server", 5)
 
 
-@server_command.sub_command(name="status", description="View statistics for this server")
+@server_command.sub_command(
+    name="status", description="View statistics for this server"
+)
 async def server_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     await interaction.response.defer()
     embed = disnake.Embed(color=variables.embed_color())
     raid_protection = 0
     try:
         raid_protection = json.loads(
-            database[f"{interaction.guild.id}.raid-protection"])
+            database[f"{interaction.guild.id}.raid-protection"]
+        )
     except:
         pass
     insults_filter = 0
     try:
-        insults_filter = json.loads(
-            database[f"insults.toggle.{interaction.guild.id}"])
+        insults_filter = json.loads(database[f"insults.toggle.{interaction.guild.id}"])
     except:
         pass
     spam_filter = 0
     try:
-        spam_filter = json.loads(
-            database[f"spamming.toggle.{interaction.guild.id}"])
+        spam_filter = json.loads(database[f"spamming.toggle.{interaction.guild.id}"])
     except:
         pass
     links_filter = 0
     try:
-        links_filter = json.loads(
-            database[f"links.toggle.{interaction.guild.id}"])
+        links_filter = json.loads(database[f"links.toggle.{interaction.guild.id}"])
     except:
         pass
     mention_filter = 0
     try:
-        mention_filter = json.loads(
-            database[f"mention.toggle.{interaction.guild.id}"])
+        mention_filter = json.loads(database[f"mention.toggle.{interaction.guild.id}"])
     except:
         pass
     newline_filter = 0
     try:
-        newline_filter = json.loads(
-            database[f"newline.toggle.{interaction.guild.id}"])
+        newline_filter = json.loads(database[f"newline.toggle.{interaction.guild.id}"])
     except:
         pass
 
@@ -3566,23 +4760,35 @@ async def server_status_command(interaction):
         else:
             counter += 1
     if len(differences) > 0:
-        average = round(sum(differences)/len(differences), 2)
+        average = round(sum(differences) / len(differences), 2)
         if average == 1.0:
             average = 1
     else:
         average = 0.0
-    embed.add_field(name="Raid Protection",
-                    value=":white_check_mark: Enabled" if raid_protection else ":x: Disabled")
-    embed.add_field(name="Newline Filter",
-                    value=":white_check_mark: Enabled" if newline_filter else ":x: Disabled")
-    embed.add_field(name="Insults Filter",
-                    value=":white_check_mark: Enabled" if insults_filter else ":x: Disabled")
-    embed.add_field(name="Spam Filter",
-                    value=":white_check_mark: Enabled" if spam_filter else ":x: Disabled")
-    embed.add_field(name="Links Filter",
-                    value=":white_check_mark: Enabled" if links_filter else ":x: Disabled")
-    embed.add_field(name="Mention Filter",
-                    value=":white_check_mark: Enabled" if mention_filter else ":x: Disabled")
+    embed.add_field(
+        name="Raid Protection",
+        value=":white_check_mark: Enabled" if raid_protection else ":x: Disabled",
+    )
+    embed.add_field(
+        name="Newline Filter",
+        value=":white_check_mark: Enabled" if newline_filter else ":x: Disabled",
+    )
+    embed.add_field(
+        name="Insults Filter",
+        value=":white_check_mark: Enabled" if insults_filter else ":x: Disabled",
+    )
+    embed.add_field(
+        name="Spam Filter",
+        value=":white_check_mark: Enabled" if spam_filter else ":x: Disabled",
+    )
+    embed.add_field(
+        name="Links Filter",
+        value=":white_check_mark: Enabled" if links_filter else ":x: Disabled",
+    )
+    embed.add_field(
+        name="Mention Filter",
+        value=":white_check_mark: Enabled" if mention_filter else ":x: Disabled",
+    )
     embed.add_field(name="Message Rate", value=f"{average}/s")
     embed.add_field(name="Active Members", value=f"{len(members)}")
     embed.add_field(name="Active Channels", value=f"{len(channels)}")
@@ -3590,15 +4796,22 @@ async def server_status_command(interaction):
     add_cooldown(interaction.author.id, "server", 5)
 
 
-@server_command.sub_command_group(name="logging", description="Manage the log channel for your server")
+@server_command.sub_command_group(
+    name="logging", description="Manage the log channel for your server"
+)
 async def logging_command(_):
     pass
 
 
 @logging_command.sub_command(name="status", description="See the current log channel")
 async def logging_status_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     channel = None
     try:
@@ -3606,52 +4819,87 @@ async def logging_status_command(interaction):
     except:
         pass
     if channel == None:
-        await interaction.response.send_message("This server does not have logging configured")
+        await interaction.response.send_message(
+            "This server does not have logging configured"
+        )
     else:
-        await interaction.response.send_message(f"This server's log channel is set to <#{channel}>")
+        await interaction.response.send_message(
+            f"This server's log channel is set to <#{channel}>"
+        )
 
 
-@logging_command.sub_command(name="set", description="Set the logging channel for your server")
+@logging_command.sub_command(
+    name="set", description="Set the logging channel for your server"
+)
 async def logging_set_command(
     interaction,
     channel: disnake.channel.TextChannel = Param(
-        description="The channel you want the bot to log messages to"),
+        description="The channel you want the bot to log messages to"
+    ),
 ):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     database[f"logging.{interaction.guild.id}"] = channel.id
-    await interaction.response.send_message(f"This server's log channel has been set to <#{channel.id}>")
+    await interaction.response.send_message(
+        f"This server's log channel has been set to <#{channel.id}>"
+    )
 
 
-@logging_command.sub_command(name="disable", description="Disable logging for your server")
+@logging_command.sub_command(
+    name="disable", description="Disable logging for your server"
+)
 async def logging_disable_command(interaction):
-    if not interaction.author.guild_permissions.administrator and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+    if (
+        not interaction.author.guild_permissions.administrator
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     try:
         del database[f"logging.{interaction.guild.id}"]
     except:
         pass
-    await interaction.response.send_message("Logging has been successfully disabled for this server")
+    await interaction.response.send_message(
+        "Logging has been successfully disabled for this server"
+    )
 
 
-@server_command.sub_command(name="suggest", description="Send a suggestion to the server owner")
+@server_command.sub_command(
+    name="suggest", description="Send a suggestion to the server owner"
+)
 async def server_suggest_command(
     interaction,
     suggestion: str = Param(description="The suggestion you want to send"),
 ):
     suggestion = functions.shrink(suggestion, 1500)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "sending_suggestion"), ephemeral=True
+    )
     try:
-        await interaction.guild.owner.send(f"**{interaction.author.name}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}")
-        await interaction.edit_original_message(content=functions.get_text(interaction.author.id, "suggestion_sent"))
+        await interaction.guild.owner.send(
+            f"**{interaction.author.name}** has sent a suggestion for **{interaction.guild.name}**\n{suggestion}"
+        )
+        await interaction.edit_original_message(
+            content=functions.get_text(interaction.author.id, "suggestion_sent")
+        )
     except:
-        await interaction.edit_original_message(content="Unable to send your suggestion")
+        await interaction.edit_original_message(
+            content="Unable to send your suggestion"
+        )
     add_cooldown(interaction.author.id, "server", 300)
 
 
-@server_command.sub_command(name="members", description="Count the members in this server")
+@server_command.sub_command(
+    name="members", description="Count the members in this server"
+)
 async def server_members_command(interaction):
     users = 0
     bots = 0
@@ -3668,7 +4916,9 @@ async def server_members_command(interaction):
     await interaction.response.send_message(embed=embed)
 
 
-@server_command.sub_command(name="information", description="View information about this server")
+@server_command.sub_command(
+    name="information", description="View information about this server"
+)
 async def server_information_command(interaction):
     users = 0
     bots = 0
@@ -3708,35 +4958,36 @@ async def server_information_command(interaction):
         embed.set_image(url=interaction.guild.banner)
     embed.add_field(name="Server ID", value=f"`{interaction.guild.id}`")
     embed.add_field(name="Server Region", value=f"{interaction.guild.region}")
-    embed.add_field(name="Creation Time",
-                    value=f"<t:{functions.parse_snowflake(interaction.guild.id)}:R>")
-    embed.add_field(name="Server Owner",
-                    value=f"`{interaction.guild.owner_id}`")
-    embed.add_field(name="Channels",
-                    value=f"{text_channels + voice_channels + categories:,}")
+    embed.add_field(
+        name="Creation Time",
+        value=f"<t:{functions.parse_snowflake(interaction.guild.id)}:R>",
+    )
+    embed.add_field(name="Server Owner", value=f"`{interaction.guild.owner_id}`")
+    embed.add_field(
+        name="Channels", value=f"{text_channels + voice_channels + categories:,}"
+    )
     embed.add_field(name="Roles", value=f"{len(interaction.guild.roles):,}")
     embed.add_field(name="Categories", value=f"{categories:,}")
     embed.add_field(name="Text Channels", value=f"{text_channels:,}")
     embed.add_field(name="Voice Channels", value=f"{voice_channels:,}")
-    embed.add_field(name="Threads", value=f"{len(await interaction.guild.active_threads()):,}")
+    embed.add_field(
+        name="Threads", value=f"{len(await interaction.guild.active_threads()):,}"
+    )
     embed.add_field(name="Emojis", value=f"{len(interaction.guild.emojis):,}")
-    embed.add_field(name="Stickers",
-                    value=f"{len(interaction.guild.stickers):,}")
+    embed.add_field(name="Stickers", value=f"{len(interaction.guild.stickers):,}")
     embed.add_field(name="Administrators", value=f"{administrators:,}")
     embed.add_field(name="Users", value=f"{users:,}")
     embed.add_field(name="Bots", value=f"{bots:,}")
     embed.add_field(name="Bans", value=f"{server_bans}")
     embed.add_field(name="Members", value=f"{users + bots:,}")
-    embed.add_field(name="Max Members",
-                    value=f"{interaction.guild.max_members:,}")
+    embed.add_field(name="Max Members", value=f"{interaction.guild.max_members:,}")
     embed.add_field(name="Invites", value=f"{server_invites}")
-    embed.add_field(name="Boosters",
-                    value=f"{len(interaction.guild.premium_subscribers):,}")
-    embed.add_field(name="Boost Level",
-                    value=f"{interaction.guild.premium_tier:,}")
+    embed.add_field(
+        name="Boosters", value=f"{len(interaction.guild.premium_subscribers):,}"
+    )
+    embed.add_field(name="Boost Level", value=f"{interaction.guild.premium_tier:,}")
     if interaction.guild.description:
-        embed.add_field(name="Description",
-                        value=interaction.guild.description)
+        embed.add_field(name="Description", value=interaction.guild.description)
     await interaction.response.send_message(embed=embed)
     add_cooldown(interaction.author.id, "server", 3)
 
@@ -3777,14 +5028,20 @@ async def choose_command(
     if item10 != "":
         items.append(item10)
     random_item = random.choice(items)
-    await interaction.response.send_message(f'{functions.get_text(interaction.author.id, "i_choose")} **"{random_item}"**')
+    await interaction.response.send_message(
+        f'{functions.get_text(interaction.author.id, "i_choose")} **"{random_item}"**'
+    )
 
 
-@client.slash_command(name="discriminator", description="Find users with the same discriminator")
+@client.slash_command(
+    name="discriminator", description="Find users with the same discriminator"
+)
 async def discriminator_command(
     interaction,
     discriminator: str = Param(
-        default=lambda interaction: interaction.author.discriminator, description="The discriminator to look for"),
+        default=lambda interaction: interaction.author.discriminator,
+        description="The discriminator to look for",
+    ),
 ):
     await interaction.response.defer()
     members = []
@@ -3794,7 +5051,9 @@ async def discriminator_command(
         if len(discriminator) != 4:
             raise Exception("invalid discriminator")
     except:
-        await interaction.edit_original_message(content="That is not a valid discriminator!")
+        await interaction.edit_original_message(
+            content="That is not a valid discriminator!"
+        )
         return
 
     count = 0
@@ -3806,13 +5065,19 @@ async def discriminator_command(
                 if count >= 10:
                     break
     if members == []:
-        await interaction.edit_original_message(content="There are no other users with the same discriminator")
+        await interaction.edit_original_message(
+            content="There are no other users with the same discriminator"
+        )
         return
 
     output = "\n".join(members)
     segments = disnake_paginator.split(output, 1000)
     pager = disnake_paginator.ButtonPaginator(
-        prefix=f"```\n", suffix="```", color=variables.embed_color(), title="Discriminator", segments=segments,
+        prefix=f"```\n",
+        suffix="```",
+        color=variables.embed_color(),
+        title="Discriminator",
+        segments=segments,
         invalid_user_function=functions.invalid_user_function,
     )
     await pager.start(interaction, deferred=True)
@@ -3824,14 +5089,21 @@ async def warn_command(
     interaction,
     member: disnake.Member = Param(description="The member you want to warn"),
     warning: str = Param(
-        0, description="The warning you want to give the member (use 'reset' to reset the warnings)"),
+        0,
+        description="The warning you want to give the member (use 'reset' to reset the warnings)",
+    ),
 ):
-    if interaction.author.guild_permissions.kick_members and interaction.author.guild_permissions.ban_members:
+    if (
+        interaction.author.guild_permissions.kick_members
+        and interaction.author.guild_permissions.ban_members
+    ):
         pass
     elif interaction.author.id in variables.permission_override:
         pass
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
     if warning == 0:
         warning = functions.get_text(member.id, "not_specified")
@@ -3849,33 +5121,78 @@ async def warn_command(
         guild_warnings = 0
     else:
         if member.id == interaction.author.id:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "cannot_warn_self"), ephemeral=True)
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "cannot_warn_self"),
+                ephemeral=True,
+            )
             return
         if member.bot:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "cannot_warn_bot"), ephemeral=True)
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "cannot_warn_bot"),
+                ephemeral=True,
+            )
             return
         if member.guild_permissions.administrator:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "cannot_warn_administrator"), ephemeral=True)
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "cannot_warn_administrator"),
+                ephemeral=True,
+            )
             return
         if member.top_role.position >= interaction.author.top_role.position:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_warn").format(member), ephemeral=True)
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "no_permission_warn").format(
+                    member
+                ),
+                ephemeral=True,
+            )
             return
     warnings[str(interaction.guild.id)] = guild_warnings
     database[f"warnings.{member.id}"] = json.dumps(warnings)
     if warning.lower() == "reset":
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "warnings_reset").format(member), ephemeral=True)
-        await log_message(interaction.guild, f"**{member}**'s warnings have been reset by **{interaction.author}**")
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "warnings_reset").format(member),
+            ephemeral=True,
+        )
+        await log_message(
+            interaction.guild,
+            f"**{member}**'s warnings have been reset by **{interaction.author}**",
+        )
         return
     try:
-        warning_embed = disnake.Embed(title=functions.get_text(
-            member.id, "warning"), description=warning, color=disnake.Color.yellow())
-        warning_embed.set_footer(text=functions.get_text(member.id, "warning_count").format(
-            guild_warnings, f"{functions.get_text(member.id, 'warning_lower') if guild_warnings == 1 else functions.get_text(member.id, 'warnings_lower')}", interaction.guild.name))
+        warning_embed = disnake.Embed(
+            title=functions.get_text(member.id, "warning"),
+            description=warning,
+            color=disnake.Color.yellow(),
+        )
+        warning_embed.set_footer(
+            text=functions.get_text(member.id, "warning_count").format(
+                guild_warnings,
+                f"{functions.get_text(member.id, 'warning_lower') if guild_warnings == 1 else functions.get_text(member.id, 'warnings_lower')}",
+                interaction.guild.name,
+            )
+        )
         await member.send(embed=warning_embed)
-        await interaction.response.send_message(embed=disnake.Embed(description=functions.get_text(interaction.author.id, "user_warned").format(member, guild_warnings), color=disnake.Color.green()))
-        await log_message(interaction.guild, f"**{member}** has been warned by **{interaction.author}** (**{guild_warnings}**): {warning}")
+        await interaction.response.send_message(
+            embed=disnake.Embed(
+                description=functions.get_text(
+                    interaction.author.id, "user_warned"
+                ).format(member, guild_warnings),
+                color=disnake.Color.green(),
+            )
+        )
+        await log_message(
+            interaction.guild,
+            f"**{member}** has been warned by **{interaction.author}** (**{guild_warnings}**): {warning}",
+        )
     except:
-        await interaction.response.send_message(embed=disnake.Embed(description=functions.get_text(interaction.author.id, "unable_to_warn").format(member), color=disnake.Color.red()))
+        await interaction.response.send_message(
+            embed=disnake.Embed(
+                description=functions.get_text(
+                    interaction.author.id, "unable_to_warn"
+                ).format(member),
+                color=disnake.Color.red(),
+            )
+        )
     add_cooldown(interaction.author.id, "warn", 5)
 
 
@@ -3888,9 +5205,17 @@ async def kick_command(
     if reason == 0:
         reason = functions.get_text(member.id, "not_specified")
 
-    if interaction.author.guild_permissions.kick_members or interaction.author.id in variables.permission_override:
+    if (
+        interaction.author.guild_permissions.kick_members
+        or interaction.author.id in variables.permission_override
+    ):
         if member.top_role.position >= interaction.author.top_role.position:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_kick").format(member), ephemeral=True)
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "no_permission_kick").format(
+                    member
+                ),
+                ephemeral=True,
+            )
             return
         try:
             await member.kick(reason=reason)
@@ -3898,34 +5223,45 @@ async def kick_command(
                 embed=disnake.Embed(
                     color=disnake.Color.green(),
                     description=functions.get_text(
-                        interaction.author.id, "user_kicked").format(member),
+                        interaction.author.id, "user_kicked"
+                    ).format(member),
                 )
             )
-            await log_message(interaction.guild, f"**{member}** has been kicked by **{interaction.author}**: {reason}")
+            await log_message(
+                interaction.guild,
+                f"**{member}** has been kicked by **{interaction.author}**: {reason}",
+            )
         except:
             await interaction.response.send_message(
                 embed=disnake.Embed(
                     color=disnake.Color.red(),
                     description=functions.get_text(
-                        interaction.author.id, "unable_to_kick").format(member),
+                        interaction.author.id, "unable_to_kick"
+                    ).format(member),
                 ),
                 ephemeral=True,
             )
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
 
 
 @client.slash_command(name="ban", description="Ban a specified member from your server")
 async def ban_command(
     interaction,
-    user: disnake.User = Param(
-        description="The ID of the member you want to ban"),
+    user: disnake.User = Param(description="The ID of the member you want to ban"),
     reason: str = Param(0, description="The reason for banning the member"),
 ):
-    if interaction.author.guild_permissions.ban_members or interaction.author.id in variables.permission_override:
+    if (
+        interaction.author.guild_permissions.ban_members
+        or interaction.author.id in variables.permission_override
+    ):
         pass
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     if reason == 0:
@@ -3933,7 +5269,12 @@ async def ban_command(
     for member in interaction.guild.members:
         if member.id == user.id:
             if member.top_role.position >= interaction.author.top_role.position:
-                await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission_ban").format(member), ephemeral=True)
+                await interaction.response.send_message(
+                    functions.get_text(
+                        interaction.author.id, "no_permission_ban"
+                    ).format(member),
+                    ephemeral=True,
+                )
                 return
     try:
         await interaction.guild.ban(user, reason=reason, delete_message_days=0)
@@ -3941,37 +5282,52 @@ async def ban_command(
             embed=disnake.Embed(
                 color=disnake.Color.green(),
                 description=functions.get_text(
-                    interaction.author.id, "user_banned").format(user),
+                    interaction.author.id, "user_banned"
+                ).format(user),
             ),
         )
-        await log_message(interaction.guild, f"**{user}** has been banned by **{interaction.author}**: {reason}")
+        await log_message(
+            interaction.guild,
+            f"**{user}** has been banned by **{interaction.author}**: {reason}",
+        )
     except:
         await interaction.response.send_message(
             embed=disnake.Embed(
                 color=disnake.Color.red(),
                 description=functions.get_text(
-                    interaction.author.id, "unable_to_ban").format(user),
+                    interaction.author.id, "unable_to_ban"
+                ).format(user),
             ),
             ephemeral=True,
         )
 
 
-@client.slash_command(name="unban", description="Unban a specified member from your server")
+@client.slash_command(
+    name="unban", description="Unban a specified member from your server"
+)
 async def unban_command(
     interaction,
     member: str = Param(description="The member you want to unban"),
 ):
-    if interaction.author.guild_permissions.ban_members or interaction.author.id in variables.permission_override:
+    if (
+        interaction.author.guild_permissions.ban_members
+        or interaction.author.id in variables.permission_override
+    ):
         pass
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_permission"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_permission"), ephemeral=True
+        )
         return
 
     try:
         user_id = int(functions.remove_mentions(member))
         user = await client.fetch_user(user_id)
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "mention_valid_user"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "mention_valid_user"),
+            ephemeral=True,
+        )
         return
     try:
         await interaction.guild.unban(user)
@@ -3979,16 +5335,21 @@ async def unban_command(
             embed=disnake.Embed(
                 color=disnake.Color.green(),
                 description=functions.get_text(
-                    interaction.author.id, "user_unbanned").format(user),
+                    interaction.author.id, "user_unbanned"
+                ).format(user),
             ),
         )
-        await log_message(interaction.guild, f"**{user}** has been unbanned by **{interaction.author}**")
+        await log_message(
+            interaction.guild,
+            f"**{user}** has been unbanned by **{interaction.author}**",
+        )
     except:
         await interaction.response.send_message(
             embed=disnake.Embed(
                 color=disnake.Color.red(),
                 description=functions.get_text(
-                    interaction.author.id, "unable_to_unban").format(user),
+                    interaction.author.id, "unable_to_unban"
+                ).format(user),
             ),
             ephemeral=True,
         )
@@ -4007,18 +5368,26 @@ async def convert_command(
     interaction,
     amount: float = Param(description="The amount (for the input unit)"),
     input_unit: str = Param(
-        name="input-unit", description="The input unit", autocomplete=autocomplete_units),
+        name="input-unit", description="The input unit", autocomplete=autocomplete_units
+    ),
     output_unit: str = Param(
-        name="output-unit", description="The output unit", autocomplete=autocomplete_units),
+        name="output-unit",
+        description="The output unit",
+        autocomplete=autocomplete_units,
+    ),
 ):
     input_unit = input_unit.strip()
     output_unit = output_unit.strip()
     data = converter.convert(amount, input_unit, output_unit)
     if data["error"] == 404:
-        await interaction.response.send_message("That input/output pair is not supported!", ephemeral=True)
+        await interaction.response.send_message(
+            "That input/output pair is not supported!", ephemeral=True
+        )
         return
     elif data["error"] == 403:
-        await interaction.response.send_message("The input and output unit is the same!", ephemeral=True)
+        await interaction.response.send_message(
+            "The input and output unit is the same!", ephemeral=True
+        )
         return
     description = f"**{round(amount, 6):,} {data['input_abbreviation']}** = **{round(data['result'], 6):,} {data['output_abbreviation']}**\n\n**Unit abbreviations:**\n`{data['input_abbreviation']}` = `{data['input_unit']}`, `{data['output_abbreviation']}` = `{data['output_unit']}`"
     embed = disnake.Embed(
@@ -4030,11 +5399,15 @@ async def convert_command(
     add_cooldown(interaction.author.id, "convert", 3)
 
 
-@client.slash_command(name="translate", description="Translate text to different languages")
+@client.slash_command(
+    name="translate", description="Translate text to different languages"
+)
 async def translate_command(
     interaction,
     language: str = Param(
-        description="The language you want to translate to", autocomplete=autocomplete_languages),
+        description="The language you want to translate to",
+        autocomplete=autocomplete_languages,
+    ),
     text: str = Param(description="The text you want to translate"),
 ):
     await interaction.response.defer()
@@ -4042,21 +5415,35 @@ async def translate_command(
         translator = googletrans.Translator()
         result = translator.translate(text, dest=language.strip())
         embed = disnake.Embed(color=variables.embed_color())
-        source_language = googletrans.LANGUAGES[result.src.lower()].title().replace(
-            "(", "").replace(")", "")
-        destination_language = googletrans.LANGUAGES[result.dest.lower()].title(
-        ).replace("(", "").replace(")", "")
+        source_language = (
+            googletrans.LANGUAGES[result.src.lower()]
+            .title()
+            .replace("(", "")
+            .replace(")", "")
+        )
+        destination_language = (
+            googletrans.LANGUAGES[result.dest.lower()]
+            .title()
+            .replace("(", "")
+            .replace(")", "")
+        )
         embed.add_field(
-            name=f"Original Text ({source_language})", value=text, inline=False)
+            name=f"Original Text ({source_language})", value=text, inline=False
+        )
         embed.add_field(
-            name=f"Translated Text ({destination_language})", value=result.text)
+            name=f"Translated Text ({destination_language})", value=result.text
+        )
         await interaction.edit_original_message(embed=embed)
         add_cooldown(interaction.author.id, "translate", 5)
     except Exception as error:
         if "or fewer in length" in str(error):
-            await interaction.edit_original_message(content="The output translation is too long!")
+            await interaction.edit_original_message(
+                content="The output translation is too long!"
+            )
         else:
-            await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
+            await interaction.edit_original_message(
+                content=f"There was an error while trying to translate the specified text: `{error}`"
+            )
 
 
 @client.message_command(name="Translate")
@@ -4068,37 +5455,55 @@ async def message_translate_command(interaction):
             if len(interaction.target.embeds) > 0:
                 text = interaction.target.embeds[0].description
                 if type(text) == None:
-                    await interaction.edit_original_message(content="That message does not have any text!")
+                    await interaction.edit_original_message(
+                        content="That message does not have any text!"
+                    )
                     return
             else:
-                await interaction.edit_original_message(content="That message does not have any text!")
+                await interaction.edit_original_message(
+                    content="That message does not have any text!"
+                )
                 return
         translator = googletrans.Translator()
         result = translator.translate(
-            text, dest=functions.get_settings(interaction.author.id)["language"])
+            text, dest=functions.get_settings(interaction.author.id)["language"]
+        )
         embed = disnake.Embed(color=variables.embed_color())
-        source_language = googletrans.LANGUAGES[result.src.lower()].title().replace(
-            "(", "").replace(")", "")
-        destination_language = googletrans.LANGUAGES[result.dest.lower()].title(
-        ).replace("(", "").replace(")", "")
+        source_language = (
+            googletrans.LANGUAGES[result.src.lower()]
+            .title()
+            .replace("(", "")
+            .replace(")", "")
+        )
+        destination_language = (
+            googletrans.LANGUAGES[result.dest.lower()]
+            .title()
+            .replace("(", "")
+            .replace(")", "")
+        )
         embed.add_field(
-            name=f"Original Text ({source_language})", value=text, inline=False)
+            name=f"Original Text ({source_language})", value=text, inline=False
+        )
         embed.add_field(
-            name=f"Translated Text ({destination_language})", value=result.text)
+            name=f"Translated Text ({destination_language})", value=result.text
+        )
         await interaction.edit_original_message(embed=embed)
         add_cooldown(interaction.author.id, "translate", 5)
     except Exception as error:
         if "or fewer in length" in str(error):
-            await interaction.edit_original_message(content="The output translation is too long!")
+            await interaction.edit_original_message(
+                content="The output translation is too long!"
+            )
         else:
-            await interaction.edit_original_message(content=f"There was an error while trying to translate the specified text: `{error}`")
+            await interaction.edit_original_message(
+                content=f"There was an error while trying to translate the specified text: `{error}`"
+            )
 
 
 @client.slash_command(name="definition", description="Find the definition of a word")
 async def definition_command(
     interaction,
-    word: str = Param(
-        description="The word you want to find the definition of"),
+    word: str = Param(description="The word you want to find the definition of"),
     language: str = Param(None, description="The word's language"),
 ):
     await interaction.response.defer()
@@ -4108,46 +5513,50 @@ async def definition_command(
         language = settings["language"]
     else:
         language = language.strip().lower()
-    reversed_languages = {value: key for key,
-                          value in googletrans.LANGUAGES.items()}
+    reversed_languages = {value: key for key, value in googletrans.LANGUAGES.items()}
     if language in reversed_languages.keys():
         language = reversed_languages[language]
     response = requests.get(
-        f"https://api.dictionaryapi.dev/api/v2/entries/{language}/{word.strip()}").json()
+        f"https://api.dictionaryapi.dev/api/v2/entries/{language}/{word.strip()}"
+    ).json()
     try:
         if response["title"] == "No Definitions Found":
             try:
                 language_name = googletrans.LANGUAGES[language].title()
             except:
                 language_name = language
-            await interaction.edit_original_message(content=f"That word was not found in the **{language_name}** dictionary")
+            await interaction.edit_original_message(
+                content=f"That word was not found in the **{language_name}** dictionary"
+            )
             return
     except:
         pass
     phonetic = "unknown"
     try:
-        phonetic = response[0]['phonetic']
+        phonetic = response[0]["phonetic"]
     except:
         pass
     origin = "unknown"
     try:
-        origin = response[0]['origin'].replace(" .", ".").replace(" )", ")")
+        origin = response[0]["origin"].replace(" .", ".").replace(" )", ")")
     except:
         pass
     description = f"**Word:** {response[0]['word']} ({phonetic})\n**Origin:** {origin}"
-    for meaning in response[0]['meanings']:
-        synonyms = ', '.join(meaning['definitions'][0]['synonyms'][:3])
+    for meaning in response[0]["meanings"]:
+        synonyms = ", ".join(meaning["definitions"][0]["synonyms"][:3])
         if synonyms == "":
             synonyms = "none"
         example = "none"
         try:
-            example = meaning['definitions'][0]['example'].replace(
-                response[0]['word'], '__' + response[0]['word'] + '__')
+            example = meaning["definitions"][0]["example"].replace(
+                response[0]["word"], "__" + response[0]["word"] + "__"
+            )
         except:
             pass
         description += f"\n\n**Type:** {meaning['partOfSpeech']}\n**Definition:** {meaning['definitions'][0]['definition']}\n**Example:** {example}\n**Synonyms:** {synonyms}"
     embed = disnake.Embed(
-        title="Definition", description=description, color=variables.embed_color())
+        title="Definition", description=description, color=variables.embed_color()
+    )
     await interaction.edit_original_message(embed=embed)
     add_cooldown(interaction.author.id, "definition", 5)
 
@@ -4178,38 +5587,50 @@ async def todo_list_command(interaction):
         text += f"**{counter}.** {todo}\n"
     if text == "":
         text = functions.get_text(interaction.author.id, "todo_empty")
-    embed = disnake.Embed(title=functions.get_text(
-        interaction.author.id, "todo_list"), description=text, color=variables.embed_color())
+    embed = disnake.Embed(
+        title=functions.get_text(interaction.author.id, "todo_list"),
+        description=text,
+        color=variables.embed_color(),
+    )
     await interaction.response.send_message(embed=embed)
 
 
 @todo_command.sub_command(name="edit", description="Modify an item in your to-do list")
 async def todo_edit_command(
     interaction,
-    item: str = Param(description="The item you want to modify",
-                      autocomplete=todo_list_autocomplete),
-    new_name: str = Param(
-        name="new-name", description="The new name of the item"),
+    item: str = Param(
+        description="The item you want to modify", autocomplete=todo_list_autocomplete
+    ),
+    new_name: str = Param(name="new-name", description="The new name of the item"),
 ):
     item = item.strip()
     new_name = new_name.strip()
     if len(new_name) > 50:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True
+        )
         return
     try:
         todo_list = json.loads(database[f"todo.{interaction.author.id}"])
     except:
         todo_list = []
     if new_name in todo_list:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_already_added"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "todo_already_added"),
+            ephemeral=True,
+        )
         return
     try:
         index = todo_list.index(item)
         todo_list[index] = new_name
         database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_updated"))
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "item_updated")
+        )
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_not_added"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "todo_not_added"), ephemeral=True
+        )
 
 
 @todo_command.sub_command(name="clear", description="Clear your to-do list")
@@ -4225,28 +5646,44 @@ async def todo_clear_command(interaction):
             await interaction.edit_original_message(view=self)
             return await super().on_timeout()
 
-        @disnake.ui.button(label=functions.get_text(interaction.author.id, "yes_upper"), style=disnake.ButtonStyle.green)
+        @disnake.ui.button(
+            label=functions.get_text(interaction.author.id, "yes_upper"),
+            style=disnake.ButtonStyle.green,
+        )
         async def clear_todo(self, button, button_interaction):
             database[f"todo.{interaction.author.id}"] = json.dumps([])
-            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "todo_cleared"), ephemeral=True)
+            await button_interaction.response.send_message(
+                functions.get_text(button_interaction.author.id, "todo_cleared"),
+                ephemeral=True,
+            )
             for button in self.children:
                 button.disabled = True
             await interaction.edit_original_message(view=self)
 
-        @disnake.ui.button(label=functions.get_text(interaction.author.id, "no_upper"), style=disnake.ButtonStyle.red)
+        @disnake.ui.button(
+            label=functions.get_text(interaction.author.id, "no_upper"),
+            style=disnake.ButtonStyle.red,
+        )
         async def cancel(self, button, button_interaction):
-            await button_interaction.response.send_message(functions.get_text(button_interaction.author.id, "operation_cancelled"), ephemeral=True)
+            await button_interaction.response.send_message(
+                functions.get_text(button_interaction.author.id, "operation_cancelled"),
+                ephemeral=True,
+            )
             for button in self.children:
                 button.disabled = True
             await interaction.edit_original_message(view=self)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_clear_confirm"), view=ConfirmationView(), ephemeral=True)
+
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "todo_clear_confirm"),
+        view=ConfirmationView(),
+        ephemeral=True,
+    )
 
 
 @todo_command.sub_command(name="add", description="Add an item to your to-do list")
 async def todo_add_command(
     interaction,
-    item: str = Param(
-        description="The item you want to add to your to-do list"),
+    item: str = Param(description="The item you want to add to your to-do list"),
 ):
     item = item.strip()
     try:
@@ -4254,25 +5691,39 @@ async def todo_add_command(
     except:
         todo_list = []
     if len(todo_list) >= 25:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("25"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "item_limit").format("25"),
+            ephemeral=True,
+        )
         return
     if len(item) > 50:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True
+        )
         return
     if item not in todo_list:
         todo_list.append(item)
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_already_added"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "todo_already_added"),
+            ephemeral=True,
+        )
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_added").format(item))
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "todo_added").format(item)
+    )
 
 
-@todo_command.sub_command(name="remove", description="Remove an item from your to-do list")
+@todo_command.sub_command(
+    name="remove", description="Remove an item from your to-do list"
+)
 async def todo_remove_command(
     interaction,
-    item: str = Param(description="The item you want to add to your to-do list",
-                      autocomplete=todo_list_autocomplete),
+    item: str = Param(
+        description="The item you want to add to your to-do list",
+        autocomplete=todo_list_autocomplete,
+    ),
 ):
     item = item.strip()
     try:
@@ -4282,10 +5733,14 @@ async def todo_remove_command(
     if item in todo_list:
         todo_list.remove(item)
     else:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_not_added"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "todo_not_added"), ephemeral=True
+        )
         return
     database[f"todo.{interaction.author.id}"] = json.dumps(todo_list)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "todo_removed").format(item))
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "todo_removed").format(item)
+    )
 
 
 @client.slash_command(name="reminders", description="Remind yourself about something")
@@ -4296,8 +5751,7 @@ async def remind_command(_):
 @remind_command.sub_command(name="list", description="See all your active reminders")
 async def remind_list_command(interaction):
     try:
-        current_reminders = json.loads(
-            database[f"reminders.{interaction.author.id}"])
+        current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
     except:
         current_reminders = []
     text = ""
@@ -4329,12 +5783,12 @@ async def remind_remove_autocomplete(interaction, string):
 @remind_command.sub_command(name="remove", description="Remove a reminder")
 async def remind_remove_command(
     interaction,
-    text: str = Param(description="The name of the reminder",
-                      autocomplete=remind_remove_autocomplete),
+    text: str = Param(
+        description="The name of the reminder", autocomplete=remind_remove_autocomplete
+    ),
 ):
     try:
-        current_reminders = json.loads(
-            database[f"reminders.{interaction.author.id}"])
+        current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
     except:
         current_reminders = []
     key = None
@@ -4342,12 +5796,15 @@ async def remind_remove_command(
         if reminder[2] == text:
             key = reminder
     if key == None:
-        await interaction.response.send_message("That reminder does not exist!", ephemeral=True)
+        await interaction.response.send_message(
+            "That reminder does not exist!", ephemeral=True
+        )
         return
     current_reminders.remove(key)
-    database[f"reminders.{interaction.author.id}"] = json.dumps(
-        current_reminders)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, "reminder_removed"))
+    database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "reminder_removed")
+    )
 
 
 @remind_command.sub_command(name="add", description="Add a new reminder")
@@ -4355,41 +5812,64 @@ async def remind_add_command(
     interaction,
     duration: str = Param(description="The duration of the reminder"),
     text: str = Param(description="The name of the reminder"),
-    type: ReminderOption = Param(
-        "Normal", description="The type of the reminder"),
+    type: ReminderOption = Param("Normal", description="The type of the reminder"),
 ):
     original_duration = duration
     try:
         duration = functions.parse_time(duration) / 60
     except:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "invalid_duration"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "invalid_duration"),
+            ephemeral=True,
+        )
         return
 
     if len(text) > 100 and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "text_too_long"), ephemeral=True
+        )
         return
     if type == "Repeated":
         if duration < 60:
-            await interaction.response.send_message(functions.get_text(interaction.author.id, "repeated_reminders_small"), ephemeral=True)
+            await interaction.response.send_message(
+                functions.get_text(interaction.author.id, "repeated_reminders_small"),
+                ephemeral=True,
+            )
             return
     if duration > 10080 and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "duration_too_long"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "duration_too_long"),
+            ephemeral=True,
+        )
         return
     if duration < 0:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "no_negative_numbers"), ephemeral=True)
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "no_negative_numbers"),
+            ephemeral=True,
+        )
         return
     try:
-        current_reminders = json.loads(
-            database[f"reminders.{interaction.author.id}"])
+        current_reminders = json.loads(database[f"reminders.{interaction.author.id}"])
     except:
         current_reminders = []
-    if len(current_reminders) >= 5 and interaction.author.id not in variables.permission_override:
-        await interaction.response.send_message(functions.get_text(interaction.author.id, "item_limit").format("5"), ephemeral=True)
+    if (
+        len(current_reminders) >= 5
+        and interaction.author.id not in variables.permission_override
+    ):
+        await interaction.response.send_message(
+            functions.get_text(interaction.author.id, "item_limit").format("5"),
+            ephemeral=True,
+        )
         return
-    current_reminders.append([round(time.time()), duration*60, text, type])
-    database[f"reminders.{interaction.author.id}"] = json.dumps(
-        current_reminders)
-    await interaction.response.send_message(functions.get_text(interaction.author.id, 'reminder_added').format(functions.display_time(interaction.author.id, functions.parse_time(original_duration))))
+    current_reminders.append([round(time.time()), duration * 60, text, type])
+    database[f"reminders.{interaction.author.id}"] = json.dumps(current_reminders)
+    await interaction.response.send_message(
+        functions.get_text(interaction.author.id, "reminder_added").format(
+            functions.display_time(
+                interaction.author.id, functions.parse_time(original_duration)
+            )
+        )
+    )
 
 
 def epoch_to_date(epoch):
@@ -4416,8 +5896,7 @@ def date_to_epoch(timestamp):
     hour = time_parts[0]
     minute = time_parts[1]
     second = time_parts[2]
-    epoch = datetime.datetime(year, month, day, hour,
-                              minute, second).timestamp()
+    epoch = datetime.datetime(year, month, day, hour, minute, second).timestamp()
     return int(epoch)
 
 
@@ -4519,7 +5998,7 @@ def evaluate_expression(expression):
         "round": lambda x: round(x),
         "len": lambda x: len(x),
         "sqrt": lambda x: math.sqrt(x),
-        "cbrt": lambda x: x ** (1. / 3),
+        "cbrt": lambda x: x ** (1.0 / 3),
         "square": lambda x: x * x,
         "cube": lambda x: x * x * x,
         "random": lambda x, y: random.randint(x, y),
@@ -4539,8 +6018,7 @@ def evaluate_expression(expression):
     }
 
     try:
-        answer = str(simpleeval.simple_eval(
-            expression, functions=math_functions))
+        answer = str(simpleeval.simple_eval(expression, functions=math_functions))
     except:
         answer = None
     return answer
@@ -4551,7 +6029,9 @@ async def log_message(guild, message):
         log_channel = json.loads(database[f"logging.{guild.id}"])
         for channel in guild.channels:
             if channel.id == log_channel:
-                await channel.send(message, allowed_mentions=disnake.AllowedMentions.none())
+                await channel.send(
+                    message, allowed_mentions=disnake.AllowedMentions.none()
+                )
     except:
         pass
 
@@ -4562,7 +6042,7 @@ def rgb_to_hex(rgb_color):
             pass
         else:
             raise Exception("invalid RGB color code")
-    return '#%02x%02x%02x' % rgb_color
+    return "#%02x%02x%02x" % rgb_color
 
 
 def generate_color(color_code, generate_image=True):
@@ -4591,14 +6071,15 @@ def generate_color(color_code, generate_image=True):
     if color_code.startswith("#") and len(color_code) == 7:
         try:
             if generate_image:
-                image = Image.new(
-                    "RGB", (image_width, image_height), color_code)
+                image = Image.new("RGB", (image_width, image_height), color_code)
                 image.save("images/color.png")
 
-            value = color_code.lstrip('#')
+            value = color_code.lstrip("#")
             length = len(value)
-            rgb_color = tuple(int(value[i:i+length//3], 16)
-                              for i in range(0, length, length//3))
+            rgb_color = tuple(
+                int(value[i : i + length // 3], 16)
+                for i in range(0, length, length // 3)
+            )
             return (color_code, rgb_color)
         except:
             return 1
@@ -4607,11 +6088,10 @@ def generate_color(color_code, generate_image=True):
             color_code = color_code.replace("(", "")
             color_code = color_code.replace(")", "")
             color_code = color_code.replace(", ", ",")
-            rgb_color = tuple(map(int, color_code.split(',')))
+            rgb_color = tuple(map(int, color_code.split(",")))
             color_code = rgb_to_hex(rgb_color)
             if generate_image:
-                image = Image.new(
-                    "RGB", (image_width, image_height), color_code)
+                image = Image.new("RGB", (image_width, image_height), color_code)
                 image.save("images/color.png")
 
             return (color_code, rgb_color)
@@ -4635,12 +6115,15 @@ async def send_vote_message(user_id):
             for member in guild.members:
                 if str(member.id) == str(user_id):
                     interaction = disnake_paginator.wrappers.UserInteractionWrapper(
-                        member)
+                        member
+                    )
                     await interaction.response.send_message(
                         language.get(
-                            functions.get_settings(user_id)["language"], "vote_message"),
-                        view=get_vote_view(functions.get_text(
-                            user_id, "vote_add_reminder")),
+                            functions.get_settings(user_id)["language"], "vote_message"
+                        ),
+                        view=get_vote_view(
+                            functions.get_text(user_id, "vote_add_reminder")
+                        ),
                     )
                     return
 
@@ -4657,23 +6140,29 @@ async def on_member_join(member):
     try:
         if json.loads(database[f"welcome.toggle.{member.guild.id}"]):
             welcome_message = database[f"welcome.text.{member.guild.id}"].decode(
-                "utf-8")
+                "utf-8"
+            )
             welcome_channel = database[f"welcome.channel.{member.guild.id}"].decode(
-                "utf-8")
+                "utf-8"
+            )
             for channel in member.guild.channels:
                 if welcome_channel == str(channel.id):
+                    welcome_message = welcome_message.replace("{user}", member.name)
                     welcome_message = welcome_message.replace(
-                        "{user}", member.name)
+                        "{user_id}", str(member.id)
+                    )
                     welcome_message = welcome_message.replace(
-                        "{user_id}", str(member.id))
+                        "{user.id}", str(member.id)
+                    )
                     welcome_message = welcome_message.replace(
-                        "{user.id}", str(member.id))
+                        "{discriminator}", member.discriminator
+                    )
                     welcome_message = welcome_message.replace(
-                        "{discriminator}", member.discriminator)
+                        "{members}", str(member.guild.member_count)
+                    )
                     welcome_message = welcome_message.replace(
-                        "{members}", str(member.guild.member_count))
-                    welcome_message = welcome_message.replace(
-                        "{server}", member.guild.name)
+                        "{server}", member.guild.name
+                    )
                     await channel.send(welcome_message)
     except:
         pass
@@ -4682,24 +6171,20 @@ async def on_member_join(member):
 async def on_member_remove(member):
     try:
         if json.loads(database[f"leave.toggle.{member.guild.id}"]):
-            leave_message = database[f"leave.text.{member.guild.id}"].decode(
-                "utf-8")
-            leave_channel = database[f"leave.channel.{member.guild.id}"].decode(
-                "utf-8")
+            leave_message = database[f"leave.text.{member.guild.id}"].decode("utf-8")
+            leave_channel = database[f"leave.channel.{member.guild.id}"].decode("utf-8")
             for channel in member.guild.channels:
                 if leave_channel == str(channel.id):
+                    leave_message = leave_message.replace("{user}", member.name)
+                    leave_message = leave_message.replace("{user_id}", str(member.id))
+                    leave_message = leave_message.replace("{user.id}", str(member.id))
                     leave_message = leave_message.replace(
-                        "{user}", member.name)
+                        "{discriminator}", member.discriminator
+                    )
                     leave_message = leave_message.replace(
-                        "{user_id}", str(member.id))
-                    leave_message = leave_message.replace(
-                        "{user.id}", str(member.id))
-                    leave_message = leave_message.replace(
-                        "{discriminator}", member.discriminator)
-                    leave_message = leave_message.replace(
-                        "{members}", str(member.guild.member_count))
-                    leave_message = leave_message.replace(
-                        "{server}", member.guild.name)
+                        "{members}", str(member.guild.member_count)
+                    )
+                    leave_message = leave_message.replace("{server}", member.guild.name)
                     await channel.send(leave_message)
     except:
         pass
@@ -4716,7 +6201,9 @@ async def on_guild_join(guild):
         async for entry in guild.audit_logs(limit=10):
             if entry.action == disnake.AuditLogAction.bot_add:
                 if entry.target.id == client.user.id:
-                    await help_paginator.start(disnake_paginator.wrappers.UserInteractionWrapper(entry.user))
+                    await help_paginator.start(
+                        disnake_paginator.wrappers.UserInteractionWrapper(entry.user)
+                    )
                     break
     except:
         pass
@@ -4724,8 +6211,7 @@ async def on_guild_join(guild):
 
 async def cleanup_reactions(payload):
     try:
-        reaction_roles = json.loads(
-            database[f"reaction-roles.{payload.guild_id}"])
+        reaction_roles = json.loads(database[f"reaction-roles.{payload.guild_id}"])
     except:
         return
     new_reaction_roles = []
@@ -4739,16 +6225,18 @@ async def cleanup_reactions(payload):
         except:
             pass
     if len(reaction_roles) != len(new_reaction_roles):
-        database[f"reaction-roles.{payload.guild_id}"] = json.dumps(
-            new_reaction_roles)
+        database[f"reaction-roles.{payload.guild_id}"] = json.dumps(new_reaction_roles)
 
 
 async def on_reaction_add(payload):
-    if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
+    if (
+        payload.user_id == client.user.id
+        or payload.user_id in blacklisted_users
+        or payload.guild_id == None
+    ):
         return
     try:
-        reaction_roles = json.loads(
-            database[f"reaction-roles.{payload.guild_id}"])
+        reaction_roles = json.loads(database[f"reaction-roles.{payload.guild_id}"])
     except:
         return
 
@@ -4768,28 +6256,39 @@ async def on_reaction_add(payload):
                             try:
                                 await payload.member.add_roles(role)
                                 try:
-                                    await payload.member.send(f"You have been given the **{role.name}** role in **{target_guild.name}**")
+                                    await payload.member.send(
+                                        f"You have been given the **{role.name}** role in **{target_guild.name}**"
+                                    )
                                 except:
                                     pass
                             except:
                                 try:
-                                    await payload.member.send(f"I was unable to give you the **{role.name}** role in **{target_guild.name}**")
+                                    await payload.member.send(
+                                        f"I was unable to give you the **{role.name}** role in **{target_guild.name}**"
+                                    )
                                 except:
                                     pass
-                                await log_message(target_guild, f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)")
+                                await log_message(
+                                    target_guild,
+                                    f"Unable to give **{payload.member}** the **{role.name}** role (reaction roles)",
+                                )
                     else:
                         reaction_roles.remove(reaction_role)
                         database[f"reaction-roles.{payload.guild_id}"] = json.dumps(
-                            reaction_roles)
+                            reaction_roles
+                        )
                     return
 
 
 async def on_reaction_remove(payload):
-    if payload.user_id == client.user.id or payload.user_id in blacklisted_users or payload.guild_id == None:
+    if (
+        payload.user_id == client.user.id
+        or payload.user_id in blacklisted_users
+        or payload.guild_id == None
+    ):
         return
     try:
-        reaction_roles = json.loads(
-            database[f"reaction-roles.{payload.guild_id}"])
+        reaction_roles = json.loads(database[f"reaction-roles.{payload.guild_id}"])
     except:
         return
 
@@ -4815,19 +6314,27 @@ async def on_reaction_remove(payload):
                             try:
                                 await member.remove_roles(role)
                                 try:
-                                    await member.send(f"Your **{role.name}** role has been removed in **{target_guild.name}**")
+                                    await member.send(
+                                        f"Your **{role.name}** role has been removed in **{target_guild.name}**"
+                                    )
                                 except:
                                     pass
                             except:
                                 try:
-                                    await member.send(f"I was unable to remove your **{role.name}** role in **{target_guild.name}**")
+                                    await member.send(
+                                        f"I was unable to remove your **{role.name}** role in **{target_guild.name}**"
+                                    )
                                 except:
                                     pass
-                                await log_message(target_guild, f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)")
+                                await log_message(
+                                    target_guild,
+                                    f"Unable to remove **{member}**'s **{role.name}** role (reaction roles)",
+                                )
                     else:
                         reaction_roles.remove(reaction_role)
                         database[f"reaction-roles.{payload.guild_id}"] = json.dumps(
-                            reaction_roles)
+                            reaction_roles
+                        )
                     return
 
 
@@ -4842,7 +6349,8 @@ async def on_message(message):
                 for segment in list(reversed(segments)):
                     if segment.strip() != "":
                         response = requests.get(
-                            f"https://discord.com/api/invites/{segment}").json()
+                            f"https://discord.com/api/invites/{segment}"
+                        ).json()
                         if response["code"] != 10006:
                             guild_name = response["guild"]["name"]
                             guild_id = response["guild"]["id"]
@@ -4853,7 +6361,9 @@ async def on_message(message):
                                         description="I have already joined that Discord server!",
                                         color=variables.embed_color(),
                                     )
-                                    await message.reply(embed=embed, mention_author=False)
+                                    await message.reply(
+                                        embed=embed, mention_author=False
+                                    )
                                     return
                             embed = disnake.Embed(
                                 title="Server Invite",
@@ -4865,43 +6375,49 @@ async def on_message(message):
         return
 
     prefix = variables.prefix
-    if message.content == f"<@{client.user.id}>" or message.content == f"<@!{client.user.id}>":
-        await message.channel.send(embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color()))
+    if (
+        message.content == f"<@{client.user.id}>"
+        or message.content == f"<@!{client.user.id}>"
+    ):
+        await message.channel.send(
+            embed=disnake.Embed(
+                title="New Prefix",
+                description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})",
+                color=variables.embed_color(),
+            )
+        )
         return
 
     if message.content.startswith(f"<@{client.user.id}> "):
-        message.content = message.content.replace(
-            f"<@{client.user.id}> ", prefix, 1)
+        message.content = message.content.replace(f"<@{client.user.id}> ", prefix, 1)
     if message.content.startswith(f"<@!{client.user.id}> "):
-        message.content = message.content.replace(
-            f"<@!{client.user.id}> ", prefix, 1)
+        message.content = message.content.replace(f"<@!{client.user.id}> ", prefix, 1)
     if message.content.startswith(f"<@{client.user.id}>"):
-        message.content = message.content.replace(
-            f"<@{client.user.id}>", prefix, 1)
+        message.content = message.content.replace(f"<@{client.user.id}>", prefix, 1)
     if message.content.startswith(f"<@!{client.user.id}>"):
-        message.content = message.content.replace(
-            f"<@!{client.user.id}>", prefix, 1)
+        message.content = message.content.replace(f"<@!{client.user.id}>", prefix, 1)
 
     if not message.author.guild_permissions.administrator:
         if message.author.id not in variables.permission_override:
             try:
                 ignored_channels = json.loads(
-                    database[f"filter-ignore.{message.guild.id}"])
+                    database[f"filter-ignore.{message.guild.id}"]
+                )
             except:
                 ignored_channels = {}
             for filter in variables.filters.values():
                 if filter not in ignored_channels:
                     ignored_channels[filter] = []
             try:
-                mute_duration = json.loads(
-                    database[f"auto-mute.{message.guild.id}"])
+                mute_duration = json.loads(database[f"auto-mute.{message.guild.id}"])
             except:
                 mute_duration = 10
             try:
                 if message.channel.id not in ignored_channels["insults"]:
                     if json.loads(database[f"insults.toggle.{message.guild.id}"]):
                         insults = json.loads(
-                            database[f"insults.list.{message.guild.id}"])
+                            database[f"insults.list.{message.guild.id}"]
+                        )
                         for pattern in insults:
                             if re.search(pattern, message.content, flags=re.IGNORECASE):
                                 try:
@@ -4909,19 +6425,27 @@ async def on_message(message):
                                 except:
                                     pass
                                 try:
-                                    await message.author.send(functions.get_text(message.author.id, "banned_word").format(word.lower()))
+                                    await message.author.send(
+                                        functions.get_text(
+                                            message.author.id, "banned_word"
+                                        ).format(word.lower())
+                                    )
                                 except:
                                     pass
-                                await message.author.timeout(duration=mute_duration, reason="Using a banned word")
-                                await log_message(message.guild, f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
+                                await message.author.timeout(
+                                    duration=mute_duration, reason="Using a banned word"
+                                )
+                                await log_message(
+                                    message.guild,
+                                    f'{message.author.mention} used the word **"{word.lower()}"** in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}',
+                                )
                                 return
             except:
                 pass
             try:
                 if message.channel.id not in ignored_channels["links"]:
                     if json.loads(database[f"links.toggle.{message.guild.id}"]):
-                        link_regexes = ["http://",
-                                        "https://", "www.", "discord.gg/"]
+                        link_regexes = ["http://", "https://", "www.", "discord.gg/"]
                         for regex in link_regexes:
                             if regex in message.content.lower().replace(" ", ""):
                                 try:
@@ -4929,11 +6453,18 @@ async def on_message(message):
                                 except:
                                     pass
                                 try:
-                                    await message.author.send("Please do not put links in your message!")
+                                    await message.author.send(
+                                        "Please do not put links in your message!"
+                                    )
                                 except:
                                     pass
-                                await message.author.timeout(duration=mute_duration, reason="Sending links")
-                                await log_message(message.guild, f'{message.author.mention} sent a link in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
+                                await message.author.timeout(
+                                    duration=mute_duration, reason="Sending links"
+                                )
+                                await log_message(
+                                    message.guild,
+                                    f"{message.author.mention} sent a link in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}",
+                                )
                                 return
             except:
                 pass
@@ -4953,7 +6484,8 @@ async def on_message(message):
                             strike_limit = 6
                             try:
                                 strike_limit = json.loads(
-                                    database[f"spamming.limit.{message.guild.id}"])
+                                    database[f"spamming.limit.{message.guild.id}"]
+                                )
                             except:
                                 pass
                             if strikes >= strike_limit:
@@ -4962,11 +6494,18 @@ async def on_message(message):
                                 except:
                                     pass
                                 try:
-                                    await message.author.send(f"Stop spamming! You are sending more than **{strikes} {'message' if strikes == 1 else 'messages'}** in **15 seconds**!")
+                                    await message.author.send(
+                                        f"Stop spamming! You are sending more than **{strikes} {'message' if strikes == 1 else 'messages'}** in **15 seconds**!"
+                                    )
                                 except:
                                     pass
-                                await message.author.timeout(duration=mute_duration, reason="Spamming messages")
-                                await log_message(message.guild, f'{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
+                                await message.author.timeout(
+                                    duration=mute_duration, reason="Spamming messages"
+                                )
+                                await log_message(
+                                    message.guild,
+                                    f"{message.author.mention} is spamming (**{strikes}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}",
+                                )
                                 return
             except:
                 pass
@@ -4976,7 +6515,8 @@ async def on_message(message):
                         limit = 10
                         try:
                             limit = json.loads(
-                                database[f"mention.limit.{message.guild.id}"])
+                                database[f"mention.limit.{message.guild.id}"]
+                            )
                         except:
                             pass
                         mentions = len(message.raw_mentions)
@@ -4986,11 +6526,18 @@ async def on_message(message):
                             except:
                                 pass
                             try:
-                                await message.author.send(f"Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!")
+                                await message.author.send(
+                                    f"Please do not spam mentions in your message! You just mentioned **{mentions} {'user' if mentions == 1 else 'users'}**!"
+                                )
                             except:
                                 pass
-                            await message.author.timeout(duration=mute_duration, reason="Spamming mentions")
-                            await log_message(message.guild, f'{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}')
+                            await message.author.timeout(
+                                duration=mute_duration, reason="Spamming mentions"
+                            )
+                            await log_message(
+                                message.guild,
+                                f"{message.author.mention} is spamming mentions (**{mentions}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500)}",
+                            )
                             return
             except:
                 pass
@@ -5000,22 +6547,30 @@ async def on_message(message):
                         limit = 10
                         try:
                             limit = json.loads(
-                                database[f"newline.limit.{message.guild.id}"])
+                                database[f"newline.limit.{message.guild.id}"]
+                            )
                         except:
                             pass
                         newlines = message.content.count("\n")
-                        if "\n"*limit in message.content:
+                        if "\n" * limit in message.content:
                             try:
                                 await message.delete()
                             except:
                                 pass
                             try:
-                                await message.author.send(f"Please do not spam newlines in your message! You just sent **{newlines} {'newline' if newlines == 1 else 'newlines'}** in **1 message**!")
+                                await message.author.send(
+                                    f"Please do not spam newlines in your message! You just sent **{newlines} {'newline' if newlines == 1 else 'newlines'}** in **1 message**!"
+                                )
                             except:
                                 pass
-                            await message.author.timeout(duration=mute_duration, reason="Spamming newlines")
+                            await message.author.timeout(
+                                duration=mute_duration, reason="Spamming newlines"
+                            )
                             newline = "\n"
-                            await log_message(message.guild, f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500).replace(newline*8, newline+"..."+newline)}')
+                            await log_message(
+                                message.guild,
+                                f'{message.author.mention} is spamming newlines (**{newlines}**) in <#{message.channel.id}>\n\n{functions.shrink(message.content, 1500).replace(newline*8, newline+"..."+newline)}',
+                            )
                             return
             except:
                 pass
@@ -5026,7 +6581,9 @@ async def on_message(message):
         del database[afk_key]
         if functions.get_settings(message.author.id)["afk_messages"]:
             try:
-                await message.author.send(functions.get_text(message.author.id, "afk_removed"))
+                await message.author.send(
+                    functions.get_text(message.author.id, "afk_removed")
+                )
             except:
                 pass
     for mention in message.mentions:
@@ -5037,11 +6594,11 @@ async def on_message(message):
                 if user.id == mention.id:
                     user_name = user.name
             if not user_name:
-                user_name = functions.get_text(
-                    message.author.id, "mentioned_user")
+                user_name = functions.get_text(message.author.id, "mentioned_user")
             await message.reply(
                 functions.get_text(
-                    message.author.id, "currently_afk",
+                    message.author.id,
+                    "currently_afk",
                 ).format(
                     user_name,
                     f"<t:{afk_status[0]}:R>",
@@ -5051,12 +6608,23 @@ async def on_message(message):
         except:
             pass
 
-    if message.content.startswith(prefix) and len(message.content) > 1 and message.author.id not in variables.bot_owners:
-        await message.channel.send("We have migrated to slash commands!", embed=disnake.Embed(title="New Prefix", description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})", color=variables.embed_color()))
+    if (
+        message.content.startswith(prefix)
+        and len(message.content) > 1
+        and message.author.id not in variables.bot_owners
+    ):
+        await message.channel.send(
+            "We have migrated to slash commands!",
+            embed=disnake.Embed(
+                title="New Prefix",
+                description=f"My prefix here is `/` (slash commands)\nIf you do not see any slash commands, make sure the bot is invited with [this link]({variables.bot_invite_link})",
+                color=variables.embed_color(),
+            ),
+        )
         return
 
-    if message.content.startswith(prefix+"execute"):
-        length = len(prefix+"execute ")
+    if message.content.startswith(prefix + "execute"):
+        length = len(prefix + "execute ")
         if len(message.content) >= length:
             code = message.content[length:]
         else:
@@ -5096,12 +6664,17 @@ async def on_message(message):
             with contextlib.redirect_stdout(stdout):
                 if "#globals" in code:
                     exec(
-                        f"async def run_code():\n{textwrap.indent(code, '   ')}", globals())
+                        f"async def run_code():\n{textwrap.indent(code, '   ')}",
+                        globals(),
+                    )
                     await globals()["run_code"]()
                 else:
                     dictionary = dict(locals(), **globals())
                     exec(
-                        f"async def run_code():\n{textwrap.indent(code, '   ')}", dictionary, dictionary)
+                        f"async def run_code():\n{textwrap.indent(code, '   ')}",
+                        dictionary,
+                        dictionary,
+                    )
                     await dictionary["run_code"]()
                 output = stdout.getvalue()
         except Exception as error:
@@ -5124,7 +6697,9 @@ async def on_message(message):
                 segments=segments,
                 invalid_user_function=functions.invalid_user_function,
             )
-            await pager.start(disnake_paginator.wrappers.MessageInteractionWrapper(message))
+            await pager.start(
+                disnake_paginator.wrappers.MessageInteractionWrapper(message)
+            )
         elif len(output.strip()) == 0:
             await message.add_reaction("✅")
         else:
@@ -5133,7 +6708,9 @@ async def on_message(message):
 
 async def on_slash_command_error(interaction, error):
     error_text = str(error)
-    if error_text.startswith("InteractionResponded:") or error_text.startswith("Command raised an exception: InteractionResponded:"):
+    if error_text.startswith("InteractionResponded:") or error_text.startswith(
+        "Command raised an exception: InteractionResponded:"
+    ):
         return
 
     if type(error) == disnake.errors.Forbidden:
@@ -5144,19 +6721,24 @@ async def on_slash_command_error(interaction, error):
     else:
         if "or fewer in length" in error_text:
             try:
-                await interaction.response.send_message("Message too long to be sent!", ephemeral=True)
+                await interaction.response.send_message(
+                    "Message too long to be sent!", ephemeral=True
+                )
             except:
                 try:
-                    await interaction.edit_original_message(content="Message too long to be sent!")
+                    await interaction.edit_original_message(
+                        content="Message too long to be sent!"
+                    )
                 except:
                     await interaction.channel.send("Message too long to be sent!")
             return
 
         error_id = random.randint(0, 32768)
-        escaped_character = '\`'
+        escaped_character = "\`"
         interaction_data = parse_interaction(interaction)
         formatted_error = str(
-            ''.join(traceback.format_exception(error, error, error.__traceback__)))
+            "".join(traceback.format_exception(error, error, error.__traceback__))
+        )
         file = open(f"error-{error_id}.txt", "w+")
         file.write(formatted_error)
         file.close()
@@ -5174,16 +6756,23 @@ async def on_slash_command_error(interaction, error):
                     if member.id == user_id:
                         try:
                             if not sent:
-                                await member.send(embed=report_embed, file=disnake.File(f"error-{error_id}.txt"))
+                                await member.send(
+                                    embed=report_embed,
+                                    file=disnake.File(f"error-{error_id}.txt"),
+                                )
                                 sent = True
                         except Exception as new_error:
-                            print(
-                                f"Unable to send error to {member}: {new_error}")
+                            print(f"Unable to send error to {member}: {new_error}")
 
-        embed = disnake.Embed(title=functions.get_text(interaction.author.id, "bot_error"),
-                              description=f"{functions.get_text(interaction.author.id, 'error_message')}\n```\n{error}\n```", color=disnake.Color.red(), timestamp=datetime.datetime.now())
-        embed.set_footer(text=functions.get_text(
-            interaction.author.id, "bot_error_report"))
+        embed = disnake.Embed(
+            title=functions.get_text(interaction.author.id, "bot_error"),
+            description=f"{functions.get_text(interaction.author.id, 'error_message')}\n```\n{error}\n```",
+            color=disnake.Color.red(),
+            timestamp=datetime.datetime.now(),
+        )
+        embed.set_footer(
+            text=functions.get_text(interaction.author.id, "bot_error_report")
+        )
         try:
             await interaction.response.send_message(embed=embed, ephemeral=True)
         except:

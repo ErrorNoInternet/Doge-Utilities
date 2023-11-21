@@ -50,16 +50,13 @@ conversions = [
     Conversion("centimeter", "kilometer", "divide", 100000),
     Conversion("meter", "kilometer", "divide", 1000),
     Conversion("mile", "kilometer", "divide", 0.621371),
-
     Conversion("meter", "foot", "multiply", 3.2808399),
     Conversion("inch", "meter", "multiply", 0.0254),
     Conversion("foot", "inch", "multiply", 12),
     Conversion("foot", "centimeter", "multiply", 30.48),
     Conversion("inch", "centimeter", "multiply", 2.54),
-
     Conversion("ton", "kilogram", "multiply", 907.18474),
     Conversion("kilogram", "gram", "multiply", 1000),
-
     Conversion("byte", "kilobyte", "divide", 1000),
     Conversion("byte", "megabyte", "divide", 1000000),
     Conversion("byte", "gigabyte", "divide", 1000000000),
@@ -75,7 +72,6 @@ conversions = [
     Conversion("gigabyte", "terabyte", "divide", 1000),
     Conversion("gigabyte", "petabyte", "divide", 1000000),
     Conversion("terabyte", "petabyte", "divide", 1000),
-
     Conversion("millisecond", "second", "divide", 1000),
     Conversion("millisecond", "minute", "divide", 60000),
     Conversion("millisecond", "hour", "divide", 3600000),
@@ -104,9 +100,7 @@ conversions = [
     Conversion("week", "month", "divide", 4.2857),
     Conversion("week", "year", "divide", 52.177457),
     Conversion("month", "year", "divide", 12),
-
-    Conversion("fahrenheit", "celcius",
-               "custom:(x-32)*0.5556", shortened=False),
+    Conversion("fahrenheit", "celcius", "custom:(x-32)*0.5556", shortened=False),
     Conversion("celcius", "fahrenheit", "custom:(x*1.8)+32", shortened=False),
 ]
 
@@ -117,8 +111,9 @@ for conversion in conversions:
     new_action = "divide"
     if conversion.action == "divide":
         new_action = "multiply"
-    reversed_conversions.append(Conversion(
-        conversion.output, conversion.input, new_action, conversion.amount))
+    reversed_conversions.append(
+        Conversion(conversion.output, conversion.input, new_action, conversion.amount)
+    )
 [conversions.append(conversion) for conversion in reversed_conversions]
 
 

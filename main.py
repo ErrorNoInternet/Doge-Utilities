@@ -65,7 +65,8 @@ async def on_guild_channel_create(channel):
     await asyncio.sleep(1)
     try:
         current_setting = json.loads(
-            core.database[f"{channel.guild.id}.raid-protection"])
+            core.database[f"{channel.guild.id}.raid-protection"]
+        )
         if current_setting:
             if channel.id not in variables.updated_channels:
                 variables.updated_channels.append(channel.id)
@@ -107,7 +108,8 @@ async def on_guild_channel_create(channel):
 async def on_guild_channel_update(before, after):
     try:
         current_setting = json.loads(
-            core.database[f"{before.guild.id}.raid-protection"])
+            core.database[f"{before.guild.id}.raid-protection"]
+        )
         if not current_setting:
             return
     except:
@@ -118,7 +120,12 @@ async def on_guild_channel_update(before, after):
         return
     variables.updated_channels.append(after.id)
     if type(after) == disnake.TextChannel:
-        await after.edit(name=before.name, topic=before.topic, category=before.category, slowmode_delay=before.slowmode_delay)
+        await after.edit(
+            name=before.name,
+            topic=before.topic,
+            category=before.category,
+            slowmode_delay=before.slowmode_delay,
+        )
     elif type(after) == disnake.VoiceChannel:
         await after.edit(name=before.name, category=before.category)
     elif type(after) == disnake.CategoryChannel:
@@ -130,7 +137,8 @@ async def on_guild_channel_update(before, after):
 async def on_guild_channel_delete(channel):
     try:
         current_setting = json.loads(
-            core.database[f"{channel.guild.id}.raid-protection"])
+            core.database[f"{channel.guild.id}.raid-protection"]
+        )
         if not current_setting:
             return
     except:
@@ -143,16 +151,30 @@ async def on_guild_channel_delete(channel):
     for cached_channel in server_channels[channel.guild.id]:
         if channel.id == cached_channel.id:
             if type(channel) == disnake.TextChannel:
-                new_channel = await channel.guild.create_text_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, slowmode_delay=cached_channel.slowmode_delay, topic=cached_channel.topic)
+                new_channel = await channel.guild.create_text_channel(
+                    name=cached_channel.name,
+                    position=cached_channel.position,
+                    category=cached_channel.category,
+                    slowmode_delay=cached_channel.slowmode_delay,
+                    topic=cached_channel.topic,
+                )
                 await new_channel.edit(is_nsfw=cached_channel.is_nsfw())
                 variables.updated_channels.append(new_channel.id)
                 server_channels[channel.guild.id].append(new_channel)
             elif type(channel) == disnake.CategoryChannel:
-                new_channel = await channel.guild.create_category(name=cached_channel.name, position=cached_channel.position)
+                new_channel = await channel.guild.create_category(
+                    name=cached_channel.name, position=cached_channel.position
+                )
                 server_channels[channel.guild.id].append(new_channel)
                 variables.updated_channels.append(new_channel.id)
             else:
-                new_channel = await channel.guild.create_voice_channel(name=cached_channel.name, position=cached_channel.position, category=cached_channel.category, user_limit=cached_channel.user_limit, bitrate=cached_channel.bitrate)
+                new_channel = await channel.guild.create_voice_channel(
+                    name=cached_channel.name,
+                    position=cached_channel.position,
+                    category=cached_channel.category,
+                    user_limit=cached_channel.user_limit,
+                    bitrate=cached_channel.bitrate,
+                )
                 server_channels[channel.guild.id].append(new_channel)
                 variables.updated_channels.append(new_channel.id)
     update_counter(channel.guild.id)
@@ -162,8 +184,7 @@ async def on_guild_channel_delete(channel):
 async def on_guild_role_create(role):
     await asyncio.sleep(1)
     try:
-        current_setting = json.loads(
-            core.database[f"{role.guild.id}.raid-protection"])
+        current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
         if current_setting:
             if role.id not in variables.updated_roles:
                 variables.updated_roles.append(role.id)
@@ -179,7 +200,8 @@ async def on_guild_role_create(role):
 async def on_guild_role_update(before, after):
     try:
         current_setting = json.loads(
-            core.database[f"{before.guild.id}.raid-protection"])
+            core.database[f"{before.guild.id}.raid-protection"]
+        )
         if not current_setting:
             return
     except:
@@ -192,15 +214,16 @@ async def on_guild_role_update(before, after):
         variables.updated_roles.remove(after.id)
         return
     variables.updated_roles.append(after.id)
-    await after.edit(name=before.name, color=before.color, permissions=before.permissions)
+    await after.edit(
+        name=before.name, color=before.color, permissions=before.permissions
+    )
     update_counter(before.guild.id)
 
 
 @core.client.event
 async def on_guild_role_delete(role):
     try:
-        current_setting = json.loads(
-            core.database[f"{role.guild.id}.raid-protection"])
+        current_setting = json.loads(core.database[f"{role.guild.id}.raid-protection"])
         if not current_setting:
             return
     except:
@@ -215,7 +238,11 @@ async def on_guild_role_delete(role):
     global server_roles
     for cached_role in server_roles[role.guild.id]:
         if role.id == cached_role.id:
-            new_role = await role.guild.create_role(name=cached_role.name, color=cached_role.color, permissions=cached_role.permissions)
+            new_role = await role.guild.create_role(
+                name=cached_role.name,
+                color=cached_role.color,
+                permissions=cached_role.permissions,
+            )
             await new_role.edit(position=cached_role.position)
             server_roles[role.guild.id].append(new_role)
             variables.updated_roles.append(new_role.id)
@@ -225,7 +252,8 @@ async def on_guild_role_delete(role):
 @core.client.event
 async def on_ready():
     print(
-        f"Successfully logged in as {core.client.user} in {round(time.time() - initialize_time, 1)} seconds")
+        f"Successfully logged in as {core.client.user} in {round(time.time() - initialize_time, 1)} seconds"
+    )
 
     global first_run
     if not first_run:
@@ -233,7 +261,10 @@ async def on_ready():
         threading.Thread(
             name="random_status",
             target=asyncio.run_coroutine_threadsafe,
-            args=(random_status(), core.client.loop, ),
+            args=(
+                random_status(),
+                core.client.loop,
+            ),
         ).start()
         core.client.add_view(core.get_vote_view())
 
@@ -266,7 +297,8 @@ async def on_message(message):
         await core.on_message(message)
     except Exception as error:
         formatted_error = str(
-            ''.join(traceback.format_exception(error, error, error.__traceback__)))
+            "".join(traceback.format_exception(error, error, error.__traceback__))
+        )
         print(formatted_error)
 
 
@@ -291,6 +323,7 @@ async def on_error(event, *_):
 @core.client.event
 async def on_slash_command_error(interaction, error):
     await core.on_slash_command_error(interaction, error)
+
 
 threading.Thread(name="raid-protection", target=update_objects).start()
 core.client.topggpy = topgg.DBLClient(

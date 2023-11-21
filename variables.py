@@ -11,13 +11,15 @@ message_managers = bot_owners
 
 def embed_color():
     if datetime.datetime.now().month == 6:
-        return random.choice([0xe81416, 0xffa500, 0xfaeb36, 0x79c314, 0x487de7, 0x4b369d, 0x70369d])
+        return random.choice(
+            [0xE81416, 0xFFA500, 0xFAEB36, 0x79C314, 0x487DE7, 0x4B369D, 0x70369D]
+        )
     elif datetime.datetime.now().month == 10:
-        return 0xff6600
+        return 0xFF6600
     elif datetime.datetime.now().month == 12:
-        return random.choice([0xc30f16, 0x0fc362])
+        return random.choice([0xC30F16, 0x0FC362])
     else:
-        return 0x20c2f6
+        return 0x20C2F6
 
 
 secrets = [
@@ -42,8 +44,7 @@ updated_channels = []
 updated_roles = []
 updated_members = []
 settings_cache = {}
-ascii_characters = string.ascii_lowercase + \
-    string.ascii_uppercase + string.digits
+ascii_characters = string.ascii_lowercase + string.ascii_uppercase + string.digits
 bold_characters = "𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗"
 italic_characters = "𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡0123456789"
 extension_characters = string.punctuation + " "
@@ -102,30 +103,42 @@ supporters = {
 }
 bot_version = "unknown"
 try:
-    bot_version = subprocess.check_output(
-        ['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    bot_version = (
+        subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+        .decode("ascii")
+        .strip()
+    )
 except:
     print("[WARNING] Unable to get Git commit hash")
 bot_last_updated = "unknown"
 try:
-    bot_last_updated = subprocess.check_output(
-        ["git", "log", "-1", "--date=short", "--format=%cd"]).decode("ascii").strip()
+    bot_last_updated = (
+        subprocess.check_output(["git", "log", "-1", "--date=short", "--format=%cd"])
+        .decode("ascii")
+        .strip()
+    )
 except:
     print("[WARNING] Unable to get Git commit date")
 
 bot_invite_link = "https://discord.com/oauth2/authorize?client_id=854965721805226005&permissions=8&scope=applications.commands%20bot"
 support_server_invite = "https://discord.gg/3Tp7R8FUsC"
 help_text = "**Hello there!** My name is **Doge Utilities**, and I am a Discord bot made to help you with all sorts of tasks. I use **slash commands**, which is Discord's new command system made for Discord bots. If you would like to see all my commands, simply press the `/` key on your keyboard into the chat box and click on the <:DogeUtilities:879683075393613824> icon.\n\nOne of the first things to do is to enable raid protection for your server. This feature allows you to protect your server from hackers and raid bots. If someone deletes a channel or a role while this feature is on, Doge Utilities will automatically re-create whatever was deleted. To enable this, run the `/raid-protection enable` command.\n\nThe third thing you want to do is to enable filters. Filters are moderation tools that can help you automatically manage your server. There are currently **5 filters**. Namely `links`, `spam`, `mention`, `insults`, and `newline`. Type `/filter` to see the commands for all the filters. There is also a log feature, which lets you know when a member triggers a filter on your server. To set this up, run `/server logging set <#channel>`.\n\nYou might also want to setup welcome and leave messages. These are messages that get sent whenever someone joins or leaves your server. You can choose a welcome channel with `/greetings welcome channel <#channel>` and set a **custom welcome message** with `/greetings welcome text <message>`. Most people would want to put a helpful message introducing the user to the server. You can also include things like \"{user}\" or \"{server}\" as variables in your greeting message. {user} will get replaced by the user's username, {server} will get replaced by the server's name, and so on. The full list is: `{user}`, `{user_id}`, `{discriminator}`, `{members}`, and `{server}`.\n\nThe last thing to do is to configure autorole. Roles basically tell people what you are in a specific server. If you have the 'Administrator' role, then everyone would know that you have all the permissions on this server and can do anything. If you have the 'Developer' role, then people might ask you questions about programming. Autorole is a feature that can automatically assign roles to users when they join your server. To get started with this, simply run `/autorole set <role>`. The limit for the amount of roles you can set is **5**.\n\nIf you have any questions, please join the [official support server](https://discord.gg/3Tp7R8FUsC) and ask for help. If you have a suggestion, please send them with the `/suggest` command. Thank you for using Doge Utilities!\n\nDoge Utilities privacy policy: <WEBSITE_URL>/privacy\nDoge Utilities terms of use: <WEBSITE_URL>/terms\nDoge Utilities source code: https://github.com/ErrorNoInternet/Doge-Utilities".replace(
-    "<WEBSITE_URL>", os.getenv("WEBSITE_URL"))
+    "<WEBSITE_URL>", os.getenv("WEBSITE_URL")
+)
 status_types = ["Playing", "Watching", "Listening", "Competing"]
 status1 = ["with Discord", "with [users] users", "on [servers] servers"]
-status2 = ["over Discord", "[servers] servers",
-           "Dogecoin stocks", "over the world"]
-status3 = ["lofi music", "requests", "suggestions",
-           "the radio", "[servers] servers"]
+status2 = ["over Discord", "[servers] servers", "Dogecoin stocks", "over the world"]
+status3 = ["lofi music", "requests", "suggestions", "the radio", "[servers] servers"]
 status4 = ["the Olympics", "[servers] servers", "a contest", "a competition"]
-weekdays = {1: "Monday", 2: "Tuesday", 3: "Wednesday",
-            4: "Thursday", 5: "Friday", 6: "Saturday", 7: "Sunday"}
+weekdays = {
+    1: "Monday",
+    2: "Tuesday",
+    3: "Wednesday",
+    4: "Thursday",
+    5: "Friday",
+    6: "Saturday",
+    7: "Sunday",
+}
 public_flags = {
     "1": "Discord Employee",
     "2": "Discord Partner",
