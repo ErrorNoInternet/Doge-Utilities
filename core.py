@@ -33,7 +33,6 @@ from disnake.ext.commands import Param
 from PIL import Image
 
 import converter
-import extra
 import functions
 import language
 import server
@@ -2240,7 +2239,7 @@ async def scramble_command(
     for letter in text:
         letters.append(letter)
     output = ""
-    for i in range(len(letters)):
+    for _ in range(len(letters)):
         letter = random.choice(letters)
         output += letter
         letters.remove(letter)
