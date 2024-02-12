@@ -6397,7 +6397,10 @@ async def on_message(message):
     if message.content.startswith(f"<@!{client.user.id}>"):
         message.content = message.content.replace(f"<@!{client.user.id}>", prefix, 1)
 
-    if not message.author.guild_permissions.administrator or not variables.ignore_administrators:
+    if (
+        not message.author.guild_permissions.administrator
+        or not variables.ignore_administrators
+    ):
         if message.author.id not in variables.permission_override:
             try:
                 ignored_channels = json.loads(
